@@ -1,0 +1,291 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Dark mode lives on html[data-mode="dark"] (see the THEMING notes below). */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono-face);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  /* Secondary card surface (tile / hover backgrounds) and the accent
+   * extras the Settings redesign leans on. The raw --primary-* vars
+   * already exist per-accent below; these mappings expose them (and
+   * --card-2) as Tailwind utilities: bg-card-2, bg-primary-soft,
+   * bg-primary-soft-2, hover:bg-primary-hover. */
+  --color-card-2: var(--card-2);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-2: var(--primary-soft-2);
+  --color-status-good: var(--status-good);
+  --color-status-warning: var(--status-warning);
+  --color-status-serious: var(--status-serious);
+  --color-status-critical: var(--status-critical);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ============================================================
+ * THEMING — two orthogonal dimensions
+ *
+ *   1. MODE   (light / dark)  → neutral surfaces. Selected with
+ *      `document.documentElement.dataset.mode`. Defaults to dark.
+ *   2. ACCENT (violet / …)    → the primary color only. Selected
+ *      with `document.documentElement.dataset.theme`.
+ *
+ * The two compose: any accent works in either mode. Neutral
+ * tokens (background / card / border / muted / sidebar surfaces /
+ * neutral charts / radius) live in the MODE blocks below; accent
+ * tokens (--primary*, --ring, --chart-1, --sidebar-primary*,
+ * --sidebar-ring) live in the ACCENT blocks. They set disjoint
+ * variables, so cascade order between them doesn't matter.
+ *
+ * `:root` carries the dark-mode + violet defaults so a visitor
+ * renders correctly before JS runs; the boot script in
+ * layout.tsx replays the saved mode + accent before first paint.
+ *
+ * The three `--primary-*` extras (hover / soft / soft-2) feed
+ * hovered primary buttons and tinted-primary surfaces (sidebar
+ * active pill, validation badges).
+ *
+ * Token shapes come straight from the design handoff at
+ * project/Color Themes.html — change one, change the other.
+ * ============================================================ */
+
+/* ---- MODE: neutral surfaces ---- */
+
+:root,
+html[data-mode="dark"] {
+  /* AutoShift dark: the site's ink (#1A1D1B) as the ground. */
+  --background: #141715;
+  --foreground: #f4f2ed;
+  --card: #1c201e;
+  --card-2: #222724;
+  --card-foreground: #f4f2ed;
+  --popover: #1c201e;
+  --popover-foreground: #f4f2ed;
+  --secondary: #262b28;
+  --secondary-foreground: #f4f2ed;
+  --muted: #262b28;
+  --muted-foreground: #a9b0ac;
+  --accent: #262b28;
+  --accent-foreground: #f4f2ed;
+  --destructive: #e5675c;
+  --border: #2f3531;
+  --input: #2f3531;
+  --chart-2: #8fb3e8;
+  --chart-3: #d9a3e6;
+  --chart-4: #e8c46a;
+  --chart-5: #f0a878;
+  --radius: 0.875rem;
+  --shadow-card: 0 2px 12px rgb(0 0 0 / 0.25);
+  --sidebar: #181b19;
+  --sidebar-foreground: #f4f2ed;
+  --sidebar-accent: #262b28;
+  --sidebar-accent-foreground: #f4f2ed;
+  --sidebar-border: #2f3531;
+  --status-good: #4cc38a;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #e05252;
+  /* Pastel tones, dimmed for a dark ground. */
+  --tone-mint: #1f2d27;
+  --tone-peach: #33271f;
+  --tone-sky: #1f2633;
+  --tone-lilac: #2b2230;
+  --tone-butter: #302b1d;
+}
+
+html[data-mode="light"] {
+  /* AutoShift light: warm cream ground, white rounded cards, soft lines. */
+  --background: #faf8f4;
+  --foreground: #1a1d1b;
+  --card: #ffffff;
+  --card-2: #f6f3ed;
+  --card-foreground: #1a1d1b;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d1b;
+  --secondary: #f1ede4;
+  --secondary-foreground: #1a1d1b;
+  --muted: #f1ede4;
+  --muted-foreground: #565e5a;
+  --accent: #efebe2;
+  --accent-foreground: #1a1d1b;
+  --destructive: #b42318;
+  --border: #e7e3da;
+  --input: #e7e3da;
+  /* Pastel-tone inks from the site (sky, lilac, butter, peach). */
+  --chart-2: #24508f;
+  --chart-3: #6a2e80;
+  --chart-4: #7a5a0e;
+  --chart-5: #9a4a14;
+  --radius: 0.875rem;
+  --shadow-card: 0 2px 12px rgb(26 29 27 / 0.05);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1d1b;
+  --sidebar-accent: #f4f1ea;
+  --sidebar-accent-foreground: #1a1d1b;
+  --sidebar-border: #e7e3da;
+  --status-good: #1e6b3a;
+  --status-warning: #8a5a00;
+  --status-serious: #b5481f;
+  --status-critical: #b42318;
+  /* The site's pastel tones, for tinted panels. */
+  --tone-mint: #e4f1ea;
+  --tone-peach: #fcebdc;
+  --tone-sky: #e3ecf8;
+  --tone-lilac: #f1e6f5;
+  --tone-butter: #fbf1d3;
+}
+
+/* ---- ACCENT: primary color ---- */
+
+:root,
+html[data-theme="autoshift"] {
+  /* AutoShift green (#1E4C41): the one colour used for actions. */
+  --primary: #1e4c41;
+  --primary-foreground: #ffffff;
+  --primary-hover: #163a31;
+  --primary-soft: rgb(30 76 65 / 0.08);
+  --primary-soft-2: rgb(30 76 65 / 0.16);
+  --ring: #1e4c41;
+  --chart-1: #1e4c41;
+  --sidebar-primary: #1e4c41;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-ring: #1e4c41;
+}
+
+/* The deep green disappears on a dark ground; lift it to the site's mint. */
+html[data-mode="dark"][data-theme="autoshift"] {
+  --primary: #5fbf9f;
+  --primary-foreground: #0f1f1a;
+  --primary-hover: #7fd0b5;
+  --primary-soft: rgb(95 191 159 / 0.14);
+  --primary-soft-2: rgb(95 191 159 / 0.24);
+  --ring: #5fbf9f;
+  --chart-1: #5fbf9f;
+  --sidebar-primary: #5fbf9f;
+  --sidebar-primary-foreground: #0f1f1a;
+  --sidebar-ring: #5fbf9f;
+}
+
+html[data-theme="violet"] {
+  --primary: oklch(0.526 0.247 293);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.6 0.22 293);
+  --primary-soft: oklch(0.526 0.247 293 / 0.12);
+  --primary-soft-2: oklch(0.526 0.247 293 / 0.2);
+  --ring: oklch(0.526 0.247 293);
+  --chart-1: oklch(0.526 0.247 293);
+  --sidebar-primary: oklch(0.526 0.247 293);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.526 0.247 293);
+}
+
+html[data-theme="emerald"] {
+  --primary: oklch(0.62 0.16 162);
+  --primary-foreground: oklch(0.16 0.02 162);
+  --primary-hover: oklch(0.68 0.15 162);
+  --primary-soft: oklch(0.62 0.16 162 / 0.12);
+  --primary-soft-2: oklch(0.62 0.16 162 / 0.22);
+  --ring: oklch(0.62 0.16 162);
+  --chart-1: oklch(0.62 0.16 162);
+  --chart-2: oklch(0.7 0.14 195);
+  --sidebar-primary: oklch(0.62 0.16 162);
+  --sidebar-primary-foreground: oklch(0.16 0.02 162);
+  --sidebar-ring: oklch(0.62 0.16 162);
+}
+
+html[data-theme="cobalt"] {
+  --primary: oklch(0.585 0.2 254);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.66 0.18 254);
+  --primary-soft: oklch(0.585 0.2 254 / 0.12);
+  --primary-soft-2: oklch(0.585 0.2 254 / 0.22);
+  --ring: oklch(0.585 0.2 254);
+  --chart-1: oklch(0.585 0.2 254);
+  --chart-2: oklch(0.7 0.15 220);
+  --sidebar-primary: oklch(0.585 0.2 254);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.585 0.2 254);
+}
+
+html[data-theme="amber"] {
+  --primary: oklch(0.745 0.16 65);
+  --primary-foreground: oklch(0.18 0.03 65);
+  --primary-hover: oklch(0.8 0.15 65);
+  --primary-soft: oklch(0.745 0.16 65 / 0.12);
+  --primary-soft-2: oklch(0.745 0.16 65 / 0.22);
+  --ring: oklch(0.745 0.16 65);
+  --chart-1: oklch(0.745 0.16 65);
+  --chart-2: oklch(0.7 0.15 35);
+  --sidebar-primary: oklch(0.745 0.16 65);
+  --sidebar-primary-foreground: oklch(0.18 0.03 65);
+  --sidebar-ring: oklch(0.745 0.16 65);
+}
+
+html[data-theme="rose"] {
+  --primary: oklch(0.645 0.22 16);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.71 0.2 16);
+  --primary-soft: oklch(0.645 0.22 16 / 0.12);
+  --primary-soft-2: oklch(0.645 0.22 16 / 0.22);
+  --ring: oklch(0.645 0.22 16);
+  --chart-1: oklch(0.645 0.22 16);
+  --chart-2: oklch(0.7 0.18 340);
+  --sidebar-primary: oklch(0.645 0.22 16);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.645 0.22 16);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  .recharts-cartesian-axis-tick-value {
+    fill: var(--muted-foreground);
+  }
+  html {
+    @apply font-sans;
+  }
+}

@@ -1,49 +1,55 @@
-# Autoshift
+# AutoShift
 
-AI conversations, campaigns and a shared inbox for WhatsApp, Instagram and Messenger.
+AutoShift's public website and its WhatsApp CRM, in one Next.js app on Supabase.
 
-| Part | Stack | Path |
-|---|---|---|
-| Marketing site + CRM app | React 19, Vite, TypeScript, Tailwind CSS 4 | [`frontend/`](frontend) |
-| API (Embedded Signup, webhooks, tenants) | FastAPI, Python 3.12+ | [`backend/`](backend) |
-| Database & auth | Supabase (Postgres + Auth) | [`supabase/migrations/`](supabase/migrations) |
+| Route | What it is |
+|---|---|
+| `/` | The AutoShift website: a self-contained page in [`public/site/index.html`](public/site/index.html) (its own data, styles, hash routing and editor) |
+| `/tools`, `/tools/*` | Free WhatsApp tools: link generator, QR code generator, text formatter, chat button |
+| `/release-notes` | Product release notes |
+| `/login`, `/signup` | CRM sign-in (Supabase Auth) |
+| `/dashboard`, `/inbox`, `/contacts`, `/pipelines`, `/broadcasts`, `/automations`, `/flows`, `/agents`, `/settings` | The CRM |
 
-## Quick start
+## What the CRM does
+- **Shared inbox** on the official WhatsApp Business API: assignment, status, notes, quick replies, media, voice notes.
+- **Contacts** with tags, custom fields, CSV import and de-duplication.
+- **Sales pipelines** (Kanban), with deals linked to conversations.
+- **Broadcasts** with Meta-approved templates and delivery/read tracking.
+- **Automations and flows:** no-code triggers, conditions, waits and webhooks, plus a visual builder.
+- **AI reply assistant** (your own OpenAI/Anthropic key), auto-reply and a knowledge base.
+- **Dashboard:** response times, message volume, pipeline value, reply queue.
+- **Teams:** invites and roles (owner/admin/agent/viewer), a public REST API with scoped keys, and an MCP server in [`mcp-server/`](mcp-server).
+
+## Design
+The CRM uses the website's design language, defined in [`src/app/globals.css`](src/app/globals.css):
+- **Surfaces:** a warm cream ground (`#FAF8F4`), white rounded cards, `#E7E3DA` lines and ink `#1A1D1B`.
+- **Colour:** one green for actions (`#1E4C41`), plus pastel tones for tinted panels.
+- **Type and shape:** Plus Jakarta Sans, and pill-shaped buttons.
+- **Modes:** light is the default; dark mode and other accents can be picked in Settings → Appearance.
+
+## Run it locally
+Requires Node.js 22.12+ and a Supabase project.
 
 ```bash
-# 1. Database: run supabase/migrations/*.sql in the Supabase SQL editor (or `supabase db push`).
-
-# 2. Backend
-cd backend
-cp .env.example .env          # fill in Meta, Supabase and encryption values
-uv sync                       # or: pip install -e . && pip install pytest pytest-asyncio respx ruff
-uv run uvicorn app.main:create_app --factory --reload --port 8000
-
-# 3. Frontend
-cd ../frontend
-cp .env.example .env.local    # public values only
 npm install
-npm run dev                   # http://localhost:5173
+cp .env.local.example .env.local   # Supabase URL/keys, ENCRYPTION_KEY, META_APP_SECRET
+npm run dev                        # http://localhost:3000
 ```
 
-Checks: `uv run pytest`, `uv run ruff check .` (backend) · `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (frontend).
+Apply the database schema by running `supabase/migrations/*.sql` in order (Supabase SQL editor, or `supabase db push`).
 
-## WhatsApp Embedded Signup
+Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 
-Settings → WhatsApp has a **Connect WhatsApp** button. It loads the Meta JS SDK, runs
-`FB.login` with your Embedded Signup `config_id`, and listens for the `WA_EMBEDDED_SIGNUP`
-message event carrying the WABA ID and phone number ID. The browser posts the code and IDs to
-`POST /api/whatsapp/embedded-signup`, where the API:
+## Documentation
+- [Public REST API](docs/public-api.md)
+- [MCP server](docs/mcp.md)
+- [Several WhatsApp Business Accounts](docs/multi-waba.md)
+- [Troubleshooting the WhatsApp connection](docs/whatsapp-connection-troubleshooting.md)
+- [Auth emails](docs/auth-emails.md)
+- [Docker](docs/docker.md)
 
-1. exchanges the code for a business token,
-2. checks with `debug_token` that the token was issued to this app and grants that WABA,
-3. checks the phone number belongs to the WABA,
-4. stores `waba_id`, `phone_number_id` and the **encrypted** token for the tenant,
-5. subscribes the app to the WABA's webhooks (`POST /{waba_id}/subscribed_apps`),
-6. registers the number (`POST /{phone_number_id}/register`, skipped for coexistence numbers),
-7. fetches the number's status for the settings page.
-
-Webhooks arrive at `GET/POST /webhooks/whatsapp` (verify token handshake, `X-Hub-Signature-256`
-check, then `messages`, status and `account_update` events matched to the tenant by WABA ID).
-
-Meta-side setup steps are in [`docs/meta-setup.md`](docs/meta-setup.md).
+## Credits and licence
+The CRM is built on [wacrm](https://github.com/ArnasDon/wacrm) by Arnas Donauskas, used under the
+MIT licence (see [`LICENSE`](LICENSE)). Its upstream history is in
+[`docs/upstream-wacrm-changelog.md`](docs/upstream-wacrm-changelog.md). WhatsApp is a trademark of
+Meta Platforms, Inc.
