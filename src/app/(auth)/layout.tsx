@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { LogoMark } from "@/components/brand/logo-mark";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // Shared metadata for auth pages (login / signup / forgot-password).
 // None of these should be indexed — they'd compete with the marketing
@@ -20,9 +22,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default async function AuthLayout({ children }: { children: ReactNode }) {
+  const t = await getTranslations("Setup");
+  const configured = isSupabaseConfigured();
   return (
     <div className="relative">
+      {!configured && (
+        <>
+          {/* Phones: in the flow under the logo. Larger screens: floating above the card. */}
+          <div className="px-4 pt-20 sm:hidden">
+            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} />
+          </div>
+          <div className="absolute inset-x-4 top-24 z-10 mx-auto hidden max-w-md sm:block">
+            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} />
+          </div>
+        </>
+      )}
       {/* Plain <a>: "/" is the static public site, not an app route. */}
       <a
         href="/"
@@ -31,7 +46,20 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <LogoMark className="size-6" />
         AutoShift
       </a>
-      {children}
+      {/* With the notice on a phone, the page below no longer needs a full screen of height. */}
+      <div className={configured ? undefined : "max-sm:[&>div]:min-h-0 max-sm:[&>div]:py-6"}>{children}</div>
+    </div>
+  );
+}
+
+function SetupNotice({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div
+      role="status"
+      className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-800"
+    >
+      <p className="font-semibold">{title}</p>
+      <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">{desc}</p>
     </div>
   );
 }

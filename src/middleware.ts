@@ -1,7 +1,28 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
+
+// Every top-level route under src/app/(dashboard)/ belongs here —
+// middleware.test.ts reads that directory and fails on a missing one.
+const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings']
 
 export async function middleware(request: NextRequest) {
+  // No Supabase project yet: public pages work, the app sends people to
+  // /login (which explains sign-in isn't connected), app APIs answer 503.
+  if (!isSupabaseConfigured()) {
+    const path = request.nextUrl.pathname
+    if (PROTECTED_PATHS.some((p) => path.startsWith(p))) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+    if (path.startsWith('/api/whatsapp/') && !path.includes('/webhook')) {
+      return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 })
+    }
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -70,10 +91,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected pages - redirect to login if not authenticated
-  // Every top-level route under src/app/(dashboard)/ belongs here —
-  // middleware.test.ts reads that directory and fails on a missing one.
-  const protectedPaths = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings']
-  if (!user && protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+  if (!user && PROTECTED_PATHS.some(path => request.nextUrl.pathname.startsWith(path))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return withRefreshedCookies(NextResponse.redirect(url))

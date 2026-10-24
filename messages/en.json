@@ -3045,5 +3045,9 @@
       "desc": "Send and receive WhatsApp messages from n8n workflows using AutoShift’s API and webhooks.",
       "cta": "Set up n8n"
     }
+  },
+  "Setup": {
+    "notConfiguredTitle": "Sign-in isn’t connected yet",
+    "notConfiguredDesc": "This deployment has no Supabase project, so accounts can’t be created or used. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your hosting settings and redeploy."
   }
 }

@@ -117,7 +117,7 @@ describe("middleware — refreshed auth cookies survive redirects", () => {
 describe("middleware — every dashboard route requires a session", () => {
   // Read the route group rather than hard-coding a list, so a new page added
   // under src/app/(dashboard)/ fails here until it is added to
-  // protectedPaths. /flows, /agents and /notifications were missed that way
+  // PROTECTED_PATHS. /flows, /agents and /notifications were missed that way
   // and rendered a broken page to signed-out visitors instead of redirecting.
   const dashboardRoutes = readdirSync(join(__dirname, "app", "(dashboard)"), {
     withFileTypes: true,
@@ -136,5 +136,28 @@ describe("middleware — every dashboard route requires a session", () => {
 
     expect(res.status).toBe(307);
     expect(new URL(res.headers.get("location")!).pathname).toBe("/login");
+  });
+});
+
+describe("middleware — Supabase not configured yet", () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "REPLACE_https://your-project-ref.supabase.co";
+  });
+
+  it("serves public pages without touching Supabase", async () => {
+    const res = await middleware(new NextRequest("https://app.test/tools"));
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.status).toBe(200);
+  });
+
+  it("sends app routes to /login", async () => {
+    const res = await middleware(new NextRequest("https://app.test/inbox"));
+    expect(res.status).toBe(307);
+    expect(new URL(res.headers.get("location")!).pathname).toBe("/login");
+  });
+
+  it("answers app APIs with 503 but leaves the webhook alone", async () => {
+    expect((await middleware(new NextRequest("https://app.test/api/whatsapp/send"))).status).toBe(503);
+    expect((await middleware(new NextRequest("https://app.test/api/whatsapp/webhook"))).status).toBe(200);
   });
 });

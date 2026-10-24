@@ -3045,5 +3045,9 @@
       "desc": "AutoShift의 API와 웹훅으로 n8n 워크플로에서 WhatsApp 메시지를 주고받으세요.",
       "cta": "n8n 설정하기"
     }
+  },
+  "Setup": {
+    "notConfiguredTitle": "아직 로그인이 연결되지 않았습니다",
+    "notConfiguredDesc": "이 배포에는 Supabase 프로젝트가 없어 계정을 만들거나 사용할 수 없습니다. 호스팅 설정에 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 추가한 뒤 다시 배포하세요."
   }
 }

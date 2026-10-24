@@ -3045,5 +3045,9 @@
       "desc": "Envía y recibe mensajes de WhatsApp desde flujos de n8n con la API y los webhooks de AutoShift.",
       "cta": "Configurar n8n"
     }
+  },
+  "Setup": {
+    "notConfiguredTitle": "El inicio de sesión aún no está conectado",
+    "notConfiguredDesc": "Esta implementación no tiene un proyecto de Supabase, así que no se pueden crear ni usar cuentas. Añade NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en la configuración del hosting y vuelve a implementar."
   }
 }
