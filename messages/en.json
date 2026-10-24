@@ -2923,5 +2923,127 @@
       "metaApiStatus": "Meta API error: {status}",
       "syncFailed": "Failed to sync templates"
     }
+  },
+  "N8n": {
+    "back": "Built-in automations",
+    "title": "Automate with n8n",
+    "subtitle": "Run your WhatsApp automations in n8n. AutoShift sends each new message to n8n, and n8n replies through AutoShift, using the API and webhooks your workspace already has.",
+    "docs": "API reference",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Copy failed. Select the text and copy it manually.",
+    "flow": {
+      "title": "How AutoShift and n8n connect",
+      "receiveTitle": "1 · Receive",
+      "receiveDesc": "AutoShift posts message.received, message.status_updated and conversation.created events to an n8n Webhook node.",
+      "decideTitle": "2 · Decide in n8n",
+      "decideDesc": "Branch on keywords, ask your AI model, check a spreadsheet or your CRM: anything n8n can do.",
+      "sendTitle": "3 · Send",
+      "sendDesc": "An HTTP Request node calls the AutoShift API to send a reply, a template or a broadcast on WhatsApp."
+    },
+    "setup": {
+      "title": "Set up in three steps",
+      "baseUrlHint": "The nodes and workflows on this page are generated for the address below.",
+      "baseUrlLabel": "Your AutoShift address",
+      "step1Title": "Create an API key",
+      "step1Desc": "Create a key with the scopes your workflows need (at least messages:send and contacts:read). In n8n, add a Header Auth credential named “{credential}”: header Authorization, value Bearer followed by your key.",
+      "step1Action": "Open API keys",
+      "step2Title": "Send AutoShift events to n8n",
+      "step2Desc": "Add a Webhook node in n8n, copy its Production URL and paste it here, then run this call with a key that has the webhooks:manage scope.",
+      "n8nUrlLabel": "n8n webhook Production URL",
+      "n8nUrlPlaceholder": "https://n8n.example.com/webhook/autoshift",
+      "n8nUrlError": "Use the https:// Production URL of a public n8n instance. AutoShift does not deliver to http:// or private addresses.",
+      "eventsLabel": "Events to send",
+      "copyCall": "Copy call",
+      "step2Note": "The response shows the signing secret once; keep it if you want to verify the X-AutoShift-Signature header in n8n.",
+      "step3Title": "Import a workflow",
+      "step3Desc": "Copy a template and paste it onto your n8n canvas, or import the downloaded file. Pick the “{credential}” credential on each HTTP Request node, then activate the workflow.",
+      "step3Action": "See templates"
+    },
+    "events": {
+      "message_received": "New message from a contact",
+      "message_status_updated": "Sent, delivered, read or failed",
+      "conversation_created": "New conversation opened"
+    },
+    "templates": {
+      "title": "Workflow templates",
+      "desc": "Ready-made n8n workflows wired to your AutoShift address.",
+      "steps": "Workflow steps",
+      "listensFor": "Listens for",
+      "keyScopes": "API key scopes",
+      "viewJson": "View workflow JSON",
+      "copy": "Copy workflow",
+      "download": "Download .json",
+      "failedNote": "After importing, replace +910000000000 with your team’s WhatsApp number.",
+      "items": {
+        "auto-reply": {
+          "title": "Auto-reply to new messages",
+          "desc": "Answer every incoming WhatsApp message straight away, then let your team take over."
+        },
+        "keyword-router": {
+          "title": "Keyword router",
+          "desc": "Send the price list when someone asks about price; otherwise promise a quick reply from the team."
+        },
+        "welcome": {
+          "title": "Welcome new conversations",
+          "desc": "Greet every new conversation and tag the contact as a new lead."
+        },
+        "failed-delivery": {
+          "title": "Failed delivery alert",
+          "desc": "Tell your team on WhatsApp when a message fails to deliver."
+        }
+      }
+    },
+    "nodes": {
+      "title": "AutoShift nodes for n8n",
+      "desc": "Each card is a ready-to-use n8n node. Copy it and paste it onto your canvas.",
+      "trigger": "Trigger",
+      "action": "Action",
+      "scope": "Scope: {scope}",
+      "noScope": "No API key needed",
+      "copy": "Copy node",
+      "items": {
+        "receive": {
+          "title": "Receive message",
+          "desc": "Webhook trigger for AutoShift events: new messages, delivery updates and new conversations."
+        },
+        "send-text": {
+          "title": "Send message",
+          "desc": "Send a WhatsApp text to a number in +country-code format."
+        },
+        "send-template": {
+          "title": "Send template",
+          "desc": "Send an approved template, for messages outside the 24-hour window."
+        },
+        "send-media": {
+          "title": "Send media",
+          "desc": "Send an image, video, document or audio file by URL, with an optional caption."
+        },
+        "get-contact": {
+          "title": "Look up contact",
+          "desc": "Get a contact’s phone, name, email and tags from the contact_id in an event."
+        },
+        "create-contact": {
+          "title": "Create contact",
+          "desc": "Create a contact, or return the existing one with the same phone number."
+        },
+        "update-contact": {
+          "title": "Update contact",
+          "desc": "Change a contact’s name, email or company, or replace their tags."
+        },
+        "conversation-messages": {
+          "title": "Read conversation",
+          "desc": "Fetch a conversation’s messages, newest first, for context."
+        },
+        "broadcast": {
+          "title": "Start broadcast",
+          "desc": "Send a template broadcast to up to 1,000 recipients at a time."
+        }
+      }
+    },
+    "banner": {
+      "title": "Prefer n8n?",
+      "desc": "Send and receive WhatsApp messages from n8n workflows using AutoShift’s API and webhooks.",
+      "cta": "Set up n8n"
+    }
   }
 }

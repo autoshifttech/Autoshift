@@ -2923,5 +2923,127 @@
       "metaApiStatus": "Erro da API da Meta: {status}",
       "syncFailed": "Falha ao sincronizar os modelos"
     }
+  },
+  "N8n": {
+    "back": "Automações integradas",
+    "title": "Automatize com n8n",
+    "subtitle": "Rode suas automações de WhatsApp no n8n. A AutoShift envia cada nova mensagem ao n8n, e o n8n responde pela AutoShift, usando a API e os webhooks que seu espaço de trabalho já tem.",
+    "docs": "Referência da API",
+    "copied": "Copiado para a área de transferência",
+    "copyFailed": "Não foi possível copiar. Selecione o texto e copie manualmente.",
+    "flow": {
+      "title": "Como a AutoShift e o n8n se conectam",
+      "receiveTitle": "1 · Receber",
+      "receiveDesc": "A AutoShift envia os eventos message.received, message.status_updated e conversation.created para um nó Webhook do n8n.",
+      "decideTitle": "2 · Decidir no n8n",
+      "decideDesc": "Filtre por palavras-chave, consulte seu modelo de IA, uma planilha ou seu CRM: tudo o que o n8n faz.",
+      "sendTitle": "3 · Enviar",
+      "sendDesc": "Um nó HTTP Request chama a API da AutoShift para enviar uma resposta, um modelo ou uma transmissão no WhatsApp."
+    },
+    "setup": {
+      "title": "Configure em três passos",
+      "baseUrlHint": "Os nós e fluxos desta página são gerados para o endereço abaixo.",
+      "baseUrlLabel": "Seu endereço da AutoShift",
+      "step1Title": "Crie uma chave de API",
+      "step1Desc": "Crie uma chave com os escopos de que seus fluxos precisam (no mínimo messages:send e contacts:read). No n8n, adicione uma credencial Header Auth chamada “{credential}”: cabeçalho Authorization, valor Bearer seguido da sua chave.",
+      "step1Action": "Abrir chaves de API",
+      "step2Title": "Envie os eventos da AutoShift ao n8n",
+      "step2Desc": "Adicione um nó Webhook no n8n, copie a Production URL e cole aqui; depois execute esta chamada com uma chave que tenha o escopo webhooks:manage.",
+      "n8nUrlLabel": "Production URL do webhook do n8n",
+      "n8nUrlPlaceholder": "https://n8n.example.com/webhook/autoshift",
+      "n8nUrlError": "Use a Production URL https:// de uma instância pública do n8n. A AutoShift não entrega para http:// nem para endereços privados.",
+      "eventsLabel": "Eventos a enviar",
+      "copyCall": "Copiar chamada",
+      "step2Note": "A resposta mostra o segredo de assinatura uma única vez; guarde-o se quiser verificar o cabeçalho X-AutoShift-Signature no n8n.",
+      "step3Title": "Importe um fluxo",
+      "step3Desc": "Copie um modelo e cole no canvas do n8n, ou importe o arquivo baixado. Escolha a credencial “{credential}” em cada nó HTTP Request e ative o fluxo.",
+      "step3Action": "Ver modelos"
+    },
+    "events": {
+      "message_received": "Nova mensagem de um contato",
+      "message_status_updated": "Enviada, entregue, lida ou com falha",
+      "conversation_created": "Nova conversa aberta"
+    },
+    "templates": {
+      "title": "Modelos de fluxo",
+      "desc": "Fluxos prontos do n8n, já apontando para o seu endereço da AutoShift.",
+      "steps": "Etapas do fluxo",
+      "listensFor": "Escuta",
+      "keyScopes": "Escopos da chave de API",
+      "viewJson": "Ver JSON do fluxo",
+      "copy": "Copiar fluxo",
+      "download": "Baixar .json",
+      "failedNote": "Depois de importar, troque +910000000000 pelo número de WhatsApp da sua equipe.",
+      "items": {
+        "auto-reply": {
+          "title": "Resposta automática",
+          "desc": "Responda na hora a cada mensagem recebida no WhatsApp e deixe sua equipe assumir depois."
+        },
+        "keyword-router": {
+          "title": "Roteador por palavra-chave",
+          "desc": "Envie a tabela de preços quando perguntarem o preço; caso contrário, prometa uma resposta rápida da equipe."
+        },
+        "welcome": {
+          "title": "Boas-vindas a novas conversas",
+          "desc": "Cumprimente cada nova conversa e marque o contato como novo lead."
+        },
+        "failed-delivery": {
+          "title": "Alerta de falha na entrega",
+          "desc": "Avise sua equipe no WhatsApp quando uma mensagem não for entregue."
+        }
+      }
+    },
+    "nodes": {
+      "title": "Nós da AutoShift para o n8n",
+      "desc": "Cada cartão é um nó do n8n pronto para uso. Copie e cole no seu canvas.",
+      "trigger": "Gatilho",
+      "action": "Ação",
+      "scope": "Escopo: {scope}",
+      "noScope": "Não precisa de chave de API",
+      "copy": "Copiar nó",
+      "items": {
+        "receive": {
+          "title": "Receber mensagem",
+          "desc": "Gatilho de webhook para eventos da AutoShift: novas mensagens, atualizações de entrega e novas conversas."
+        },
+        "send-text": {
+          "title": "Enviar mensagem",
+          "desc": "Envie um texto no WhatsApp para um número no formato +código do país."
+        },
+        "send-template": {
+          "title": "Enviar modelo",
+          "desc": "Envie um modelo aprovado, para mensagens fora da janela de 24 horas."
+        },
+        "send-media": {
+          "title": "Enviar mídia",
+          "desc": "Envie imagem, vídeo, documento ou áudio por URL, com legenda opcional."
+        },
+        "get-contact": {
+          "title": "Buscar contato",
+          "desc": "Obtenha telefone, nome, e-mail e etiquetas do contato a partir do contact_id de um evento."
+        },
+        "create-contact": {
+          "title": "Criar contato",
+          "desc": "Crie um contato ou receba o existente com o mesmo número."
+        },
+        "update-contact": {
+          "title": "Atualizar contato",
+          "desc": "Altere nome, e-mail ou empresa do contato, ou substitua as etiquetas."
+        },
+        "conversation-messages": {
+          "title": "Ler conversa",
+          "desc": "Busque as mensagens de uma conversa, da mais recente para a mais antiga."
+        },
+        "broadcast": {
+          "title": "Iniciar transmissão",
+          "desc": "Envie uma transmissão de modelo para até 1.000 destinatários por vez."
+        }
+      }
+    },
+    "banner": {
+      "title": "Prefere o n8n?",
+      "desc": "Envie e receba mensagens de WhatsApp em fluxos do n8n usando a API e os webhooks da AutoShift.",
+      "cta": "Configurar n8n"
+    }
   }
 }
