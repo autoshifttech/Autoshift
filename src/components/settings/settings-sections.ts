@@ -1,5 +1,6 @@
 import {
   Coins,
+  FileLock2,
   CreditCard,
   FileText,
   Inbox,
@@ -36,6 +37,7 @@ export const SETTINGS_SECTIONS = [
   'deals',
   'members',
   'billing',
+  'privacy',
   'api',
 ] as const;
 
@@ -64,6 +66,7 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   deals: { id: 'deals', label: 'Deals & currency', icon: Coins, group: 'workspace' },
   members: { id: 'members', label: 'Team members', icon: UsersRound, group: 'workspace' },
   billing: { id: 'billing', label: 'Plan & billing', icon: CreditCard, group: 'workspace' },
+  privacy: { id: 'privacy', label: 'Data & privacy', icon: FileLock2, group: 'workspace' },
   api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'developer' },
 };
 

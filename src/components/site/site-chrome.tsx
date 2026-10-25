@@ -79,8 +79,9 @@ const FOOTER = [
   {
     title: "Legal",
     links: [
-      { label: "Privacy policy", href: "/#page-privacy-policy" },
-      { label: "Terms", href: "/#page-terms" },
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of service", href: "/terms" },
+      { label: "Data deletion", href: "/data-deletion" },
       { label: "Sign in", href: "/login" },
     ],
   },

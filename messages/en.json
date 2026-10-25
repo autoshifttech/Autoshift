@@ -2005,7 +2005,8 @@
       "inbox": "Inbox",
       "members": "Team members",
       "api": "API keys",
-      "billing": "Plan & billing"
+      "billing": "Plan & billing",
+      "privacy": "Data & privacy"
     },
     "groups": {
       "account": "Account",
@@ -2287,7 +2288,8 @@
     "creating": "Creating account...",
     "submit": "Create account",
     "haveAccount": "Already have an account?",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "agreeTerms": "By creating an account you agree to our <terms>Terms of service</terms> and <privacy>Privacy policy</privacy>."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "Check your email",
@@ -4245,5 +4247,46 @@
     "preview": "Preview",
     "checkboxHint": "Keep it clear: say it's WhatsApp, what they'll get, and how to stop.",
     "cancel": "Cancel"
+  },
+  "Privacy": {
+    "title": "Data & privacy",
+    "description": "Download your data, delete a customer's data when they ask, or delete this workspace.",
+    "exportTitle": "Download your data",
+    "exportDesc": "Contacts, leads, bookings, assistants, campaigns and settings as one JSON file.",
+    "exportButton": "Download data",
+    "exported": "Your data is downloading.",
+    "customerTitle": "Delete a customer's data",
+    "customerDesc": "When a customer asks you to forget them, remove their number, chats, leads and consent records.",
+    "customerPhone": "Customer's WhatsApp number",
+    "customerButton": "Delete their data",
+    "customerDeleted": "Data for {phone} deleted.",
+    "customerHint": "Invoices and payment records you must keep for tax are not affected.",
+    "policiesTitle": "Policies",
+    "privacyLink": "Privacy policy",
+    "termsLink": "Terms of service",
+    "deletionLink": "Data deletion page",
+    "dangerTitle": "Delete workspace",
+    "deleteDesc": "Your team loses access straight away. You have {days} days to change your mind, then everything is erased.",
+    "deleteWhatsapp": "Your WhatsApp number is disconnected from AutoShift (the number itself stays yours).",
+    "deletePlan": "Your plan is cancelled and won't renew.",
+    "deleteWallet": "Unused wallet credits from the last 180 days are refunded.",
+    "deleteInvoices": "Invoices are kept for tax law; everything else is erased.",
+    "deleteButton": "Delete workspace",
+    "confirmTitle": "Delete {name}?",
+    "confirmDesc": "This schedules the deletion. You can cancel it within {days} days from this page.",
+    "reason": "Why are you leaving?",
+    "reasonPlaceholder": "Choose a reason…",
+    "reason_price": "Too expensive",
+    "reason_missing": "A feature I need is missing",
+    "reason_hard": "Hard to use",
+    "reason_switching": "Moving to another tool",
+    "reason_closing": "Closing the business",
+    "reason_other": "Something else",
+    "typeName": "Type {name} to confirm",
+    "keep": "Keep workspace",
+    "scheduled": "Workspace deletion scheduled.",
+    "scheduledBanner": "This workspace will be erased on {date}. Until then you can cancel.",
+    "cancelDeletion": "Cancel deletion",
+    "cancelled": "Deletion cancelled. Welcome back."
   }
 }

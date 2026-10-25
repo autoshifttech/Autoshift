@@ -20,6 +20,7 @@ import { InboxSettings } from '@/components/settings/inbox-settings';
 import { MembersTab } from '@/components/settings/members-tab';
 import { ApiKeysSettings } from '@/components/settings/api-keys-settings';
 import { BillingPanel } from '@/components/billing/billing-panel';
+import { DataPrivacyPanel } from '@/components/settings/data-privacy-panel';
 import { WhatsAppConnectCard } from '@/components/whatsapp/connect-card';
 import {
   resolveSection,
@@ -90,6 +91,7 @@ function SettingsPageInner() {
     deals: <DealsSettings />,
     members: <MembersTab />,
     billing: <BillingPanel />,
+    privacy: <DataPrivacyPanel />,
     api: <ApiKeysSettings />,
   };
 

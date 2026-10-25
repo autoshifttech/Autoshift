@@ -2005,7 +2005,8 @@
       "inbox": "Bandeja de entrada",
       "members": "Miembros del equipo",
       "api": "Claves de API",
-      "billing": "Plan y facturación"
+      "billing": "Plan y facturación",
+      "privacy": "Datos y privacidad"
     },
     "groups": {
       "account": "Cuenta",
@@ -2287,7 +2288,8 @@
     "creating": "Creando cuenta...",
     "submit": "Crear cuenta",
     "haveAccount": "¿Ya tienes una cuenta?",
-    "signIn": "Iniciar sesión"
+    "signIn": "Iniciar sesión",
+    "agreeTerms": "Al crear una cuenta aceptas nuestros <terms>Términos del servicio</terms> y la <privacy>Política de privacidad</privacy>."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "Revisa tu correo",
@@ -4245,5 +4247,46 @@
     "preview": "Vista previa",
     "checkboxHint": "Sé claro: di que es WhatsApp, qué recibirán y cómo darse de baja.",
     "cancel": "Cancelar"
+  },
+  "Privacy": {
+    "title": "Datos y privacidad",
+    "description": "Descarga tus datos, borra los datos de un cliente cuando lo pida o elimina este espacio de trabajo.",
+    "exportTitle": "Descargar tus datos",
+    "exportDesc": "Contactos, leads, reservas, asistentes, campañas y ajustes en un archivo JSON.",
+    "exportButton": "Descargar datos",
+    "exported": "Tus datos se están descargando.",
+    "customerTitle": "Borrar los datos de un cliente",
+    "customerDesc": "Cuando un cliente pida que lo olvides, elimina su número, chats, leads y registros de consentimiento.",
+    "customerPhone": "WhatsApp del cliente",
+    "customerButton": "Borrar sus datos",
+    "customerDeleted": "Datos de {phone} borrados.",
+    "customerHint": "No afecta a facturas ni registros de pago que debes guardar por ley.",
+    "policiesTitle": "Políticas",
+    "privacyLink": "Política de privacidad",
+    "termsLink": "Términos del servicio",
+    "deletionLink": "Página de eliminación de datos",
+    "dangerTitle": "Eliminar espacio de trabajo",
+    "deleteDesc": "Tu equipo pierde el acceso al instante. Tienes {days} días para cambiar de opinión; después se borra todo.",
+    "deleteWhatsapp": "Tu número de WhatsApp se desconecta de AutoShift (el número sigue siendo tuyo).",
+    "deletePlan": "Tu plan se cancela y no se renueva.",
+    "deleteWallet": "Se reembolsan los créditos sin usar de los últimos 180 días.",
+    "deleteInvoices": "Las facturas se guardan por ley; todo lo demás se borra.",
+    "deleteButton": "Eliminar espacio de trabajo",
+    "confirmTitle": "¿Eliminar {name}?",
+    "confirmDesc": "Esto programa la eliminación. Puedes cancelarla en {days} días desde esta página.",
+    "reason": "¿Por qué te vas?",
+    "reasonPlaceholder": "Elige un motivo…",
+    "reason_price": "Demasiado caro",
+    "reason_missing": "Falta una función que necesito",
+    "reason_hard": "Difícil de usar",
+    "reason_switching": "Me cambio a otra herramienta",
+    "reason_closing": "Cierro el negocio",
+    "reason_other": "Otro motivo",
+    "typeName": "Escribe {name} para confirmar",
+    "keep": "Conservar espacio",
+    "scheduled": "Eliminación programada.",
+    "scheduledBanner": "Este espacio se borrará el {date}. Hasta entonces puedes cancelar.",
+    "cancelDeletion": "Cancelar eliminación",
+    "cancelled": "Eliminación cancelada. Bienvenido de nuevo."
   }
 }

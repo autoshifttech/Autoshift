@@ -2005,7 +2005,8 @@
       "inbox": "Caixa de entrada",
       "members": "Membros da equipe",
       "api": "Chaves de API",
-      "billing": "Plano e cobrança"
+      "billing": "Plano e cobrança",
+      "privacy": "Dados e privacidade"
     },
     "groups": {
       "account": "Conta",
@@ -2287,7 +2288,8 @@
     "creating": "Criando conta...",
     "submit": "Criar conta",
     "haveAccount": "Já tem uma conta?",
-    "signIn": "Entrar"
+    "signIn": "Entrar",
+    "agreeTerms": "Ao criar uma conta você aceita nossos <terms>Termos de serviço</terms> e a <privacy>Política de privacidade</privacy>."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "Verifique seu e-mail",
@@ -4245,5 +4247,46 @@
     "preview": "Prévia",
     "checkboxHint": "Seja claro: diga que é WhatsApp, o que vão receber e como parar.",
     "cancel": "Cancelar"
+  },
+  "Privacy": {
+    "title": "Dados e privacidade",
+    "description": "Baixe seus dados, apague os dados de um cliente quando ele pedir ou exclua este espaço de trabalho.",
+    "exportTitle": "Baixar seus dados",
+    "exportDesc": "Contatos, leads, agendamentos, assistentes, campanhas e configurações em um arquivo JSON.",
+    "exportButton": "Baixar dados",
+    "exported": "Seus dados estão sendo baixados.",
+    "customerTitle": "Apagar dados de um cliente",
+    "customerDesc": "Quando um cliente pedir para ser esquecido, remova o número, conversas, leads e registros de consentimento.",
+    "customerPhone": "WhatsApp do cliente",
+    "customerButton": "Apagar os dados",
+    "customerDeleted": "Dados de {phone} apagados.",
+    "customerHint": "Faturas e registros de pagamento que você precisa guardar por lei não são afetados.",
+    "policiesTitle": "Políticas",
+    "privacyLink": "Política de privacidade",
+    "termsLink": "Termos de serviço",
+    "deletionLink": "Página de exclusão de dados",
+    "dangerTitle": "Excluir espaço de trabalho",
+    "deleteDesc": "Sua equipe perde o acesso na hora. Você tem {days} dias para mudar de ideia; depois tudo é apagado.",
+    "deleteWhatsapp": "Seu número de WhatsApp é desconectado do AutoShift (o número continua seu).",
+    "deletePlan": "Seu plano é cancelado e não renova.",
+    "deleteWallet": "Créditos não usados dos últimos 180 dias são reembolsados.",
+    "deleteInvoices": "Faturas são mantidas por lei; todo o resto é apagado.",
+    "deleteButton": "Excluir espaço de trabalho",
+    "confirmTitle": "Excluir {name}?",
+    "confirmDesc": "Isto agenda a exclusão. Você pode cancelar em até {days} dias nesta página.",
+    "reason": "Por que está saindo?",
+    "reasonPlaceholder": "Escolha um motivo…",
+    "reason_price": "Muito caro",
+    "reason_missing": "Falta um recurso de que preciso",
+    "reason_hard": "Difícil de usar",
+    "reason_switching": "Vou usar outra ferramenta",
+    "reason_closing": "Vou fechar o negócio",
+    "reason_other": "Outro motivo",
+    "typeName": "Digite {name} para confirmar",
+    "keep": "Manter espaço",
+    "scheduled": "Exclusão agendada.",
+    "scheduledBanner": "Este espaço será apagado em {date}. Até lá você pode cancelar.",
+    "cancelDeletion": "Cancelar exclusão",
+    "cancelled": "Exclusão cancelada. Bem-vindo de volta."
   }
 }

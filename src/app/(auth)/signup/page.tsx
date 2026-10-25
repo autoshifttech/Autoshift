@@ -233,6 +233,20 @@ function SignupPageInner() {
             >
               {loading ? t("creating") : t("submit")}
             </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              {t.rich("agreeTerms", {
+                terms: (chunks) => (
+                  <Link href="/terms" className="font-medium text-primary hover:underline">
+                    {chunks}
+                  </Link>
+                ),
+                privacy: (chunks) => (
+                  <Link href="/privacy" className="font-medium text-primary hover:underline">
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">

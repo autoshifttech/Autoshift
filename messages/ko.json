@@ -2005,7 +2005,8 @@
       "inbox": "인박스",
       "members": "팀원",
       "api": "API 키",
-      "billing": "요금제 및 결제"
+      "billing": "요금제 및 결제",
+      "privacy": "데이터 및 개인정보"
     },
     "groups": {
       "account": "계정",
@@ -2287,7 +2288,8 @@
     "creating": "계정 만드는 중...",
     "submit": "계정 만들기",
     "haveAccount": "이미 계정이 있으신가요?",
-    "signIn": "로그인"
+    "signIn": "로그인",
+    "agreeTerms": "계정을 만들면 <terms>서비스 약관</terms> 및 <privacy>개인정보 처리방침</privacy>에 동의하게 됩니다."
   },
   "ForgotPasswordPage": {
     "checkEmailTitle": "이메일을 확인하세요",
@@ -4245,5 +4247,46 @@
     "preview": "미리보기",
     "checkboxHint": "WhatsApp이라는 점, 받게 될 내용, 거부 방법을 분명히 쓰세요.",
     "cancel": "취소"
+  },
+  "Privacy": {
+    "title": "데이터 및 개인정보",
+    "description": "데이터를 내려받거나, 고객 요청 시 해당 고객의 데이터를 삭제하거나, 이 워크스페이스를 삭제하세요.",
+    "exportTitle": "데이터 내려받기",
+    "exportDesc": "연락처, 리드, 예약, 어시스턴트, 캠페인, 설정을 JSON 파일 하나로 받습니다.",
+    "exportButton": "데이터 내려받기",
+    "exported": "데이터를 내려받는 중입니다.",
+    "customerTitle": "고객 데이터 삭제",
+    "customerDesc": "고객이 정보 삭제를 요청하면 번호, 채팅, 리드, 동의 기록을 지우세요.",
+    "customerPhone": "고객 WhatsApp 번호",
+    "customerButton": "데이터 삭제",
+    "customerDeleted": "{phone}의 데이터를 삭제했습니다.",
+    "customerHint": "세법상 보관해야 하는 청구서와 결제 기록은 영향을 받지 않습니다.",
+    "policiesTitle": "정책",
+    "privacyLink": "개인정보 처리방침",
+    "termsLink": "서비스 약관",
+    "deletionLink": "데이터 삭제 페이지",
+    "dangerTitle": "워크스페이스 삭제",
+    "deleteDesc": "팀은 즉시 접근 권한을 잃습니다. {days}일 안에 취소할 수 있으며, 이후 모든 데이터가 삭제됩니다.",
+    "deleteWhatsapp": "WhatsApp 번호가 AutoShift에서 연결 해제됩니다(번호는 계속 사용할 수 있습니다).",
+    "deletePlan": "요금제가 취소되며 갱신되지 않습니다.",
+    "deleteWallet": "최근 180일간 충전한 미사용 크레딧은 환불됩니다.",
+    "deleteInvoices": "청구서는 법에 따라 보관되며 나머지는 모두 삭제됩니다.",
+    "deleteButton": "워크스페이스 삭제",
+    "confirmTitle": "{name}을(를) 삭제할까요?",
+    "confirmDesc": "삭제가 예약됩니다. {days}일 안에 이 페이지에서 취소할 수 있습니다.",
+    "reason": "떠나시는 이유가 무엇인가요?",
+    "reasonPlaceholder": "이유 선택…",
+    "reason_price": "너무 비쌈",
+    "reason_missing": "필요한 기능이 없음",
+    "reason_hard": "사용하기 어려움",
+    "reason_switching": "다른 도구로 이동",
+    "reason_closing": "사업 종료",
+    "reason_other": "기타",
+    "typeName": "확인하려면 {name}을(를) 입력하세요",
+    "keep": "워크스페이스 유지",
+    "scheduled": "워크스페이스 삭제가 예약되었습니다.",
+    "scheduledBanner": "이 워크스페이스는 {date}에 삭제됩니다. 그 전까지 취소할 수 있습니다.",
+    "cancelDeletion": "삭제 취소",
+    "cancelled": "삭제를 취소했습니다. 다시 오신 걸 환영합니다."
   }
 }
