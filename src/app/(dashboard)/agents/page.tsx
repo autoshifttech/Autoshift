@@ -49,7 +49,7 @@ function AgentsPageInner() {
       </p>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="mt-6">
-        <TabsList className="max-w-full overflow-x-auto">
+        <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <TabsTrigger value="assistants">
             <Users className="mr-1.5 h-4 w-4" /> {t('tabAssistants')}
           </TabsTrigger>

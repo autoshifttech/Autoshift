@@ -79,7 +79,7 @@ export function AssistantEditor({ id }: { id: string }) {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Tabs defaultValue="profile">
-          <TabsList className="max-w-full overflow-x-auto">
+          <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger value="profile">
               <Settings2 className="mr-1.5 h-4 w-4" />
               {t("tabProfile")}

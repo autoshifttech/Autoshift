@@ -47,7 +47,7 @@ function BookingsPageInner() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => router.replace(`/bookings?tab=${v}`, { scroll: false })} className="mt-6">
-        <TabsList className="max-w-full overflow-x-auto">
+        <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TABS.map((id) => {
             const Icon = ICONS[id];
             return (
