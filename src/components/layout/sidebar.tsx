@@ -26,6 +26,7 @@ import {
   Users,
   UsersRound,
   Wallet,
+  Wrench,
   X,
   Zap,
 } from "lucide-react";
@@ -109,7 +110,10 @@ const navGroups: { labelKey: string; items: NavItem[] }[] = [
   },
   {
     labelKey: "groupAi",
-    items: [{ href: "/agents", labelKey: "aiAgents", icon: Bot }],
+    items: [
+      { href: "/agents", labelKey: "aiAgents", icon: Bot },
+      { href: "/ai-tools", labelKey: "aiTools", icon: Wrench },
+    ],
   },
   {
     labelKey: "groupEngagement",
