@@ -40,7 +40,7 @@ function AgentsPageInner() {
     <div>
       <div className="flex items-center gap-2">
         <Bot className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="sr-only">
           {t('title')}
         </h1>
       </div>

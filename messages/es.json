@@ -940,7 +940,20 @@
       },
       "errorLoad": "Error al cargar las difusiones",
       "broadcastInProgress": "Difusión en curso",
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "allBroadcasts": "Todas las difusiones",
+      "all": "Todas",
+      "search": "Buscar difusiones",
+      "kpi": {
+        "sent": "Mensajes enviados",
+        "sentNote": "en {count, plural, =1 {# difusión} other {# difusiones}}",
+        "delivery": "Tasa de entrega",
+        "deliveryNote": "llegaron al teléfono del cliente",
+        "read": "Tasa de lectura",
+        "readNote": "de los mensajes entregados",
+        "replied": "Tasa de respuesta",
+        "repliedNote": "respuestas por mensaje entregado"
+      }
     },
     "status": {
       "draft": "Borrador",
@@ -1182,7 +1195,11 @@
         "duplicateError": "Error al duplicar",
         "deleteError": "Error al eliminar"
       },
-      "loadFailed": "No se pudieron cargar las automatizaciones"
+      "loadFailed": "No se pudieron cargar las automatizaciones",
+      "statusActive": "Activa",
+      "statusPaused": "En pausa",
+      "runsLabel": "Ejecuciones",
+      "lastRunLabel": "Última ejecución"
     },
     "edit": {
       "loading": "Cargando...",

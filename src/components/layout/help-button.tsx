@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BookOpen, Code2, Inbox, LifeBuoy, MessageCircle, PlugZap, Sparkles, Wallet, X } from "lucide-react";
 
@@ -13,6 +14,8 @@ export function HelpButton() {
   const t = useTranslations("Help");
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  // On phones the inbox composer sits where the button would float.
+  const hideOnPhone = usePathname().startsWith("/inbox");
 
   useEffect(() => {
     if (!open) return;
@@ -36,7 +39,7 @@ export function HelpButton() {
   ];
 
   return (
-    <div ref={panel} className="fixed right-4 bottom-24 z-40 flex flex-col items-end gap-3 sm:right-6 lg:bottom-6">
+    <div ref={panel} className={cn("fixed right-4 bottom-24 z-40 flex-col items-end gap-3 sm:right-6 lg:bottom-6 lg:flex", hideOnPhone ? "hidden" : "flex")}>
       {open && (
         <div role="dialog" aria-label={t("title")} className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-popover shadow-[0_16px_40px_-12px_rgb(0_0_0/0.25)]">
           <div className="bg-[#1E4C41] px-5 py-4 text-white">

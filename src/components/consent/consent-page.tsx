@@ -253,7 +253,7 @@ export function ConsentPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+          <h1 className="sr-only">{t("title")}</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
       </div>

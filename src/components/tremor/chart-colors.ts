@@ -28,6 +28,25 @@ export const chartColors = {
     fill: "fill-[#8fcbb3]",
     text: "text-[#8fcbb3]",
   },
+  // The site's warm tones, for temperature-style series (hot / warm / cold).
+  peach: {
+    bg: "bg-[#e58f68]",
+    stroke: "stroke-[#e58f68]",
+    fill: "fill-[#e58f68]",
+    text: "text-[#e58f68]",
+  },
+  butter: {
+    bg: "bg-[#e0b84a]",
+    stroke: "stroke-[#e0b84a]",
+    fill: "fill-[#e0b84a]",
+    text: "text-[#e0b84a]",
+  },
+  sky: {
+    bg: "bg-[#7fa6e3]",
+    stroke: "stroke-[#7fa6e3]",
+    fill: "fill-[#7fa6e3]",
+    text: "text-[#7fa6e3]",
+  },
   blue: {
     bg: "bg-blue-500",
     stroke: "stroke-blue-500",

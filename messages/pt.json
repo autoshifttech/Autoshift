@@ -940,7 +940,20 @@
       },
       "errorLoad": "Falha ao carregar os disparos",
       "broadcastInProgress": "Disparo em andamento",
-      "retry": "Tentar novamente"
+      "retry": "Tentar novamente",
+      "allBroadcasts": "Todas as transmissões",
+      "all": "Todas",
+      "search": "Pesquisar transmissões",
+      "kpi": {
+        "sent": "Mensagens enviadas",
+        "sentNote": "em {count, plural, =1 {# transmissão} other {# transmissões}}",
+        "delivery": "Taxa de entrega",
+        "deliveryNote": "chegaram ao telefone do cliente",
+        "read": "Taxa de leitura",
+        "readNote": "das mensagens entregues",
+        "replied": "Taxa de resposta",
+        "repliedNote": "respostas por mensagem entregue"
+      }
     },
     "status": {
       "draft": "Rascunho",
@@ -1182,7 +1195,11 @@
         "duplicateError": "Falha ao duplicar",
         "deleteError": "Falha ao excluir"
       },
-      "loadFailed": "Falha ao carregar as automações"
+      "loadFailed": "Falha ao carregar as automações",
+      "statusActive": "Ativa",
+      "statusPaused": "Pausada",
+      "runsLabel": "Execuções",
+      "lastRunLabel": "Última execução"
     },
     "edit": {
       "loading": "Carregando...",

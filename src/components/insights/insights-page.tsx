@@ -63,7 +63,7 @@ export function InsightsPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+          <h1 className="sr-only">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
         </div>
         <div className="flex items-center gap-2 self-start">
@@ -110,7 +110,7 @@ export function InsightsPage() {
         <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <h2 className="font-semibold text-foreground">{t("leadsTitle")}</h2>
           <p className="text-sm text-muted-foreground">{t("leadsDesc")}</p>
-          <BarChart className="mt-4 h-60" data={leads} index="label" categories={[t("hot"), t("warm"), t("cold")]} colors={["pink", "amber", "blue"]} type="stacked" yAxisWidth={44} valueFormatter={(v) => v.toLocaleString(locale)} />
+          <BarChart className="mt-4 h-60" data={leads} index="label" categories={[t("hot"), t("warm"), t("cold")]} colors={["peach", "butter", "sky"]} type="stacked" yAxisWidth={44} valueFormatter={(v) => v.toLocaleString(locale)} />
         </section>
       </div>
 

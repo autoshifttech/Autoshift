@@ -940,7 +940,20 @@
       },
       "errorLoad": "Failed to load broadcasts",
       "broadcastInProgress": "Broadcast in progress",
-      "retry": "Retry"
+      "retry": "Retry",
+      "allBroadcasts": "All broadcasts",
+      "all": "All",
+      "search": "Search broadcasts",
+      "kpi": {
+        "sent": "Messages sent",
+        "sentNote": "across {count, plural, =1 {# broadcast} other {# broadcasts}}",
+        "delivery": "Delivery rate",
+        "deliveryNote": "reached the customer's phone",
+        "read": "Read rate",
+        "readNote": "of delivered messages",
+        "replied": "Reply rate",
+        "repliedNote": "replies per delivered message"
+      }
     },
     "status": {
       "draft": "Draft",
@@ -1182,7 +1195,11 @@
         "duplicateError": "Failed to duplicate",
         "deleteError": "Failed to delete"
       },
-      "loadFailed": "Failed to load automations"
+      "loadFailed": "Failed to load automations",
+      "statusActive": "Active",
+      "statusPaused": "Paused",
+      "runsLabel": "Runs",
+      "lastRunLabel": "Last run"
     },
     "edit": {
       "loading": "Loading...",

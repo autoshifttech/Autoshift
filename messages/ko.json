@@ -940,7 +940,20 @@
       },
       "errorLoad": "브로드캐스트를 불러오지 못했습니다",
       "broadcastInProgress": "브로드캐스트 진행 중",
-      "retry": "다시 시도"
+      "retry": "다시 시도",
+      "allBroadcasts": "모든 브로드캐스트",
+      "all": "전체",
+      "search": "브로드캐스트 검색",
+      "kpi": {
+        "sent": "보낸 메시지",
+        "sentNote": "브로드캐스트 {count}개",
+        "delivery": "전달률",
+        "deliveryNote": "고객 휴대폰에 도착",
+        "read": "읽음률",
+        "readNote": "전달된 메시지 기준",
+        "replied": "답장률",
+        "repliedNote": "전달된 메시지당 답장"
+      }
     },
     "status": {
       "draft": "초안",
@@ -1182,7 +1195,11 @@
         "duplicateError": "복제하지 못했습니다",
         "deleteError": "삭제하지 못했습니다"
       },
-      "loadFailed": "자동화를 불러오지 못했습니다"
+      "loadFailed": "자동화를 불러오지 못했습니다",
+      "statusActive": "활성",
+      "statusPaused": "일시 중지",
+      "runsLabel": "실행",
+      "lastRunLabel": "마지막 실행"
     },
     "edit": {
       "loading": "불러오는 중...",

@@ -166,7 +166,7 @@ export default function AutomationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
+          <h1 className="sr-only">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("subtitle")}
           </p>
@@ -232,7 +232,7 @@ export default function AutomationsPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {automations.map((a) => (
             <AutomationCard
               key={a.id}
@@ -303,64 +303,22 @@ function AutomationCard({
     ? tTriggers(`${automation.trigger_type}.label`)
     : automation.trigger_type
   return (
-    <li className="rounded-xl border border-border bg-card transition-colors hover:border-border">
-      <div className="flex items-center gap-4 p-4">
-        <div
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10"
-          aria-hidden
-        >
-          <Zap className="h-5 w-5 text-primary" />
-        </div>
-
-        <button
-          type="button"
-          onClick={onEdit}
-          className="min-w-0 flex-1 text-left"
-        >
-          <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-semibold text-foreground">
-              {automation.name}
-            </span>
-            {automation.is_active && (
-              <span className="relative flex h-2 w-2" aria-label={t("activeIndicator")}>
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-            )}
-          </div>
-          {automation.description && (
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">{automation.description}</p>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                meta.pillClass,
-              )}
-            >
-              {triggerLabel}
-            </span>
-            <span className="tabular-nums">
-              {automation.execution_count === 1
-                ? t("runs", { count: automation.execution_count })
-                : t("runsPlural", { count: automation.execution_count })}
-            </span>
-            <span aria-hidden>·</span>
-            <span>{t("lastRun", { time: formatRelative(automation.last_executed_at, tRelative) })}</span>
-          </div>
+    <li className="flex flex-col gap-3 rounded-[18px] border border-border bg-card p-4 shadow-[var(--shadow-card)] transition-[transform,box-shadow] hover:-translate-y-0.5">
+      <div className="flex items-start justify-between gap-2">
+        <button type="button" onClick={onEdit} className="min-w-0 text-left text-sm leading-snug font-bold text-foreground hover:underline">
+          {automation.name}
         </button>
-
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="text-[11px] text-muted-foreground">{automation.is_active ? t("statusActive") : t("statusPaused")}</span>
           <Switch
             checked={automation.is_active}
             onCheckedChange={(v) => onToggle(!!v)}
             aria-label={automation.is_active ? t("deactivate") : t("activate")}
           />
-
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={t("openMenu")}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[popup-open]:bg-muted"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[popup-open]:bg-muted"
             >
               <MoreVertical className="h-4 w-4" />
             </DropdownMenuTrigger>
@@ -386,6 +344,21 @@ function AutomationCard({
           </DropdownMenu>
         </div>
       </div>
+      <span className={cn("inline-flex w-fit items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-semibold", meta.pillClass)}>
+        <Zap className="size-3" aria-hidden />
+        {triggerLabel}
+      </span>
+      {automation.description && <p className="line-clamp-2 min-h-9 text-xs text-muted-foreground">{automation.description}</p>}
+      <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
+        <div>
+          <dt>{t("runsLabel")}</dt>
+          <dd className="text-base font-bold tracking-[-0.02em] text-foreground tabular-nums">{automation.execution_count.toLocaleString()}</dd>
+        </div>
+        <div>
+          <dt>{t("lastRunLabel")}</dt>
+          <dd className="text-sm font-semibold text-foreground">{formatRelative(automation.last_executed_at, tRelative)}</dd>
+        </div>
+      </dl>
     </li>
   )
 }

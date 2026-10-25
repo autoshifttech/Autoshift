@@ -13,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Radio, Plus, Loader2 } from 'lucide-react';
+import { Radio, Plus, Loader2, Search, Send, CheckCheck, Eye, MessageCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useCan } from '@/hooks/use-can';
 import { GatedButton } from '@/components/ui/gated-button';
 import { getBroadcastStatus } from '@/lib/broadcast-status';
@@ -64,6 +65,8 @@ export default function BroadcastsPage() {
   const tGate = useTranslations('GatedButton');
   const canCreate = useCan('send-messages');
   const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -183,7 +186,7 @@ export default function BroadcastsPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
+          <h1 className="sr-only">{t('title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {t('subtitle')}
           </p>
@@ -217,7 +220,37 @@ export default function BroadcastsPage() {
           </GatedButton>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <>
+          <BroadcastKpis broadcasts={broadcasts} />
+          <section className="rounded-[20px] border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:p-5">
+            <h2 className="mb-3 text-[15px] font-bold">{t('allBroadcasts')}</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-1.5">
+                {['all', ...Array.from(new Set(broadcasts.map((b) => b.status)))].map((key) => {
+                  const count = key === 'all' ? broadcasts.length : broadcasts.filter((b) => b.status === key).length;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setStatusFilter(key)}
+                      aria-pressed={statusFilter === key}
+                      className={cn(
+                        'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors',
+                        statusFilter === key ? 'border-foreground bg-foreground text-background' : 'border-input bg-card text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {key === 'all' ? t('all') : tStatus(getBroadcastStatus(key as Broadcast['status']).label)}
+                      <span className="opacity-60">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <label className="flex h-9 w-full items-center gap-2 rounded-xl border border-input bg-card px-3 text-sm sm:w-60">
+                <Search className="size-3.5 text-muted-foreground" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('search')} aria-label={t('search')} className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
+              </label>
+            </div>
+        <div className="-mx-2 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
@@ -233,7 +266,9 @@ export default function BroadcastsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {broadcasts.map((broadcast) => {
+              {broadcasts
+                .filter((b) => (statusFilter === 'all' || b.status === statusFilter) && (!query.trim() || `${b.name} ${b.template_name}`.toLowerCase().includes(query.trim().toLowerCase())))
+                .map((broadcast) => {
                 const status = getBroadcastStatus(broadcast.status);
                 return (
                   <TableRow
@@ -243,6 +278,14 @@ export default function BroadcastsPage() {
                   >
                     <TableCell className="font-medium text-foreground">
                       {broadcast.name}
+                      {broadcast.status === 'sending' && broadcast.total_recipients > 0 && (
+                        <span className="mt-1.5 flex items-center gap-2 text-[11px] font-normal text-muted-foreground">
+                          <span className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
+                            <span className="block h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${percent(broadcast.sent_count, broadcast.total_recipients)}%` }} />
+                          </span>
+                          {percent(broadcast.sent_count, broadcast.total_recipients)}% · {broadcast.sent_count} / {broadcast.total_recipients}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground md:table-cell">
                       {broadcast.template_name}
@@ -261,7 +304,7 @@ export default function BroadcastsPage() {
                       <RateCell
                         value={broadcast.read_count}
                         total={broadcast.total_recipients}
-                        color="bg-blue-500"
+                        color="bg-[var(--chart-3)]"
                       />
                     </TableCell>
                     <TableCell>
@@ -286,7 +329,38 @@ export default function BroadcastsPage() {
             </TableBody>
           </Table>
         </div>
+          </section>
+        </>
       )}
+    </div>
+  );
+}
+
+/** Totals across every broadcast: sent, delivered, read and replied. */
+function BroadcastKpis({ broadcasts }: { broadcasts: Broadcast[] }) {
+  const t = useTranslations('Broadcasts.page.kpi');
+  const sent = broadcasts.reduce((s, b) => s + b.sent_count, 0);
+  const delivered = broadcasts.reduce((s, b) => s + b.delivered_count, 0);
+  const read = broadcasts.reduce((s, b) => s + b.read_count, 0);
+  const replied = broadcasts.reduce((s, b) => s + b.replied_count, 0);
+  const tiles = [
+    { icon: Send, label: t('sent'), value: sent.toLocaleString(), note: t('sentNote', { count: broadcasts.length }) },
+    { icon: CheckCheck, label: t('delivery'), value: `${percent(delivered, sent)}%`, note: t('deliveryNote') },
+    { icon: Eye, label: t('read'), value: `${percent(read, delivered)}%`, note: t('readNote') },
+    { icon: MessageCircle, label: t('replied'), value: `${percent(replied, delivered)}%`, note: t('repliedNote') },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {tiles.map(({ icon: Icon, label, value, note }) => (
+        <section key={label} className="rounded-[18px] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+          <p className="flex items-center gap-2 text-xs font-semibold">
+            <Icon className="size-3.5 text-muted-foreground" />
+            {label}
+          </p>
+          <p className="mt-2 text-[26px] leading-none font-bold tracking-[-0.035em] tabular-nums">{value}</p>
+          <p className="mt-1.5 text-[11px] text-muted-foreground">{note}</p>
+        </section>
+      ))}
     </div>
   );
 }

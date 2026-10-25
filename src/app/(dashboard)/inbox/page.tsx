@@ -566,11 +566,11 @@ function InboxPageInner() {
   const hasActiveConv = !!activeConversation;
 
   return (
-    <div className="flex h-[calc(100dvh-10.5rem)] min-w-0 flex-col overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)] lg:h-[calc(100dvh-6.5rem)]">
+    <div className="flex h-[calc(100dvh-10.5rem)] min-w-0 flex-col gap-3 lg:h-[calc(100dvh-6.5rem)]">
       {/* WhatsApp connection banner — in the flex column, not absolute,
           so it pushes the panels down instead of overlapping them. */}
       {whatsappConnected === false && (
-        <div className="flex shrink-0 items-center justify-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2">
+        <div className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-2">
           <WifiOff className="h-4 w-4 text-amber-800 dark:text-amber-400" />
           <p className="text-xs text-amber-800 dark:text-amber-400">
             {t("whatsappNotConnected")}
@@ -578,13 +578,13 @@ function InboxPageInner() {
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 gap-4">
         {/* Left panel: Conversation list.
             Hidden on mobile when a conversation is selected so the
             thread can occupy the full width. Always visible on lg+. */}
         <div
           className={cn(
-            "flex h-full flex-1 lg:flex-none",
+            "flex h-full flex-1 lg:flex-none", "overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)]",
             hasActiveConv ? "hidden lg:flex" : "flex",
           )}
         >
@@ -610,7 +610,7 @@ function InboxPageInner() {
             on the right. Issue #165. */}
         <div
           className={cn(
-            "flex h-full min-w-0 flex-1 lg:flex",
+            "flex h-full min-w-0 flex-1 lg:flex", "overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)]",
             hasActiveConv ? "flex" : "hidden lg:flex",
           )}
         >
@@ -637,7 +637,7 @@ function InboxPageInner() {
             On mobile it's always hidden (the `lg:block` below), so the
             toggle — which is itself desktop-only — never affects it. */}
         {contactPanelOpen && (
-          <div className="hidden lg:block">
+          <div className="hidden overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)] lg:block">
             <ContactSidebar contact={activeContact} />
           </div>
         )}
