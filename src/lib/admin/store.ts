@@ -57,6 +57,9 @@ export interface BusinessOverride {
 
 export interface AlertSettings {
   channels: { panel: boolean; email: boolean; whatsapp: boolean }
+  destinations: { email: string; whatsapp: string }
+  /** Daily summary instead of one message per alert. */
+  digest: boolean
   rules: Record<'lowWallet' | 'quality' | 'paymentFailed' | 'trialEnding' | 'marketingSpike' | 'systemDown', boolean>
   lowWalletBelow: number
 }
@@ -100,6 +103,8 @@ export function initialAdminState(): AdminState {
     audit: AUDIT,
     alerts: {
       channels: { panel: true, email: true, whatsapp: false },
+      destinations: { email: 'founder@autoshift.app', whatsapp: '' },
+      digest: false,
       rules: { lowWallet: true, quality: true, paymentFailed: true, trialEnding: true, marketingSpike: true, systemDown: true },
       lowWalletBelow: 200,
     },
@@ -109,7 +114,7 @@ export function initialAdminState(): AdminState {
   }
 }
 
-export const adminStore = createStore(initialAdminState, 'autoshift.admin.v1')
+export const adminStore = createStore(initialAdminState, 'autoshift.admin.v2')
 const SERVER = initialAdminState()
 export const useAdmin = () => useStore(adminStore, SERVER)
 
@@ -153,4 +158,12 @@ export function updateBusiness(b: Business, action: string, details: string, pat
 
 export function addTicketMessage(id: string, message: TicketMessage, status?: Ticket['status']) {
   adminStore.set((s) => ({ ...s, tickets: s.tickets.map((t) => (t.id === id ? { ...t, status: status ?? t.status, messages: [...t.messages, message] } : t)) }))
+}
+
+export function updateTicket(id: string, patch: Partial<Ticket>, audit?: { action: string; details: string }) {
+  const ticket = adminStore.get().tickets.find((t) => t.id === id)
+  if (!ticket) return
+  const change = (s: AdminState) => ({ tickets: s.tickets.map((t) => (t.id === id ? { ...t, ...patch } : t)) })
+  if (audit) act(audit.action, id, audit.details, change)
+  else adminStore.set((s) => ({ ...s, ...change(s) }))
 }

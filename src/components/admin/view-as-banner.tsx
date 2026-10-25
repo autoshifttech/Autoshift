@@ -30,8 +30,10 @@ function read(): ViewAs | null {
 export function ViewAsBanner() {
   const [v, setV] = useState<ViewAs | null>(null);
   // sessionStorage only exists in the browser, so read it after mount.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setV(read()), []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setV(read());
+  }, []);
   if (!v) return null;
   return (
     <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[#10211c] px-4 py-2 text-center text-xs text-white sm:text-sm">
