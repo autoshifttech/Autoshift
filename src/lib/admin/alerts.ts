@@ -16,7 +16,7 @@ export interface AdminAlert {
 const SEVERITY_ORDER: Record<Severity, number> = { critical: 0, warning: 1, info: 2 }
 
 /** Everything that needs the founder's attention, most urgent first. */
-export function buildAlerts(businesses: Business[], state: Pick<AdminState, 'alerts' | 'dismissedAlerts' | 'tickets'>): AdminAlert[] {
+export function buildAlerts(businesses: Business[], state: Pick<AdminState, 'alerts' | 'dismissedAlerts' | 'tickets'> & Partial<Pick<AdminState, 'resolvedEvents'>>): AdminAlert[] {
   const { rules, lowWalletBelow } = state.alerts
   const out: AdminAlert[] = []
   for (const b of businesses) {
@@ -38,7 +38,7 @@ export function buildAlerts(businesses: Business[], state: Pick<AdminState, 'ale
   if (rules.systemDown) {
     for (const s of SERVICES.filter((x) => x.status !== 'operational'))
       out.push({ id: `s-${s.id}`, severity: s.status === 'down' ? 'critical' : 'warning', title: `${s.name} is ${s.status}`, detail: s.detail, href: '/admin/system', at: daysAgo(0.02) })
-    const unresolved = SYSTEM_EVENTS.filter((e) => !e.resolved).length
+    const unresolved = SYSTEM_EVENTS.filter((e) => !e.resolved && !state.resolvedEvents?.includes(e.id)).length
     if (unresolved) out.push({ id: 'events', severity: 'info', title: `${unresolved} system errors to review`, detail: 'Failed sends, webhook and payment errors.', href: '/admin/system', at: daysAgo(0.01) })
   }
   const urgent = state.tickets.filter((t: Ticket) => t.status === 'open' && (t.priority === 'urgent' || t.priority === 'high'))

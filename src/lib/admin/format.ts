@@ -22,6 +22,14 @@ export function inrCompact(n: number): string {
   return `${sign}₹${abs}`
 }
 
+/** Axis labels: 950, 6K, 1.2L. */
+export function numCompact(n: number): string {
+  const abs = Math.abs(n)
+  if (abs >= 1e5) return `${+(n / 1e5).toFixed(1)}L`
+  if (abs >= 1e3) return `${+(n / 1e3).toFixed(1)}K`
+  return String(n)
+}
+
 export const num = (n: number) => new Intl.NumberFormat('en-IN').format(n)
 
 export const pct = (n: number, digits = 0) => `${(n * 100).toFixed(digits)}%`

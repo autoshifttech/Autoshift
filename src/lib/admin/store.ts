@@ -75,6 +75,8 @@ export interface AdminState {
   audit: AuditEntry[]
   alerts: AlertSettings
   dismissedAlerts: string[]
+  resolvedEvents: string[]
+  jobRuns: Record<string, string>
 }
 
 const NAMES: Record<PlanId, string> = { starter: 'Starter', growth: 'Growth', pro: 'Pro' }
@@ -102,6 +104,8 @@ export function initialAdminState(): AdminState {
       lowWalletBelow: 200,
     },
     dismissedAlerts: [],
+    resolvedEvents: [],
+    jobRuns: {},
   }
 }
 
