@@ -1860,7 +1860,18 @@
         "Marketing": "마케팅",
         "Utility": "유틸리티",
         "Authentication": "인증"
-      }
+      },
+      "previewTitle": "휴대폰 미리보기",
+      "previewTab": "미리보기",
+      "previewEditTab": "편집",
+      "previewBusinessAccount": "비즈니스 계정",
+      "previewToday": "오늘",
+      "previewBodyEmpty": "메시지 내용이 여기에 표시됩니다",
+      "previewButtonEmpty": "버튼 텍스트",
+      "previewSeeAll": "모든 옵션 보기",
+      "previewEmpty": "입력을 시작하면 고객이 보게 될 모습 그대로 템플릿이 여기에 표시됩니다.",
+      "previewMessage": "메시지",
+      "previewYourBusiness": "내 비즈니스"
     },
     "roles": {
       "admin": "관리자",

@@ -32,6 +32,8 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { SettingsPanelHead } from './settings-panel-head';
+import { TemplatePhonePreview } from '@/components/templates/phone-preview';
+import { useSetup } from '@/lib/workspace/setup';
 import {
   Dialog,
   DialogContent,
@@ -143,6 +145,11 @@ export function TemplateManager() {
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [form, setForm] = useState<TemplateFormData>(emptyForm);
+  // Phones show the form or the preview, one at a time.
+  const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
+  const setup = useSetup();
+  const businessName =
+    setup.business.displayName.trim() || setup.business.name.trim() || t('previewYourBusiness');
   // Non-null when the dialog is editing an existing row — switches the
   // submit handler from POST /submit to PATCH /[id] and changes the
   // dialog title + CTA. Set to the template id to pre-fill from a row.
@@ -257,12 +264,14 @@ export function TemplateManager() {
       footer_text: template.footer_text ?? '',
       buttons: template.buttons ?? [],
     });
+    setMobileView('edit');
     setDialogOpen(true);
   }
 
   function openCreate() {
     setEditingId(null);
     setForm(emptyForm);
+    setMobileView('edit');
     setDialogOpen(true);
   }
 
@@ -677,7 +686,7 @@ export function TemplateManager() {
           }
         }}
       >
-        <DialogContent className="bg-popover border-border sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-popover border-border sm:max-w-2xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-popover-foreground">
               {editingId ? t('dialogEditTitle') : t('dialogNewTitle')}
@@ -689,6 +698,30 @@ export function TemplateManager() {
             </DialogDescription>
           </DialogHeader>
 
+          <div
+            role="tablist"
+            className="flex rounded-full bg-muted p-1 lg:hidden"
+          >
+            {(['edit', 'preview'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                role="tab"
+                aria-selected={mobileView === v}
+                onClick={() => setMobileView(v)}
+                className={`flex-1 rounded-full py-1.5 text-sm font-medium transition-colors ${
+                  mobileView === v
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {v === 'edit' ? t('previewEditTab') : t('previewTab')}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className={mobileView === 'preview' ? 'hidden lg:block' : undefined}>
           {form.category === 'Authentication' && (
             <div className="flex items-start gap-2 rounded border border-amber-700/40 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
               <AlertCircle className="size-4 mt-0.5 shrink-0" />
@@ -1090,6 +1123,17 @@ export function TemplateManager() {
                 </div>
               )}
             </div>
+          </div>
+          </div>
+
+          <aside
+            className={`${mobileView === 'edit' ? 'hidden lg:block' : ''} lg:sticky lg:top-0 lg:self-start`}
+          >
+            <p className="mb-3 hidden text-center text-xs font-medium tracking-wide text-muted-foreground uppercase lg:block">
+              {t('previewTitle')}
+            </p>
+            <TemplatePhonePreview template={form} businessName={businessName} />
+          </aside>
           </div>
 
           <DialogFooter className="bg-popover border-border">

@@ -1860,7 +1860,18 @@
         "Marketing": "Marketing",
         "Utility": "Utilidad",
         "Authentication": "Autenticación"
-      }
+      },
+      "previewTitle": "Vista en el móvil",
+      "previewTab": "Vista previa",
+      "previewEditTab": "Editar",
+      "previewBusinessAccount": "Cuenta de empresa",
+      "previewToday": "Hoy",
+      "previewBodyEmpty": "El texto de tu mensaje aparece aquí",
+      "previewButtonEmpty": "Texto del botón",
+      "previewSeeAll": "Ver todas las opciones",
+      "previewEmpty": "Empieza a escribir y tu plantilla aparece aquí, tal como la verán tus clientes.",
+      "previewMessage": "Mensaje",
+      "previewYourBusiness": "Tu empresa"
     },
     "roles": {
       "admin": "Administrador",

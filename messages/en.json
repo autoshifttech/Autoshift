@@ -1860,7 +1860,18 @@
         "Marketing": "Marketing",
         "Utility": "Utility",
         "Authentication": "Authentication"
-      }
+      },
+      "previewTitle": "Phone preview",
+      "previewTab": "Preview",
+      "previewEditTab": "Edit",
+      "previewBusinessAccount": "Business account",
+      "previewToday": "Today",
+      "previewBodyEmpty": "Your message text appears here",
+      "previewButtonEmpty": "Button text",
+      "previewSeeAll": "See all options",
+      "previewEmpty": "Start typing and your template appears here, just as customers will see it.",
+      "previewMessage": "Message",
+      "previewYourBusiness": "Your business"
     },
     "roles": {
       "admin": "Admin",
