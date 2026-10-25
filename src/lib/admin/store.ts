@@ -167,3 +167,16 @@ export function updateTicket(id: string, patch: Partial<Ticket>, audit?: { actio
   if (audit) act(audit.action, id, audit.details, change)
   else adminStore.set((s) => ({ ...s, ...change(s) }))
 }
+
+/** A business opens a request from the help button (the business app side of the Support inbox). */
+export function createTicket(input: { businessId: string; subject: string; category: Ticket['category']; priority: Ticket['priority']; message: string; author: string }): string {
+  const tickets = adminStore.get().tickets
+  const next = Math.max(1040, ...tickets.map((t) => Number(t.id.replace(/\D/g, '')) || 0)) + 1
+  const id = `T-${next}`
+  const at = new Date().toISOString()
+  adminStore.set((s) => ({
+    ...s,
+    tickets: [{ id, businessId: input.businessId, subject: input.subject, category: input.category, status: 'open', priority: input.priority, assignee: null, createdAt: at, messages: [{ from: 'business', author: input.author, text: input.message, at }] }, ...s.tickets],
+  }))
+  return id
+}

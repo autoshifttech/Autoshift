@@ -40,6 +40,7 @@ const pageTitles: Record<string, string> = {
   "/files": "files",
   "/ai-tools": "aiTools",
   "/templates": "templates",
+  "/support": "support",
   "/settings": "settings",
 };
 

@@ -19,6 +19,7 @@ import {
   Crown,
   GitBranch,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   MessageSquare,
   Radio,
@@ -139,6 +140,7 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
     labelKey: "groupAccount",
     items: [
       { href: "/wallet", labelKey: "wallet", icon: Wallet },
+      { href: "/support", labelKey: "support", icon: LifeBuoy },
       { href: "/settings", labelKey: "settings", icon: Settings },
     ],
   },

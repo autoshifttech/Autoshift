@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BookOpen, Code2, LifeBuoy, MessageCircle, PlugZap, Sparkles, Wallet, X } from "lucide-react";
+import { BookOpen, Code2, Inbox, LifeBuoy, MessageCircle, PlugZap, Sparkles, Wallet, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { openPalette } from "./command-palette";
@@ -60,8 +60,9 @@ export function HelpButton() {
                 </a>
               </li>
             </ul>
-            <a
-              href="/#contact"
+            <Link
+              href="/support?new=1"
+              onClick={() => setOpen(false)}
               className="flex items-center gap-3 rounded-xl bg-[var(--tone-mint)] px-3 py-3 text-sm font-medium text-foreground hover:brightness-95"
             >
               <MessageCircle className="size-5 text-primary" />
@@ -69,7 +70,11 @@ export function HelpButton() {
                 {t("contact")}
                 <span className="block text-xs font-normal text-muted-foreground">{t("contactHint")}</span>
               </span>
-            </a>
+            </Link>
+            <Link href="/support" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-2 py-1 text-sm text-foreground hover:bg-muted">
+              <Inbox className="size-4 text-primary" />
+              {t("myRequests")}
+            </Link>
             <button
               type="button"
               onClick={() => {

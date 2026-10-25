@@ -234,6 +234,8 @@ function makeBusinesses(): Business[] {
 }
 
 export const BUSINESSES: Business[] = makeBusinesses()
+/** The workspace the business app's demo signs in to (Olive & Thread). */
+export const DEMO_BUSINESS_ID = 'biz_004'
 export const businessById = (id: string) => BUSINESSES.find((b) => b.id === id)
 
 /* ---------------------------------------------------------------- money */
@@ -525,6 +527,7 @@ export const TICKETS: Ticket[] = (() => {
     t(5, 21, 'How do I add my receptionist?', 'Other', 'closed', 'low', 'Deepa Krishnan', 4, [['business', 'How can my receptionist also reply to chats?'], ['admin', 'Settings → Team → Invite. Choose the Agent role so she can reply but not change billing.'], ['business', 'Done, thank you!']]),
     t(6, 11, 'Inbox not loading on my phone', 'Bug', 'pending', 'high', 'Deepa Krishnan', 2, [['business', 'The inbox shows a spinner forever on my Android phone.'], ['admin', 'Thanks! Which browser and version? A screenshot would help.']]),
     t(7, 30, 'Wallet top-up shows pending', 'Billing', 'open', 'normal', null, 0.3, [['business', 'Paid ₹2,000 by UPI 20 minutes ago, wallet still shows pending.']]),
+    t(9, 3, 'How do I import contacts from Excel?', 'Other', 'closed', 'low', 'Deepa Krishnan', 6, [['business', 'I have 800 customers in an Excel sheet. How do I bring them in?'], ['admin', 'Save the sheet as CSV, then Contacts → Import. Map the phone column and add a consent column if they agreed to offers. Happy to check the file if you send it.'], ['business', 'Worked, thanks!']]),
     t(8, 7, 'Number quality turned yellow', 'WhatsApp connection', 'closed', 'normal', 'Deepa Krishnan', 9, [['business', 'Why is my quality yellow?'], ['admin', 'Several people blocked your last broadcast. Send only to customers who opted in, and keep marketing to once a week for now.']]),
   ]
 })()

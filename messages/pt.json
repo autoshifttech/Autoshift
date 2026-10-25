@@ -55,7 +55,8 @@
     "drips": "Sequências",
     "insights": "Análises",
     "files": "Arquivos",
-    "optIns": "Opt-ins e bloqueios"
+    "optIns": "Opt-ins e bloqueios",
+    "support": "Ajuda e suporte"
   },
   "Header": {
     "dashboard": "Painel",
@@ -84,7 +85,8 @@
     "drips": "Sequências",
     "insights": "Análises",
     "files": "Arquivos",
-    "optIns": "Opt-ins e bloqueios"
+    "optIns": "Opt-ins e bloqueios",
+    "support": "Ajuda e suporte"
   },
   "ModeToggle": {
     "switchMode": "Mudar para o modo {mode}"
@@ -4159,7 +4161,8 @@
     "whatsNew": "Novidades",
     "contact": "Falar com nossa equipe",
     "contactHint": "Costumamos responder em até uma hora.",
-    "shortcut": "Busca rápida"
+    "shortcut": "Busca rápida",
+    "myRequests": "Minhas solicitações"
   },
   "Consent": {
     "title": "Opt-ins e bloqueios",
@@ -4288,5 +4291,48 @@
     "scheduledBanner": "Este espaço será apagado em {date}. Até lá você pode cancelar.",
     "cancelDeletion": "Cancelar exclusão",
     "cancelled": "Exclusão cancelada. Bem-vindo de volta."
+  },
+  "Support": {
+    "title": "Ajuda e suporte",
+    "description": "Pergunte qualquer coisa à equipe do AutoShift: conectar o WhatsApp, cobrança, modelos ou um problema. As respostas chegam aqui e no seu e-mail.",
+    "newRequest": "Nova solicitação",
+    "newRequestDesc": "Conte o que está acontecendo. Quanto mais detalhes, mais rápido resolvemos.",
+    "category": "Assunto",
+    "categoryPlaceholder": "Escolha um assunto…",
+    "category_whatsapp": "Conectar o WhatsApp",
+    "category_billing": "Cobrança e carteira",
+    "category_templates": "Modelos de mensagem",
+    "category_ai": "Assistente de IA",
+    "category_bug": "Algo não funciona",
+    "category_other": "Outro assunto",
+    "urgency": "Qual a urgência?",
+    "urgency_normal": "Normal",
+    "urgency_high": "Está travando minha equipe",
+    "urgency_urgent": "Clientes afetados agora",
+    "subject": "Título",
+    "subjectPlaceholder": "ex.: Transmissão parada em envio",
+    "message": "Detalhes",
+    "messagePlaceholder": "O que aconteceu, o que você esperava e qualquer erro que apareceu.",
+    "replyTime": "Costumamos responder em até uma hora, das 9h às 21h (horário da Índia).",
+    "sendRequest": "Enviar solicitação",
+    "cancel": "Cancelar",
+    "created": "Solicitação {id} enviada. Responderemos aqui em breve.",
+    "status_open": "Aguardando o AutoShift",
+    "status_pending": "O AutoShift respondeu",
+    "status_closed": "Resolvido",
+    "emptyTitle": "Nenhuma solicitação ainda",
+    "emptyDesc": "Se algo não estiver claro ou não funcionar, envie uma solicitação e uma pessoa de verdade vai ajudar.",
+    "pick": "Abra uma solicitação para ver a conversa.",
+    "newReply": "Nova resposta",
+    "back": "Voltar às solicitações",
+    "teamName": "{name} · AutoShift",
+    "you": "Você",
+    "waitingForTeam": "Nossa equipe responderá em breve.",
+    "replyPlaceholder": "Escreva uma resposta…",
+    "reopenPlaceholder": "Ainda precisa de ajuda? Escreva aqui para reabrir.",
+    "send": "Enviar",
+    "reopen": "Reabrir e enviar",
+    "replySent": "Resposta enviada.",
+    "teamFallback": "Equipe AutoShift"
   }
 }

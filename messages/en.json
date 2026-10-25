@@ -55,7 +55,8 @@
     "drips": "Drip campaigns",
     "insights": "Insights",
     "files": "Files",
-    "optIns": "Opt-ins & blocklist"
+    "optIns": "Opt-ins & blocklist",
+    "support": "Help & support"
   },
   "Header": {
     "dashboard": "Dashboard",
@@ -84,7 +85,8 @@
     "drips": "Drip campaigns",
     "insights": "Insights",
     "files": "Files",
-    "optIns": "Opt-ins & blocklist"
+    "optIns": "Opt-ins & blocklist",
+    "support": "Help & support"
   },
   "ModeToggle": {
     "switchMode": "Switch to {mode} mode"
@@ -4159,7 +4161,8 @@
     "whatsNew": "What’s new",
     "contact": "Talk to our team",
     "contactHint": "We usually reply within an hour.",
-    "shortcut": "Quick search"
+    "shortcut": "Quick search",
+    "myRequests": "My support requests"
   },
   "Consent": {
     "title": "Opt-ins & blocklist",
@@ -4288,5 +4291,48 @@
     "scheduledBanner": "This workspace will be erased on {date}. Until then you can cancel.",
     "cancelDeletion": "Cancel deletion",
     "cancelled": "Deletion cancelled. Welcome back."
+  },
+  "Support": {
+    "title": "Help & support",
+    "description": "Ask the AutoShift team anything: connecting WhatsApp, billing, templates or a problem. Replies come here and to your email.",
+    "newRequest": "New request",
+    "newRequestDesc": "Tell us what's happening. The more detail, the faster we can fix it.",
+    "category": "Topic",
+    "categoryPlaceholder": "Choose a topic…",
+    "category_whatsapp": "Connecting WhatsApp",
+    "category_billing": "Billing & wallet",
+    "category_templates": "Message templates",
+    "category_ai": "AI assistant",
+    "category_bug": "Something isn't working",
+    "category_other": "Something else",
+    "urgency": "How urgent?",
+    "urgency_normal": "Normal",
+    "urgency_high": "It's blocking my team",
+    "urgency_urgent": "Customers are affected now",
+    "subject": "Subject",
+    "subjectPlaceholder": "e.g. Broadcast stuck on sending",
+    "message": "Details",
+    "messagePlaceholder": "What happened, what you expected, and any error you saw.",
+    "replyTime": "We usually reply within an hour, 9 AM to 9 PM IST.",
+    "sendRequest": "Send request",
+    "cancel": "Cancel",
+    "created": "Request {id} sent. We'll reply here soon.",
+    "status_open": "Waiting for AutoShift",
+    "status_pending": "AutoShift replied",
+    "status_closed": "Solved",
+    "emptyTitle": "No requests yet",
+    "emptyDesc": "If anything is unclear or not working, send us a request and a real person will help.",
+    "pick": "Open a request to read the conversation.",
+    "newReply": "New reply",
+    "back": "Back to requests",
+    "teamName": "{name} · AutoShift",
+    "you": "You",
+    "waitingForTeam": "Our team will reply soon.",
+    "replyPlaceholder": "Write a reply…",
+    "reopenPlaceholder": "Still need help? Write here to reopen.",
+    "send": "Send",
+    "reopen": "Reopen and send",
+    "replySent": "Reply sent.",
+    "teamFallback": "AutoShift team"
   }
 }
