@@ -413,39 +413,6 @@ export function Step3Personalize({
         </div>
       )}
 
-      </div>
-
-      {/* Live preview: the template on a phone, filled in for the first
-          contact (or sample data), as the recipient will see it. */}
-      <aside className="lg:sticky lg:top-4 lg:self-start">
-        <div className="mb-3 flex items-center justify-center gap-2">
-          <Eye className="h-4 w-4 text-primary" />
-          <p className="text-sm font-medium text-foreground">{t('personalize.preview')}</p>
-          <span className="truncate text-xs text-muted-foreground">({previewLabel})</span>
-          {loadingPreview && (
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-          )}
-        </div>
-        <TemplatePhonePreview
-          businessName={businessName}
-          template={{
-            header_format: isMediaHeaderType(template.header_type)
-              ? template.header_type
-              : template.header_type === 'text'
-                ? 'text'
-                : 'none',
-            header_content: template.header_content ?? '',
-            header_sample: template.sample_values?.header?.[0] ?? '',
-            header_media_url: headerMediaUrl,
-            body_text: previewText,
-            body_samples: [],
-            footer_text: template.footer_text ?? '',
-            buttons: template.buttons ?? [],
-          }}
-        />
-      </aside>
-      </div>
-
       {unmappedKeys.length > 0 && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
           {t.rich('personalize.unmappedWarning', {
@@ -472,6 +439,39 @@ export function Step3Personalize({
           {t('next')}
           <ArrowRight className="h-4 w-4" />
         </Button>
+      </div>
+      </div>
+
+      {/* Live preview: the template on a phone, filled in for the first
+          contact (or sample data), as the recipient will see it. */}
+      <aside className="lg:sticky lg:top-0 lg:self-start">
+        <div className="mb-3 flex items-center justify-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          <p className="text-sm font-medium text-foreground">{t('personalize.preview')}</p>
+          <span className="truncate text-xs text-muted-foreground">({previewLabel})</span>
+          {loadingPreview && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+          )}
+        </div>
+        <TemplatePhonePreview
+          businessName={businessName}
+          screenClassName="h-[560px] lg:h-[min(600px,calc(100dvh-13rem))] lg:min-h-[420px]"
+          template={{
+            header_format: isMediaHeaderType(template.header_type)
+              ? template.header_type
+              : template.header_type === 'text'
+                ? 'text'
+                : 'none',
+            header_content: template.header_content ?? '',
+            header_sample: template.sample_values?.header?.[0] ?? '',
+            header_media_url: headerMediaUrl,
+            body_text: previewText,
+            body_samples: [],
+            footer_text: template.footer_text ?? '',
+            buttons: template.buttons ?? [],
+          }}
+        />
+      </aside>
       </div>
     </div>
   );

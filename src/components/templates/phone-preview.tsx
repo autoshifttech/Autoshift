@@ -73,7 +73,7 @@ function MediaHeader({ format, url }: { format: "image" | "video" | "document"; 
 }
 
 /** A phone mock-up showing a WhatsApp template the way a customer receives it. */
-export function TemplatePhonePreview({ template, businessName, className }: { template: PhonePreviewTemplate; businessName: string; className?: string }) {
+export function TemplatePhonePreview({ template, businessName, className, screenClassName = "h-[560px]" }: { template: PhonePreviewTemplate; businessName: string; className?: string; /** Height of the phone screen. */ screenClassName?: string }) {
   const t = useTranslations("Settings.templates");
   const { header_format, header_content, header_sample, header_media_url, body_text, body_samples, footer_text, buttons } = template;
   const hasContent = body_text.trim() || (header_format === "text" && header_content.trim()) || (header_format !== "none" && header_format !== "text") || footer_text.trim() || buttons.length > 0;
@@ -83,7 +83,7 @@ export function TemplatePhonePreview({ template, businessName, className }: { te
   return (
     <div className={cn("mx-auto w-full max-w-[290px]", className)}>
       <div className="rounded-[2.6rem] bg-[#1b1b1d] p-2.5 shadow-[0_24px_48px_-20px_rgb(0_0_0/0.45)] ring-1 ring-black/10">
-        <div className="relative flex h-[560px] flex-col overflow-hidden rounded-[2.1rem] bg-[#efeae2] dark:bg-[#0b141a]">
+        <div className={cn("relative flex flex-col overflow-hidden rounded-[2.1rem] bg-[#efeae2] dark:bg-[#0b141a]", screenClassName)}>
           {/* Status bar and camera island */}
           <div className="relative flex items-center justify-between bg-[#1E4C41] px-6 pt-2.5 pb-1 text-[11px] font-semibold text-white">
             <span>9:41</span>
