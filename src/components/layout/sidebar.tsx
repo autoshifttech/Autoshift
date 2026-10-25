@@ -13,6 +13,7 @@ import {
   Bot,
   CalendarDays,
   FileText,
+  Filter,
   Crown,
   GitBranch,
   LayoutDashboard,
@@ -21,6 +22,7 @@ import {
   Radio,
   Settings,
   Shield,
+  Target,
   User,
   UserCog,
   Users,
@@ -102,6 +104,7 @@ const navGroups: { labelKey: string; items: NavItem[] }[] = [
     items: [
       { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
       { href: "/inbox", labelKey: "inbox", icon: MessageSquare },
+      { href: "/leads", labelKey: "leads", icon: Target },
       { href: "/notifications", labelKey: "notifications", icon: Bell },
       { href: "/contacts", labelKey: "contacts", icon: Users },
       { href: "/bookings", labelKey: "bookings", icon: CalendarDays },
@@ -119,6 +122,7 @@ const navGroups: { labelKey: string; items: NavItem[] }[] = [
     labelKey: "groupEngagement",
     items: [
       { href: "/broadcasts", labelKey: "broadcasts", icon: Radio },
+      { href: "/segments", labelKey: "segments", icon: Filter },
       { href: "/automations", labelKey: "automations", icon: Zap },
       { href: "/templates", labelKey: "templates", icon: FileText },
     ],

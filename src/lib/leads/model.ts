@@ -72,6 +72,17 @@ export interface LeadSettings {
   ai: AiProfile
 }
 
+export const LEAD_STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost'] as const
+export type LeadStatus = (typeof LEAD_STATUSES)[number]
+export const LEAD_SOURCES = ['whatsapp_ad', 'website', 'campaign', 'organic', 'referral'] as const
+export type LeadSource = (typeof LEAD_SOURCES)[number]
+
+export interface LeadEvent {
+  at: string
+  kind: 'captured' | 'answered' | 'scored' | 'handoff' | 'status' | 'booked' | 'note'
+  text: string
+}
+
 export interface Lead {
   id: string
   name: string
@@ -79,6 +90,11 @@ export interface Lead {
   answers: Record<string, string>
   capturedAt: string
   handedOffTo: string | null
+  status: LeadStatus
+  source: LeadSource
+  /** Which AI assistant talked to them. */
+  assistant: string
+  events: LeadEvent[]
 }
 
 // --- scoring ----------------------------------------------------------------
@@ -102,6 +118,11 @@ export function ruleMatches(rule: ScoreRule, answer: string | undefined): boolea
     case 'at_least':
       return Number.isFinite(num(a)) && num(a) >= num(rule.value)
   }
+}
+
+/** Which rules a lead matched, for the score breakdown. */
+export function scoreBreakdown(answers: Record<string, string>, rules: ScoreRule[]): ScoreRule[] {
+  return rules.filter((r) => ruleMatches(r, answers[r.questionId]))
 }
 
 export function scoreLead(answers: Record<string, string>, rules: ScoreRule[]): number {
@@ -306,20 +327,39 @@ export function defaultLeadSettings(): LeadSettings {
 
 export function sampleLeads(now = Date.now()): Lead[] {
   const ago = (m: number) => new Date(now - m * 60_000).toISOString()
-  return [
-    { id: 'l1', name: 'Arjun Mehta', phone: '+91 99620 11873', answers: { name: 'Arjun', budget: '95', location: 'OMR', type: 'Apartment', timeline: 'Within 1 month' }, capturedAt: ago(18), handedOffTo: 'Rahul Iyer' },
-    { id: 'l2', name: 'Priya Raman', phone: '+91 98765 43210', answers: { name: 'Priya', budget: '60', location: 'Velachery', type: 'Apartment', timeline: '1–3 months' }, capturedAt: ago(64), handedOffTo: null },
-    { id: 'l3', name: 'Meena Iyer', phone: '+91 94450 12345', answers: { name: 'Meena', budget: '120', location: 'ECR', type: 'Villa', timeline: '1–3 months' }, capturedAt: ago(140), handedOffTo: 'Asha Kumar' },
-    { id: 'l4', name: 'Omar Hussain', phone: '+91 97000 12345', answers: { name: 'Omar', timeline: 'Just exploring' }, capturedAt: ago(60 * 26), handedOffTo: null },
-    { id: 'l5', name: 'Sara Thomas', phone: '+91 90031 55520', answers: { name: 'Sara', budget: '45', location: 'Tambaram', timeline: '3–6 months' }, capturedAt: ago(60 * 30), handedOffTo: null },
+  type Row = [string, string, Record<string, string>, number, string | null, LeadStatus, LeadSource, string]
+  const rows: Row[] = [
+    ['Arjun Mehta', '+91 99620 11873', { name: 'Arjun', budget: '95', location: 'OMR', type: 'Apartment', timeline: 'Within 1 month' }, 18, 'Rahul Iyer', 'qualified', 'whatsapp_ad', 'Sales assistant'],
+    ['Priya Raman', '+91 98765 43210', { name: 'Priya', budget: '60', location: 'Velachery', type: 'Apartment', timeline: '1–3 months' }, 64, null, 'contacted', 'website', 'Sales assistant'],
+    ['Meena Iyer', '+91 94450 12345', { name: 'Meena', budget: '120', location: 'ECR', type: 'Villa', timeline: '1–3 months' }, 140, 'Asha Kumar', 'qualified', 'referral', 'Sales assistant'],
+    ['Omar Hussain', '+91 97000 12345', { name: 'Omar', timeline: 'Just exploring' }, 60 * 26, null, 'new', 'organic', 'Sales assistant'],
+    ['Sara Thomas', '+91 90031 55520', { name: 'Sara', budget: '45', location: 'Tambaram', timeline: '3–6 months' }, 60 * 30, null, 'contacted', 'campaign', 'Sales assistant'],
+    ['Karthik Rao', '+91 98401 22334', { name: 'Karthik', budget: '85', location: 'Adyar', type: 'Apartment', timeline: 'Within 1 month' }, 60 * 5, 'Rahul Iyer', 'won', 'whatsapp_ad', 'Sales assistant'],
+    ['Divya Menon', '+91 99401 55678', { name: 'Divya', budget: '70', location: 'Anna Nagar', type: 'Apartment', timeline: '1–3 months' }, 60 * 9, null, 'new', 'whatsapp_ad', 'Sales assistant'],
+    ['Vikram Singh', '+91 98840 77889', { name: 'Vikram', budget: '150', location: 'ECR', type: 'Villa', timeline: 'Within 1 month' }, 60 * 3, 'Asha Kumar', 'qualified', 'referral', 'Sales assistant'],
+    ['Lakshmi Pillai', '+91 94440 33445', { name: 'Lakshmi', budget: '35', location: 'Porur', timeline: '3–6 months' }, 60 * 50, null, 'lost', 'campaign', 'Sales assistant'],
+    ['Nisha Kapoor', '+91 99887 76655', { name: 'Nisha', budget: '55', location: 'OMR', type: 'Plot', timeline: '1–3 months' }, 60 * 12, null, 'contacted', 'website', 'Support assistant'],
+    ['Farhan Ali', '+91 97890 11223', { name: 'Farhan', type: 'Commercial', timeline: 'Just exploring' }, 60 * 72, null, 'new', 'organic', 'Sales assistant'],
+    ['Rekha Das', '+91 98410 66778', { name: 'Rekha', budget: '90', location: 'Velachery', type: 'Apartment', timeline: 'Within 1 month' }, 60 * 1.5, null, 'new', 'whatsapp_ad', 'Sales assistant'],
   ]
+  return rows.map(([name, phone, answers, m, handedOffTo, status, source, assistant], i) => {
+    const events: LeadEvent[] = [
+      { at: ago(m), kind: 'captured', text: source },
+      { at: ago(m - 3), kind: 'answered', text: String(Object.keys(answers).length) },
+    ]
+    if (handedOffTo) events.push({ at: ago(m - 6), kind: 'handoff', text: handedOffTo })
+    if (status === 'won') events.push({ at: ago(m - 600), kind: 'booked', text: 'Site visit' }, { at: ago(m - 2000), kind: 'status', text: 'won' })
+    if (status === 'lost') events.push({ at: ago(m - 1500), kind: 'status', text: 'lost' })
+    return { id: `l${i + 1}`, name, phone, answers, capturedAt: ago(m), handedOffTo, status, source, assistant, events }
+  })
 }
 
 export const leadStore = createStore<LeadSettings>(defaultLeadSettings, 'autoshift.leads')
 const SERVER_SETTINGS = defaultLeadSettings()
 export const useLeadSettings = () => useStore(leadStore, SERVER_SETTINGS)
 
-export const leadsStore = createStore<{ leads: Lead[] }>(() => ({ leads: sampleLeads() }), 'autoshift.leadlist')
+// v2: leads gained status, source, assistant and a timeline.
+export const leadsStore = createStore<{ leads: Lead[] }>(() => ({ leads: sampleLeads() }), 'autoshift.leadlist.v2')
 const SERVER_LEADS = { leads: sampleLeads(0) }
 export const useLeads = () => useStore(leadsStore, SERVER_LEADS).leads
 
