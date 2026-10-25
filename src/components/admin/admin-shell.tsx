@@ -96,29 +96,29 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
         type="button"
         aria-label="Close menu"
         onClick={onClose}
-        className={cn("fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}
+        className={cn("fixed inset-0 z-30 bg-background/70 backdrop-blur-sm transition-opacity lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}
       />
       <aside
         aria-label="Admin navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#10211c] text-white/80 transition-transform duration-200 lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform duration-200 lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-4">
+        <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <Link href="/admin" className="flex items-center gap-2" onClick={onClose}>
             <LogoMark className="size-8" />
-            <span className="text-base font-extrabold tracking-tight text-white">AutoShift</span>
-            <span className="rounded-md bg-[#c9f27a] px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-[#10211c] uppercase">Admin</span>
+            <span className="text-base font-extrabold tracking-tight text-foreground">AutoShift</span>
+            <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">Admin</span>
           </Link>
-          <button type="button" onClick={onClose} aria-label="Close menu" className="flex size-9 items-center justify-center rounded-md hover:bg-white/10 lg:hidden">
+          <button type="button" onClick={onClose} aria-label="Close menu" className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden">
             <X className="size-5" />
           </button>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           {ADMIN_NAV.map((group, gi) => (
             <div key={group.label} className={gi ? "mt-5" : undefined}>
-              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.09em] text-white/40 uppercase">{group.label}</p>
+              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.09em] text-muted-foreground/80 uppercase">{group.label}</p>
               <ul className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
                   const active = current?.href === item.href;
@@ -128,12 +128,12 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
                         href={item.href}
                         onClick={onClose}
                         aria-current={active ? "page" : undefined}
-                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2", active ? "bg-white/12 text-white" : "hover:bg-white/6 hover:text-white")}
+                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
                       >
-                        <item.icon className={cn("size-4", active && "text-[#c9f27a]")} />
+                        <item.icon className="size-4" />
                         <span className="flex-1">{item.label}</span>
                         {item.href === "/admin/support" && openTickets > 0 && (
-                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#c9f27a] px-1 text-[10px] font-bold text-[#10211c]">{openTickets}</span>
+                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{openTickets}</span>
                         )}
                       </Link>
                     </li>
@@ -143,8 +143,8 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
             </div>
           ))}
         </nav>
-        <div className="shrink-0 border-t border-white/10 p-3">
-          <Link href="/dashboard" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/60 hover:bg-white/6 hover:text-white">
+        <div className="shrink-0 border-t border-border p-3">
+          <Link href="/dashboard" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
             <BarChart3 className="size-3.5" />
             Open the business app
           </Link>
