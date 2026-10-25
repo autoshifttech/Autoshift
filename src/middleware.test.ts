@@ -156,13 +156,6 @@ describe("middleware — Supabase not configured yet", () => {
     expect(new URL(res.headers.get("location")!).pathname).toBe("/login");
   });
 
-  it("opens app routes in demo mode", async () => {
-    const req = new NextRequest("https://app.test/inbox", { headers: { cookie: "autoshift_demo=1" } });
-    const res = await middleware(req);
-    expect(res.headers.get("location")).toBeNull();
-    expect(res.status).toBe(200);
-  });
-
   it("answers app APIs with 503 but leaves the webhook alone", async () => {
     expect((await middleware(new NextRequest("https://app.test/api/whatsapp/send"))).status).toBe(503);
     expect((await middleware(new NextRequest("https://app.test/api/whatsapp/webhook"))).status).toBe(200);

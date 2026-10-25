@@ -11,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { setDemoCookie } from "@/lib/demo/cookie";
 import type { User } from "@supabase/supabase-js";
 import { DEFAULT_CURRENCY } from "@/lib/currency";
 import {
@@ -384,8 +383,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    // Leaving the demo workspace (no-op when demo mode is off).
-    setDemoCookie(false);
     setUser(null);
     setProfile(null);
     setAccount(null);

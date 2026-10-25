@@ -3048,10 +3048,6 @@
   },
   "Setup": {
     "notConfiguredTitle": "Sign-in isn’t connected yet",
-    "notConfiguredDesc": "This deployment has no Supabase project, so accounts can’t be created or used. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your hosting settings and redeploy.",
-    "demoButton": "View demo",
-    "demoHint": "Explore the CRM with a sample business. Nothing is saved.",
-    "demoBanner": "You’re viewing a demo workspace with sample data. Changes aren’t saved.",
-    "demoExit": "Exit demo"
+    "notConfiguredDesc": "This deployment has no Supabase project, so accounts can’t be created or used. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your hosting settings and redeploy."
   }
 }
