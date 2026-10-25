@@ -191,7 +191,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex"
+      className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 ring-1 ring-white/[0.06] shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex"
     >
       <Link href="/dashboard" aria-label={t("title")} className="mb-3 shrink-0">
         <LogoMark className="size-9" />

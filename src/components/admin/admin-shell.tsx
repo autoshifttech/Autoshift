@@ -157,7 +157,7 @@ function AdminRail() {
   const [moreOpen, setMoreOpen] = useState(false);
   const inMore = !!current && !RAIL_HREFS.includes(current.href) && current.href !== "/admin/settings";
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex">
+    <aside aria-label="Admin navigation" className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 ring-1 ring-white/[0.06] shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex">
       <Link href="/admin" aria-label="AutoShift admin" className="mb-3 shrink-0">
         <LogoMark className="size-9" />
       </Link>
