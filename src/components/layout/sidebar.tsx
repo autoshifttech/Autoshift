@@ -24,7 +24,6 @@ import {
   UserCog,
   Users,
   UsersRound,
-  Workflow,
   X,
   Zap,
 } from "lucide-react";
@@ -100,7 +99,8 @@ const navItems: NavItem[] = [
   { href: "/pipelines", labelKey: "pipelines", icon: GitBranch },
   { href: "/broadcasts", labelKey: "broadcasts", icon: Radio },
   { href: "/automations", labelKey: "automations", icon: Zap },
-  { href: "/flows", labelKey: "flows", icon: Workflow, beta: true },
+  // Flows (beta) is hidden from the menu while Automations and n8n cover
+  // automation; the /flows pages still work for anyone with a link.
   { href: "/agents", labelKey: "aiAgents", icon: Bot },
 ];
 

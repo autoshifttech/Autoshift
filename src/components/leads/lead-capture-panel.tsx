@@ -133,15 +133,15 @@ function RecentLeads() {
       <div className="divide-y divide-border">
         {scored.map(({ lead, score, temp }) => (
           <div key={lead.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm">
-            <span className="w-36 font-medium text-foreground">{lead.name}</span>
+            <span className="font-medium text-foreground sm:w-36">{lead.name}</span>
             <TempChip temp={temp} score={score} />
-            <span className="min-w-0 flex-1 truncate text-muted-foreground">
+            <span className="order-last min-w-0 basis-full truncate text-muted-foreground sm:order-none sm:flex-1 sm:basis-auto">
               {s.questions
                 .filter((q) => q.id !== "name" && lead.answers[q.id])
                 .map((q) => `${q.saveAs}: ${lead.answers[q.id]}`)
                 .join(" · ") || t("noAnswers")}
             </span>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground sm:ml-0">
               {lead.handedOffTo ? (
                 <>
                   <UserCheck className="size-3.5 text-primary" />

@@ -12,7 +12,7 @@ import { useSetup } from "@/lib/workspace/setup";
 import { WEEKDAYS, bookingStore, defaultHours, isoDate, useBookingState, type WeeklyHours } from "@/lib/booking/model";
 import { useDateLabel } from "./booking-ui";
 
-const timeInput = "h-8 w-[6.5rem] rounded-lg border border-input bg-card px-2 text-sm text-foreground dark:bg-input/30";
+const timeInput = "h-8 w-[8rem] rounded-lg border border-input bg-card px-2 text-sm text-foreground dark:bg-input/30";
 
 function HoursEditor({ hours, onChange }: { hours: WeeklyHours; onChange: (h: WeeklyHours) => void }) {
   const t = useTranslations("Bookings");
