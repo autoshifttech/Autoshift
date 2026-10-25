@@ -3057,7 +3057,11 @@
   },
   "Setup": {
     "notConfiguredTitle": "아직 로그인이 연결되지 않았습니다",
-    "notConfiguredDesc": "이 배포에는 Supabase 프로젝트가 없어 계정을 만들거나 사용할 수 없습니다. 호스팅 설정에 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 추가한 뒤 다시 배포하세요."
+    "notConfiguredDesc": "이 배포에는 Supabase 프로젝트가 없어 계정을 만들거나 사용할 수 없습니다. 호스팅 설정에 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 추가한 뒤 다시 배포하세요.",
+    "demoButton": "데모 보기",
+    "demoHint": "샘플 비즈니스로 CRM을 둘러보세요. 아무것도 저장되지 않습니다.",
+    "demoBanner": "샘플 데이터가 있는 데모 워크스페이스를 보고 있습니다. 변경 사항은 저장되지 않습니다.",
+    "demoExit": "데모 종료"
   },
   "Onboarding": {
     "skipForNow": "나중에 하기",

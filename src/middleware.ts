@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
+import { DEMO_COOKIE } from '@/lib/demo/cookie'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
@@ -9,9 +10,11 @@ const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pip
 export async function middleware(request: NextRequest) {
   // No Supabase project yet: public pages work, the app sends people to
   // /login (which explains sign-in isn't connected), app APIs answer 503.
+  // "View demo" sets a cookie that opens the app on sample data instead.
   if (!isSupabaseConfigured()) {
     const path = request.nextUrl.pathname
-    if (PROTECTED_PATHS.some((p) => path.startsWith(p))) {
+    const demo = request.cookies.get(DEMO_COOKIE)?.value === '1'
+    if (!demo && PROTECTED_PATHS.some((p) => path.startsWith(p))) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.search = ''

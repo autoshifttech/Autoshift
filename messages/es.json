@@ -3057,7 +3057,11 @@
   },
   "Setup": {
     "notConfiguredTitle": "El inicio de sesión aún no está conectado",
-    "notConfiguredDesc": "Esta implementación no tiene un proyecto de Supabase, así que no se pueden crear ni usar cuentas. Añade NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en la configuración del hosting y vuelve a implementar."
+    "notConfiguredDesc": "Esta implementación no tiene un proyecto de Supabase, así que no se pueden crear ni usar cuentas. Añade NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en la configuración del hosting y vuelve a implementar.",
+    "demoButton": "Ver demo",
+    "demoHint": "Explora el CRM con un negocio de ejemplo. No se guarda nada.",
+    "demoBanner": "Estás viendo un espacio de demostración con datos de ejemplo. Los cambios no se guardan.",
+    "demoExit": "Salir de la demo"
   },
   "Onboarding": {
     "skipForNow": "Omitir por ahora",
