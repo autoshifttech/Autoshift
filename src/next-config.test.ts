@@ -33,3 +33,23 @@ describe("next.config Cache-Control", () => {
     },
   );
 });
+
+async function headerFor(pathname: string, key: string) {
+  const rules = (await nextConfig.headers?.()) ?? [];
+  return rules
+    .filter((rule) => getPathMatch(rule.source, { strict: true })(pathname))
+    .flatMap((rule) => rule.headers)
+    .filter((header) => header.key.toLowerCase() === key.toLowerCase())
+    .map((header) => header.value)
+    .at(-1);
+}
+
+describe("next.config framing", () => {
+  it("lets only our own pages frame the website editor", async () => {
+    expect(await headerFor("/site/index.html", "X-Frame-Options")).toBe("SAMEORIGIN");
+  });
+
+  it.each(["/dashboard", "/admin", "/login", "/inbox/123"])("keeps %s unframeable", async (pathname) => {
+    expect(await headerFor(pathname, "X-Frame-Options")).toBe("DENY");
+  });
+});

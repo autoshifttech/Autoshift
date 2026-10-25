@@ -37,35 +37,40 @@ const SECURITY_HEADERS = [
   },
   {
     key: "Content-Security-Policy-Report-Only",
-    value: [
-      "default-src 'self'",
-      // Next.js needs 'unsafe-inline' for its inline hydration script
-      // and 'unsafe-eval' in dev + some production optimisations.
-      // Nonce-based CSP is a later project.
-      // googletagmanager: optional analytics on the public site
-      // (public/site/index.html).
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
-      // Tailwind + inline style attributes on lots of components.
-      // Google Fonts stylesheet used by the public site.
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      // Supabase public-bucket avatars, contact avatars (arbitrary
-      // https URLs paste-able from the UI), OG images, data URLs for
-      // tiny inline assets.
-      "img-src 'self' data: blob: https:",
-      // Outbound media previews (blob: from MediaRecorder + file picker)
-      // and Supabase public-bucket audio/video the inbox renders.
-      "media-src 'self' blob: https://*.supabase.co",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      // Supabase REST + realtime (WSS). All Meta API calls happen
-      // server-side, so graph.facebook.com does not belong here.
-      // Formspree receives the public site's contact form.
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; "),
+    value: cspReportOnly("'none'"),
   },
 ] as const;
+
+/** Report-only CSP; `frameAncestors` says who may put the page in a frame. */
+function cspReportOnly(frameAncestors: string) {
+  return [
+    "default-src 'self'",
+    // Next.js needs 'unsafe-inline' for its inline hydration script
+    // and 'unsafe-eval' in dev + some production optimisations.
+    // Nonce-based CSP is a later project.
+    // googletagmanager: optional analytics on the public site
+    // (public/site/index.html).
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
+    // Tailwind + inline style attributes on lots of components.
+    // Google Fonts stylesheet used by the public site.
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    // Supabase public-bucket avatars, contact avatars (arbitrary
+    // https URLs paste-able from the UI), OG images, data URLs for
+    // tiny inline assets.
+    "img-src 'self' data: blob: https:",
+    // Outbound media previews (blob: from MediaRecorder + file picker)
+    // and Supabase public-bucket audio/video the inbox renders.
+    "media-src 'self' blob: https://*.supabase.co",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    // Supabase REST + realtime (WSS). All Meta API calls happen
+    // server-side, so graph.facebook.com does not belong here.
+    // Formspree receives the public site's contact form.
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com",
+    `frame-ancestors ${frameAncestors}`,
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
 
 const APP_LOCALE = ["en", "pt", "es", "ko"].includes(process.env.NEXT_PUBLIC_APP_LOCALE ?? "")
   ? (process.env.NEXT_PUBLIC_APP_LOCALE as string)
@@ -173,6 +178,16 @@ const nextConfig: NextConfig = {
         // policy don't hurt).
         source: "/:path*",
         headers: [...SECURITY_HEADERS],
+      },
+      {
+        // The website editor (public/site) opens inside the platform
+        // admin panel at /admin/website, so this one file may be framed
+        // by our own pages. Comes last so it overrides DENY above.
+        source: "/site/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy-Report-Only", value: cspReportOnly("'self'") },
+        ],
       },
     ];
   },

@@ -11,6 +11,7 @@ import {
   Building2,
   CreditCard,
   FileClock,
+  Globe,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
@@ -143,7 +144,23 @@ function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void })
             </div>
           ))}
         </nav>
-        <div className="shrink-0 border-t border-border p-3">
+        <div className="shrink-0 space-y-1 border-t border-border p-3">
+          {/* The public website has its own editor; it gets a button of its own. */}
+          <Link
+            href="/admin/website"
+            onClick={onClose}
+            aria-current={pathname.startsWith("/admin/website") ? "page" : undefined}
+            className={cn(
+              "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+              pathname.startsWith("/admin/website") ? "border-primary bg-primary text-primary-foreground" : "border-primary/30 bg-primary/5 text-primary hover:bg-primary/10",
+            )}
+          >
+            <Globe className="size-4" />
+            <span className="flex-1">
+              Website admin
+              <span className={cn("block text-[11px] font-normal", pathname.startsWith("/admin/website") ? "text-primary-foreground/80" : "text-muted-foreground")}>Edit the public website</span>
+            </span>
+          </Link>
           <Link href="/dashboard" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
             <BarChart3 className="size-3.5" />
             Open the business app
@@ -293,7 +310,8 @@ function AdminMenu() {
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const title = activeItem(pathname)?.label ?? "Admin";
+  const website = pathname.startsWith("/admin/website");
+  const title = website ? "Website admin" : (activeItem(pathname)?.label ?? "Admin");
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AdminSidebar open={open} onClose={() => setOpen(false)} />
@@ -312,9 +330,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <AdminMenu />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="mx-auto max-w-[1400px] space-y-6">{children}</div>
-        </main>
+        {website ? (
+          // The website editor fills the whole area.
+          <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+        ) : (
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="mx-auto max-w-[1400px] space-y-6">{children}</div>
+          </main>
+        )}
       </div>
     </div>
   );
