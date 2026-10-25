@@ -5,7 +5,7 @@ import { DEMO_COOKIE } from '@/lib/demo/cookie'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
-const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips']
+const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files']
 
 export async function middleware(request: NextRequest) {
   // No Supabase project yet: public pages work, the app sends people to

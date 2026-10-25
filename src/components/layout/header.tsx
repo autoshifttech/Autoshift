@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { CreditsBadge } from "@/components/wallet/credits-badge";
+import { SearchButton } from "@/components/layout/command-palette";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "dashboard",
@@ -34,6 +35,8 @@ const pageTitles: Record<string, string> = {
   "/leads": "leads",
   "/segments": "segments",
   "/drips": "drips",
+  "/insights": "insights",
+  "/files": "files",
   "/ai-tools": "aiTools",
   "/templates": "templates",
   "/settings": "settings",
@@ -84,6 +87,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
+        <SearchButton />
         <CreditsBadge />
         <ModeToggle />
 

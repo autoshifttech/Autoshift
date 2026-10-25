@@ -9,11 +9,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 import { useUnreadNotifications } from "@/hooks/use-unread-notifications";
 import {
+  BarChart3,
   Bell,
   Bot,
   CalendarDays,
   FileText,
   Filter,
+  FolderOpen,
   Crown,
   GitBranch,
   LayoutDashboard,
@@ -99,13 +101,14 @@ interface NavItem {
 // Grouped like the reference layout: day-to-day work, AI, outreach, account.
 // Flows (beta) is hidden from the menu while Automations and n8n cover
 // automation; the /flows pages still work for anyone with a link.
-const navGroups: { labelKey: string; items: NavItem[] }[] = [
+export const navGroups: { labelKey: string; items: NavItem[] }[] = [
   {
     labelKey: "groupWorkspace",
     items: [
       { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
       { href: "/inbox", labelKey: "inbox", icon: MessageSquare },
       { href: "/leads", labelKey: "leads", icon: Target },
+      { href: "/insights", labelKey: "insights", icon: BarChart3 },
       { href: "/notifications", labelKey: "notifications", icon: Bell },
       { href: "/contacts", labelKey: "contacts", icon: Users },
       { href: "/bookings", labelKey: "bookings", icon: CalendarDays },
@@ -127,6 +130,7 @@ const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/segments", labelKey: "segments", icon: Filter },
       { href: "/automations", labelKey: "automations", icon: Zap },
       { href: "/templates", labelKey: "templates", icon: FileText },
+      { href: "/files", labelKey: "files", icon: FolderOpen },
     ],
   },
   {
