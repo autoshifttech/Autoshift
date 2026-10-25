@@ -34,6 +34,7 @@ const pageTitles: Record<string, string> = {
   "/wallet": "wallet",
   "/leads": "leads",
   "/segments": "segments",
+  "/opt-ins": "optIns",
   "/drips": "drips",
   "/insights": "insights",
   "/files": "files",

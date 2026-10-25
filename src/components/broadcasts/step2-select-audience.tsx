@@ -17,8 +17,11 @@ import {
   ArrowRight,
   ArrowLeft,
   X,
+  ShieldCheck,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { excludedPhones, useConsent } from '@/lib/consent/model';
 import { NativeSelect } from '@/components/ui/native-select'
 
 type AudienceType = 'all' | 'tags' | 'custom_field' | 'csv';
@@ -52,6 +55,8 @@ export function Step2SelectAudience({
   onBack,
 }: Step2Props) {
   const t = useTranslations('Broadcasts.wizard');
+  const consent = useConsent();
+  const skipped = excludedPhones(consent).size;
 
   const OPERATOR_OPTIONS = useMemo<{ value: CustomFieldOperator; label: string }[]>(() => [
     { value: 'is', label: t('selectAudience.operatorIs') },
@@ -480,6 +485,16 @@ export function Step2SelectAudience({
         ) : (
           <p className="text-xs text-muted-foreground">
             {t('selectAudience.selectTypeForEstimate')}
+          </p>
+        )}
+        {/* Opted-out and blocked numbers never get marketing. */}
+        {skipped > 0 && (
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            {t('selectAudience.optOutSkipped', { count: skipped })}
+            <Link href="/opt-ins" className="font-medium text-primary hover:underline">
+              {t('selectAudience.manageOptOuts')}
+            </Link>
           </p>
         )}
       </div>

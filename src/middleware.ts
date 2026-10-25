@@ -6,7 +6,7 @@ import { ADMIN_COOKIE } from '@/lib/admin/session'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
-const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files']
+const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files', '/opt-ins']
 
 export async function middleware(request: NextRequest) {
   // Platform admin panel (design preview): every /admin page but the
