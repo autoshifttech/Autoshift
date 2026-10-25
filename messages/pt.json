@@ -56,7 +56,9 @@
     "insights": "Análises",
     "files": "Arquivos",
     "optIns": "Opt-ins e bloqueios",
-    "support": "Ajuda e suporte"
+    "support": "Ajuda e suporte",
+    "more": "Mais",
+    "morePages": "Todas as páginas"
   },
   "Header": {
     "dashboard": "Painel",

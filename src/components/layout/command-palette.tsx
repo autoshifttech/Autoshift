@@ -147,11 +147,11 @@ export function SearchButton() {
     <button
       type="button"
       onClick={openPalette}
-      className="hidden h-8 items-center gap-2 rounded-full border border-border bg-card pr-1.5 pl-3 text-sm text-muted-foreground transition-colors hover:bg-muted md:inline-flex"
+      className="hidden h-10 items-center gap-2 rounded-xl border border-border bg-card pr-2 pl-3 text-sm text-muted-foreground shadow-[var(--shadow-card)] transition-colors hover:text-foreground md:inline-flex"
     >
       <Search className="size-3.5" />
-      <span className="w-28 text-left lg:w-40">{t("button")}</span>
-      <kbd className="rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
+      <span className="w-24 text-left lg:w-36">{t("button")}</span>
+      <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[10px]">Ctrl K</kbd>
     </button>
   );
 }

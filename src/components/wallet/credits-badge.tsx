@@ -19,10 +19,10 @@ export function CreditsBadge() {
       href="/wallet"
       aria-label={t("badgeLabel", { amount: formatMoney(balance, locale) })}
       className={cn(
-        "hidden items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:inline-flex",
+        "hidden h-10 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold shadow-[var(--shadow-card)] transition-colors sm:inline-flex",
         low
           ? "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
-          : "border-border bg-card text-foreground hover:bg-muted",
+          : "border-border bg-card text-foreground hover:bg-card-2",
       )}
     >
       <Wallet className={cn("size-3.5", low ? "" : "text-primary")} />

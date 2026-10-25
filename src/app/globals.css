@@ -94,12 +94,12 @@
 :root,
 html[data-mode="dark"] {
   /* AutoShift dark: the site's ink (#1A1D1B) as the ground. */
-  --background: #141715;
+  --background: #0f1311;
   --foreground: #f4f2ed;
-  --card: #1c201e;
-  --card-2: #222724;
+  --card: #171c19;
+  --card-2: #1d231f;
   --card-foreground: #f4f2ed;
-  --popover: #1c201e;
+  --popover: #1b201d;
   --popover-foreground: #f4f2ed;
   --secondary: #262b28;
   --secondary-foreground: #f4f2ed;
@@ -108,14 +108,18 @@ html[data-mode="dark"] {
   --accent: #262b28;
   --accent-foreground: #f4f2ed;
   --destructive: #e5675c;
-  --border: #2f3531;
-  --input: #2f3531;
+  --border: #262d29;
+  --input: #323a36;
   --chart-2: #8fb3e8;
   --chart-3: #d9a3e6;
   --chart-4: #e8c46a;
   --chart-5: #f0a878;
   --radius: 0.875rem;
-  --shadow-card: 0 2px 12px rgb(0 0 0 / 0.25);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 28px -18px rgb(0 0 0 / 0.7);
+  /* New layout: the icon rail and the dark chart card. */
+  --rail: #0a0d0c;
+  --ink: #0b100e;
+  --canvas-glow: radial-gradient(1200px 600px at 80% -10%, rgb(95 191 159 / 0.07), transparent 60%);
   --sidebar: #181b19;
   --sidebar-foreground: #f4f2ed;
   --sidebar-accent: #262b28;
@@ -135,12 +139,12 @@ html[data-mode="dark"] {
 
 html[data-mode="light"] {
   /* AutoShift light: warm cream ground, white rounded cards, soft lines. */
-  --background: #faf8f4;
+  --background: #f4efe7;
   --foreground: #1a1d1b;
-  --card: #ffffff;
-  --card-2: #f6f3ed;
+  --card: #fffdf9;
+  --card-2: #f7f3ed;
   --card-foreground: #1a1d1b;
-  --popover: #ffffff;
+  --popover: #fffdf9;
   --popover-foreground: #1a1d1b;
   --secondary: #f1ede4;
   --secondary-foreground: #1a1d1b;
@@ -149,15 +153,18 @@ html[data-mode="light"] {
   --accent: #efebe2;
   --accent-foreground: #1a1d1b;
   --destructive: #b42318;
-  --border: #e7e3da;
-  --input: #e7e3da;
+  --border: #ece5db;
+  --input: #ddd5c9;
   /* Pastel-tone inks from the site (sky, lilac, butter, peach). */
   --chart-2: #24508f;
   --chart-3: #6a2e80;
   --chart-4: #7a5a0e;
   --chart-5: #9a4a14;
   --radius: 0.875rem;
-  --shadow-card: 0 2px 12px rgb(26 29 27 / 0.05);
+  --shadow-card: 0 1px 2px rgb(60 40 20 / 0.04), 0 10px 28px -18px rgb(60 40 20 / 0.25);
+  --rail: #1c2320;
+  --ink: #17201d;
+  --canvas-glow: radial-gradient(1200px 600px at 80% -10%, #fbf3ea, transparent 60%), radial-gradient(900px 500px at -10% 0%, #f0f4ef, transparent 60%);
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1d1b;
   --sidebar-accent: #f4f1ea;
@@ -190,6 +197,7 @@ html[data-theme="autoshift"] {
   --sidebar-primary: #1e4c41;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-ring: #1e4c41;
+  --hero: linear-gradient(165deg, #2f7a66 0%, #1e4c41 55%, #173c33 100%);
 }
 
 /* The deep green disappears on a dark ground; lift it to the site's mint. */
@@ -204,6 +212,7 @@ html[data-mode="dark"][data-theme="autoshift"] {
   --sidebar-primary: #5fbf9f;
   --sidebar-primary-foreground: #0f1f1a;
   --sidebar-ring: #5fbf9f;
+  --hero: linear-gradient(165deg, #2f7a66 0%, #1e4c41 60%, #163a31 100%);
 }
 
 html[data-theme="violet"] {
@@ -273,6 +282,73 @@ html[data-theme="rose"] {
   --sidebar-primary: oklch(0.645 0.22 16);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-ring: oklch(0.645 0.22 16);
+}
+
+/* Accents without their own hero colour build one from --primary. */
+html:not([data-theme="autoshift"]) {
+  --hero: linear-gradient(165deg, color-mix(in oklab, var(--primary) 80%, white) 0%, var(--primary) 55%, color-mix(in oklab, var(--primary) 80%, black) 100%);
+}
+
+/* ---- New layout helpers ---- */
+.app-canvas {
+  background-image: var(--canvas-glow);
+}
+/* Rail tooltip: data-tip on any rail button. */
+.rail-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translate(-4px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  border-radius: 8px;
+  background: #1a1d1b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 9px;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 60;
+}
+.rail-tip:hover::after,
+.rail-tip:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+.rail-tip:not([data-tip])::after {
+  display: none;
+}
+/* Striped fill for "planned / waiting / not yet" parts of a meter. */
+.hatch {
+  background: repeating-linear-gradient(-45deg, var(--input) 0 2px, transparent 2px 5px);
+}
+.hatch-light {
+  background: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.75) 0 3px, rgb(255 255 255 / 0.2) 3px 7px);
+}
+.bg-hero {
+  background-image: var(--hero);
+}
+@keyframes grow-y {
+  from { transform: scaleY(0); }
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+}
+.animate-grow-y {
+  transform-origin: bottom;
+  animation: grow-y 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.animate-grow-x {
+  transform-origin: left;
+  animation: grow-x 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-grow-y,
+  .animate-grow-x {
+    animation: none;
+  }
 }
 
 @layer base {

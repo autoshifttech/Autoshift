@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
@@ -16,78 +17,26 @@ import {
   FileText,
   Filter,
   FolderOpen,
-  Crown,
   GitBranch,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
   MessageSquare,
+  MoreHorizontal,
   Radio,
   Repeat,
   Settings,
-  Shield,
   ShieldCheck,
   Target,
-  User,
-  UserCog,
   Users,
-  UsersRound,
   Wallet,
   Wrench,
-  X,
   Zap,
 } from "lucide-react";
-import type { AccountRole } from "@/lib/auth/roles";
 
-// Per-role chip metadata used in the sidebar's account strip + the
-// Members tab roster. Keeping this near both consumers in a single
-// place avoids drift between the two surfaces — when a designer
-// wants to recolour "agent" rows, this is the one diff.
-const ROLE_CHIP: Record<
-  AccountRole,
-  { icon: typeof Crown; labelKey: string; className: string }
-> = {
-  owner: {
-    icon: Crown,
-    labelKey: "roleOwner",
-    // Amber: scarce, immutable, "the boss" — gets visual emphasis.
-    className:
-      "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-300",
-  },
-  admin: {
-    icon: Shield,
-    labelKey: "roleAdmin",
-    // Primary-tinted: significant but not as scarce as owner.
-    className:
-      "border-primary/40 bg-primary/10 text-primary",
-  },
-  agent: {
-    icon: UserCog,
-    labelKey: "roleAgent",
-    // Neutral slate: the operational default.
-    className:
-      "border-border bg-muted text-foreground",
-  },
-  viewer: {
-    icon: User,
-    labelKey: "roleViewer",
-    // Muted slate: read-only role; visually quieter than agent.
-    className:
-      "border-border bg-card text-muted-foreground",
-  },
-};
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ModeToggle } from "@/components/layout/mode-toggle";
 
 interface NavItem {
   href: string;
@@ -146,276 +95,187 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
   },
 ];
 
-interface SidebarProps {
-  /** Controlled on mobile by the Header's hamburger button. Ignored on lg+. */
-  open?: boolean;
-  onClose?: () => void;
+/** Shown as icons on the desktop rail; everything else sits under "More". */
+const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings", "/contacts", "/automations", "/insights", "/leads", "/agents", "/wallet"];
+/** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
+const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings"];
+
+const allItems = navGroups.flatMap((g) => g.items);
+const itemFor = (href: string) => allItems.find((i) => i.href === href)!;
+
+function isActiveHref(pathname: string, href: string) {
+  return pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
 }
 
-import { useTranslations } from "next-intl";
+export interface NavCounts {
+  totalUnread: number;
+  unreadNotifications: number;
+}
 
-export function Sidebar({ open = false, onClose }: SidebarProps) {
+/** Subscribes once; the shell passes the counts to both navs. */
+export function useNavCounts(): NavCounts {
+  return { totalUnread: useTotalUnread(), unreadNotifications: useUnreadNotifications() };
+}
+
+function NavBadges({ href, active, counts }: { href: string; active: boolean; counts: NavCounts }) {
   const t = useTranslations("Sidebar");
-  const pathname = usePathname();
-  const { profile, profileLoading, account, accountRole, signOut } = useAuth();
-  const totalUnread = useTotalUnread();
-  const unreadNotifications = useUnreadNotifications();
-  // Only surface the account-name strip when it actually carries
-  // information. A solo user's personal account is named after them
-  // (the 017 signup trigger seeds it from `full_name`), so showing it
-  // here would just duplicate the user name in the footer below. Once
-  // the account is renamed or the user joins a shared account, the
-  // name diverges and the strip becomes meaningful — that's the signal
-  // we gate on. Wait for the profile fetch to settle first, otherwise
-  // the strip flashes in once the row resolves (a layout jump).
-  const showAccountStrip =
-    !profileLoading &&
-    !!account?.name &&
-    account.name !== profile?.full_name;
+  const { totalUnread, unreadNotifications } = counts;
+  if (href === "/inbox" && totalUnread > 0 && !active) {
+    return (
+      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white">
+        {totalUnread > 9 ? "9+" : totalUnread}
+      </span>
+    );
+  }
+  if (href === "/notifications" && unreadNotifications > 0) {
+    return (
+      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+        {unreadNotifications > 9 ? "9+" : unreadNotifications}
+      </span>
+    );
+  }
+  return null;
+}
 
-  // Close the drawer when route changes — users opened it to navigate,
-  // so once they pick a destination the drawer should get out of the way.
-  useEffect(() => {
-    onClose?.();
-    // Only pathname drives this — onClose identity doesn't need to re-run it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
-
-  // Lock body scroll and allow Escape to close while the drawer is open on
-  // mobile. No-ops on desktop because the sidebar isn't positioned there.
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose?.();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
-
+/** Every page not on the rail, grouped as in the old sidebar. */
+function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; exclude: string[]; onPick?: () => void; counts: NavCounts }) {
+  const t = useTranslations("Sidebar");
   return (
     <>
-      {/* Backdrop — only exists on mobile and only when open. Clicking
-          it closes the drawer. Hidden from lg+ since the sidebar is
-          part of the main flex row there. */}
-      <button
-        type="button"
-        aria-label={t("closeMenu")}
-        onClick={onClose}
-        className={cn(
-          "fixed inset-0 z-30 bg-background/70 backdrop-blur-sm transition-opacity lg:hidden",
-          open
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0",
-        )}
-      />
-
-      <aside
-        className={cn(
-          // Mobile: fixed drawer that slides in from the left.
-          "fixed inset-y-0 left-0 z-40 flex h-full w-64 flex-col border-r border-border bg-card",
-          "transition-transform duration-200 ease-out will-change-transform",
-          open ? "translate-x-0" : "-translate-x-full",
-          // Desktop: static, always visible — reset all the mobile framing.
-          "lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none",
-        )}
-        aria-label={t("primaryNav")}
-      >
-        {/* Logo row. On mobile we put a close button here; on desktop the
-            close button is hidden since the sidebar is always-visible. */}
-        <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <LogoMark className="size-8" />
-            <span className="text-base font-extrabold tracking-tight text-foreground">
-              {t("title")}
-            </span>
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("closeMenu")}
-            className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Main navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {navGroups.map((group, gi) => (
-            <div key={group.labelKey} className={gi > 0 ? "mt-5" : undefined}>
-              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.09em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</p>
-              <ul className="flex flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== "/dashboard" && pathname.startsWith(item.href));
-
-                  const showUnreadDot =
-                    item.href === "/inbox" && totalUnread > 0 && !isActive;
-
-                  // Unlike the inbox dot, the notifications count stays visible
-                  // even while the page is active — it reflects unread state
-                  // (cleared by marking notifications read), not "currently
-                  // viewing this section".
-                  const showNotificationBadge =
-                    item.href === "/notifications" && unreadNotifications > 0;
-
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          // Taller on mobile so fingers can hit the row reliably (≥44px).
-                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2",
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span className="flex-1">{t(item.labelKey as string)}</span>
-                        {item.beta && (
-                          <span
-                            aria-label={t("beta")}
-                            className="rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300"
-                          >
-                            {t("beta")}
-                          </span>
-                        )}
-                        {showUnreadDot && (
-                          <span
-                            aria-label={t("unreadConversations", { count: totalUnread })}
-                            className="relative flex h-2 w-2"
-                          >
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-                          </span>
-                        )}
-                        {showNotificationBadge && (
-                          <span
-                            aria-label={t("unreadNotifications", { count: unreadNotifications })}
-                            className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"
-                          >
-                            {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-
-        {/* User section */}
-        <div className="shrink-0 border-t border-border p-3">
-          {/* Account name display — surfaced only when the account
-              name differs from the user's own name (see
-              `showAccountStrip`). For a default solo account the two
-              match, so we hide it to avoid duplicating the user name
-              below; for renamed or shared accounts it tells the user
-              which account they're acting in. */}
-          {showAccountStrip && account?.name ? (
-            <div className="mb-2 flex items-center gap-2 px-3 text-xs text-muted-foreground">
-              <UsersRound className="size-3.5 shrink-0" />
-              {/* `title=` exposes the full name on hover when it
-                  gets truncated (long account names + narrow
-                  sidebars). Cheap a11y win. */}
-              <span className="truncate" title={account.name}>
-                {account.name}
-              </span>
-              {accountRole ? (
-                // Always render the chip — owners used to be
-                // invisible here, which made them indistinguishable
-                // from admins at a glance. Now everyone sees their
-                // role (with a colour cue) regardless of tier.
-                (() => {
-                  const meta = ROLE_CHIP[accountRole];
-                  const Icon = meta.icon;
-                  return (
-                    <span
-                      className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${meta.className}`}
-                    >
-                      <Icon className="size-3" />
-                      {t(meta.labelKey as string)}
-                    </span>
-                  );
-                })()
-              ) : null}
-            </div>
-          ) : null}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus:outline-none data-popup-open:bg-muted/60">
-              <Avatar className="size-8 shrink-0">
-                {profile?.avatar_url ? (
-                  <AvatarImage
-                    src={profile.avatar_url}
-                    alt={profile.full_name ?? t("defaultAvatar")}
-                  />
-                ) : null}
-                <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
-                  {profile?.full_name?.charAt(0)?.toUpperCase() ??
-                    profile?.email?.charAt(0)?.toUpperCase() ??
-                    "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {profile?.full_name ?? t("defaultUser")}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {profile?.email ?? ""}
-                </p>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              side="top"
-              sideOffset={6}
-              className="min-w-56 bg-popover text-popover-foreground ring-border"
-            >
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href="/settings?tab=profile"
-                    onClick={onClose}
-                    className="text-popover-foreground focus:bg-accent focus:text-accent-foreground"
-                  />
-                }
-              >
-                <User className="size-4" />
-                {t("menuProfile")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href="/settings?tab=whatsapp"
-                    onClick={onClose}
-                    className="text-popover-foreground focus:bg-accent focus:text-accent-foreground"
-                  />
-                }
-              >
-                <Settings className="size-4" />
-                {t("menuSettings")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem
-                onClick={signOut}
-                className="text-popover-foreground focus:bg-accent focus:text-accent-foreground"
-              >
-                <LogOut className="size-4" />
-                {t("menuSignOut")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </aside>
+      {navGroups.map((group) => {
+        const items = group.items.filter((i) => !exclude.includes(i.href));
+        if (!items.length) return null;
+        return (
+          <div key={group.labelKey} className="pb-1">
+            <p className="px-2.5 pt-2.5 pb-1 text-[10px] font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</p>
+            {items.map((item) => {
+              const active = isActiveHref(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onPick}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
+                    active ? "bg-card-2 font-semibold text-foreground" : "text-muted-foreground hover:bg-card-2 hover:text-foreground",
+                  )}
+                >
+                  <item.icon className="size-4" />
+                  <span className="flex-1">{t(item.labelKey)}</span>
+                  <NavBadges href={item.href} active={active} counts={counts} />
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })}
     </>
+  );
+}
+
+const railButton =
+  "rail-tip relative flex size-10 shrink-0 items-center justify-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none";
+const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_0/0.6)] hover:bg-[#fffdf9] hover:text-[#1a1d1b]";
+
+/**
+ * Desktop: a dark rail of icon buttons with tooltips, the rest of the
+ * pages under "More". Phones get a bottom bar instead (see MobileNav).
+ */
+export function Sidebar({ counts }: { counts: NavCounts }) {
+  const t = useTranslations("Sidebar");
+  const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const inMore = !RAIL_HREFS.some((h) => isActiveHref(pathname, h)) && !pathname.startsWith("/settings");
+
+  return (
+    <aside
+      aria-label={t("primaryNav")}
+      className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex"
+    >
+      <Link href="/dashboard" aria-label={t("title")} className="mb-3 shrink-0">
+        <LogoMark className="size-9" />
+      </Link>
+      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
+        {RAIL_HREFS.map((href) => {
+          const item = itemFor(href);
+          const active = isActiveHref(pathname, href);
+          return (
+            <Link key={href} href={href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+              <item.icon className="size-[18px]" />
+              <NavBadges href={href} active={active} counts={counts} />
+            </Link>
+          );
+        })}
+        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+          <PopoverTrigger aria-label={t("more")} data-tip={t("more")} className={cn(railButton, inMore && railActive)}>
+            <MoreHorizontal className="size-[18px]" />
+          </PopoverTrigger>
+          <PopoverContent side="right" align="start" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
+            <MorePages pathname={pathname} exclude={RAIL_HREFS} onPick={() => setMoreOpen(false)} counts={counts} />
+          </PopoverContent>
+        </Popover>
+      </nav>
+      <span className="my-1.5 h-px w-6 shrink-0 bg-white/10" />
+      <ModeToggle className={cn(railButton, "size-10 rounded-xl")} />
+      <Link href="/settings" aria-label={t("settings")} data-tip={t("settings")} aria-current={pathname.startsWith("/settings") ? "page" : undefined} className={cn(railButton, pathname.startsWith("/settings") && railActive)}>
+        <Settings className="size-[18px]" />
+      </Link>
+    </aside>
+  );
+}
+
+/** Phone bottom bar: four main pages and a "More" sheet with the rest. */
+export function MobileNav({ counts }: { counts: NavCounts }) {
+  const t = useTranslations("Sidebar");
+  const pathname = usePathname();
+  const { profile, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const inMore = !BAR_HREFS.some((h) => isActiveHref(pathname, h));
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpen(false);
+  }, [pathname]);
+
+  return (
+    <nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-[20px] bg-[var(--rail)] px-2 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
+      {BAR_HREFS.map((href) => {
+        const item = itemFor(href);
+        const active = isActiveHref(pathname, href);
+        return (
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60 transition-colors", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
+            <span className="relative">
+              <item.icon className="size-5" />
+              <NavBadges href={href} active={active} counts={counts} />
+            </span>
+            {t(item.labelKey)}
+          </Link>
+        );
+      })}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", inMore && "bg-[#fffdf9] text-[#1a1d1b]")}>
+          <MoreHorizontal className="size-5" />
+          {t("more")}
+        </SheetTrigger>
+        <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
+          <SheetTitle className="px-2.5 pb-1 text-base">{t("morePages")}</SheetTitle>
+          <MorePages pathname={pathname} exclude={BAR_HREFS} onPick={() => setOpen(false)} counts={counts} />
+          <div className="mt-2 flex items-center gap-3 border-t border-border px-2.5 pt-3">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary-soft text-sm font-bold text-primary">
+              {profile?.full_name?.charAt(0)?.toUpperCase() ?? profile?.email?.charAt(0)?.toUpperCase() ?? "U"}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{profile?.full_name ?? t("defaultUser")}</p>
+              <p className="truncate text-xs text-muted-foreground">{profile?.email ?? ""}</p>
+            </div>
+            <ModeToggle className="rounded-xl border border-border" />
+            <button type="button" onClick={signOut} aria-label={t("menuSignOut")} className="flex size-10 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground">
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </nav>
   );
 }

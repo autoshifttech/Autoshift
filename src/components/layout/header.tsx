@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Menu, Settings as SettingsIcon, User } from "lucide-react";
+import { LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModeToggle } from "@/components/layout/mode-toggle";
+import { WhatsAppHealthChip } from "@/components/dashboard/whatsapp-health-chip";
 import { CreditsBadge } from "@/components/wallet/credits-badge";
 import { SearchButton } from "@/components/layout/command-palette";
 
@@ -52,15 +52,9 @@ function getPageTitleKey(pathname: string): string {
   return match ? match[1] : "dashboard";
 }
 
-interface HeaderProps {
-  /** Wired to the shell's drawer state. Used only on mobile — the
-   *  hamburger button is hidden on lg+. */
-  onOpenSidebar?: () => void;
-}
-
 import { useTranslations } from "next-intl";
 
-export function Header({ onOpenSidebar }: HeaderProps) {
+export function Header() {
   const t = useTranslations("Header");
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
@@ -72,46 +66,34 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     "U";
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-4 lg:px-6">
-      <div className="flex min-w-0 items-center gap-2">
-        {/* Hamburger — mobile only. 44×44 hit target per Apple HIG. */}
-        <button
-          type="button"
-          onClick={onOpenSidebar}
-          aria-label={t("openMenu")}
-          className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-        <h1 className="truncate text-base font-semibold text-foreground sm:text-lg">
-          {t(titleKey as string)}
-        </h1>
-      </div>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
+      <h1 className="min-w-0 truncate text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
+        {t(titleKey as string)}
+      </h1>
 
-      <div className="flex items-center gap-1 sm:gap-2">
+      <div className="flex items-center gap-2">
         <SearchButton />
+        <span className="hidden xl:inline-flex">
+          <WhatsAppHealthChip />
+        </span>
         <CreditsBadge />
-        <ModeToggle />
 
         <DropdownMenu>
         <DropdownMenuTrigger
-          className="flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-muted/70 focus:bg-muted/70 focus:outline-none data-popup-open:bg-muted/70 sm:gap-3 sm:pl-1 sm:pr-3"
+          className="flex items-center rounded-xl transition-transform focus-visible:ring-2 focus-visible:ring-ring focus:outline-none active:scale-95"
           aria-label={t("openAccountMenu")}
         >
-          <Avatar className="size-8">
+          <Avatar className="size-10 rounded-xl after:rounded-xl">
             {profile?.avatar_url ? (
               <AvatarImage
                 src={profile.avatar_url}
                 alt={profile.full_name ?? t("defaultAvatar")}
               />
             ) : null}
-            <AvatarFallback className="bg-primary/10 text-sm font-medium text-primary">
+            <AvatarFallback className="rounded-xl bg-gradient-to-br from-[#8b6fd6] to-[#6a4fc2] text-sm font-bold text-white">
               {initial}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden text-sm font-medium text-foreground sm:inline">
-            {profile?.full_name ?? t("defaultUser")}
-          </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

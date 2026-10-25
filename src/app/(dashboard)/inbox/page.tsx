@@ -566,7 +566,7 @@ function InboxPageInner() {
   const hasActiveConv = !!activeConversation;
 
   return (
-    <div className="-m-4 flex h-[calc(100vh-3.5rem)] flex-col overflow-hidden sm:-m-6">
+    <div className="flex h-[calc(100dvh-10.5rem)] min-w-0 flex-col overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)] lg:h-[calc(100dvh-6.5rem)]">
       {/* WhatsApp connection banner — in the flex column, not absolute,
           so it pushes the panels down instead of overlapping them. */}
       {whatsappConnected === false && (
