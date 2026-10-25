@@ -12,6 +12,7 @@ import {
   Pencil,
   RotateCcw,
   Upload,
+  ArrowLeft,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -473,6 +474,36 @@ export function TemplateManager() {
     );
   }
 
+  function renderEditorActions() {
+    return (
+      <>
+        <Button
+          variant="outline"
+          onClick={() => setDialogOpen(false)}
+          className="border-border text-muted-foreground hover:bg-muted"
+        >
+          {t('cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting || form.category === 'Authentication'}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              {editingId ? t('saving') : t('submitting')}
+            </>
+          ) : editingId ? (
+            t('saveResubmit')
+          ) : (
+            t('submitApproval')
+          )}
+        </Button>
+      </>
+    );
+  }
+
   const headerNeedsMedia =
     form.header_format !== 'none' && form.header_format !== 'text';
   const headerMediaKind: MediaHeaderKind | null = isMediaHeaderKind(
@@ -686,21 +717,36 @@ export function TemplateManager() {
           }
         }}
       >
-        <DialogContent className="bg-popover border-border sm:max-w-2xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-popover-foreground">
-              {editingId ? t('dialogEditTitle') : t('dialogNewTitle')}
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              {editingId
-                ? t('dialogEditDesc')
-                : t('dialogNewDesc')}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent
+          showCloseButton={false}
+          className="top-0 left-0 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none bg-background p-0 ring-0 sm:max-w-none data-open:zoom-in-100 data-closed:zoom-out-100"
+        >
+          {/* Full-screen editor: form on the left, phone preview docked right. */}
+          <header className="flex items-center gap-3 border-b border-border bg-background px-4 py-3 sm:px-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDialogOpen(false)}
+              aria-label={t('cancel')}
+              className="shrink-0"
+            >
+              <ArrowLeft className="size-5" />
+            </Button>
+            <DialogHeader className="min-w-0 flex-1 gap-0.5">
+              <DialogTitle className="truncate text-lg font-semibold text-foreground">
+                {editingId ? t('dialogEditTitle') : t('dialogNewTitle')}
+              </DialogTitle>
+              <DialogDescription className="hidden truncate text-xs text-muted-foreground md:block">
+                {editingId ? t('dialogEditDesc') : t('dialogNewDesc')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="hidden items-center gap-2 sm:flex">{renderEditorActions()}</div>
+          </header>
 
+          <div className="px-4 pt-3 lg:hidden">
           <div
             role="tablist"
-            className="flex rounded-full bg-muted p-1 lg:hidden"
+            className="flex rounded-full bg-muted p-1"
           >
             {(['edit', 'preview'] as const).map((v) => (
               <button
@@ -719,9 +765,13 @@ export function TemplateManager() {
               </button>
             ))}
           </div>
+          </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className={mobileView === 'preview' ? 'hidden lg:block' : undefined}>
+          <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_420px]">
+          <div
+            className={`min-h-0 overflow-y-auto px-4 py-5 sm:px-6 ${mobileView === 'preview' ? 'hidden lg:block' : ''}`}
+          >
+          <div className="mx-auto max-w-3xl">
           {form.category === 'Authentication' && (
             <div className="flex items-start gap-2 rounded border border-amber-700/40 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
               <AlertCircle className="size-4 mt-0.5 shrink-0" />
@@ -1125,42 +1175,23 @@ export function TemplateManager() {
             </div>
           </div>
           </div>
+          </div>
 
           <aside
-            className={`${mobileView === 'edit' ? 'hidden lg:block' : ''} lg:sticky lg:top-0 lg:self-start`}
+            className={`min-h-0 flex-col items-center justify-center overflow-y-auto border-border bg-muted/40 px-4 py-5 lg:flex lg:border-l ${mobileView === 'edit' ? 'hidden' : 'flex'}`}
           >
-            <p className="mb-3 hidden text-center text-xs font-medium tracking-wide text-muted-foreground uppercase lg:block">
-              {t('previewTitle')}
-            </p>
-            <TemplatePhonePreview template={form} businessName={businessName} />
+            <TemplatePhonePreview
+              template={form}
+              businessName={businessName}
+              className="max-w-[320px]"
+              screenClassName="h-[min(640px,calc(100dvh-12rem))] min-h-[440px]"
+            />
           </aside>
           </div>
 
-          <DialogFooter className="bg-popover border-border">
-            <Button
-              variant="outline"
-              onClick={() => setDialogOpen(false)}
-              className="border-border text-muted-foreground hover:bg-muted"
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || form.category === 'Authentication'}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  {editingId ? t('saving') : t('submitting')}
-                </>
-              ) : editingId ? (
-                t('saveResubmit')
-              ) : (
-                t('submitApproval')
-              )}
-            </Button>
-          </DialogFooter>
+          <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3 sm:hidden">
+            {renderEditorActions()}
+          </div>
         </DialogContent>
       </Dialog>
 
