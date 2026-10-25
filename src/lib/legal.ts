@@ -15,6 +15,11 @@ export const LEGAL = {
   effective: '25 October 2026',
   /** Days before a deleted workspace's data is erased for good. */
   deletionGraceDays: 30,
+  /** AutoShift's own GST registration: decides CGST + SGST vs IGST. */
+  sellerGstin: '',
+  sellerStateCode: '29',
+  /** Service code on invoices; confirm with your accountant. */
+  sac: '998315',
 } as const
 
 export const waLink = (number: string) => `https://wa.me/${number.replace(/\D/g, '')}`
