@@ -30,6 +30,7 @@ import { PipelineCard } from '@/components/dashboard/pipeline-card'
 import { ReplyQueueCard } from '@/components/dashboard/reply-queue-card'
 import { SetupChecklist } from '@/components/dashboard/setup-checklist'
 import { TeamCard } from '@/components/dashboard/team-card'
+import { WorkspaceSummary } from '@/components/dashboard/workspace-summary'
 
 const POLL_MS = 60_000
 const REALTIME_DEBOUNCE_MS = 2_000
@@ -150,6 +151,8 @@ function DashboardPageInner() {
         range={range}
         onRangeChange={handleRangeChange}
       />
+
+      <WorkspaceSummary />
 
       {data && needsSetup(data.setup) ? (
         <SetupChecklist setup={data.setup} />
