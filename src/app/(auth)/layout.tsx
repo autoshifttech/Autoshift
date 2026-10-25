@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { ViewDemoButton } from "@/components/demo/view-demo-button";
 
 // Shared metadata for auth pages (login / signup / forgot-password).
 // None of these should be indexed — they'd compete with the marketing
@@ -31,10 +32,10 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
         <>
           {/* Phones: in the flow under the logo. Larger screens: floating above the card. */}
           <div className="px-4 pt-20 sm:hidden">
-            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} />
+            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} demo={<ViewDemoButton label={t("demoButton")} hint={t("demoHint")} />} />
           </div>
           <div className="absolute inset-x-4 top-24 z-10 mx-auto hidden max-w-md sm:block">
-            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} />
+            <SetupNotice title={t("notConfiguredTitle")} desc={t("notConfiguredDesc")} demo={<ViewDemoButton label={t("demoButton")} hint={t("demoHint")} />} />
           </div>
         </>
       )}
@@ -52,7 +53,7 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   );
 }
 
-function SetupNotice({ title, desc }: { title: string; desc: string }) {
+function SetupNotice({ title, desc, demo }: { title: string; desc: string; demo: ReactNode }) {
   return (
     <div
       role="status"
@@ -60,6 +61,7 @@ function SetupNotice({ title, desc }: { title: string; desc: string }) {
     >
       <p className="font-semibold">{title}</p>
       <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">{desc}</p>
+      {demo}
     </div>
   );
 }
