@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ExternalLink, Globe, Info, Maximize2, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, ExternalLink, Globe, Info, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -32,33 +33,28 @@ export function WebsiteAdminPage() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-col gap-3 border-b border-border bg-background px-4 py-3 sm:px-6 lg:flex-row lg:items-center">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--tone-mint)] text-primary">
-            <Globe className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold tracking-tight text-foreground">Website admin</h1>
-            <p className="hidden text-xs text-muted-foreground sm:block">Edit the public AutoShift website: pages, services, pricing, blog, theme, photos, SEO and contact leads.</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.open("/", "_blank", "noopener")}>
-            <ExternalLink className="size-3.5" />
-            View live site
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.open(EDITOR_URL, "_blank", "noopener")}>
-            <Maximize2 className="size-3.5" />
-            Open full screen
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5 text-rose-600 hover:text-rose-600" onClick={() => setResetting(true)}>
-            <RotateCcw className="size-3.5" />
-            Reset
-          </Button>
-        </div>
+    <div className="flex h-dvh flex-col bg-background">
+      {/* Full screen: the platform admin's sidebar and header are left behind. */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:px-4">
+        <Link href="/admin" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium text-foreground hover:bg-muted">
+          <ArrowLeft className="size-4" />
+          <span className="hidden sm:inline">Back to admin panel</span>
+          <span className="sm:hidden">Admin</span>
+        </Link>
+        <span className="flex min-w-0 flex-1 items-center gap-2">
+          <Globe className="size-4 shrink-0 text-primary" />
+          <span className="truncate text-sm font-semibold text-foreground">Website admin</span>
+        </span>
+        <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => window.open("/", "_blank", "noopener")}>
+          <ExternalLink className="size-3.5" />
+          <span className="hidden sm:inline">View live site</span>
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-rose-600 hover:text-rose-600" onClick={() => setResetting(true)}>
+          <RotateCcw className="size-3.5" />
+          <span className="hidden sm:inline">Reset</span>
+        </Button>
       </div>
-      <p className="flex items-start gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-amber-900 sm:px-6 dark:text-amber-200">
+      <p className="flex items-start gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-1.5 text-xs text-amber-900 dark:text-amber-200">
         <Info className="mt-0.5 size-3.5 shrink-0" />
         <span>
           Design preview: Publish saves changes in this browser only<span className="hidden sm:inline">, so you see them on the site here. Once the backend is connected, Publish will update the live site for every visitor</span>.
