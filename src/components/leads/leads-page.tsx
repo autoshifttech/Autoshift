@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { BookingDialog } from "@/components/booking/booking-dialog";
+import { useDrips } from "@/lib/drips/model";
 import { cn } from "@/lib/utils";
 import {
   LEAD_SOURCES,
@@ -244,6 +245,7 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
   const t = useTranslations("LeadsPage");
   const locale = useLocale();
   const [booking, setBooking] = useState(false);
+  const drips = useDrips().filter((d) => d.status !== "draft");
   const matched = scoreBreakdown(lead.answers, settings.rules);
   const qName = (id: string) => settings.questions.find((q) => q.id === id)?.saveAs ?? id;
   return (
@@ -299,6 +301,26 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
             {t("book")}
           </Button>
         </div>
+
+        <label className="grid gap-1.5 text-sm">
+          <span className="text-xs text-muted-foreground">{t("addToDrip")}</span>
+          <NativeSelect
+            value=""
+            onChange={(e) => {
+              const drip = drips.find((d) => d.id === e.target.value);
+              if (!drip) return;
+              setLead(lead.id, {}, { at: new Date().toISOString(), kind: "note", text: t("ev_drip", { name: drip.name }) });
+              toast.success(t("addedToDrip", { name: drip.name }));
+            }}
+          >
+            <option value="">{t("chooseDrip")}</option>
+            {drips.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </label>
 
         <section>
           <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("answers")}</h3>

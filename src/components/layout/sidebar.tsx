@@ -20,6 +20,7 @@ import {
   LogOut,
   MessageSquare,
   Radio,
+  Repeat,
   Settings,
   Shield,
   Target,
@@ -122,6 +123,7 @@ const navGroups: { labelKey: string; items: NavItem[] }[] = [
     labelKey: "groupEngagement",
     items: [
       { href: "/broadcasts", labelKey: "broadcasts", icon: Radio },
+      { href: "/drips", labelKey: "drips", icon: Repeat },
       { href: "/segments", labelKey: "segments", icon: Filter },
       { href: "/automations", labelKey: "automations", icon: Zap },
       { href: "/templates", labelKey: "templates", icon: FileText },

@@ -33,6 +33,7 @@ const pageTitles: Record<string, string> = {
   "/wallet": "wallet",
   "/leads": "leads",
   "/segments": "segments",
+  "/drips": "drips",
   "/ai-tools": "aiTools",
   "/templates": "templates",
   "/settings": "settings",
