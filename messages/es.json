@@ -355,6 +355,25 @@
         "hoursOnly": "{value} h",
         "days": "{value} d {remainder} h",
         "daysOnly": "{value} d"
+      },
+      "bento": {
+        "handled": "Mensajes gestionados",
+        "live": "EN VIVO",
+        "split": "{incoming} recibidos · {outgoing} enviados",
+        "waiting": "Esperando respuesta",
+        "oldest": "La más antigua espera {wait}",
+        "allAnswered": "Todos tienen respuesta",
+        "wallet": "Monedero",
+        "balance": "saldo",
+        "topUp": "Añadir créditos",
+        "daysLeft": "≈ {days} {days, plural, =1 {día} other {días}} restantes al ritmo actual",
+        "noSpend": "Sin gasto en los últimos 14 días",
+        "whoReplied": "Quién respondió",
+        "ai": "Asistentes de IA",
+        "teammate": "Compañero",
+        "others": "Todos los demás",
+        "replies": "respuestas",
+        "noReplies": "Aún no hay respuestas en este periodo."
       }
     }
   },

@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowUpRight, Bot, MessageSquare, Sparkles, Target, Wallet } from "lucide-react";
+import { ArrowUpRight, Bot, MessageSquare, Sparkles, Target } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PLANS, TRIAL_DAYS, planPrice, trialDaysLeft, useSubscription } from "@/lib/billing/plans";
-import { balanceOf, formatMoney, spendByKind, useWallet } from "@/lib/wallet/model";
+import { formatMoney, spendByKind, useWallet } from "@/lib/wallet/model";
 import { useLeads, useLeadSettings, scoreLead, temperature } from "@/lib/leads/model";
 import { useSetup } from "@/lib/workspace/setup";
 
-/** Top of the dashboard: plan, wallet, AI spend, leads, messages and channel status at a glance. */
+/** Dashboard: plan, channel status, AI spend and leads at a glance. */
 export function WorkspaceSummary() {
   const t = useTranslations("Summary");
   const tb = useTranslations("Billing");
@@ -22,9 +22,7 @@ export function WorkspaceSummary() {
   const leadSettings = useLeadSettings();
   const setup = useSetup();
 
-  const balance = balanceOf(wallet.transactions);
   const spend = spendByKind(wallet.transactions);
-  const messages = spend.marketing.units + spend.utility.units + spend.authentication.units + spend.service.units + spend.ai.units;
   const hot = leads.filter((l) => temperature(scoreLead(l.answers, leadSettings.rules), leadSettings.thresholds) === "hot").length;
   const daysLeft = trialDaysLeft(sub);
   const trial = sub.status === "trialing";
@@ -32,11 +30,10 @@ export function WorkspaceSummary() {
   const connected = setup.whatsapp === "connected";
 
   const stats = [
-    { href: "/wallet", icon: Wallet, value: formatMoney(balance, locale), label: t("walletBalance"), low: balance < wallet.lowBalanceAlert },
+    // Wallet balance and messages handled live in the cards above.
     { href: "/wallet", icon: Bot, value: formatMoney(spend.ai.amount, locale), label: t("aiSpend") },
     { href: "/leads", icon: Target, value: String(leads.length), label: t("totalLeads", { hot }) },
-    { href: "/inbox", icon: MessageSquare, value: messages.toLocaleString(locale), label: t("messagesHandled") },
-  ];
+  ] as { href: string; icon: typeof Bot; value: string; label: string; low?: boolean }[];
 
   return (
     <div className="space-y-4">
@@ -117,7 +114,7 @@ export function WorkspaceSummary() {
         </section>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4">
         {stats.map(({ href, icon: Icon, value, label, low }) => (
           <Link
             key={label}

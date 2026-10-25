@@ -355,6 +355,25 @@
         "hoursOnly": "{value}시간",
         "days": "{value}일 {remainder}시간",
         "daysOnly": "{value}일"
+      },
+      "bento": {
+        "handled": "처리한 메시지",
+        "live": "실시간",
+        "split": "받음 {incoming} · 보냄 {outgoing}",
+        "waiting": "답장 대기 중",
+        "oldest": "가장 오래 기다린 시간 {wait}",
+        "allAnswered": "모두 답장을 받았어요",
+        "wallet": "지갑",
+        "balance": "잔액",
+        "topUp": "크레딧 추가",
+        "daysLeft": "현재 사용량 기준 약 {days}일 남음",
+        "noSpend": "최근 14일간 사용 내역 없음",
+        "whoReplied": "답장한 사람",
+        "ai": "AI 어시스턴트",
+        "teammate": "팀원",
+        "others": "그 외",
+        "replies": "답장",
+        "noReplies": "이 기간에는 아직 답장이 없어요."
       }
     }
   },

@@ -24,7 +24,7 @@ import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { AttentionRow } from '@/components/dashboard/attention-row'
 import { CampaignsCard } from '@/components/dashboard/campaigns-card'
 import { KpiRow } from '@/components/dashboard/kpi-row'
-import { MessageVolumeCard } from '@/components/dashboard/message-volume-card'
+import { OverviewBento } from '@/components/dashboard/overview-bento'
 import { OverviewHeader } from '@/components/dashboard/overview-header'
 import { PipelineCard } from '@/components/dashboard/pipeline-card'
 import { ReplyQueueCard } from '@/components/dashboard/reply-queue-card'
@@ -152,26 +152,23 @@ function DashboardPageInner() {
         onRangeChange={handleRangeChange}
       />
 
-      <WorkspaceSummary />
-
       {data && needsSetup(data.setup) ? (
-        <SetupChecklist setup={data.setup} />
+        <>
+          <WorkspaceSummary />
+          <SetupChecklist setup={data.setup} />
+        </>
       ) : (
         <>
+          <OverviewBento data={data} now={now} />
+          <WorkspaceSummary />
           <AttentionRow data={data} now={now} onlineCount={onlineCount} />
           <KpiRow data={data} currency={defaultCurrency} />
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-            <MessageVolumeCard data={data} />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <ReplyQueueCard data={data} now={now} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-            <PipelineCard data={data} currency={defaultCurrency} />
             <TeamCard data={data} now={now} />
-            <div className="lg:col-span-2 2xl:col-span-1">
-              <CampaignsCard data={data} />
-            </div>
+            <PipelineCard data={data} currency={defaultCurrency} />
+            <CampaignsCard data={data} />
           </div>
 
           <ActivityFeed items={activity} loading={activityLoading} />

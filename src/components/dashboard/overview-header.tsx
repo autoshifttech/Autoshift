@@ -21,7 +21,6 @@ import {
 } from '@/lib/dashboard/overview'
 import { Skeleton } from './skeleton'
 import { useFormatDuration } from './use-format-duration'
-import { WhatsAppHealthChip } from './whatsapp-health-chip'
 
 const NEW_ITEMS = [
   { key: 'newContact', href: '/contacts', icon: UserPlus },
@@ -72,7 +71,7 @@ export function OverviewHeader({
       <div className="min-w-0">
         {data ? (
           <>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-bold tracking-[-0.03em] text-foreground">
               {firstName
                 ? t(`greeting.${partOfDay(new Date(now))}`, { name: firstName })
                 : t(`greetingNoName.${partOfDay(new Date(now))}`)}
@@ -87,7 +86,6 @@ export function OverviewHeader({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <WhatsAppHealthChip />
         <Tabs value={String(range)} onValueChange={(v) => onRangeChange(Number(v) as OverviewRange)}>
           <TabsList aria-label={t('rangeLabel')}>
             {OVERVIEW_RANGES.map((r) => (
