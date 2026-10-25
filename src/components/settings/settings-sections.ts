@@ -1,5 +1,6 @@
 import {
   Coins,
+  CreditCard,
   FileText,
   Inbox,
   KeyRound,
@@ -34,6 +35,7 @@ export const SETTINGS_SECTIONS = [
   'fields',
   'deals',
   'members',
+  'billing',
   'api',
 ] as const;
 
@@ -46,7 +48,7 @@ export interface SectionMeta {
   id: SettingsSection;
   label: string;
   icon: LucideIcon;
-  group: 'top' | 'account' | 'workspace';
+  group: 'top' | 'account' | 'workspace' | 'developer';
 }
 
 export const SECTION_META: Record<SettingsSection, SectionMeta> = {
@@ -61,13 +63,15 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   fields: { id: 'fields', label: 'Fields & tags', icon: Tags, group: 'workspace' },
   deals: { id: 'deals', label: 'Deals & currency', icon: Coins, group: 'workspace' },
   members: { id: 'members', label: 'Team members', icon: UsersRound, group: 'workspace' },
-  api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'workspace' },
+  billing: { id: 'billing', label: 'Plan & billing', icon: CreditCard, group: 'workspace' },
+  api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'developer' },
 };
 
 export const RAIL_GROUPS: { label: string | null; group: SectionMeta['group'] }[] = [
   { label: null, group: 'top' },
   { label: 'Account', group: 'account' },
   { label: 'Workspace', group: 'workspace' },
+  { label: 'Developer', group: 'developer' },
 ];
 
 function isSection(value: string | null): value is SettingsSection {

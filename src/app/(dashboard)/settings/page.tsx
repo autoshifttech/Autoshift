@@ -19,6 +19,8 @@ import { DealsSettings } from '@/components/settings/deals-settings';
 import { InboxSettings } from '@/components/settings/inbox-settings';
 import { MembersTab } from '@/components/settings/members-tab';
 import { ApiKeysSettings } from '@/components/settings/api-keys-settings';
+import { BillingPanel } from '@/components/billing/billing-panel';
+import { WhatsAppConnectCard } from '@/components/whatsapp/connect-card';
 import {
   resolveSection,
   type SettingsSection,
@@ -75,13 +77,19 @@ function SettingsPageInner() {
     profile: <ProfileForm />,
     security: <SecurityPanel />,
     appearance: <AppearancePanel />,
-    whatsapp: <WhatsAppConfig />,
+    whatsapp: (
+      <div className="space-y-6">
+        <WhatsAppConnectCard />
+        <WhatsAppConfig />
+      </div>
+    ),
     templates: <TemplateManager />,
     'quick-replies': <QuickRepliesManager />,
     fields: <FieldsAndTagsPanel />,
     inbox: <InboxSettings />,
     deals: <DealsSettings />,
     members: <MembersTab />,
+    billing: <BillingPanel />,
     api: <ApiKeysSettings />,
   };
 

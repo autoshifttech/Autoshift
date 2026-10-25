@@ -4,7 +4,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
-const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings']
+const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding']
 
 export async function middleware(request: NextRequest) {
   // No Supabase project yet: public pages work, the app sends people to
