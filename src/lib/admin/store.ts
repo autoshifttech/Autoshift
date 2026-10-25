@@ -28,19 +28,22 @@ import {
 } from './data'
 
 export interface PlanConfig {
-  id: PlanId
+  /** starter / growth / pro, or a slug for a plan added in the admin. */
+  id: string
   name: string
   monthly: number
   seats: number | null
   contacts: number | null
   aiReplies: number
   active: boolean
+  /** Added in the admin panel; can be deleted while nobody is on it. */
+  custom?: boolean
 }
 
 export interface Coupon {
   code: string
   percentOff: number
-  appliesTo: 'all' | PlanId
+  appliesTo: 'all' | string
   expiresAt: string
   redemptions: number
   maxRedemptions: number | null

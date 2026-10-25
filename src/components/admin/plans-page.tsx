@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Save, TicketPercent } from "lucide-react";
+import { Plus, Save, TicketPercent, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -42,6 +42,7 @@ function PlanCard({ plan, subscribers }: { plan: PlanConfig; subscribers: number
         <div className="min-w-0">
           <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} aria-label="Plan name" className="h-8 border-transparent bg-transparent px-0 text-lg font-bold shadow-none focus-visible:border-border focus-visible:px-2" />
           <p className="text-xs text-muted-foreground">
+            {plan.custom && <span className="mr-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary uppercase">New</span>}
             {subscribers} paying · {inr(draft.monthly * 10)} yearly (2 months free)
           </p>
         </div>
@@ -58,6 +59,22 @@ function PlanCard({ plan, subscribers }: { plan: PlanConfig; subscribers: number
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Price changes apply to new signups now and to existing businesses from their next renewal. Empty limit = unlimited.</p>
       <div className="mt-4 flex justify-end gap-2">
+        {plan.custom && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-auto text-rose-600 hover:text-rose-600"
+            aria-label={`Delete ${plan.name} plan`}
+            title={subscribers ? "Move its businesses to another plan before deleting" : "Delete plan"}
+            disabled={subscribers > 0}
+            onClick={() => {
+              act("Deleted plan", `${plan.name} plan`, inr(plan.monthly) + " per month", (s) => ({ plans: s.plans.filter((p) => p.id !== plan.id), coupons: s.coupons.map((c) => (c.appliesTo === plan.id ? { ...c, appliesTo: "all", active: false } : c)) }));
+              toast.success(`${plan.name} plan deleted`);
+            }}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        )}
         {dirty && (
           <Button variant="ghost" onClick={() => setDraft(plan)}>
             Undo
@@ -274,14 +291,101 @@ function CouponsPanel() {
   );
 }
 
+function NewPlanDialog({ open, onOpenChange, existing }: { open: boolean; onOpenChange: (o: boolean) => void; existing: PlanConfig[] }) {
+  const blank = { name: "", monthly: "", aiReplies: "", seats: "", contacts: "", active: false };
+  const [d, setD] = useState(blank);
+  const slug = d.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const taken = existing.some((p) => p.id === slug || p.name.trim().toLowerCase() === d.name.trim().toLowerCase());
+  const price = Number(d.monthly);
+  const ok = slug.length > 0 && !taken && price > 0 && Number(d.aiReplies) >= 0;
+  const close = () => {
+    setD(blank);
+    onOpenChange(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>New plan</DialogTitle>
+          <DialogDescription>Add a plan, for example for agencies, enterprises or a festive offer. Yearly billing is 10× the monthly price (2 months free).</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="np-name">Plan name</Label>
+            <Input id="np-name" value={d.name} maxLength={30} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="Business" />
+            {taken && <p className="text-xs text-rose-600">A plan with this name already exists.</p>}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="np-price">Price per month (₹)</Label>
+              <Input id="np-price" inputMode="numeric" value={d.monthly} onChange={(e) => setD({ ...d, monthly: e.target.value.replace(/\D/g, "") })} placeholder="9999" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="np-ai">AI replies included</Label>
+              <Input id="np-ai" inputMode="numeric" value={d.aiReplies} onChange={(e) => setD({ ...d, aiReplies: e.target.value.replace(/\D/g, "") })} placeholder="50000" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="np-seats">Team members</Label>
+              <Input id="np-seats" inputMode="numeric" value={d.seats} onChange={(e) => setD({ ...d, seats: e.target.value.replace(/\D/g, "") })} placeholder="Unlimited" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="np-contacts">Contacts</Label>
+              <Input id="np-contacts" inputMode="numeric" value={d.contacts} onChange={(e) => setD({ ...d, contacts: e.target.value.replace(/\D/g, "") })} placeholder="Unlimited" />
+            </div>
+          </div>
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 text-sm">
+            <span>
+              <span className="block font-medium text-foreground">Put on sale now</span>
+              <span className="block text-xs text-muted-foreground">Off keeps it hidden from the pricing page until you&apos;re ready.</span>
+            </span>
+            <Switch checked={d.active} onCheckedChange={(v) => setD({ ...d, active: v })} aria-label="Put on sale now" />
+          </label>
+          {price > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {inr(price)}/month · {inr(price * 10)}/year · {inr(Math.round(price * 1.18))} with GST
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!ok}
+            onClick={() => {
+              const plan: PlanConfig = { id: slug, name: d.name.trim(), monthly: price, aiReplies: Number(d.aiReplies) || 0, seats: parseLimit(d.seats), contacts: parseLimit(d.contacts), active: d.active, custom: true };
+              act("Created plan", `${plan.name} plan`, `${inr(price)}/month · ${d.active ? "on sale" : "hidden"}`, (s) => ({ plans: [...s.plans, plan] }));
+              toast.success(`${plan.name} plan added`);
+              close();
+            }}
+          >
+            Add plan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function PlansPage() {
   const { plans, prices, trialDays, minTopup } = useAdmin();
   const businesses = useBusinesses();
   const paying = (id: string) => businesses.filter((b) => b.plan === id && (b.status === "active" || b.status === "past_due")).length;
+  const [adding, setAdding] = useState(false);
   return (
     <>
-      <PageHeader title="Plans & pricing" description="Plan prices and limits, wallet rates, trial length and coupons. Every change is logged in the audit log." />
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
+      <PageHeader
+        title="Plans & pricing"
+        description="Plan prices and limits, wallet rates, trial length and coupons. Every change is logged in the audit log."
+        actions={
+          <Button className="gap-1.5" onClick={() => setAdding(true)}>
+            <Plus className="size-4" />
+            New plan
+          </Button>
+        }
+      />
+      <NewPlanDialog open={adding} onOpenChange={setAdding} existing={plans} />
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-3">
         {plans.map((p) => (
           <PlanCard key={`${p.id}-${JSON.stringify(p)}`} plan={p} subscribers={paying(p.id)} />
         ))}

@@ -288,6 +288,19 @@ html[data-theme="rose"] {
   html {
     @apply font-sans;
   }
+  /* Browser autofill paints its own grey-blue fill and pale text; keep
+     autofilled fields in our colours and readable in both themes. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: var(--foreground);
+    caret-color: var(--foreground);
+    -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+    box-shadow: 0 0 0 1000px var(--card) inset;
+    transition: background-color 9999s ease-out 0s;
+  }
   /* Thin, single-line scrollbars with no arrow buttons. */
   ::-webkit-scrollbar {
     width: 6px;
