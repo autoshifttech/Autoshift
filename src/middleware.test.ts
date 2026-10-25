@@ -168,3 +168,38 @@ describe("middleware — Supabase not configured yet", () => {
     expect((await middleware(new NextRequest("https://app.test/api/whatsapp/webhook"))).status).toBe(200);
   });
 });
+
+describe("middleware — admin panel", () => {
+  it.each(["/admin", "/admin/businesses", "/admin/payments"])("sends %s to the admin sign-in without the admin cookie", async (route) => {
+    mockUser = { id: "user-1" };
+
+    const res = await middleware(new NextRequest(`https://app.test${route}`));
+
+    expect(res.status).toBe(307);
+    expect(new URL(res.headers.get("location")!).pathname).toBe("/admin/login");
+  });
+
+  it("leaves the admin sign-in page open", async () => {
+    const res = await middleware(new NextRequest("https://app.test/admin/login"));
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("opens the panel with the admin cookie", async () => {
+    mockUser = { id: "user-1" };
+    const req = new NextRequest("https://app.test/admin");
+    req.cookies.set("autoshift_admin", "1");
+
+    const res = await middleware(req);
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("does not treat look-alike paths as admin", async () => {
+    mockUser = { id: "user-1" };
+
+    const res = await middleware(new NextRequest("https://app.test/administrator"));
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+});

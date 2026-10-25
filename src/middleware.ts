@@ -2,12 +2,27 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { DEMO_COOKIE } from '@/lib/demo/cookie'
+import { ADMIN_COOKIE } from '@/lib/admin/session'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
 const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/bookings', '/pipelines', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files']
 
 export async function middleware(request: NextRequest) {
+  // Platform admin panel (design preview): every /admin page but the
+  // sign-in needs the admin session cookie, configured or not.
+  const pathname = request.nextUrl.pathname
+  if (
+    (pathname === '/admin' || pathname.startsWith('/admin/')) &&
+    pathname !== '/admin/login' &&
+    request.cookies.get(ADMIN_COOKIE)?.value !== '1'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin/login'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
   // No Supabase project yet: public pages work, the app sends people to
   // /login (which explains sign-in isn't connected), app APIs answer 503.
   // "View demo" sets a cookie that opens the app on sample data instead.
