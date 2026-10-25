@@ -97,9 +97,11 @@ export function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <Panel title="Revenue and costs" description="Last 12 months, before GST.">
-          <BarChart className="h-64" data={revenueRows} index="month" categories={["Subscriptions", "Wallet top-ups", "Meta & AI costs"]} colors={["brand", "mint", "amber"]} yAxisWidth={56} valueFormatter={(v) => inrCompact(v)} />
-        </Panel>
+        <div className="ink-scope min-w-0">
+          <Panel title="Revenue and costs" description="Last 12 months, before GST." className="h-full rounded-[22px]">
+            <BarChart className="h-64" data={revenueRows} index="month" categories={["Subscriptions", "Wallet top-ups", "Meta & AI costs"]} colors={["brand", "mint", "peach"]} yAxisWidth={56} valueFormatter={(v) => inrCompact(v)} />
+          </Panel>
+        </div>
 
         <Panel
           title="Needs your attention"
@@ -138,7 +140,7 @@ export function AdminOverview() {
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-3">
         <Panel title="Growth" description="New signups and paying businesses each month." className="lg:col-span-2">
-          <BarChart className="h-56" data={growthRows} index="month" categories={["New signups", "Paying businesses"]} colors={["violet", "brand"]} yAxisWidth={36} />
+          <BarChart className="h-56" data={growthRows} index="month" categories={["New signups", "Paying businesses"]} colors={["sky", "brand"]} yAxisWidth={36} />
         </Panel>
         <Panel title="Plan mix" description="Paying businesses and MRR by plan.">
           <ul className="space-y-4">

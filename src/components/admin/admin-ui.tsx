@@ -12,7 +12,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+        <h1 className="text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -22,7 +22,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 
 export function Panel({ title, description, actions, children, className, bodyClassName }: { title?: string; description?: string; actions?: ReactNode; children: ReactNode; className?: string; bodyClassName?: string }) {
   return (
-    <section className={cn("min-w-0 rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]", className)}>
+    <section className={cn("min-w-0 rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)]", className)}>
       {(title || actions) && (
         <div className="flex flex-wrap items-start justify-between gap-2 px-5 pt-4">
           <div className="min-w-0">

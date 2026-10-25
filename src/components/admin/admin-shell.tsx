@@ -17,14 +17,13 @@ import {
   LogOut,
   Mail,
   Megaphone,
-  Menu,
+  MoreHorizontal,
   Search,
   Settings2,
   ShieldCheck,
   Tags,
   UsersRound,
   Wallet,
-  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { setAdminCookie } from "@/lib/admin/session";
 import { buildAlerts } from "@/lib/admin/alerts";
 import { ROLE_LABEL } from "@/lib/admin/data";
@@ -88,84 +88,145 @@ function activeItem(pathname: string) {
   return [...ALL_ITEMS].sort((a, b) => b.href.length - a.href.length).find((i) => pathname === i.href || (i.href !== "/admin" && pathname.startsWith(i.href)));
 }
 
-function AdminSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+/** Shown as icons on the rail and in the phone bar; the rest sit under "More". */
+const RAIL_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/plans", "/admin/whatsapp", "/admin/ai", "/admin/support", "/admin/team"];
+const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
+
+const railButton =
+  "rail-tip relative flex size-10 shrink-0 items-center justify-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none";
+const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_0/0.6)] hover:bg-[#fffdf9] hover:text-[#1a1d1b]";
+
+function itemFor(href: string) {
+  return ALL_ITEMS.find((i) => i.href === href)!;
+}
+
+function SupportBadge({ href, count }: { href: string; count: number }) {
+  if (href !== "/admin/support" || count === 0) return null;
+  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white">{count}</span>;
+}
+
+/** The pages that aren't on the rail, plus the website editor and the business app. */
+function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; currentHref?: string; onPick?: () => void }) {
+  return (
+    <>
+      {ADMIN_NAV.map((group) => {
+        const items = group.items.filter((i) => !exclude.includes(i.href));
+        if (!items.length) return null;
+        return (
+          <div key={group.label} className="pb-1">
+            <p className="px-2.5 pt-2.5 pb-1 text-[10px] font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{group.label}</p>
+            {items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onPick}
+                aria-current={currentHref === item.href ? "page" : undefined}
+                className={cn("flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors", currentHref === item.href ? "bg-card-2 font-semibold text-foreground" : "text-muted-foreground hover:bg-card-2 hover:text-foreground")}
+              >
+                <item.icon className="size-4" />
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        );
+      })}
+      <div className="mt-1 space-y-1 border-t border-border pt-2">
+        {/* The public website has its own editor; it opens full screen. */}
+        <Link href="/admin/website" onClick={onPick} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-primary hover:bg-primary-soft">
+          <Globe className="size-4" />
+          <span className="flex-1">
+            Website admin
+            <span className="block text-[11px] font-normal text-muted-foreground">Opens full screen</span>
+          </span>
+        </Link>
+        <Link href="/dashboard" onClick={onPick} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-card-2 hover:text-foreground">
+          <BarChart3 className="size-3.5" />
+          Open the business app
+        </Link>
+      </div>
+    </>
+  );
+}
+
+/** Desktop: dark icon rail with tooltips. */
+function AdminRail() {
   const pathname = usePathname();
   const { tickets } = useAdmin();
   const openTickets = tickets.filter((t) => t.status === "open").length;
   const current = activeItem(pathname);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const inMore = !!current && !RAIL_HREFS.includes(current.href) && current.href !== "/admin/settings";
   return (
-    <>
-      <button
-        type="button"
-        aria-label="Close menu"
-        onClick={onClose}
-        className={cn("fixed inset-0 z-30 bg-background/70 backdrop-blur-sm transition-opacity lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}
-      />
-      <aside
-        aria-label="Admin navigation"
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform duration-200 lg:static lg:z-0 lg:w-60 lg:translate-x-0 lg:transition-none",
-          open ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
-          <Link href="/admin" className="flex items-center gap-2" onClick={onClose}>
-            <LogoMark className="size-8" />
-            <span className="text-base font-extrabold tracking-tight text-foreground">AutoShift</span>
-            <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">Admin</span>
-          </Link>
-          <button type="button" onClick={onClose} aria-label="Close menu" className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden">
-            <X className="size-5" />
-          </button>
-        </div>
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {ADMIN_NAV.map((group, gi) => (
-            <div key={group.label} className={gi ? "mt-5" : undefined}>
-              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.09em] text-muted-foreground/80 uppercase">{group.label}</p>
-              <ul className="flex flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const active = current?.href === item.href;
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        aria-current={active ? "page" : undefined}
-                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:py-2", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
-                      >
-                        <item.icon className="size-4" />
-                        <span className="flex-1">{item.label}</span>
-                        {item.href === "/admin/support" && openTickets > 0 && (
-                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{openTickets}</span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-        <div className="shrink-0 space-y-1 border-t border-border p-3">
-          {/* The public website has its own editor; it gets a button of its own. */}
-          <Link
-            href="/admin/website"
-            onClick={onClose}
-            className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
-          >
-            <Globe className="size-4" />
-            <span className="flex-1">
-              Website admin
-              <span className="block text-[11px] font-normal text-muted-foreground">Opens full screen</span>
+    <aside aria-label="Admin navigation" className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex">
+      <Link href="/admin" aria-label="AutoShift admin" className="mb-3 shrink-0">
+        <LogoMark className="size-9" />
+      </Link>
+      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
+        {RAIL_HREFS.map((href) => {
+          const item = itemFor(href);
+          const active = current?.href === href;
+          return (
+            <Link key={href} href={href} aria-label={item.label} data-tip={item.label} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+              <item.icon className="size-[18px]" />
+              <SupportBadge href={href} count={openTickets} />
+            </Link>
+          );
+        })}
+        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+          <PopoverTrigger aria-label="More pages" data-tip="More" className={cn(railButton, inMore && railActive)}>
+            <MoreHorizontal className="size-[18px]" />
+          </PopoverTrigger>
+          <PopoverContent side="right" align="start" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
+            <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
+          </PopoverContent>
+        </Popover>
+      </nav>
+      <span className="my-1.5 h-px w-6 shrink-0 bg-white/10" />
+      <ModeToggle className={cn(railButton, "size-10 rounded-xl")} />
+      <Link href="/admin/settings" aria-label="Alert settings" data-tip="Alert settings" aria-current={current?.href === "/admin/settings" ? "page" : undefined} className={cn(railButton, current?.href === "/admin/settings" && railActive)}>
+        <Settings2 className="size-[18px]" />
+      </Link>
+    </aside>
+  );
+}
+
+/** Phones: four pages and a "More" sheet. */
+function AdminMobileNav() {
+  const pathname = usePathname();
+  const { tickets } = useAdmin();
+  const openTickets = tickets.filter((t) => t.status === "open").length;
+  const current = activeItem(pathname);
+  const [open, setOpen] = useState(false);
+  const inMore = !current || !BAR_HREFS.includes(current.href);
+  return (
+    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-[20px] bg-[var(--rail)] px-2 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
+      {BAR_HREFS.map((href) => {
+        const item = itemFor(href);
+        const active = current?.href === href;
+        return (
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
+            <span className="relative">
+              <item.icon className="size-5" />
+              <SupportBadge href={href} count={openTickets} />
             </span>
+            {item.label === "Support inbox" ? "Support" : item.label}
           </Link>
-          <Link href="/dashboard" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            <BarChart3 className="size-3.5" />
-            Open the business app
-          </Link>
-        </div>
-      </aside>
-    </>
+        );
+      })}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", inMore && "bg-[#fffdf9] text-[#1a1d1b]")}>
+          <MoreHorizontal className="size-5" />
+          More
+        </SheetTrigger>
+        <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
+          <div className="flex items-center justify-between px-2.5 pb-1">
+            <SheetTitle className="text-base">All pages</SheetTitle>
+            <ModeToggle className="rounded-xl border border-border" />
+          </div>
+          <MoreList exclude={BAR_HREFS} currentHref={current?.href} onPick={() => setOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    </nav>
   );
 }
 
@@ -209,7 +270,7 @@ function BusinessSearch() {
         }}
         placeholder="Find a business, owner, email or number…"
         aria-label="Find a business"
-        className="h-9 w-full rounded-full border border-border bg-card pr-3 pl-9 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
+        className="h-10 w-full rounded-xl border border-border bg-card pr-3 pl-9 text-sm text-foreground shadow-[var(--shadow-card)] outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
       />
       {open && q.trim() && (
         <div className="absolute top-11 right-0 left-0 z-50 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
@@ -241,7 +302,7 @@ function AlertsBell() {
   const critical = alerts.filter((a) => a.severity !== "info").length;
   return (
     <Popover>
-      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
+      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-[var(--shadow-card)] hover:text-foreground">
         <Bell className="size-[18px]" />
         {critical > 0 && <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white">{critical}</span>}
       </PopoverTrigger>
@@ -275,7 +336,7 @@ function AdminMenu() {
   const router = useRouter();
   return (
     <Popover>
-      <PopoverTrigger className="flex items-center gap-2 rounded-full py-1 pr-2 pl-1 hover:bg-muted" aria-label="Admin account">
+      <PopoverTrigger className="flex items-center gap-2 rounded-xl border border-border bg-card py-1 pr-3 pl-1 shadow-[var(--shadow-card)] hover:bg-card-2" aria-label="Admin account">
         <Initials name="Founder Admin" className="size-8" />
         <span className="hidden text-left sm:block">
           <span className="block text-sm leading-tight font-medium text-foreground">{CURRENT_ADMIN.name}</span>
@@ -306,31 +367,28 @@ function AdminMenu() {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const title = activeItem(pathname)?.label ?? "Admin";
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar open={open} onClose={() => setOpen(false)} />
+    <div className="app-canvas admin-canvas flex h-dvh overflow-hidden bg-background">
+      <AdminRail />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
-          <button type="button" onClick={() => setOpen(true)} aria-label="Open menu" className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted lg:hidden">
-            <Menu className="size-5" />
-          </button>
-          <p className="min-w-0 truncate text-base font-semibold text-foreground lg:w-48 lg:shrink-0">{title}</p>
-          <div className="flex flex-1 justify-center">
+        <header className="flex h-16 shrink-0 items-center gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
+          <Link href="/admin" className="flex items-center gap-2 lg:hidden">
+            <LogoMark className="size-8" />
+            <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">Admin</span>
+          </Link>
+          <div className="flex flex-1 justify-end lg:justify-start">
             <BusinessSearch />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <AlertsBell />
-            <ModeToggle />
             <AdminMenu />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto px-4 pt-2 pb-24 sm:px-6 lg:pb-8">
           <div className="mx-auto max-w-[1400px] space-y-6">{children}</div>
         </main>
       </div>
+      <AdminMobileNav />
     </div>
   );
 }
