@@ -296,7 +296,7 @@ function makePayments(): Payment[] {
   }
   // A few refunds.
   for (const p of out.filter((x) => x.kind === 'topup' && x.status === 'captured').slice(3, 6)) {
-    out.push({ ...p, id: `${p.id}_r`, razorpayId: `rfnd_${p.razorpayId.slice(4)}`, kind: 'refund', amount: -p.amount, gst: -p.gst, status: 'refunded', at: new Date(new Date(p.at).getTime() + 2 * DAY).toISOString(), invoice: null })
+    out.push({ ...p, id: `${p.id}_r`, razorpayId: `rfnd_${p.razorpayId.slice(4)}`, kind: 'refund', amount: -p.amount, gst: -p.gst, status: 'refunded', at: new Date(Math.min(new Date(p.at).getTime() + 2 * DAY, ADMIN_NOW - 36e5)).toISOString(), invoice: null })
   }
   out.sort((a, b) => b.at.localeCompare(a.at))
   return out
