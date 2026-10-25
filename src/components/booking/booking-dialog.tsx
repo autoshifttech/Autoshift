@@ -22,6 +22,7 @@ import {
 } from "@/lib/booking/model";
 import { selectClass, useDateLabel } from "./booking-ui";
 import { Bubble, WhatsAppPreview } from "./whatsapp-preview";
+import { NativeSelect } from "@/components/ui/native-select"
 
 /**
  * New booking, or reschedule when `booking` is given. Shows only free
@@ -110,7 +111,7 @@ export function BookingDialog({
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="bk-service">{t("service")}</Label>
-                <select
+                <NativeSelect
                   id="bk-service"
                   className={selectClass}
                   value={serviceId}
@@ -126,11 +127,11 @@ export function BookingDialog({
                       {s.name} · {t("minutes", { count: s.durationMin })}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="bk-staff">{t("staff")}</Label>
-                <select
+                <NativeSelect
                   id="bk-staff"
                   className={selectClass}
                   value={staff?.id ?? ""}
@@ -144,7 +145,7 @@ export function BookingDialog({
                       {st.name}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
             </div>
 

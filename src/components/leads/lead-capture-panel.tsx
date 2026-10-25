@@ -29,6 +29,7 @@ import {
   type ScoreRule,
 } from "@/lib/leads/model";
 import { TempChip, leadScore } from "./lead-ui";
+import { NativeSelect } from "@/components/ui/native-select"
 
 const set = (patch: Partial<LeadSettings>) => leadStore.set((s) => ({ ...s, ...patch }));
 
@@ -192,13 +193,13 @@ function QuestionsSection() {
               <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(0,1fr)_150px_120px]">
                 <Input value={q.prompt} placeholder={t("questionPh")} aria-label={t("question")} onChange={(e) => update(q.id, { prompt: e.target.value })} />
                 <Input value={q.saveAs} placeholder={t("saveAsPh")} aria-label={t("saveAs")} onChange={(e) => update(q.id, { saveAs: e.target.value })} />
-                <select className={selectClass} value={q.type} aria-label={t("answerType")} onChange={(e) => update(q.id, { type: e.target.value as AnswerType })}>
+                <NativeSelect className={selectClass} value={q.type} aria-label={t("answerType")} onChange={(e) => update(q.id, { type: e.target.value as AnswerType })}>
                   {(["text", "choice", "number"] as const).map((type) => (
                     <option key={type} value={type}>
                       {t(`type_${type}`)}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
                 {q.type === "choice" && (
                   <Input
                     className="sm:col-span-3"
@@ -265,20 +266,20 @@ function ScoringSection() {
         {s.rules.map((r) => (
           <div key={r.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-muted/50 p-2 text-sm">
             <span className="px-1 text-muted-foreground">{t("ruleIf")}</span>
-            <select className={cn(selectClass, "w-auto")} value={r.questionId} aria-label={t("question")} onChange={(e) => update(r.id, { questionId: e.target.value })}>
+            <NativeSelect className={cn(selectClass, "w-auto")} value={r.questionId} aria-label={t("question")} onChange={(e) => update(r.id, { questionId: e.target.value })}>
               {s.questions.map((q) => (
                 <option key={q.id} value={q.id}>
                   {q.saveAs || q.prompt}
                 </option>
               ))}
-            </select>
-            <select className={cn(selectClass, "w-auto")} value={r.op} aria-label={t("condition")} onChange={(e) => update(r.id, { op: e.target.value as RuleOp })}>
+            </NativeSelect>
+            <NativeSelect className={cn(selectClass, "w-auto")} value={r.op} aria-label={t("condition")} onChange={(e) => update(r.id, { op: e.target.value as RuleOp })}>
               {(["answered", "equals", "contains", "at_least"] as const).map((op) => (
                 <option key={op} value={op}>
                   {t(`op_${op}`)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             {r.op !== "answered" && <Input className="h-9 w-32" value={r.value} aria-label={t("value")} onChange={(e) => update(r.id, { value: e.target.value })} />}
             <span className="text-muted-foreground">{t("ruleAdd")}</span>
             <Input className="h-9 w-20" type="number" value={r.points} aria-label={t("points")} onChange={(e) => update(r.id, { points: Number(e.target.value) })} />
@@ -310,12 +311,12 @@ function ScoringSection() {
         <div className="grid gap-2 sm:grid-cols-2">
           {s.questions.map((q) =>
             q.type === "choice" ? (
-              <select key={q.id} className={selectClass} value={test[q.id] ?? ""} aria-label={q.saveAs} onChange={(e) => setTest({ ...test, [q.id]: e.target.value })}>
+              <NativeSelect key={q.id} className={selectClass} value={test[q.id] ?? ""} aria-label={q.saveAs} onChange={(e) => setTest({ ...test, [q.id]: e.target.value })}>
                 <option value="">{q.saveAs || q.prompt}</option>
                 {q.options.filter(Boolean).map((o) => (
                   <option key={o}>{o}</option>
                 ))}
-              </select>
+              </NativeSelect>
             ) : (
               <Input key={q.id} placeholder={q.saveAs || q.prompt} aria-label={q.saveAs} value={test[q.id] ?? ""} onChange={(e) => setTest({ ...test, [q.id]: e.target.value })} />
             ),
@@ -372,13 +373,13 @@ function HandoffSection() {
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor="ho-assign">{t("assignTo")}</Label>
-          <select id="ho-assign" className={selectClass} value={h.assignTo} onChange={(e) => upd({ assignTo: e.target.value as typeof h.assignTo })}>
+          <NativeSelect id="ho-assign" className={selectClass} value={h.assignTo} onChange={(e) => upd({ assignTo: e.target.value as typeof h.assignTo })}>
             {(["round_robin", "least_busy", "owner"] as const).map((a) => (
               <option key={a} value={a}>
                 {t(`assign_${a}`)}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="grid content-start gap-2 text-sm">
           <span className="font-medium text-foreground">{t("notify")}</span>
@@ -411,15 +412,15 @@ function RoutingSection() {
       <div className={cn("grid gap-4 sm:grid-cols-2", !r.enabled && "pointer-events-none opacity-50")}>
         <div className="grid gap-1.5">
           <Label htmlFor="rt-pipeline">{t("pipeline")}</Label>
-          <select id="rt-pipeline" className={selectClass} value={r.pipeline} onChange={(e) => upd({ pipeline: e.target.value, stageHot: SAMPLE_PIPELINES[e.target.value][1], stageWarm: SAMPLE_PIPELINES[e.target.value][0] })}>
+          <NativeSelect id="rt-pipeline" className={selectClass} value={r.pipeline} onChange={(e) => upd({ pipeline: e.target.value, stageHot: SAMPLE_PIPELINES[e.target.value][1], stageWarm: SAMPLE_PIPELINES[e.target.value][0] })}>
             {Object.keys(SAMPLE_PIPELINES).map((p) => (
               <option key={p}>{p}</option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="rt-value">{t("dealValue")}</Label>
-          <select id="rt-value" className={selectClass} value={r.valueFromQuestionId ?? ""} onChange={(e) => upd({ valueFromQuestionId: e.target.value || null })}>
+          <NativeSelect id="rt-value" className={selectClass} value={r.valueFromQuestionId ?? ""} onChange={(e) => upd({ valueFromQuestionId: e.target.value || null })}>
             <option value="">{t("noValue")}</option>
             {s.questions
               .filter((q) => q.type === "number")
@@ -428,23 +429,23 @@ function RoutingSection() {
                   {q.saveAs}
                 </option>
               ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="rt-hot">{t("stageHot")}</Label>
-          <select id="rt-hot" className={selectClass} value={r.stageHot} onChange={(e) => upd({ stageHot: e.target.value })}>
+          <NativeSelect id="rt-hot" className={selectClass} value={r.stageHot} onChange={(e) => upd({ stageHot: e.target.value })}>
             {stages.map((st) => (
               <option key={st}>{st}</option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="rt-warm">{t("stageWarm")}</Label>
-          <select id="rt-warm" className={selectClass} value={r.stageWarm} onChange={(e) => upd({ stageWarm: e.target.value })}>
+          <NativeSelect id="rt-warm" className={selectClass} value={r.stageWarm} onChange={(e) => upd({ stageWarm: e.target.value })}>
             {stages.map((st) => (
               <option key={st}>{st}</option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{t("coldNote")}</p>

@@ -26,11 +26,11 @@ import {
   type BusinessDetails,
   type Feature,
 } from "@/lib/workspace/setup";
+import { NativeSelect } from "@/components/ui/native-select"
 
 const STEPS = ["business", "plan", "whatsapp", "features"] as const;
 
-export const selectClass =
-  "h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive dark:bg-input/30";
+const selectClass = "w-full";
 
 export function OnboardingWizard() {
   const t = useTranslations("Onboarding");
@@ -224,7 +224,7 @@ function BusinessStep({ onNext }: { onNext: () => void }) {
           {field(
             "country",
             t("fieldCountry"),
-            <select
+            <NativeSelect
               id="biz-country"
               className={selectClass}
               value={b.country}
@@ -238,26 +238,26 @@ function BusinessStep({ onNext }: { onNext: () => void }) {
                   {tc(c.code)}
                 </option>
               ))}
-            </select>,
+            </NativeSelect>,
           )}
           {field(
             "timeZone",
             t("fieldTimeZone"),
-            <select id="biz-timeZone" className={selectClass} value={b.timeZone} onChange={(e) => update({ timeZone: e.target.value })}>
+            <NativeSelect id="biz-timeZone" className={selectClass} value={b.timeZone} onChange={(e) => update({ timeZone: e.target.value })}>
               {TIME_ZONES.map((z) => (
                 <option key={z}>{z}</option>
               ))}
-            </select>,
+            </NativeSelect>,
             t("fieldTimeZoneHint"),
           )}
           {field(
             "currency",
             t("fieldCurrency"),
-            <select id="biz-currency" className={selectClass} value={b.currency} onChange={(e) => update({ currency: e.target.value })}>
+            <NativeSelect id="biz-currency" className={selectClass} value={b.currency} onChange={(e) => update({ currency: e.target.value })}>
               {CURRENCIES.map((c) => (
                 <option key={c}>{c}</option>
               ))}
-            </select>,
+            </NativeSelect>,
           )}
           {field(
             "website",

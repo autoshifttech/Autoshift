@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { bookingStore, formatPrice, useBookingState, type Service, type Staff } from "@/lib/booking/model";
+import { NativeSelect } from "@/components/ui/native-select"
 
 const COLORS = ["#1E4C41", "#7C5CBF", "#C2410C", "#2563EB", "#B45309", "#BE185D"];
 const DURATIONS = [10, 15, 20, 30, 45, 60, 90, 120, 180, 240];
@@ -159,13 +160,13 @@ function ServiceDialog({ service, staff, onClose }: { service: Service | null; s
           <div className="grid grid-cols-3 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="sv-duration">{t("duration")}</Label>
-              <select id="sv-duration" className="h-9 rounded-lg border border-input bg-card px-2 text-sm dark:bg-input/30" value={draft.durationMin} onChange={(e) => set({ durationMin: Number(e.target.value) })}>
+              <NativeSelect id="sv-duration"  value={draft.durationMin} onChange={(e) => set({ durationMin: Number(e.target.value) })}>
                 {DURATIONS.map((d) => (
                   <option key={d} value={d}>
                     {t("minutes", { count: d })}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="sv-price">{t("price")}</Label>

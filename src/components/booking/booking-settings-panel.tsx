@@ -12,6 +12,7 @@ import { useSetup } from "@/lib/workspace/setup";
 import { DEFAULT_CONFIRMATION, addDays, bookingStore, isoDate, renderConfirmation, useBookingState, type BookingRules } from "@/lib/booking/model";
 import { selectClass, useDateLabel } from "./booking-ui";
 import { Bubble, QuickButtons, WhatsAppPreview } from "./whatsapp-preview";
+import { NativeSelect } from "@/components/ui/native-select"
 
 const VARIABLES = ["name", "service", "staff", "date", "time", "business"];
 
@@ -29,13 +30,13 @@ export function BookingSettingsPanel() {
   const number = (key: keyof BookingRules, labelText: string, hint: string, options: number[], unit: (n: number) => string) => (
     <div className="grid content-start gap-1.5">
       <Label htmlFor={`rule-${key}`}>{labelText}</Label>
-      <select id={`rule-${key}`} className={selectClass} value={rules[key] as number} onChange={(e) => set({ [key]: Number(e.target.value) })}>
+      <NativeSelect id={`rule-${key}`} className={selectClass} value={rules[key] as number} onChange={(e) => set({ [key]: Number(e.target.value) })}>
         {options.map((n) => (
           <option key={n} value={n}>
             {unit(n)}
           </option>
         ))}
-      </select>
+      </NativeSelect>
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
   );

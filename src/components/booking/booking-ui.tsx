@@ -21,8 +21,8 @@ export function StatusChip({ status, className }: { status: BookingStatus; class
   );
 }
 
-export const selectClass =
-  "h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+/** Width for NativeSelect dropdowns in forms (the look comes from the component). */
+export const selectClass = "w-full";
 
 /** "Mon, 27 Oct" in the viewer's locale. */
 export function useDateLabel() {

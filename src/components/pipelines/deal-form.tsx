@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { NativeSelect } from "@/components/ui/native-select"
 
 interface DealFormProps {
   open: boolean;
@@ -271,10 +272,10 @@ export function DealForm({
 
             <div className="grid gap-2">
               <Label className="text-muted-foreground">{t("contact")}</Label>
-              <select
+              <NativeSelect
                 value={contactId}
                 onChange={(e) => setContactId(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-muted px-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full"
               >
                 <option value="">{t("selectContact")}</option>
                 {contacts.map((c) => (
@@ -282,7 +283,7 @@ export function DealForm({
                     {c.name || c.phone}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
 
               {linkedConversation && (
                 <Link
@@ -311,17 +312,17 @@ export function DealForm({
               </div>
               <div className="grid gap-2">
                 <Label className="text-muted-foreground">{t("currency")}</Label>
-                <select
+                <NativeSelect
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-border bg-muted px-2.5 text-sm text-foreground outline-none focus:border-primary"
+                  className="w-full"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.code}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
             </div>
 
@@ -337,25 +338,25 @@ export function DealForm({
 
             <div className="grid gap-2">
               <Label className="text-muted-foreground">{t("stage")}</Label>
-              <select
+              <NativeSelect
                 value={stageId}
                 onChange={(e) => setStageId(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-muted px-2.5 text-sm text-foreground outline-none focus:border-primary"
+                className="w-full"
               >
                 {stages.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
 
             <div className="grid gap-2">
               <Label className="text-muted-foreground">{t("assignedTo")}</Label>
-              <select
+              <NativeSelect
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-muted px-2.5 text-sm text-foreground outline-none focus:border-primary"
+                className="w-full"
               >
                 <option value="">{t("unassigned")}</option>
                 {profiles.map((p) => (
@@ -363,7 +364,7 @@ export function DealForm({
                     {p.full_name || p.email}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
 
             <div className="grid gap-2">

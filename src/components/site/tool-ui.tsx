@@ -6,6 +6,7 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { countries } from "@/lib/tools/whatsapp";
 import { cn } from "@/lib/utils";
 import { TOOLS } from "./tools-catalog";
+import { NativeSelect } from "@/components/ui/native-select"
 
 /** White rounded card from the public site (24px radius, soft shadow). */
 export const cardClass = "rounded-[24px] bg-card shadow-[var(--shadow-card)] ring-1 ring-border/70";
@@ -55,13 +56,13 @@ export function Field({
 
 export function CountrySelect({ id, value, onChange }: { id?: string; value: string; onChange: (code: string) => void }) {
   return (
-    <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className={inputClass}>
+    <NativeSelect id={id} value={value} onChange={(event) => onChange(event.target.value)} className="h-auto rounded-[14px] border-[1.5px] px-4 py-3 text-base">
       {countries.map((country) => (
         <option key={country.code} value={country.code}>
           {country.name} (+{country.dial})
         </option>
       ))}
-    </select>
+    </NativeSelect>
   );
 }
 
