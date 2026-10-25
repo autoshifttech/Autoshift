@@ -21,6 +21,7 @@ import { MembersTab } from '@/components/settings/members-tab';
 import { ApiKeysSettings } from '@/components/settings/api-keys-settings';
 import { BillingPanel } from '@/components/billing/billing-panel';
 import { DataPrivacyPanel } from '@/components/settings/data-privacy-panel';
+import { OwnerAlertsPanel } from '@/components/settings/owner-alerts-panel';
 import { WhatsAppConnectCard } from '@/components/whatsapp/connect-card';
 import {
   resolveSection,
@@ -78,6 +79,7 @@ function SettingsPageInner() {
     profile: <ProfileForm />,
     security: <SecurityPanel />,
     appearance: <AppearancePanel />,
+    alerts: <OwnerAlertsPanel />,
     whatsapp: (
       <div className="space-y-6">
         <WhatsAppConnectCard />

@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   LogOut,
+  Mail,
   Megaphone,
   Menu,
   Search,
@@ -73,6 +74,7 @@ export const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/support", label: "Support inbox", icon: LifeBuoy },
       { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
+      { href: "/admin/emails", label: "Owner emails", icon: Mail },
       { href: "/admin/team", label: "Admin team", icon: UsersRound },
       { href: "/admin/audit", label: "Audit log", icon: FileClock },
       { href: "/admin/settings", label: "Alert settings", icon: Settings2 },
