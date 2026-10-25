@@ -3092,9 +3092,7 @@
     "notConfiguredTitle": "O login ainda não está conectado",
     "notConfiguredDesc": "Esta implantação não tem um projeto Supabase, então não é possível criar nem usar contas. Adicione NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY nas configurações da hospedagem e implante de novo.",
     "demoButton": "Ver demonstração",
-    "demoHint": "Explore o CRM com uma empresa de exemplo. Nada é salvo.",
-    "demoBanner": "Você está vendo um espaço de demonstração com dados de exemplo. As alterações não são salvas.",
-    "demoExit": "Sair da demonstração"
+    "demoHint": "Explore o CRM com uma empresa de exemplo. Nada é salvo."
   },
   "Onboarding": {
     "skipForNow": "Pular por agora",

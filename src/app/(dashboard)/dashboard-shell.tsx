@@ -13,7 +13,6 @@ import { TrialBanner } from "@/components/billing/trial-banner";
 import { LowBalanceBanner } from "@/components/wallet/credits-badge";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HelpButton } from "@/components/layout/help-button";
-import { DemoBanner } from "@/components/demo/demo-banner";
 
 // Auth-gated dashboard shell. Extracted from the layout so the layout
 // itself can stay a server component and export metadata (noindex) —
@@ -60,7 +59,6 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <HelpButton />
       <Sidebar open={sidebarOpen} onClose={closeSidebar} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <DemoBanner />
         <TrialBanner />
         <LowBalanceBanner />
         <Header onOpenSidebar={() => setSidebarOpen(true)} />

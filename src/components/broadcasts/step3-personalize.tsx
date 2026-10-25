@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Eye, ImageIcon, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { TemplatePhonePreview } from '@/components/templates/phone-preview';
+import { useSetup } from '@/lib/workspace/setup';
 
 type VariableType = 'static' | 'field' | 'custom_field';
 
@@ -77,6 +79,10 @@ export function Step3Personalize({
   onBack,
 }: Step3Props) {
   const t = useTranslations('Broadcasts.wizard');
+  const tt = useTranslations('Settings.templates');
+  const setup = useSetup();
+  const businessName =
+    setup.business.displayName.trim() || setup.business.name.trim() || tt('previewYourBusiness');
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loadingFields, setLoadingFields] = useState(true);
   const [firstContact, setFirstContact] = useState<Contact | null>(null);
@@ -247,6 +253,8 @@ export function Step3Personalize({
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="min-w-0 space-y-6">
       {mediaHeaderType && (
         <div className="rounded-xl border border-border bg-card/50 p-4">
           <div className="mb-3 flex items-center gap-2">
@@ -405,24 +413,37 @@ export function Step3Personalize({
         </div>
       )}
 
-      {/* Live Preview — rendered as a WhatsApp-style bubble so the user
-          sees approximately what the recipient will see. */}
-      <div className="rounded-xl border border-border bg-card/50 p-4">
-        <div className="mb-3 flex items-center gap-2">
+      </div>
+
+      {/* Live preview: the template on a phone, filled in for the first
+          contact (or sample data), as the recipient will see it. */}
+      <aside className="lg:sticky lg:top-4 lg:self-start">
+        <div className="mb-3 flex items-center justify-center gap-2">
           <Eye className="h-4 w-4 text-primary" />
           <p className="text-sm font-medium text-foreground">{t('personalize.preview')}</p>
-          <span className="text-xs text-muted-foreground">({previewLabel})</span>
+          <span className="truncate text-xs text-muted-foreground">({previewLabel})</span>
           {loadingPreview && (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           )}
         </div>
-        <div className="rounded-lg bg-[#0e1a12] p-3">
-          <div className="ml-auto max-w-[85%] rounded-lg bg-primary/30 px-3 py-2 shadow-sm">
-            <p className="whitespace-pre-wrap text-sm text-primary">
-              {previewText}
-            </p>
-          </div>
-        </div>
+        <TemplatePhonePreview
+          businessName={businessName}
+          template={{
+            header_format: isMediaHeaderType(template.header_type)
+              ? template.header_type
+              : template.header_type === 'text'
+                ? 'text'
+                : 'none',
+            header_content: template.header_content ?? '',
+            header_sample: template.sample_values?.header?.[0] ?? '',
+            header_media_url: headerMediaUrl,
+            body_text: previewText,
+            body_samples: [],
+            footer_text: template.footer_text ?? '',
+            buttons: template.buttons ?? [],
+          }}
+        />
+      </aside>
       </div>
 
       {unmappedKeys.length > 0 && (
