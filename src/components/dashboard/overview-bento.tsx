@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, Plus, Wallet } from 'lucide-react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 
+import { RollingNumber } from '@/components/motion/rolling-number'
 import { cn } from '@/lib/utils'
 import {
   bucketDate,
@@ -69,7 +70,7 @@ function MiniCard({ title, note, children, href }: { title: React.ReactNode; not
 function Big({ value, unit, children }: { value: React.ReactNode; unit?: React.ReactNode; children?: React.ReactNode }) {
   return (
     <div className="mt-3 mb-4 flex flex-wrap items-baseline gap-1.5">
-      <b className="text-[32px] leading-none font-bold tracking-[-0.04em] tabular-nums">{value}</b>
+      <b className="text-[32px] leading-none font-bold tracking-[-0.04em] tabular-nums"><RollingNumber>{value}</RollingNumber></b>
       {unit && <span className="text-sm font-semibold text-muted-foreground">{unit}</span>}
       {children}
     </div>
@@ -103,7 +104,7 @@ function WhoReplied({ data }: { data: DashboardOverview }) {
               {parts.map((p) => {
                 const len = Math.max(0, (p.value / total) * c - (parts.length > 1 ? 6 : 0))
                 const el = (
-                  <circle key={p.label} cx="70" cy="70" r={r} fill="none" stroke={p.color} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${len} ${c}`} strokeDashoffset={-offset}>
+                  <circle key={p.label} cx="70" cy="70" r={r} fill="none" stroke={p.color} strokeWidth="12" strokeLinecap="round" strokeDasharray={`${len} ${c}`} strokeDashoffset={-offset} className="animate-ring">
                     <title>{`${p.label}: ${format.number(p.value)}`}</title>
                   </circle>
                 )
@@ -183,7 +184,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
             {t('live')}
           </span>
         </div>
-        <b className="relative mt-3 text-[46px] leading-none font-bold tracking-[-0.04em] tabular-nums">{format.number(totalIn + totalOut)}</b>
+        <b className="relative mt-3 text-[46px] leading-none font-bold tracking-[-0.04em] tabular-nums"><RollingNumber>{format.number(totalIn + totalOut)}</RollingNumber></b>
         <p className="relative mt-2 text-xs text-white/85">{t('split', { incoming: format.number(totalIn), outgoing: format.number(totalOut) })}</p>
         <div className="relative mt-auto grid h-[230px] items-end gap-2" style={{ gridTemplateColumns: `repeat(${bars.length}, minmax(0, 1fr))` }}>
           {bars.map((b, i) => (

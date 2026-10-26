@@ -51,7 +51,7 @@ export function WorkspaceSummary() {
                 strokeWidth="9"
                 strokeLinecap="round"
                 strokeDasharray={`${ring * 264} 264`}
-                className={trial && daysLeft <= 3 ? "stroke-destructive" : "stroke-primary"}
+                className={cn("animate-ring", trial && daysLeft <= 3 ? "stroke-destructive" : "stroke-primary")}
               />
             </svg>
             <span className="absolute inset-0 flex flex-col items-center justify-center">

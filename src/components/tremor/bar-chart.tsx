@@ -869,7 +869,10 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
                 type="linear"
                 dataKey={category}
                 stackId={stacked ? "stack" : undefined}
-                isAnimationActive={false}
+                // Bars spring up from the baseline when the chart appears.
+                isAnimationActive
+                animationDuration={800}
+                animationEasing="ease-out"
                 fill=""
                 shape={(props: any) =>
                   renderShape(props, activeBar, activeLegend, layout)

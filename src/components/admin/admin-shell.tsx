@@ -39,6 +39,7 @@ import { CURRENT_ADMIN, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { relTime } from "@/lib/admin/format";
 import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
+import { PageMotion } from "@/components/motion/page-motion";
 
 interface NavItem {
   href: string;
@@ -157,7 +158,7 @@ function AdminRail() {
   return (
     <aside aria-label="Admin navigation" className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 ring-1 ring-white/[0.06] shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex">
       <Link href="/admin" aria-label="AutoShift admin" className="mb-3 shrink-0">
-        <LogoMark className="size-9" />
+        <LogoMark className="logo-in size-9" />
       </Link>
       <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
         {ADMIN_NAV.map((group, gi) => (
@@ -310,7 +311,7 @@ function AlertsBell() {
             See all
           </Link>
         </div>
-        <ul className="max-h-96 divide-y divide-border overflow-y-auto">
+        <ul className="stack-in max-h-96 divide-y divide-border overflow-y-auto">
           {alerts.slice(0, 8).map((a) => (
             <li key={a.id}>
               <Link href={a.href} className="flex gap-3 px-4 py-3 hover:bg-muted">
@@ -384,7 +385,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 px-4 pt-2 pb-24 sm:px-6 lg:pb-8">
-          <div className="mx-auto max-w-[1400px] space-y-6">{children}</div>
+          <PageMotion className="mx-auto max-w-[1400px] space-y-6">{children}</PageMotion>
         </main>
       </div>
       <AdminMobileNav />

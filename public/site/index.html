@@ -949,6 +949,25 @@ html.calm .strip-row{animation:none;flex-wrap:wrap;width:auto;justify-content:ce
 .adm-head h1{font-size:var(--text-xl);letter-spacing:-.015em}
 .adm-head h1:focus{outline:none}
 .adm-lead{color:var(--c-ink-2);margin-top:var(--space-2)}
+/* Motion: sections rise in, nav icons magnify like a dock, Publish spins
+   then the status pops, and rings/badges spring. */
+.adm-main > *{animation:nd-rise .55s cubic-bezier(.2,.8,.2,1) backwards}
+.adm-main > *:nth-child(2){animation-delay:.05s}.adm-main > *:nth-child(3){animation-delay:.1s}.adm-main > *:nth-child(4){animation-delay:.15s}.adm-main > *:nth-child(n+5){animation-delay:.2s}
+.adm .stat-cell{animation:nd-rise .55s cubic-bezier(.2,.8,.2,1) backwards}
+.adm .stat-cell:nth-child(2){animation-delay:.06s}.adm .stat-cell:nth-child(3){animation-delay:.12s}.adm .stat-cell:nth-child(4){animation-delay:.18s}
+@keyframes nd-rise{from{opacity:0;transform:translateY(12px)}}
+.adm-nav button{transition:transform .25s cubic-bezier(.3,1.6,.5,1),background-color .15s,color .15s}
+.adm-nav button:hover{transform:scale(1.16)}
+.adm-nav button:has(+ button:hover),.adm-nav button:hover + button{transform:scale(1.06)}
+.adm-head h1{animation:nd-weight .9s cubic-bezier(.3,.7,.2,1) backwards}
+@keyframes nd-weight{from{font-weight:300;opacity:.4}}
+#btn-publish[aria-busy="true"]::before{content:"";width:14px;height:14px;margin-right:8px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nd-spin .7s linear infinite}
+@keyframes nd-spin{to{transform:rotate(360deg)}}
+.adm .pill-status{animation:nd-pop .45s cubic-bezier(.3,1.6,.5,1) backwards}
+.adm-nav .badge{animation:nd-pop .45s .2s cubic-bezier(.3,1.6,.5,1) backwards}
+@keyframes nd-pop{from{opacity:0;transform:scale(.6)}}
+.adm .btn:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){.adm *{animation:none!important;transition:none!important}}
 @media (max-width:860px){
   .adm-body{grid-template-columns:1fr}
   .adm-side{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--c-grey);padding:var(--space-3) var(--gutter)}

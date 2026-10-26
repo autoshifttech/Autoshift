@@ -35,6 +35,8 @@ export function CheckoutDialog({
   const t = useTranslations("Billing");
   const [method, setMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [paying, setPaying] = useState(false);
+  // Card → paid: the button turns into a green "Paid" tick before closing.
+  const [paid, setPaid] = useState(false);
   const tg = useTranslations("Gst");
   const saved = useBillingDetails();
   const setup = useSetup();
@@ -62,7 +64,11 @@ export function CheckoutDialog({
     setPaying(true);
     window.setTimeout(() => {
       setPaying(false);
-      onPaid();
+      setPaid(true);
+      window.setTimeout(() => {
+        setPaid(false);
+        onPaid();
+      }, 900);
     }, 1200);
   };
 
@@ -118,9 +124,24 @@ export function CheckoutDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={paying}>
             {t("cancel")}
           </Button>
-          <Button onClick={pay} disabled={paying || (tried && !valid)} className="gap-1.5">
-            {paying && <Loader2 className="size-4 animate-spin" />}
-            {t("payAmount", { amount: formatMoney(total) })}
+          <Button
+            onClick={pay}
+            disabled={paying || paid || (tried && !valid)}
+            className={cn("gap-1.5 transition-colors", paid && "bg-[#1e6b3a] text-white disabled:opacity-100")}
+          >
+            {paid ? (
+              <span key="paid" className="pop-in inline-flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" className="draw-check size-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+                {t("paid")}
+              </span>
+            ) : (
+              <>
+                {paying && <Loader2 className="size-4 animate-spin" />}
+                {t("payAmount", { amount: formatMoney(total) })}
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

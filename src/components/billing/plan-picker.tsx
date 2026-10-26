@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { RollingNumber } from "@/components/motion/rolling-number";
 import { cn } from "@/lib/utils";
 import {
   PLANS,
@@ -96,7 +97,7 @@ export function PlanPicker({
             </div>
             <p className="mt-1 text-sm text-muted-foreground">{t(`planDesc_${id}`)}</p>
             <p className="mt-4 flex items-baseline gap-1">
-              <span className="text-3xl font-bold tracking-tight text-foreground">{formatInr(monthlyEquivalent(plan, cycle))}</span>
+              <span className="text-3xl font-bold tracking-tight text-foreground"><RollingNumber>{formatInr(monthlyEquivalent(plan, cycle))}</RollingNumber></span>
               <span className="text-sm text-muted-foreground">{t("perMonth")}</span>
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">

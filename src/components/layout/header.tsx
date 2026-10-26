@@ -67,7 +67,7 @@ export function Header() {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
-      <h1 className="min-w-0 truncate text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
+      <h1 key={titleKey} className="title-weight min-w-0 truncate text-xl font-bold tracking-[-0.03em] text-foreground sm:text-2xl">
         {t(titleKey as string)}
       </h1>
 

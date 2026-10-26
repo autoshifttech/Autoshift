@@ -200,7 +200,7 @@ export default function NotificationsPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="stack-in space-y-2">
           {notifications.map((n) => {
             const Icon = TYPE_ICON[n.type] ?? Bell;
             const isUnread = !n.read_at;

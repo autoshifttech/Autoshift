@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
 import { RailTip } from "@/components/layout/rail-tip";
+import { PageMotion } from "@/components/motion/page-motion";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
@@ -67,7 +68,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
             {/* Above every page: writes are being rejected and here's why.
                 Renders nothing unless the account/role failed to resolve. */}
             <AccountAccessAlert />
-            {children}
+            <PageMotion>{children}</PageMotion>
           </main>
         </div>
       </div>

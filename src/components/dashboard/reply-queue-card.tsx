@@ -60,7 +60,7 @@ export function ReplyQueueCard({ data, now }: { data: DashboardOverview | null; 
         ) : data.attention.queue.length === 0 ? (
           <EmptyState icon={CheckCircle2} title={t('empty')} hint={t('emptyHint')} className="mx-2 flex-1" />
         ) : (
-          <ul className="space-y-0.5">
+          <ul className="stack-in space-y-0.5">
             {data.attention.queue.map((q) => {
               const waited = minutesBetween(q.waitingSince, now)
               const windowLeft = (new Date(q.windowClosesAt).getTime() - now) / 60_000

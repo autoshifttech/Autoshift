@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
 
+import { RollingNumber } from "@/components/motion/rolling-number";
 import { cn } from "@/lib/utils";
 import type { BusinessStatus, NumberStatus, Quality, TicketPriority, TicketStatus } from "@/lib/admin/data";
 import type { Severity } from "@/lib/admin/alerts";
@@ -12,7 +13,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{title}</h1>
+        <h1 className="title-weight text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -48,7 +49,7 @@ export function Kpi({ label, value, hint, delta, icon: Icon, tone = "mint", href
         )}
         {delta !== undefined && <Delta value={delta} />}
       </div>
-      <p className="mt-3 text-2xl font-bold tracking-tight text-foreground tabular-nums">{value}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-foreground tabular-nums"><RollingNumber>{value}</RollingNumber></p>
       <p className="text-sm text-muted-foreground">{label}</p>
       {hint && <p className="mt-0.5 text-xs text-muted-foreground/80">{hint}</p>}
     </>

@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Radio, Plus, Loader2, Search, Send, CheckCheck, Eye, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RollingNumber } from '@/components/motion/rolling-number';
 import { useCan } from '@/hooks/use-can';
 import { GatedButton } from '@/components/ui/gated-button';
 import { getBroadcastStatus } from '@/lib/broadcast-status';
@@ -357,7 +358,7 @@ function BroadcastKpis({ broadcasts }: { broadcasts: Broadcast[] }) {
             <Icon className="size-3.5 text-muted-foreground" />
             {label}
           </p>
-          <p className="mt-2 text-[26px] leading-none font-bold tracking-[-0.035em] tabular-nums">{value}</p>
+          <p className="mt-2 text-[26px] leading-none font-bold tracking-[-0.035em] tabular-nums"><RollingNumber>{value}</RollingNumber></p>
           <p className="mt-1.5 text-[11px] text-muted-foreground">{note}</p>
         </section>
       ))}

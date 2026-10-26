@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Change } from '@/lib/dashboard/overview'
+import { RollingNumber } from '@/components/motion/rolling-number'
 import { cn } from '@/lib/utils'
 import { Skeleton } from './skeleton'
 
@@ -73,7 +74,7 @@ export function KpiTile({
         </Tooltip>
       </div>
       <p className="text-2xl leading-none font-semibold tracking-tight text-foreground tabular-nums">
-        {value}
+        <RollingNumber>{value}</RollingNumber>
         {unit ? <span className="ml-1 text-sm font-medium text-muted-foreground">{unit}</span> : null}
       </p>
       <div className="flex items-center justify-between gap-2">
