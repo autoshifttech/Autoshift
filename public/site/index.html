@@ -967,6 +967,13 @@ html.calm .strip-row{animation:none;flex-wrap:wrap;width:auto;justify-content:ce
 .adm-nav .badge{animation:nd-pop .45s .2s cubic-bezier(.3,1.6,.5,1) backwards}
 @keyframes nd-pop{from{opacity:0;transform:scale(.6)}}
 .adm .btn:active{transform:scale(.96)}
+/* Editor messages open like a Dynamic Island at the top centre. */
+body:has(.adm) #toast{top:14px;bottom:auto;transform:translate(-50%,-8px);border-radius:24px;background:#0b0b0c;color:#f5f5f4;padding:12px 20px;font-weight:600;box-shadow:0 18px 40px -16px rgb(0 0 0/.55);clip-path:inset(0 calc(50% - 46px) calc(100% - 36px) round 999px);transition:clip-path .6s cubic-bezier(.25,1.25,.4,1),opacity .3s,transform .5s cubic-bezier(.25,1.25,.4,1)}
+body:has(.adm) #toast.show{transform:translate(-50%,0);clip-path:inset(0 0 0 round 24px)}
+/* Smooth scrolling, and setting groups rise in as they scroll into view. */
+html{scroll-behavior:smooth}
+@supports (animation-timeline: view()){.adm .grp{animation:nd-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 40%}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}body:has(.adm) #toast{transition:none;clip-path:none}}
 @media (prefers-reduced-motion:reduce){.adm *{animation:none!important;transition:none!important}}
 @media (max-width:860px){
   .adm-body{grid-template-columns:1fr}

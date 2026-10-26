@@ -38,12 +38,22 @@ export function ThemedToaster() {
   return (
     <Toaster
       theme={isClient ? mode : DEFAULT_MODE}
-      position="top-right"
+      // Messages open like Apple's Dynamic Island: a black pill at the top
+      // centre that grows out to fit the message (styles in globals.css).
+      position="top-center"
+      offset={14}
+      gap={8}
       toastOptions={{
-        style: {
-          background: "var(--popover)",
-          border: "1px solid var(--border)",
-          color: "var(--popover-foreground)",
+        unstyled: true,
+        classNames: {
+          toast: "island-toast",
+          content: "island-content",
+          title: "island-title",
+          description: "island-desc",
+          icon: "island-icon",
+          actionButton: "island-action",
+          cancelButton: "island-action island-cancel",
+          closeButton: "island-close",
         },
       }}
     />

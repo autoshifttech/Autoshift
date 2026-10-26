@@ -40,6 +40,7 @@ import { relTime } from "@/lib/admin/format";
 import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 
 interface NavItem {
   href: string;
@@ -370,7 +371,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <AdminRail />
       <RailTip />
       {/* The top bar scrolls with the page, so there's no band behind it. */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+      <div id="admin-scroll" className="smooth-scroll flex min-w-0 flex-1 flex-col overflow-y-auto">
         <header className="flex h-16 shrink-0 items-center gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
           <Link href="/admin" className="flex items-center gap-2 lg:hidden">
             <LogoMark className="size-8" />
@@ -386,6 +387,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </header>
         <main className="flex-1 px-4 pt-2 pb-24 sm:px-6 lg:pb-8">
           <PageMotion className="mx-auto max-w-[1400px] space-y-6">{children}</PageMotion>
+          <ScrollReveal rootId="admin-scroll" />
         </main>
       </div>
       <AdminMobileNav />

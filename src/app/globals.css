@@ -441,7 +441,123 @@ html:not([data-theme="autoshift"]) {
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.6); }
 }
+/* Dynamic Island messages (sonner toasts). The pill starts small at the
+   top centre, then opens out to the full message; the text fades in once
+   there is room for it. */
+.island-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* Hug the message like the island does, centred in sonner's column. */
+  width: fit-content;
+  min-width: 180px;
+  max-width: min(calc(var(--width) + 64px), calc(100vw - 24px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  min-height: 44px;
+  padding: 10px 18px 10px 12px;
+  border-radius: 24px;
+  background: #0b0b0c;
+  color: #f5f5f4;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.55), inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  animation: island-open 0.65s cubic-bezier(0.25, 1.25, 0.4, 1) backwards;
+}
+.island-toast > * {
+  animation: island-text 0.35s 0.22s ease-out backwards;
+}
+@keyframes island-open {
+  0% { clip-path: inset(0 calc(50% - 46px) calc(100% - 36px) round 999px); }
+  55% { clip-path: inset(0 0 0 round 30px); }
+  100% { clip-path: inset(0 0 0 round 24px); }
+}
+@keyframes island-text {
+  from { opacity: 0; filter: blur(4px); transform: scale(0.96); }
+}
+.island-content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.island-desc {
+  font-weight: 500;
+  color: rgb(245 245 244 / 0.7);
+}
+.island-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+}
+.island-icon svg {
+  width: 16px;
+  height: 16px;
+}
+[data-sonner-toast][data-type="success"] .island-icon { background: #30d158; color: #062b12; }
+[data-sonner-toast][data-type="error"] .island-icon { background: #ff453a; color: #2b0705; }
+[data-sonner-toast][data-type="warning"] .island-icon { background: #ffd60a; color: #2b2400; }
+[data-sonner-toast][data-type="info"] .island-icon { background: #0a84ff; color: #fff; }
+.island-action {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0c;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.island-cancel {
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+/* Leaving: the pill folds back up into the island. */
+[data-sonner-toast][data-removed="true"] .island-toast,
+.island-toast[data-removed="true"] {
+  animation: island-close 0.35s ease-in forwards;
+}
+@keyframes island-close {
+  to { clip-path: inset(0 calc(50% - 46px) calc(100% - 36px) round 999px); opacity: 0; }
+}
+
+/* Smooth scrolling everywhere, and sections that rise in as they scroll
+   into view (classes set by components/motion/scroll-reveal.tsx). */
+html,
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+.sr-hide {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+}
+.sr-show {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html,
+  .smooth-scroll {
+    scroll-behavior: auto;
+  }
+  .island-toast,
+  .island-toast > *,
+  .sr-show {
+    animation: none !important;
+    transition: none !important;
+  }
+  .sr-hide {
+    opacity: 1;
+    transform: none;
+  }
   .animate-grow-y,
   .animate-grow-x,
   .roll-strip,

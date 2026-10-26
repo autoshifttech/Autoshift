@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
@@ -61,7 +62,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <TrialBanner />
         <LowBalanceBanner />
         {/* The top bar scrolls with the page, so there's no band behind it. */}
-        <div className="flex-1 overflow-y-auto">
+        <div id="app-scroll" className="smooth-scroll flex-1 overflow-y-auto">
           <Header />
           {/* Room at the bottom on phones for the floating nav bar. */}
           <main className="px-4 pt-2 pb-24 sm:px-6 lg:pb-6">
@@ -69,6 +70,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
                 Renders nothing unless the account/role failed to resolve. */}
             <AccountAccessAlert />
             <PageMotion>{children}</PageMotion>
+            <ScrollReveal rootId="app-scroll" />
           </main>
         </div>
       </div>
