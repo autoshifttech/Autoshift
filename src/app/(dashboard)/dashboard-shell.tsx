@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
+import { RailTip } from "@/components/layout/rail-tip";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
@@ -77,6 +78,7 @@ function NavFrame() {
   return (
     <>
       <Sidebar counts={counts} />
+      <RailTip />
       <MobileNav counts={counts} />
     </>
   );

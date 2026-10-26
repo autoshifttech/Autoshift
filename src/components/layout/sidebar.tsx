@@ -96,7 +96,7 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
 ];
 
 /** Shown as icons on the desktop rail; everything else sits under "More". */
-const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings", "/contacts", "/automations", "/insights", "/leads", "/agents", "/wallet"];
+const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings", "/contacts", "/leads", "/automations", "/templates", "/insights", "/notifications", "/agents", "/wallet"];
 /** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
 const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings"];
 
@@ -117,7 +117,7 @@ export function useNavCounts(): NavCounts {
   return { totalUnread: useTotalUnread(), unreadNotifications: useUnreadNotifications() };
 }
 
-function NavBadges({ href, active, counts }: { href: string; active: boolean; counts: NavCounts }) {
+function NavBadges({ href, active, counts, onRail }: { href: string; active: boolean; counts: NavCounts; onRail?: boolean }) {
   const t = useTranslations("Sidebar");
   const { totalUnread, unreadNotifications } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
@@ -129,7 +129,7 @@ function NavBadges({ href, active, counts }: { href: string; active: boolean; co
   }
   if (href === "/notifications" && unreadNotifications > 0) {
     return (
-      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"}>
         {unreadNotifications > 9 ? "9+" : unreadNotifications}
       </span>
     );
@@ -196,14 +196,14 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
       <Link href="/dashboard" aria-label={t("title")} className="mb-3 shrink-0">
         <LogoMark className="size-9" />
       </Link>
-      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 [scrollbar-width:none] [@media(max-height:700px)]:overflow-y-auto">
+      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
         {RAIL_HREFS.map((href) => {
           const item = itemFor(href);
           const active = isActiveHref(pathname, href);
           return (
             <Link key={href} href={href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
               <item.icon className="size-[18px]" />
-              <NavBadges href={href} active={active} counts={counts} />
+              <NavBadges href={href} active={active} counts={counts} onRail />
             </Link>
           );
         })}
@@ -247,7 +247,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
           <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60 transition-colors", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
             <span className="relative">
               <item.icon className="size-5" />
-              <NavBadges href={href} active={active} counts={counts} />
+              <NavBadges href={href} active={active} counts={counts} onRail />
             </span>
             {t(item.labelKey)}
           </Link>

@@ -1136,7 +1136,8 @@ html.calm .mq-row{width:auto;flex-wrap:wrap}html.calm .mq-set[aria-hidden="true"
   background:var(--nd-bg) radial-gradient(1200px 600px at 80% -10%,#fbf3ea,transparent 60%);font-family:"Plus Jakarta Sans",var(--f-body),system-ui,sans-serif}
 .adm .mono,.adm .pill-status,.adm .badge,.adm .adm-nav .grp-label,.adm .stat-cell,.adm .stat-cell *{font-family:inherit}
 .adm .stat-cell small,.adm .stat-cell span{letter-spacing:0}
-.adm-top{background:transparent;border-bottom:0;padding:14px 20px 10px 18px;backdrop-filter:none}
+.adm-top{background:rgb(244 239 231/.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:0;padding:14px 20px 10px 18px;justify-content:flex-start}
+.adm-top .adm-actions{margin-left:auto}
 .adm-tag{border-left:0;padding:2px 8px;border-radius:7px;background:rgb(30 76 65/.08);color:var(--c-green);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .adm-actions .btn-sm{border-radius:11px}
 .adm-actions .btn-ghost{background:var(--nd-card);border:1px solid var(--nd-line);box-shadow:var(--nd-shadow)}
@@ -1145,8 +1146,8 @@ html.calm .mq-row{width:auto;flex-wrap:wrap}html.calm .mq-set[aria-hidden="true"
 .adm-body{grid-template-columns:82px minmax(0,1fr)}
 .adm-side{margin:4px 0 16px 12px;width:58px;background:var(--nd-rail);border:0;border-radius:20px;padding:12px 9px;top:76px;max-height:calc(100vh - 92px);overflow-y:auto;scrollbar-width:none;box-shadow:0 24px 50px -26px rgb(20 14 8/.7)}
 .adm-side::-webkit-scrollbar{display:none}
-/* The search box moves into the top bar. */
-.adm-side input#adm-find{position:fixed;top:16px;left:240px;width:min(300px,calc(100vw - 760px));height:40px;border-radius:12px;border:1px solid var(--nd-line);background:var(--nd-card);box-shadow:var(--nd-shadow);padding:8px 12px 8px 36px;font-size:13.5px;z-index:25;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23898e8a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:15px;background-position:12px 50%}
+/* The search box sits in the top bar (moved there by the script below). */
+.adm-top #adm-find{width:min(320px,34vw);height:40px;margin-right:auto;border-radius:12px;border:1px solid var(--nd-line);background-color:var(--nd-card);box-shadow:var(--nd-shadow);padding:8px 12px 8px 36px;font-size:13.5px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23898e8a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:15px;background-position:12px 50%}
 .adm-nav{padding:0;align-items:center;gap:4px}
 .adm-nav .grp-label{font-size:0;height:1px;width:24px;background:rgb(255 255 255/.12);padding:0;margin:8px auto}
 .adm-nav .grp-label:first-child{display:none}
@@ -1173,7 +1174,10 @@ html.calm .mq-row{width:auto;flex-wrap:wrap}html.calm .mq-set[aria-hidden="true"
   .adm-side{position:fixed;inset:auto 12px 12px;top:auto;width:auto;max-height:none;margin:0;padding:8px;z-index:30;border-radius:20px;overflow-x:auto}
   .adm-nav{flex-direction:row;align-items:center;flex-wrap:nowrap}
   .adm-nav .grp-label{display:block;width:1px;height:24px;margin:0 6px;flex-shrink:0}
-  .adm-side input#adm-find{position:static;width:auto;min-width:160px;height:40px;margin:0 6px 0 0;flex-shrink:0}
+  .adm-top{padding:10px 14px;gap:8px}
+  .adm-top .adm-actions{flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none}
+  .adm-top .pill-status{display:none}
+  .adm-top #adm-find{order:3;flex:1 1 100%;width:100%;margin:0}
   .adm-side{display:flex;align-items:center}
   .adm-main{padding:16px 16px 110px}
   #nd-tip{display:none}
@@ -1215,6 +1219,9 @@ html.calm .mq-row{width:auto;flex-wrap:wrap}html.calm .mq-set[aria-hidden="true"
   };
   var FALLBACK = '<circle cx="12" cy="12" r="9"/>';
   function decorate(){
+    // Search lives in the top bar on every screen size.
+    var find = document.getElementById('adm-find'), top = document.querySelector('.adm-top');
+    if (find && top && find.parentElement !== top){ var brand = top.querySelector('.adm-brand'); top.insertBefore(find, brand ? brand.nextSibling : top.firstChild); }
     var nav = document.getElementById('adm-nav'); if (!nav) return;
     nav.querySelectorAll('button[data-tab]').forEach(function(b){
       if (b.querySelector('.nd-ic')) return;
