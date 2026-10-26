@@ -40,7 +40,7 @@ export function LowBalanceBanner() {
   const balance = balanceOf(wallet.transactions);
   if (balance >= wallet.lowBalanceAlert) return null;
   return (
-    <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-900 sm:text-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+    <div role="status" className="mx-3 mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl border border-amber-200 bg-amber-50 shadow-[var(--shadow-card)] sm:mx-6 px-4 py-2 text-center text-xs text-amber-900 sm:text-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
       <span>{t("lowBanner", { amount: formatMoney(balance, locale) })}</span>
       <Link href="/wallet" className="font-semibold underline underline-offset-2 hover:no-underline">
         {t("topUp")}
