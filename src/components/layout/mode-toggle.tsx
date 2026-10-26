@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
  *
  * 40×40 hit target to match the header's other touch controls.
  */
-export function ModeToggle({ className }: { className?: string }) {
+export function ModeToggle({ className, tip }: { className?: string; /** Show the label as a rail hover name. */ tip?: boolean }) {
   const t = useTranslations("ModeToggle");
   const { mode, toggleMode } = useTheme();
   const goingTo = mode === "dark" ? "light" : "dark";
@@ -26,7 +26,8 @@ export function ModeToggle({ className }: { className?: string }) {
       type="button"
       onClick={toggleMode}
       aria-label={switchLabel}
-      title={switchLabel}
+      title={tip ? undefined : switchLabel}
+      data-tip={tip ? switchLabel : undefined}
       className={cn(
         "flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
         className,

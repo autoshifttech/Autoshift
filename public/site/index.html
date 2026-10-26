@@ -1128,6 +1128,117 @@ html.calm .mq-row{width:auto;flex-wrap:wrap}html.calm .mq-set[aria-hidden="true"
   window.claude = { use: function(name){ return caps[name] ? Promise.resolve(caps[name]) : Promise.reject({ code:'not_declared' }); } };
 })();
 </script>
+<style id="as-admin-design">
+/* AutoShift · website editor in the dashboard design: cream canvas, dark
+   icon rail with hover names, soft rounded cards. Only touches .adm (the
+   editor); the public site is unchanged. */
+.adm{--nd-bg:#f4efe7;--nd-card:#fffdf9;--nd-card2:#f7f3ed;--nd-line:#ece5db;--nd-rail:#1c2320;--nd-shadow:0 1px 2px rgb(60 40 20/.04),0 10px 28px -18px rgb(60 40 20/.25);
+  background:var(--nd-bg) radial-gradient(1200px 600px at 80% -10%,#fbf3ea,transparent 60%);font-family:"Plus Jakarta Sans",var(--f-body),system-ui,sans-serif}
+.adm .mono,.adm .pill-status,.adm .badge,.adm .adm-nav .grp-label,.adm .stat-cell,.adm .stat-cell *{font-family:inherit}
+.adm .stat-cell small,.adm .stat-cell span{letter-spacing:0}
+.adm-top{background:transparent;border-bottom:0;padding:14px 20px 10px 18px;backdrop-filter:none}
+.adm-tag{border-left:0;padding:2px 8px;border-radius:7px;background:rgb(30 76 65/.08);color:var(--c-green);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.adm-actions .btn-sm{border-radius:11px}
+.adm-actions .btn-ghost{background:var(--nd-card);border:1px solid var(--nd-line);box-shadow:var(--nd-shadow)}
+.adm .pill-status{border-radius:11px;border-color:var(--nd-line);background:var(--nd-card);padding:7px 12px;font-size:12px;font-weight:600}
+.adm .pill-status.live{color:#1e6b3a}
+.adm-body{grid-template-columns:82px minmax(0,1fr)}
+.adm-side{margin:4px 0 16px 12px;width:58px;background:var(--nd-rail);border:0;border-radius:20px;padding:12px 9px;top:76px;max-height:calc(100vh - 92px);overflow-y:auto;scrollbar-width:none;box-shadow:0 24px 50px -26px rgb(20 14 8/.7)}
+.adm-side::-webkit-scrollbar{display:none}
+/* The search box moves into the top bar. */
+.adm-side input#adm-find{position:fixed;top:16px;left:240px;width:min(300px,calc(100vw - 760px));height:40px;border-radius:12px;border:1px solid var(--nd-line);background:var(--nd-card);box-shadow:var(--nd-shadow);padding:8px 12px 8px 36px;font-size:13.5px;z-index:25;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23898e8a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:15px;background-position:12px 50%}
+.adm-nav{padding:0;align-items:center;gap:4px}
+.adm-nav .grp-label{font-size:0;height:1px;width:24px;background:rgb(255 255 255/.12);padding:0;margin:8px auto}
+.adm-nav .grp-label:first-child{display:none}
+.adm-nav button{width:40px;height:40px;padding:0;justify-content:center;border-radius:12px;color:rgb(255 255 255/.55);position:relative;flex-shrink:0}
+.adm-nav button > span:not(.badge):not(.nd-ic){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.adm-nav button .nd-ic{display:grid;place-items:center}
+.adm-nav button .nd-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.adm-nav button:hover{background:rgb(255 255 255/.07);color:#fff}
+.adm-nav button[aria-current="page"]{background:#fffdf9;color:#1a1d1b;box-shadow:0 6px 18px -8px rgb(0 0 0/.6)}
+.adm-nav .badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#e2673c;color:#fff;font-size:9.5px;font-weight:700;line-height:12px;border:2px solid var(--nd-rail)}
+.adm-nav .grp-note{color:rgb(255 255 255/.6)!important;font-size:11px;padding:6px 0!important;text-align:center}
+#nd-tip{position:fixed;z-index:60;pointer-events:none;background:#1a1d1b;color:#fff;font:600 12px/1.2 "Plus Jakarta Sans",system-ui,sans-serif;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;transform:translate(-4px,-50%);transition:opacity .15s,transform .15s}
+#nd-tip.on{opacity:1;transform:translate(0,-50%)}
+.adm-main{max-width:1120px;padding:20px 28px 80px}
+.adm-head h1{font-size:27px;font-weight:700;letter-spacing:-.03em}
+.adm .stat-cell,.adm .grp{background:var(--nd-card);border:1px solid var(--nd-line);border-radius:20px;box-shadow:var(--nd-shadow)}
+.adm .grp{padding:22px}
+.adm .notice{border-radius:14px}
+.adm input,.adm select,.adm textarea{border-radius:11px;border-color:#ddd5c9;background:var(--nd-card)}
+.adm input:focus,.adm select:focus,.adm textarea:focus{border-color:var(--c-green);box-shadow:0 0 0 3px rgb(30 76 65/.1);outline:none}
+.adm .btn{border-radius:11px}
+@media (max-width:860px){
+  .adm-body{grid-template-columns:1fr}
+  .adm-side{position:fixed;inset:auto 12px 12px;top:auto;width:auto;max-height:none;margin:0;padding:8px;z-index:30;border-radius:20px;overflow-x:auto}
+  .adm-nav{flex-direction:row;align-items:center;flex-wrap:nowrap}
+  .adm-nav .grp-label{display:block;width:1px;height:24px;margin:0 6px;flex-shrink:0}
+  .adm-side input#adm-find{position:static;width:auto;min-width:160px;height:40px;margin:0 6px 0 0;flex-shrink:0}
+  .adm-side{display:flex;align-items:center}
+  .adm-main{padding:16px 16px 110px}
+  #nd-tip{display:none}
+}
+</style>
+<script id="as-admin-rail">/* Icons and hover names for the editor's sections. */
+(function(){
+  var P = {
+    dashboard:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    leads:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    growth:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>',
+    offer:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+    demo:'<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/>',
+    magnet:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    site:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+    theme:'<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>',
+    navigation:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+    pages:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+    custompages:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M12 18v-6M9 15h6"/>',
+    media:'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
+    backgrounds:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18M17 7.5h4M17 16.5h4"/>',
+    hero:'<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/>',
+    sections:'<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="18" height="7" x="3" y="14" rx="1"/>',
+    showcase:'<path d="M2 3h20M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3M7 21l5-5 5 5"/>',
+    stats:'<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+    services:'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    specialized:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/>',
+    work:'<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+    process:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 6h3a3 3 0 0 1 3 3v0M9 18h3a3 3 0 0 0 3-3v0"/>',
+    tools:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    pricing:'<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3M9 13c6.667 0 6.667-10 0-10"/>',
+    about:'<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+    insights:'<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>',
+    testimonials:'<path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2zM5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/>',
+    faq:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>',
+    contact:'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    cta:'<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+    backup:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>'
+  };
+  var FALLBACK = '<circle cx="12" cy="12" r="9"/>';
+  function decorate(){
+    var nav = document.getElementById('adm-nav'); if (!nav) return;
+    nav.querySelectorAll('button[data-tab]').forEach(function(b){
+      if (b.querySelector('.nd-ic')) return;
+      var label = (b.querySelector('span') || b).textContent.trim();
+      b.setAttribute('aria-label', label); b.dataset.tip = label;
+      var s = document.createElement('span'); s.className = 'nd-ic'; s.setAttribute('aria-hidden', 'true');
+      s.innerHTML = '<svg viewBox="0 0 24 24">' + (P[b.dataset.tab] || FALLBACK) + '</svg>';
+      b.insertBefore(s, b.firstChild);
+    });
+  }
+  var tip = null;
+  function show(b){
+    if (!tip){ tip = document.createElement('div'); tip.id = 'nd-tip'; document.body.appendChild(tip); }
+    var r = b.getBoundingClientRect(); tip.textContent = b.dataset.tip; tip.style.left = (r.right + 12) + 'px'; tip.style.top = (r.top + r.height / 2) + 'px'; tip.classList.add('on');
+  }
+  function hide(){ if (tip) tip.classList.remove('on'); }
+  document.addEventListener('mouseover', function(e){ var b = e.target.closest && e.target.closest('#adm-nav button[data-tip]'); if (b) show(b); else hide(); });
+  document.addEventListener('focusin', function(e){ var b = e.target.closest && e.target.closest('#adm-nav button[data-tip]'); if (b) show(b); else hide(); });
+  document.addEventListener('scroll', hide, true);
+  function watch(){ var root = document.getElementById('admin'); if (!root) return setTimeout(watch, 300); new MutationObserver(decorate).observe(root, { childList:true, subtree:true }); decorate(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+})();
+</script>
+
 <script id="as-app">
 (function(){
 'use strict';

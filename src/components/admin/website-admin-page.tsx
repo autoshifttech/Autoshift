@@ -33,10 +33,10 @@ export function WebsiteAdminPage() {
   };
 
   return (
-    <div className="flex h-dvh flex-col bg-background">
+    <div className="app-canvas flex h-dvh flex-col bg-background">
       {/* Full screen: the platform admin's sidebar and header are left behind. */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:px-4">
-        <Link href="/admin" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium text-foreground hover:bg-muted">
+      <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 sm:px-4">
+        <Link href="/admin" className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground shadow-[var(--shadow-card)] hover:bg-card-2">
           <ArrowLeft className="size-4" />
           <span className="hidden sm:inline">Back to admin panel</span>
           <span className="sm:hidden">Admin</span>
@@ -54,13 +54,13 @@ export function WebsiteAdminPage() {
           <span className="hidden sm:inline">Reset</span>
         </Button>
       </div>
-      <p className="flex items-start gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-1.5 text-xs text-amber-900 dark:text-amber-200">
+      <p className="mx-3 mb-2 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-xs text-amber-900 sm:mx-4 dark:text-amber-200">
         <Info className="mt-0.5 size-3.5 shrink-0" />
         <span>
           Design preview: Publish saves changes in this browser only<span className="hidden sm:inline">, so you see them on the site here. Once the backend is connected, Publish will update the live site for every visitor</span>.
         </span>
       </p>
-      <iframe key={frameKey} src={EDITOR_URL} title="Website admin" className="min-h-0 w-full flex-1 border-0 bg-background" />
+      <iframe key={frameKey} src={EDITOR_URL} title="Website admin" className="min-h-0 w-full flex-1 border-0 border-t border-border bg-background" />
 
       <Dialog open={resetting} onOpenChange={setResetting}>
         <DialogContent className="sm:max-w-sm">

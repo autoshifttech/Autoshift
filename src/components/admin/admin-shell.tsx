@@ -161,7 +161,7 @@ function AdminRail() {
       <Link href="/admin" aria-label="AutoShift admin" className="mb-3 shrink-0">
         <LogoMark className="size-9" />
       </Link>
-      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
+      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 [scrollbar-width:none] [@media(max-height:700px)]:overflow-y-auto">
         {RAIL_HREFS.map((href) => {
           const item = itemFor(href);
           const active = current?.href === href;
@@ -182,7 +182,7 @@ function AdminRail() {
         </Popover>
       </nav>
       <span className="my-1.5 h-px w-6 shrink-0 bg-white/10" />
-      <ModeToggle className={cn(railButton, "size-10 rounded-xl")} />
+      <ModeToggle tip className={cn(railButton, "size-10 rounded-xl")} />
       <Link href="/admin/settings" aria-label="Alert settings" data-tip="Alert settings" aria-current={current?.href === "/admin/settings" ? "page" : undefined} className={cn(railButton, current?.href === "/admin/settings" && railActive)}>
         <Settings2 className="size-[18px]" />
       </Link>
