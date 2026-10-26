@@ -59,14 +59,17 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <ViewAsBanner />
         <TrialBanner />
         <LowBalanceBanner />
-        <Header />
-        {/* Room at the bottom on phones for the floating nav bar. */}
-        <main className="flex-1 overflow-y-auto px-4 pt-2 pb-24 sm:px-6 lg:pb-6">
-          {/* Above every page: writes are being rejected and here's why.
-              Renders nothing unless the account/role failed to resolve. */}
-          <AccountAccessAlert />
-          {children}
-        </main>
+        {/* The top bar scrolls with the page, so there's no band behind it. */}
+        <div className="flex-1 overflow-y-auto">
+          <Header />
+          {/* Room at the bottom on phones for the floating nav bar. */}
+          <main className="px-4 pt-2 pb-24 sm:px-6 lg:pb-6">
+            {/* Above every page: writes are being rejected and here's why.
+                Renders nothing unless the account/role failed to resolve. */}
+            <AccountAccessAlert />
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -140,18 +140,18 @@ html[data-mode="dark"] {
 html[data-mode="light"] {
   /* AutoShift light: warm cream ground, white rounded cards, soft lines. */
   --background: #f4efe7;
-  --foreground: #1a1d1b;
+  --foreground: #121413;
   --card: #fffdf9;
   --card-2: #f7f3ed;
-  --card-foreground: #1a1d1b;
+  --card-foreground: #121413;
   --popover: #fffdf9;
-  --popover-foreground: #1a1d1b;
+  --popover-foreground: #121413;
   --secondary: #f1ede4;
-  --secondary-foreground: #1a1d1b;
+  --secondary-foreground: #121413;
   --muted: #f1ede4;
-  --muted-foreground: #565e5a;
+  --muted-foreground: #3f4542;
   --accent: #efebe2;
-  --accent-foreground: #1a1d1b;
+  --accent-foreground: #121413;
   --destructive: #b42318;
   --border: #ece5db;
   --input: #ddd5c9;
@@ -166,9 +166,9 @@ html[data-mode="light"] {
   --ink: #17201d;
   --canvas-glow: radial-gradient(1200px 600px at 80% -10%, #fbf3ea, transparent 60%), radial-gradient(900px 500px at -10% 0%, #f0f4ef, transparent 60%);
   --sidebar: #ffffff;
-  --sidebar-foreground: #1a1d1b;
+  --sidebar-foreground: #121413;
   --sidebar-accent: #f4f1ea;
-  --sidebar-accent-foreground: #1a1d1b;
+  --sidebar-accent-foreground: #121413;
   --sidebar-border: #e7e3da;
   --status-good: #1e6b3a;
   --status-warning: #8a5a00;
@@ -353,6 +353,8 @@ html:not([data-theme="autoshift"]) {
   }
   body {
     @apply bg-background text-foreground;
+    /* Medium weight by default: bolder, easier-to-read text. */
+    font-weight: 500;
   }
   .recharts-cartesian-axis-tick-value {
     fill: var(--muted-foreground);
