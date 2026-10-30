@@ -33,9 +33,9 @@ function useIsClient() {
  * server emitted and React logs a hydration mismatch.
  */
 /** How long a message stays when the caller doesn't say. */
-const DEFAULT_MS = 4600;
+const DEFAULT_MS = 5000;
 /** Time the closing beat (text fades, pill folds, circle rises) needs. */
-const CLOSE_MS = 1100;
+const CLOSE_MS = 1500;
 
 /**
  * Tells each message when to start folding away. The closing animation is

@@ -150,39 +150,45 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
   );
 }
 
-/** Desktop: every admin page as an icon, grouped, with hover names. */
+/** The desktop rail shows these six; the rest open from the dots. */
+const RAIL_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/plans", "/admin/whatsapp", "/admin/support"];
+
+/** Desktop: a short pill of the main pages, the rest behind the dots. */
 function AdminRail() {
   const pathname = usePathname();
   const { tickets } = useAdmin();
   const openTickets = tickets.filter((t) => t.status === "open").length;
   const current = activeItem(pathname);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const inMore = !!current && !RAIL_HREFS.includes(current.href);
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden max-h-[calc(100dvh-1.5rem)] w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex">
+    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex">
       <Link href="/admin" aria-label="AutoShift admin" className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
       </Link>
-      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
-        {ADMIN_NAV.map((group, gi) => (
-          <div key={group.label} role="group" aria-label={group.label} className="flex flex-col items-center gap-1">
-            {gi > 0 && <span aria-hidden className="my-1.5 h-px w-6 bg-white/15" />}
-            {group.items.map((item) => {
-              const active = current?.href === item.href;
-              return (
-                <Link key={item.href} href={item.href} aria-label={item.label} data-tip={item.label} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
-                  <item.icon className="size-[18px]" />
-                  <SupportBadge href={item.href} count={openTickets} />
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+      <nav className="flex flex-col items-center gap-0.5">
+        {RAIL_HREFS.map((href) => {
+          const item = itemFor(href);
+          const active = current?.href === href;
+          return (
+            <Link key={href} href={href} aria-label={item.label} data-tip={item.label} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+              <item.icon className="size-[18px]" />
+              <SupportBadge href={href} count={openTickets} />
+            </Link>
+          );
+        })}
+        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+          <PopoverTrigger aria-label="More pages" data-tip="More" className={cn(railButton, inMore && railActive)}>
+            <MoreHorizontal className="size-[18px]" />
+          </PopoverTrigger>
+          <PopoverContent side="right" align="center" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
+            <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
+          </PopoverContent>
+        </Popover>
       </nav>
       <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
       <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip="Website admin" className={railButton}>
         <Globe className="size-[18px]" />
-      </Link>
-      <Link href="/dashboard" aria-label="Open the business app" data-tip="Open the business app" className={railButton}>
-        <BarChart3 className="size-[18px]" />
       </Link>
       <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
     </aside>

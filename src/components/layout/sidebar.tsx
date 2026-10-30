@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { openPalette } from "@/components/layout/command-palette";
 
@@ -98,6 +99,9 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
 
 /** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
 const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings"];
+
+/** The desktop rail shows these seven; the rest open from the dots. */
+const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings", "/contacts", "/automations", "/insights"];
 
 const allItems = navGroups.flatMap((g) => g.items);
 const itemFor = (href: string) => allItems.find((i) => i.href === href)!;
@@ -184,11 +188,15 @@ const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const current = [...allItems].sort((x, y) => y.href.length - x.href.length).find((i) => isActiveHref(pathname, i.href));
+  const inMore = !!current && !RAIL_HREFS.includes(current.href) && current.href !== "/settings";
+  const moreBadge = counts.unreadNotifications > 0;
 
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden max-h-[calc(100dvh-1.5rem)] w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex"
+      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex"
     >
       <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
@@ -196,25 +204,33 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
       <button type="button" onClick={openPalette} aria-label={t("search")} data-tip={t("search")} className={cn(railButton, "mb-1")}>
         <Search className="size-[18px]" />
       </button>
-      {/* Every page, in its group; scrolls on short screens. */}
-      <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
-        {navGroups.map((group, gi) => (
-          <div key={group.labelKey} role="group" aria-label={t(group.labelKey)} className="flex flex-col items-center gap-1">
-            {gi > 0 && <span aria-hidden className="my-1.5 h-px w-6 bg-white/15" />}
-            {group.items.map((item) => {
-              const active = isActiveHref(pathname, item.href);
-              return (
-                <Link key={item.href} href={item.href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
-                  <item.icon className="size-[18px]" />
-                  <NavBadges href={item.href} active={active} counts={counts} onRail />
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+      <nav className="flex flex-col items-center gap-0.5">
+        {RAIL_HREFS.map((href) => {
+          const item = itemFor(href);
+          const active = isActiveHref(pathname, href);
+          return (
+            <Link key={href} href={href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+              <item.icon className="size-[18px]" />
+              <NavBadges href={href} active={active} counts={counts} onRail />
+            </Link>
+          );
+        })}
+        {/* Everything else opens from the dots. */}
+        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+          <PopoverTrigger aria-label={t("more")} data-tip={t("more")} className={cn(railButton, inMore && railActive)}>
+            <MoreHorizontal className="size-[18px]" />
+            {moreBadge && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full border-2 border-[var(--rail)] bg-[#c2410c]" />}
+          </PopoverTrigger>
+          <PopoverContent side="right" align="center" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
+            <MorePages pathname={pathname} exclude={[...RAIL_HREFS, "/settings"]} onPick={() => setMoreOpen(false)} counts={counts} />
+          </PopoverContent>
+        </Popover>
       </nav>
       <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
       <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
+      <Link href="/settings" aria-label={t("settings")} data-tip={t("settings")} aria-current={isActiveHref(pathname, "/settings") ? "page" : undefined} className={cn(railButton, isActiveHref(pathname, "/settings") && railActive)}>
+        <Settings className="size-[18px]" />
+      </Link>
     </aside>
   );
 }
