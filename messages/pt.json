@@ -3363,6 +3363,8 @@
     "upgrade": "Ver planos",
     "trialBanner": "{days, plural, =0 {Seu teste grátis termina hoje.} one {Falta # dia no seu teste grátis.} other {Faltam # dias no seu teste grátis.}}",
     "choosePlanShort": "Escolher um plano",
+    "trialShort": "{days, plural, =0 {Termina hoje} one {# dia restante} other {# dias restantes}}",
+    "upgrade": "Assinar",
     "finishSetup": "Concluir configuração"
   },
   "Bookings": {

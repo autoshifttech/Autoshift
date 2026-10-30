@@ -3363,6 +3363,8 @@
     "upgrade": "See plans",
     "trialBanner": "{days, plural, =0 {Your free trial ends today.} one {# day left in your free trial.} other {# days left in your free trial.}}",
     "choosePlanShort": "Choose a plan",
+    "trialShort": "{days, plural, =0 {Ends today} one {# day left} other {# days left}}",
+    "upgrade": "Upgrade",
     "finishSetup": "Finish setup"
   },
   "Bookings": {

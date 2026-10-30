@@ -3363,6 +3363,8 @@
     "upgrade": "요금제 보기",
     "trialBanner": "{days, plural, =0 {무료 체험이 오늘 끝납니다.} other {무료 체험이 #일 남았습니다.}}",
     "choosePlanShort": "요금제 선택",
+    "trialShort": "{days, plural, =0 {오늘 종료} other {#일 남음}}",
+    "upgrade": "업그레이드",
     "finishSetup": "설정 마저 하기"
   },
   "Bookings": {

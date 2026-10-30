@@ -25,7 +25,6 @@ import {
   MoreHorizontal,
   Radio,
   Repeat,
-  Search,
   Settings,
   ShieldCheck,
   Target,
@@ -38,7 +37,6 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ModeToggle } from "@/components/layout/mode-toggle";
-import { openPalette } from "@/components/layout/command-palette";
 
 interface NavItem {
   href: string;
@@ -201,9 +199,6 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
       <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
       </Link>
-      <button type="button" onClick={openPalette} aria-label={t("search")} data-tip={t("search")} className={cn(railButton, "mb-1")}>
-        <Search className="size-[18px]" />
-      </button>
       <nav className="flex flex-col items-center gap-0.5">
         {RAIL_HREFS.map((href) => {
           const item = itemFor(href);
