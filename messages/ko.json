@@ -3701,6 +3701,7 @@
     "pay": "{amount} 결제",
     "topUpDone": "지갑에 {amount}이(가) 추가되었습니다.",
     "badgeLabel": "지갑 잔액 {amount}",
+    "lowShort": "잔액 부족 · {amount}",
     "lowBanner": "지갑 잔액이 부족합니다({amount}). 잔액이 0이 되면 AI 답변과 캠페인이 멈춥니다."
   },
   "Summary": {

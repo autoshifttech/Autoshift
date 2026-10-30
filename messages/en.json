@@ -3701,6 +3701,7 @@
     "pay": "Pay {amount}",
     "topUpDone": "{amount} added to your wallet.",
     "badgeLabel": "Wallet balance {amount}",
+    "lowShort": "Low balance · {amount}",
     "lowBanner": "Wallet balance is low ({amount}). AI replies and campaigns pause at zero."
   },
   "Summary": {

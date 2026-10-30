@@ -3701,6 +3701,7 @@
     "pay": "Pagar {amount}",
     "topUpDone": "{amount} adicionados à sua carteira.",
     "badgeLabel": "Saldo da carteira {amount}",
+    "lowShort": "Saldo baixo · {amount}",
     "lowBanner": "Saldo da carteira baixo ({amount}). Respostas da IA e campanhas pausam em zero."
   },
   "Summary": {

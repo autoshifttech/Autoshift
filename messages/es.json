@@ -3701,6 +3701,7 @@
     "pay": "Pagar {amount}",
     "topUpDone": "{amount} añadidos a tu monedero.",
     "badgeLabel": "Saldo del monedero {amount}",
+    "lowShort": "Saldo bajo · {amount}",
     "lowBanner": "Saldo del monedero bajo ({amount}). Las respuestas de IA y las campañas se pausan en cero."
   },
   "Summary": {
