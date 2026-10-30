@@ -169,22 +169,22 @@ export function DataTable({ head, children, empty, className }: { head: ReactNod
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full min-w-[640px] text-sm">
         <thead>
-          <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+          <tr className="border-b border-border bg-muted/40 text-left text-xs font-semibold tracking-wide text-muted-foreground">
             {head.map((h, i) => (
-              <th key={i} className="relative px-3 py-2.5 font-medium whitespace-nowrap first:pl-5 last:pr-5">
+              <th key={i} className="relative px-3 py-2 font-semibold whitespace-nowrap first:pl-5 last:pr-5">
                 {h || <span className="sr-only">Actions</span>}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">{children}</tbody>
+        <tbody className="divide-y divide-border [&>tr]:transition-colors [&>tr:hover]:bg-muted/40">{children}</tbody>
       </table>
       {empty}
     </div>
   );
 }
 
-export const td = "px-3 py-3 align-middle first:pl-5 last:pr-5";
+export const td = "px-3 py-2.5 align-middle first:pl-5 last:pr-5";
 
 /** Segmented control used for filters and ranges. */
 export function Segmented<T extends string>({ value, options, onChange, className }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; className?: string }) {

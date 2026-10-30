@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -37,6 +37,7 @@ import { buildAlerts } from "@/lib/admin/alerts";
 import { ROLE_LABEL } from "@/lib/admin/data";
 import { CURRENT_ADMIN, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { relTime } from "@/lib/admin/format";
+import { AdminCommandPalette } from "./admin-command-palette";
 import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
@@ -237,68 +238,18 @@ function AdminMobileNav() {
   );
 }
 
-function BusinessSearch() {
-  const router = useRouter();
-  const businesses = useBusinesses();
-  const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
-  const box = useRef<HTMLDivElement>(null);
-  const results = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return [];
-    return businesses.filter((b) => `${b.name} ${b.owner.name} ${b.owner.email} ${b.whatsapp.number} ${b.city}`.toLowerCase().includes(s)).slice(0, 6);
-  }, [q, businesses]);
-
-  useEffect(() => {
-    const onDown = (e: MouseEvent) => box.current && !box.current.contains(e.target as Node) && setOpen(false);
-    window.addEventListener("mousedown", onDown);
-    return () => window.removeEventListener("mousedown", onDown);
-  }, []);
-
-  const go = (id: string) => {
-    setOpen(false);
-    setQ("");
-    router.push(`/admin/businesses/${id}`);
-  };
-
+function PaletteButton({ onOpen }: { onOpen: () => void }) {
   return (
-    <div ref={box} className="relative hidden w-full max-w-sm md:block">
-      <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-      <input
-        value={q}
-        onChange={(e) => {
-          setQ(e.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && results[0]) go(results[0].id);
-          if (e.key === "Escape") setOpen(false);
-        }}
-        placeholder="Find a business, owner, email or number…"
-        aria-label="Find a business"
-        className="h-10 w-full rounded-full liquid-glass pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
-      />
-      {open && q.trim() && (
-        <div className="absolute top-11 right-0 left-0 z-50 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
-          {results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted-foreground">No business matches “{q}”.</p>
-          ) : (
-            results.map((b) => (
-              <button key={b.id} type="button" onClick={() => go(b.id)} className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted">
-                <Initials name={b.name} className="size-7 text-xs" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">{b.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {b.owner.name} · {b.city}
-                  </span>
-                </span>
-              </button>
-            ))
-          )}
-        </div>
-      )}
-    </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label="Search the admin panel"
+      className="hidden h-10 w-full max-w-sm items-center gap-2 rounded-full liquid-glass pr-2 pl-3.5 text-left text-sm font-semibold transition-[filter] hover:brightness-105 md:inline-flex"
+    >
+      <Search className="size-4 shrink-0" />
+      <span className="min-w-0 flex-1 truncate">Find a page, business, owner or number…</span>
+      <kbd className="rounded-md border border-foreground/15 px-1.5 py-0.5 text-xs font-medium">Ctrl K</kbd>
+    </button>
   );
 }
 
@@ -374,8 +325,10 @@ function AdminMenu() {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  const [paletteOpen, setPaletteOpen] = useState(false);
   return (
     <div className="app-canvas admin-canvas flex h-dvh overflow-hidden bg-background">
+      <AdminCommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} nav={ADMIN_NAV} />
       <AdminRail />
       <RailTip />
       {/* The top bar scrolls with the page, so there's no band behind it. */}
@@ -386,7 +339,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-xs font-bold tracking-wider text-primary uppercase">Admin</span>
           </Link>
           <div className="flex flex-1 justify-end lg:justify-start">
-            <BusinessSearch />
+            <PaletteButton onOpen={() => setPaletteOpen(true)} />
           </div>
           <div className="flex items-center gap-2">
             <AlertsBell />
