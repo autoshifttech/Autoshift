@@ -15,7 +15,7 @@ export const STATUS_TONE: Record<BookingStatus, string> = {
 export function StatusChip({ status, className }: { status: BookingStatus; className?: string }) {
   const t = useTranslations("Bookings");
   return (
-    <span className={cn("inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_TONE[status], className)}>
+    <span className={cn("inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium", STATUS_TONE[status], className)}>
       {t(`status_${status}`)}
     </span>
   );

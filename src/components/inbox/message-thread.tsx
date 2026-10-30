@@ -961,9 +961,9 @@ export function MessageThread({
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <MessageSquare className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-sm font-medium text-muted-foreground">
+        <h2 className="mt-4 text-sm font-medium text-muted-foreground">
           {t("selectConversation")}
-        </h3>
+        </h2>
         <p className="mt-1 text-xs text-muted-foreground">
           {t("selectConversationHint")}
         </p>
@@ -1022,7 +1022,7 @@ export function MessageThread({
           <Badge
             variant="outline"
             className={cn(
-              "ml-1 hidden gap-1 border-border text-[10px] sm:inline-flex sm:ml-2",
+              "ml-1 hidden gap-1 border-border text-xs sm:inline-flex sm:ml-2",
               sessionInfo.expired ? "text-red-700 dark:text-red-400" : "text-primary"
             )}
           >
@@ -1204,7 +1204,7 @@ export function MessageThread({
               <div key={group.date}>
                 {/* Date separator */}
                 <div className="mb-4 flex items-center justify-center">
-                  <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                     {formatDateSeparator(group.date, t)}
                   </span>
                 </div>

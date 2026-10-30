@@ -583,6 +583,7 @@
   "Contacts": {
     "page": {
       "title": "연락처",
+      "rowActions": "행 작업",
       "subtitle": "연락처 목록을 관리하세요. 전체 연락처 {count}개.",
       "subtitleZero": "연락처 목록을 관리하세요.",
       "customFieldsBtn": "커스텀 필드",

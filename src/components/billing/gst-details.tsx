@@ -18,7 +18,7 @@ export function GstDetailsForm({ value, onChange, showErrors }: { value: Billing
   const set = (patch: Partial<BillingDetails>) => onChange({ ...value, ...patch });
   const message = (f: BillingField) => {
     const e = err(f);
-    return e ? <p className="text-xs text-rose-600">{t(`error_${f}_${e}`)}</p> : null;
+    return e ? <p className="text-xs text-rose-700 dark:text-rose-400">{t(`error_${f}_${e}`)}</p> : null;
   };
   const field = (f: BillingField, label: string, props: React.ComponentProps<typeof Input> = {}) => (
     <div className="space-y-1">

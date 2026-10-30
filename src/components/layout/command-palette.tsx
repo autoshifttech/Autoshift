@@ -107,7 +107,7 @@ export function CommandPalette() {
             aria-label={t("placeholder")}
             className="h-12 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">Esc</kbd>
+          <kbd className="rounded border border-border px-1.5 py-0.5 text-xs text-muted-foreground">Esc</kbd>
         </div>
         <ul ref={listRef} role="listbox" className="max-h-[50vh] overflow-y-auto p-2">
           {results.length === 0 && <li className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults", { query })}</li>}
@@ -117,7 +117,7 @@ export function CommandPalette() {
             const Icon = item.icon;
             return (
               <li key={item.id} role="presentation">
-                {header && <p className="px-3 pt-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">{header}</p>}
+                {header && <p className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">{header}</p>}
                 <button
                   type="button"
                   role="option"
@@ -151,7 +151,7 @@ export function SearchButton() {
     >
       <Search className="size-3.5" />
       <span className="w-24 text-left lg:w-36">{t("button")}</span>
-      <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[10px]">Ctrl K</kbd>
+      <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-xs">Ctrl K</kbd>
     </button>
   );
 }

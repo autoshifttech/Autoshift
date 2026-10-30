@@ -187,7 +187,7 @@ export default function BroadcastsPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="sr-only">{t('title')}</h1>
+          <h2 className="sr-only">{t('title')}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t('subtitle')}
           </p>
@@ -280,7 +280,7 @@ export default function BroadcastsPage() {
                     <TableCell className="font-medium text-foreground">
                       {broadcast.name}
                       {broadcast.status === 'sending' && broadcast.total_recipients > 0 && (
-                        <span className="mt-1.5 flex items-center gap-2 text-[11px] font-normal text-muted-foreground">
+                        <span className="mt-1.5 flex items-center gap-2 text-xs font-normal text-muted-foreground">
                           <span className="h-1.5 w-28 overflow-hidden rounded-full bg-muted">
                             <span className="block h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${percent(broadcast.sent_count, broadcast.total_recipients)}%` }} />
                           </span>
@@ -359,7 +359,7 @@ function BroadcastKpis({ broadcasts }: { broadcasts: Broadcast[] }) {
             {label}
           </p>
           <p className="mt-2 text-[26px] leading-none font-bold tracking-[-0.035em] tabular-nums"><RollingNumber>{value}</RollingNumber></p>
-          <p className="mt-1.5 text-[11px] text-muted-foreground">{note}</p>
+          <p className="mt-1.5 text-xs text-muted-foreground">{note}</p>
         </section>
       ))}
     </div>

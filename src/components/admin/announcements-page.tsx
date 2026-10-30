@@ -45,7 +45,7 @@ function Preview({ d }: { d: Pick<Draft, "title" | "body" | "kind"> }) {
     );
   return (
     <div className="rounded-xl border border-border bg-card p-3">
-      <span className="rounded-full bg-[var(--tone-mint)] px-2 py-0.5 text-[10px] font-semibold text-primary uppercase">New</span>
+      <span className="rounded-full bg-[var(--tone-mint)] px-2 py-0.5 text-xs font-semibold text-primary uppercase">New</span>
       <p className="mt-1.5 text-sm font-semibold text-foreground">{d.title || "Your title"}</p>
       <p className="text-xs text-muted-foreground">{d.body || "What changed and why it helps."}</p>
     </div>
@@ -192,7 +192,7 @@ export function AnnouncementsPage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="an-body">Message</Label>
                     <Textarea id="an-body" rows={3} value={draft.body} maxLength={280} onChange={(e) => setDraft({ ...draft, body: e.target.value })} placeholder="One or two short sentences." />
-                    <p className="text-right text-[11px] text-muted-foreground">{draft.body.length}/280</p>
+                    <p className="text-right text-xs text-muted-foreground">{draft.body.length}/280</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
@@ -204,7 +204,7 @@ export function AnnouncementsPage() {
                           </option>
                         ))}
                       </NativeSelect>
-                      <p className="text-[11px] text-muted-foreground">{reach(draft.audience)} businesses</p>
+                      <p className="text-xs text-muted-foreground">{reach(draft.audience)} businesses</p>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="an-when">When</Label>

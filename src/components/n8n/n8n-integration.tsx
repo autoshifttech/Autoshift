@@ -118,8 +118,8 @@ export function N8nIntegration() {
             <ArrowLeft className="size-4" /> {t("back")}
           </Link>
           <div className="mt-3 flex items-center gap-3">
-            <span className="rounded-lg bg-[#EA4B71] px-2 py-1 font-mono text-sm font-bold text-white">n8n</span>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">{t("title")}</h1>
+            <span className="rounded-lg bg-[#C92A55] px-2 py-1 font-mono text-sm font-bold text-white">n8n</span>
+            <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">{t("title")}</h2>
           </div>
           <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
         </div>
@@ -273,7 +273,7 @@ export function N8nIntegration() {
                 <Card className="h-full">
                   <CardContent className="flex h-full flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={cn("rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold", METHOD_TONE[entry.method])}>
+                      <span className={cn("rounded-full px-2.5 py-0.5 font-mono text-xs font-bold", METHOD_TONE[entry.method])}>
                         {entry.method}
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">

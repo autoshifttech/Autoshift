@@ -85,14 +85,14 @@ export function PlanPicker({
             )}
           >
             {plan.popular && (
-              <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
+              <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
                 {t("popular")}
               </span>
             )}
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-foreground">{t(`plan_${id}`)}</h3>
               {current === id && (
-                <span className="rounded-full bg-[var(--tone-mint)] px-2 py-0.5 text-[11px] font-medium text-primary">{t("currentPlan")}</span>
+                <span className="rounded-full bg-[var(--tone-mint)] px-2 py-0.5 text-xs font-medium text-primary">{t("currentPlan")}</span>
               )}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">{t(`planDesc_${id}`)}</p>

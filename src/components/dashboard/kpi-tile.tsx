@@ -111,7 +111,7 @@ export function TargetBar({ value, target }: { value: number | null; target: num
         />
         <div className="absolute -inset-y-1 left-1/2 w-0.5 rounded-full bg-foreground/70" />
       </div>
-      <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground tabular-nums">
+      <div className="mt-1.5 flex justify-between text-xs text-muted-foreground tabular-nums">
         <span>0</span>
         <span>{t('target', { minutes: target })}</span>
         <span>{t('targetMax', { minutes: max })}</span>

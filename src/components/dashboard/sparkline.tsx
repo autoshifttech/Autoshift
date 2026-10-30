@@ -9,7 +9,7 @@ export function Sparkline({ values }: { values: (number | null)[] }) {
     <div className="h-9 w-full" aria-hidden>
       {hasData ? (
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 3, right: 2, bottom: 0, left: 2 }}>
+          <AreaChart accessibilityLayer={false} data={data} margin={{ top: 3, right: 2, bottom: 0, left: 2 }}>
             <YAxis hide domain={['dataMin', 'dataMax']} />
             <Area
               type="monotone"

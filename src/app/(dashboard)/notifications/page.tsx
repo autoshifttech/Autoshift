@@ -167,7 +167,7 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("description")}
           </p>
@@ -252,7 +252,7 @@ export default function NotificationsPage() {
                         {n.body}
                       </p>
                     )}
-                    <p className="mt-1 text-[11px] text-muted-foreground/70">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(n.created_at), {
                         addSuffix: true,
                       })}

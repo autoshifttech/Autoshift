@@ -17,7 +17,7 @@ function Delta({ value }: { value: number | null }) {
   if (value === null) return null;
   const up = value >= 0;
   return (
-    <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium", up ? "bg-[var(--tone-mint)] text-primary" : "bg-destructive/10 text-destructive")}>
+    <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium", up ? "bg-[var(--tone-mint)] text-primary" : "bg-destructive/10 text-destructive")}>
       {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
       {Math.abs(value)}%
     </span>
@@ -63,7 +63,7 @@ export function InsightsPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
         </div>
         <div className="flex items-center gap-2 self-start">
@@ -232,7 +232,7 @@ export function InsightsPage() {
           <div className="grid grid-cols-[56px_repeat(24,minmax(0,1fr))] gap-1">
             <span />
             {Array.from({ length: 24 }, (_, h) => (
-              <span key={h} className="text-center text-[10px] text-muted-foreground">
+              <span key={h} className="text-center text-xs text-muted-foreground">
                 {h % 3 === 0 ? h : ""}
               </span>
             ))}

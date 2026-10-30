@@ -71,7 +71,7 @@ export function AdminLogin() {
         <div className="mb-6 flex items-center justify-center gap-2 text-white">
           <LogoMark className="size-9" />
           <span className="text-xl font-extrabold tracking-tight">AutoShift</span>
-          <span className="rounded-md bg-[#c9f27a] px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-[#10211c] uppercase">Admin</span>
+          <span className="rounded-md bg-[#c9f27a] px-1.5 py-0.5 text-xs font-bold tracking-wider text-[#10211c] uppercase">Admin</span>
         </div>
         <div className="rounded-2xl bg-card p-6 shadow-2xl sm:p-8">
           {step === "password" ? (
@@ -91,7 +91,7 @@ export function AdminLogin() {
                 <Label htmlFor="admin-password">Password</Label>
                 <Input id="admin-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
+              {error && <p className="text-sm text-rose-700 dark:text-rose-400" role="alert">{error}</p>}
               <Button type="submit" className="h-10 w-full" disabled={busy}>
                 {busy && <Loader2 className="size-4 animate-spin" />}
                 Continue
@@ -130,7 +130,7 @@ export function AdminLogin() {
                   />
                 ))}
               </div>
-              {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
+              {error && <p className="text-sm text-rose-700 dark:text-rose-400" role="alert">{error}</p>}
               <Button className="h-10 w-full" disabled={busy} onClick={() => verify(code)}>
                 {busy && <Loader2 className="size-4 animate-spin" />}
                 Verify and sign in

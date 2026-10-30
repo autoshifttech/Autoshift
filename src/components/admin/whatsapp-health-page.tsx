@@ -86,7 +86,7 @@ export function WhatsAppHealthPage() {
               <tr key={b.id} className={cn(b.whatsapp.quality === "red" && "bg-rose-500/[0.04]")}>
                 <td className={td}>
                   <Link href={`/admin/businesses/${b.id}`} className="flex items-center gap-3 hover:underline">
-                    <Initials name={b.name} className="size-8 text-[10px]" />
+                    <Initials name={b.name} className="size-8 text-xs" />
                     <span className="font-medium whitespace-nowrap text-foreground">{b.name}</span>
                   </Link>
                 </td>
@@ -97,7 +97,7 @@ export function WhatsAppHealthPage() {
                 <td className={cn(td, "tabular-nums")}>{b.whatsapp.tier}</td>
                 <td className={cn(td, "tabular-nums")}>{num(b.usage.marketing)}</td>
                 <td className={cn(td, "whitespace-nowrap tabular-nums")}>
-                  {b.whatsapp.templatesApproved} ok{b.whatsapp.templatesRejected > 0 && <span className="text-rose-600"> · {b.whatsapp.templatesRejected} rejected</span>}
+                  {b.whatsapp.templatesApproved} ok{b.whatsapp.templatesRejected > 0 && <span className="text-rose-700 dark:text-rose-400"> · {b.whatsapp.templatesRejected} rejected</span>}
                 </td>
                 <td className={cn(td, "text-right")}>
                   {b.whatsapp.quality !== "green" && (

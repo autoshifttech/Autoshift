@@ -434,18 +434,18 @@ function NodeCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span
-              className="truncate text-[11px] font-semibold tracking-wider uppercase"
+              className="truncate text-xs font-semibold tracking-wider uppercase"
               style={{ color: c.text }}
             >
               {t(`nodes.${node.node_type}.label`)}
             </span>
-            <code className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px]">
+            <code className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
               {node.node_key}
             </code>
             {isEntry && (
               <Badge
                 variant="outline"
-                className="border-primary/40 bg-primary/10 text-primary text-[10px]"
+                className="border-primary/40 bg-primary/10 text-primary text-xs"
               >
                 {t('badgeEntry')}
               </Badge>
@@ -564,7 +564,7 @@ function NodeConfigWithAdvanced({
               />
             </div>
             {hasReplyIds && (
-              <p className="text-muted-foreground text-[10px]">
+              <p className="text-muted-foreground text-xs">
                 {t('replyIdsHint')}
               </p>
             )}
@@ -610,7 +610,7 @@ function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: Retur
           <Fragment key={group.id}>
             {i > 0 && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+              <DropdownMenuLabel className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t(`categories.${group.id}`)}
               </DropdownMenuLabel>
               {group.types.map((t_type) => {

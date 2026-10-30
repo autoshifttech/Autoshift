@@ -768,6 +768,12 @@ html,
   * {
     @apply border-border outline-ring/50;
   }
+  /* A visible keyboard focus everywhere; components with their own ring
+     (outline-none utility) keep it. */
+  :where(a, button, summary, [role="button"], [role="tab"], [role="menuitem"], [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
   body {
     @apply bg-background text-foreground;
     /* Medium weight by default: bolder, easier-to-read text. */

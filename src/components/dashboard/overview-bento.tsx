@@ -115,7 +115,7 @@ function WhoReplied({ data }: { data: DashboardOverview }) {
             <div className="absolute inset-0 grid place-items-center text-center">
               <div>
                 <b className="block text-xl tracking-[-0.03em] tabular-nums">{format.number(total, { notation: 'compact' })}</b>
-                <span className="text-[11px] text-muted-foreground">{t('replies')}</span>
+                <span className="text-xs text-muted-foreground">{t('replies')}</span>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
         <span aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(400px_200px_at_80%_0%,rgb(255_255_255/0.14),transparent_70%)]" />
         <div className="relative flex items-center justify-between">
           <h3 className="text-[15px] font-semibold">{t('handled')}</h3>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold tracking-[0.08em]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2 py-0.5 text-xs font-bold tracking-[0.08em]">
             <span className="size-1.5 animate-pulse rounded-full bg-[#7ff0b8]" />
             {t('live')}
           </span>
@@ -190,7 +190,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
           {bars.map((b, i) => (
             <div key={b.t} className="relative flex h-full flex-col items-center justify-end gap-2" title={`${barLabel(b.t)}: ${format.number(b.total)}`}>
               {i === peakIndex && b.total > 0 && (
-                <b className="absolute left-1/2 -translate-x-1/2 rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold text-[#1a1d1b] shadow-md" style={{ bottom: `calc(${(b.total / peak) * 82}% + 30px)` }}>
+                <b className="absolute left-1/2 -translate-x-1/2 rounded-full bg-white px-1.5 py-0.5 text-xs font-bold text-[#1a1d1b] shadow-md" style={{ bottom: `calc(${(b.total / peak) * 82}% + 30px)` }}>
                   {format.number(b.total, { notation: 'compact' })}
                 </b>
               )}
@@ -198,7 +198,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
                 className={cn('animate-grow-y block w-full max-w-9 rounded-full', i === bars.length - 1 && bars.length > 1 ? 'hatch-light' : 'bg-[#fffdf9]')}
                 style={{ height: `${Math.max(4, (b.total / peak) * 82)}%`, animationDelay: `${i * 50}ms` }}
               />
-              <span className="text-[10px] text-white/75">{barLabel(b.t)}</span>
+              <span className="text-xs text-white/75">{barLabel(b.t)}</span>
             </div>
           ))}
         </div>
@@ -218,7 +218,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
         </div>
       </MiniCard>
 
-      <MiniCard title={tk('readRate')} note={<span className="text-[11px] text-muted-foreground">{data.kpis.broadcastDelivered ? tk('readOfDelivered', { read: format.number(data.kpis.broadcastRead), delivered: format.number(data.kpis.broadcastDelivered) }) : ''}</span>}>
+      <MiniCard title={tk('readRate')} note={<span className="text-xs text-muted-foreground">{data.kpis.broadcastDelivered ? tk('readOfDelivered', { read: format.number(data.kpis.broadcastRead), delivered: format.number(data.kpis.broadcastDelivered) }) : ''}</span>}>
         <Big value={readRate == null ? tk('none') : format.number(readRate * 100, { maximumFractionDigits: 1 })} unit={readRate == null ? undefined : '%'} />
         {readRate == null ? <p className="mt-auto text-xs text-muted-foreground">{tk('noBroadcasts')}</p> : <Ticks pct={readRate * 100} className="bg-[var(--chart-3)]" />}
       </MiniCard>

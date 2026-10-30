@@ -33,7 +33,7 @@ function Preview({ email }: { email: OwnerEmail }) {
           </div>
           <p className="mt-4 text-sm whitespace-pre-wrap text-foreground">{fill(email.body)}</p>
           {email.button && <span className="mt-5 inline-block rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{email.button}</span>}
-          <p className="mt-6 border-t border-border pt-3 text-[11px] text-muted-foreground">You get this because you own a workspace on AutoShift. Manage alerts in Settings → Email &amp; WhatsApp alerts.</p>
+          <p className="mt-6 border-t border-border pt-3 text-xs text-muted-foreground">You get this because you own a workspace on AutoShift. Manage alerts in Settings → Email &amp; WhatsApp alerts.</p>
         </div>
       </div>
     </div>
@@ -81,12 +81,12 @@ function Editor({ saved }: { saved: OwnerEmail }) {
           <p className="text-xs text-muted-foreground">Insert a variable:</p>
           <div className="mt-1.5 flex flex-wrap gap-1">
             {EMAIL_VARIABLES.map((v) => (
-              <button key={v} type="button" onClick={() => setD({ ...d, body: `${d.body}{{${v}}}` })} className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground hover:bg-primary/10">
+              <button key={v} type="button" onClick={() => setD({ ...d, body: `${d.body}{{${v}}}` })} className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground hover:bg-primary/10">
                 {`{{${v}}}`}
               </button>
             ))}
           </div>
-          {unknown.length > 0 && <p className="mt-2 text-xs text-rose-600">Unknown variable: {unknown.map((u) => `{{${u}}}`).join(", ")}. It would be sent as typed.</p>}
+          {unknown.length > 0 && <p className="mt-2 text-xs text-rose-700 dark:text-rose-400">Unknown variable: {unknown.map((u) => `{{${u}}}`).join(", ")}. It would be sent as typed.</p>}
         </div>
         <div className="flex flex-wrap justify-end gap-2">
           {original && JSON.stringify({ ...original, enabled: d.enabled }) !== JSON.stringify(d) && (
@@ -133,7 +133,7 @@ export function EmailsPage() {
         <Panel bodyClassName="p-2">
           {groups.map((g) => (
             <div key={g} className="mb-2">
-              <p className="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{g}</p>
+              <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{g}</p>
               <ul>
                 {emails
                   .filter((x) => x.group === g)
@@ -143,7 +143,7 @@ export function EmailsPage() {
                         <Mail className="size-4 shrink-0" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-medium">{x.name}</span>
-                          <span className="block text-[11px] text-muted-foreground">
+                          <span className="block text-xs text-muted-foreground">
                             {num(x.sent30d)} sent · {pct(x.openRate)} opened
                           </span>
                         </span>

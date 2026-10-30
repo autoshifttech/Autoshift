@@ -190,7 +190,7 @@ export function BusinessesPage() {
                   {b.whatsapp.status === "connected" && <span className="text-xs text-muted-foreground">Quality {QUALITY_META[b.whatsapp.quality].label.toLowerCase()}</span>}
                 </div>
               </td>
-              <td className={cn(td, "tabular-nums", b.wallet < 0 ? "text-rose-600" : b.wallet < 200 ? "text-amber-700 dark:text-amber-400" : "text-foreground")}>{inr(b.wallet, 2)}</td>
+              <td className={cn(td, "tabular-nums", b.wallet < 0 ? "text-rose-700 dark:text-rose-400" : b.wallet < 200 ? "text-amber-700 dark:text-amber-400" : "text-foreground")}>{inr(b.wallet, 2)}</td>
               <td className={cn(td, "tabular-nums")}>{b.mrr ? inr(b.mrr) : "—"}</td>
               <td className={cn(td, "tabular-nums")}>{num(b.usage.marketing + b.usage.utility + b.usage.authentication + b.usage.service)}</td>
               <td className={cn(td, "whitespace-nowrap text-muted-foreground")}>{date(b.createdAt, true)}</td>

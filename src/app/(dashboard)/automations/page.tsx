@@ -166,7 +166,7 @@ export default function AutomationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("subtitle")}
           </p>
@@ -186,7 +186,7 @@ export default function AutomationsPage() {
         href="/automations/n8n"
         className="group flex flex-wrap items-center gap-4 rounded-2xl bg-[var(--tone-lilac)] p-4 ring-1 ring-border transition hover:ring-primary/40 sm:flex-nowrap"
       >
-        <span className="rounded-lg bg-[#EA4B71] px-2 py-1 font-mono text-sm font-bold text-white">n8n</span>
+        <span className="rounded-lg bg-[#C92A55] px-2 py-1 font-mono text-sm font-bold text-white">n8n</span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">{tN8n("title")}</span>
           <span className="block text-sm text-muted-foreground">{tN8n("desc")}</span>
@@ -309,7 +309,7 @@ function AutomationCard({
           {automation.name}
         </button>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className="text-[11px] text-muted-foreground">{automation.is_active ? t("statusActive") : t("statusPaused")}</span>
+          <span className="text-xs text-muted-foreground">{automation.is_active ? t("statusActive") : t("statusPaused")}</span>
           <Switch
             checked={automation.is_active}
             onCheckedChange={(v) => onToggle(!!v)}
@@ -344,12 +344,12 @@ function AutomationCard({
           </DropdownMenu>
         </div>
       </div>
-      <span className={cn("inline-flex w-fit items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-semibold", meta.pillClass)}>
+      <span className={cn("inline-flex w-fit items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-semibold", meta.pillClass)}>
         <Zap className="size-3" aria-hidden />
         {triggerLabel}
       </span>
       {automation.description && <p className="line-clamp-2 min-h-9 text-xs text-muted-foreground">{automation.description}</p>}
-      <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
+      <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs text-muted-foreground">
         <div>
           <dt>{t("runsLabel")}</dt>
           <dd className="text-base font-bold tracking-[-0.02em] text-foreground tabular-nums">{automation.execution_count.toLocaleString()}</dd>

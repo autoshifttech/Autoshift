@@ -87,7 +87,7 @@ export function HelpButton() {
               className="flex w-full items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
             >
               {t("shortcut")}
-              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
+              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs">Ctrl K</kbd>
             </button>
           </div>
         </div>

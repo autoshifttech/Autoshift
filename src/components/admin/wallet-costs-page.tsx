@@ -104,7 +104,7 @@ export function WalletCostsPage() {
                       <StatusPill status={b.status} />
                     </span>
                   </span>
-                  <span className={cn("text-sm font-semibold tabular-nums", b.wallet < 0 ? "text-rose-600" : "text-amber-700 dark:text-amber-400")}>{inr(b.wallet, 2)}</span>
+                  <span className={cn("text-sm font-semibold tabular-nums", b.wallet < 0 ? "text-rose-700 dark:text-rose-400" : "text-amber-700 dark:text-amber-400")}>{inr(b.wallet, 2)}</span>
                 </Link>
               </li>
             ))}

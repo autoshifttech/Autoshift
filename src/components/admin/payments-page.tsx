@@ -135,7 +135,7 @@ export function PaymentsPage() {
                 <td className={cn(td, "whitespace-nowrap text-muted-foreground")}>{dateTime(p.at)}</td>
                 <td className={cn(td, "font-medium")}>{businessById(p.businessId)?.name}</td>
                 <td className={cn(td, "whitespace-nowrap")}>{KIND_LABEL[p.kind]}</td>
-                <td className={cn(td, "whitespace-nowrap tabular-nums", p.amount < 0 && "text-rose-600")}>{inr(p.amount)}</td>
+                <td className={cn(td, "whitespace-nowrap tabular-nums", p.amount < 0 && "text-rose-700 dark:text-rose-400")}>{inr(p.amount)}</td>
                 <td className={cn(td, "whitespace-nowrap tabular-nums")}>{inr(p.amount + p.gst)}</td>
                 <td className={cn(td, "text-xs uppercase text-muted-foreground")}>{p.method}</td>
                 <td className={td}>

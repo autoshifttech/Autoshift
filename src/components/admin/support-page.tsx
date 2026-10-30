@@ -34,12 +34,12 @@ function TicketRow({ t, active, onOpen }: { t: Ticket; active: boolean; onOpen: 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-sm font-semibold text-foreground">{b?.name}</span>
-          <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{relTime(last?.at ?? t.createdAt)}</span>
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground">{relTime(last?.at ?? t.createdAt)}</span>
         </span>
         <span className="block truncate text-sm text-foreground">{t.subject}</span>
         <span className="mt-1 flex flex-wrap items-center gap-1.5">
           <Pill tone={PRIORITY_META[t.priority].tone}>{PRIORITY_META[t.priority].label}</Pill>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {t.id} · {t.assignee ?? "Unassigned"}
           </span>
           {waiting && <span className="size-2 rounded-full bg-primary" aria-label="Waiting for your reply" />}
@@ -124,12 +124,12 @@ function Conversation({ t, team, onBack }: { t: Ticket; team: string[]; onBack: 
               )}
             >
               {m.from === "note" && (
-                <span className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                <span className="mb-1 flex items-center gap-1 text-xs font-semibold text-amber-800 dark:text-amber-300">
                   <Lock className="size-3" /> Internal note
                 </span>
               )}
               <p className="whitespace-pre-wrap">{m.text}</p>
-              <p className={cn("mt-1 text-[11px]", m.from === "admin" ? "text-primary-foreground/70" : "text-muted-foreground")}>
+              <p className={cn("mt-1 text-xs", m.from === "admin" ? "text-primary-foreground/70" : "text-muted-foreground")}>
                 {m.author} · {dateTime(m.at)}
               </p>
             </div>

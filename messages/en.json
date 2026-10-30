@@ -583,6 +583,7 @@
   "Contacts": {
     "page": {
       "title": "Contacts",
+      "rowActions": "Row actions",
       "subtitle": "Manage your contact list. {count} total contacts.",
       "subtitleZero": "Manage your contact list.",
       "customFieldsBtn": "Custom fields",

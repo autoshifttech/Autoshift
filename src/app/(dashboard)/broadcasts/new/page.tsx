@@ -133,7 +133,7 @@ export default function NewBroadcastPage() {
     <div className={`mx-auto space-y-8 ${currentStep === 2 ? 'max-w-5xl' : 'max-w-3xl'}`}>
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
+        <h2 className="text-2xl font-bold text-foreground">{t('title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {t('subtitle')}
         </p>

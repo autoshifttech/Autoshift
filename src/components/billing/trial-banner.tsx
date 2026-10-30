@@ -15,7 +15,7 @@ export function TrialBanner() {
   if (sub.status !== "trialing") return null;
   const days = trialDaysLeft(sub);
   return (
-    <div className="mx-3 mt-3 flex items-center justify-center gap-x-3 sm:mx-6">
+    <section aria-label={t("trialShort", { days })} className="mx-3 mt-3 flex items-center justify-center gap-x-3 sm:mx-6">
       <div className="inline-flex h-10 items-center gap-2 rounded-full border border-[#f1e1ae] bg-[var(--tone-butter)] py-1 pr-1 pl-3.5 text-sm font-semibold text-foreground dark:border-transparent">
         <Clock className="size-4 text-[#7A5A0E] dark:text-amber-300" />
         <span>{t("trialShort", { days })}</span>
@@ -28,6 +28,6 @@ export function TrialBanner() {
           {t("finishSetup")}
         </Link>
       )}
-    </div>
+    </section>
   );
 }

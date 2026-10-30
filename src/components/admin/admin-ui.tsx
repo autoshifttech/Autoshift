@@ -69,7 +69,7 @@ export function Delta({ value, invert = false }: { value: number; invert?: boole
   const good = invert ? !up : up;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
-    <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold", good ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-rose-500/10 text-rose-700 dark:text-rose-400")}>
+    <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-semibold", good ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-rose-500/10 text-rose-700 dark:text-rose-400")}>
       <Icon className="size-3" />
       {Math.abs(Math.round(value * 100))}%
     </span>
@@ -170,8 +170,8 @@ export function DataTable({ head, children, empty, className }: { head: ReactNod
         <thead>
           <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
             {head.map((h, i) => (
-              <th key={i} className="px-3 py-2.5 font-medium whitespace-nowrap first:pl-5 last:pr-5">
-                {h}
+              <th key={i} className="relative px-3 py-2.5 font-medium whitespace-nowrap first:pl-5 last:pr-5">
+                {h || <span className="sr-only">Actions</span>}
               </th>
             ))}
           </tr>

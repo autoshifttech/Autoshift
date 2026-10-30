@@ -153,7 +153,7 @@ export function BusinessDetail({ id }: { id: string }) {
               Unblock
             </Button>
           ) : (
-            <Button variant="outline" className="gap-1.5 text-rose-600 hover:text-rose-600" onClick={() => setDialog("block")}>
+            <Button variant="outline" className="gap-1.5 text-rose-700 dark:text-rose-400 hover:text-rose-600" onClick={() => setDialog("block")}>
               <Ban className="size-4" />
               Block
             </Button>
@@ -297,7 +297,7 @@ export function BusinessDetail({ id }: { id: string }) {
               <tr key={p.id}>
                 <td className={cn(td, "whitespace-nowrap")}>{dateTime(p.at)}</td>
                 <td className={cn(td, "capitalize")}>{p.kind === "topup" ? "Wallet top-up" : p.kind}</td>
-                <td className={cn(td, "tabular-nums", p.amount < 0 && "text-rose-600")}>{inr(p.amount)}</td>
+                <td className={cn(td, "tabular-nums", p.amount < 0 && "text-rose-700 dark:text-rose-400")}>{inr(p.amount)}</td>
                 <td className={cn(td, "tabular-nums text-muted-foreground")}>{inr(p.gst)}</td>
                 <td className={cn(td, "uppercase text-muted-foreground text-xs")}>{p.method}</td>
                 <td className={td}>

@@ -86,7 +86,7 @@ export function EditorHeader() {
         <StatusChip status={state.status} />
         {dirty && (
           <span
-            className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-amber-800 dark:text-amber-300"
+            className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-amber-800 dark:text-amber-300"
             title={t("unsavedHint")}
             aria-live="polite"
           >
@@ -104,7 +104,7 @@ export function EditorHeader() {
           >
             <History className="h-3.5 w-3.5" />
             {t("runs")}
-            <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+            <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               {flow.execution_count}
             </span>
           </Button>

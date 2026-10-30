@@ -136,7 +136,7 @@ export function ChatPreview({ title, subtitle = "Preview", children }: { title: 
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{title}</p>
-            <p className="text-[11px] opacity-75">{subtitle}</p>
+            <p className="text-xs opacity-75">{subtitle}</p>
           </div>
         </div>
         <div className="flex h-[22rem] flex-col justify-end gap-2 bg-[#efeae2] p-3">{children}</div>
@@ -155,7 +155,7 @@ export function ChatBubble({ children, outgoing = false }: { children: ReactNode
         )}
       >
         {children}
-        <span className="mt-1 flex items-center justify-end gap-1 text-[10px] text-[#7b827e]">
+        <span className="mt-1 flex items-center justify-end gap-1 text-xs text-[#7b827e]">
           now {outgoing && <CheckCheck aria-hidden className="size-3 text-sky-500" />}
         </span>
       </div>

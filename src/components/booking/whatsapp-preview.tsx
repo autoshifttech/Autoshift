@@ -24,7 +24,7 @@ export function Bubble({ from, children, time }: { from: "business" | "customer"
         )}
       >
         {children}
-        {time && <span className="mt-1 block text-right text-[10px] text-[#667781] dark:text-[#8696a0]">{time}</span>}
+        {time && <span className="mt-1 block text-right text-xs text-[#667781] dark:text-[#8696a0]">{time}</span>}
       </div>
     </div>
   );

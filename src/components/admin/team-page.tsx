@@ -113,7 +113,7 @@ export function TeamPage() {
                     </Button>
                   )}
                   {!me && m.status !== "invited" && (
-                    <Button size="sm" variant="ghost" className={m.status === "active" ? "text-rose-600 hover:text-rose-600" : undefined} onClick={() => update(m, { status: m.status === "active" ? "disabled" : "active" }, m.status === "active" ? "Disabled admin" : "Enabled admin", m.name)}>
+                    <Button size="sm" variant="ghost" className={m.status === "active" ? "text-rose-700 dark:text-rose-400 hover:text-rose-600" : undefined} onClick={() => update(m, { status: m.status === "active" ? "disabled" : "active" }, m.status === "active" ? "Disabled admin" : "Enabled admin", m.name)}>
                       {m.status === "active" ? "Disable" : "Enable"}
                     </Button>
                   )}
@@ -153,7 +153,7 @@ export function TeamPage() {
             <div className="space-y-1.5">
               <Label htmlFor="inv-email">Work email</Label>
               <Input id="inv-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="sara@autoshift.app" />
-              {taken && <p className="text-xs text-rose-600">This person is already on the team.</p>}
+              {taken && <p className="text-xs text-rose-700 dark:text-rose-400">This person is already on the team.</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="inv-role">Role</Label>

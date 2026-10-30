@@ -51,7 +51,7 @@ function DripsListInner() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
         <Button onClick={() => create()} className="gap-1.5 self-start">
@@ -101,7 +101,7 @@ function DripsListInner() {
                 [t("colBooked"), d.stats.booked],
               ].map(([k, v]) => (
                 <div key={String(k)}>
-                  <dt className="text-[11px] text-muted-foreground">{k}</dt>
+                  <dt className="text-xs text-muted-foreground">{k}</dt>
                   <dd className="font-semibold text-foreground">{v}</dd>
                 </div>
               ))}

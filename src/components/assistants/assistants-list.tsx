@@ -79,7 +79,7 @@ export function AssistantsList() {
                     <dt className="sr-only">{label}</dt>
                     <Icon className="mx-auto size-3.5 text-muted-foreground" aria-hidden />
                     <dd className="mt-0.5 text-sm font-semibold text-foreground">{value.toLocaleString(locale)}</dd>
-                    <span className="block truncate text-[10px] text-muted-foreground" aria-hidden>
+                    <span className="block truncate text-xs text-muted-foreground" aria-hidden>
                       {label}
                     </span>
                   </div>

@@ -253,7 +253,7 @@ export function ConsentPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
       </div>
@@ -427,7 +427,7 @@ export function ConsentPage() {
             <div className="space-y-1.5">
               <Label htmlFor="bl-phone">{t("phone")}</Label>
               <Input id="bl-phone" inputMode="tel" placeholder="+91 98765 43210" value={block.phone} onChange={(e) => setBlock({ ...block, phone: e.target.value })} />
-              {state.blocked.some((b) => phoneKey(b.phone) === phoneKey(block.phone)) && <p className="text-xs text-rose-600">{t("alreadyBlocked")}</p>}
+              {state.blocked.some((b) => phoneKey(b.phone) === phoneKey(block.phone)) && <p className="text-xs text-rose-700 dark:text-rose-400">{t("alreadyBlocked")}</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="bl-name">{t("nameOptional")}</Label>

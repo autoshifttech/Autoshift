@@ -42,7 +42,7 @@ function PlanCard({ plan, subscribers }: { plan: PlanConfig; subscribers: number
         <div className="min-w-0">
           <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} aria-label="Plan name" className="h-8 border-transparent bg-transparent px-0 text-lg font-bold shadow-none focus-visible:border-border focus-visible:px-2" />
           <p className="text-xs text-muted-foreground">
-            {plan.custom && <span className="mr-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary uppercase">New</span>}
+            {plan.custom && <span className="mr-1 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary uppercase">New</span>}
             {subscribers} paying · {inr(draft.monthly * 10)} yearly (2 months free)
           </p>
         </div>
@@ -63,7 +63,7 @@ function PlanCard({ plan, subscribers }: { plan: PlanConfig; subscribers: number
           <Button
             variant="ghost"
             size="icon"
-            className="mr-auto text-rose-600 hover:text-rose-600"
+            className="mr-auto text-rose-700 dark:text-rose-400 hover:text-rose-600"
             aria-label={`Delete ${plan.name} plan`}
             title={subscribers ? "Move its businesses to another plan before deleting" : "Delete plan"}
             disabled={subscribers > 0}
@@ -139,13 +139,13 @@ function RatesPanel() {
                   <Input inputMode="decimal" value={draft[k]} onChange={(e) => setDraft({ ...draft, [k]: e.target.value.replace(/[^\d.]/g, "") })} aria-label={`${UNIT_ECONOMICS[k].label} price`} className={cn("h-8 pl-7", below && "border-rose-500")} />
                 </div>
               </td>
-              <td className={cn(td, "tabular-nums", below ? "text-rose-600" : "text-foreground")}>{inr(price - cost, 2)}</td>
+              <td className={cn(td, "tabular-nums", below ? "text-rose-700 dark:text-rose-400" : "text-foreground")}>{inr(price - cost, 2)}</td>
               <td className={cn(td, "tabular-nums")}>{price ? pct((price - cost) / price) : "—"}</td>
             </tr>
           );
         })}
       </DataTable>
-      {kinds.some((k) => (Number(draft[k]) || 0) < UNIT_ECONOMICS[k].cost) && <p className="px-5 py-3 text-xs text-rose-600">A price is below your cost. You would lose money on every message of that type.</p>}
+      {kinds.some((k) => (Number(draft[k]) || 0) < UNIT_ECONOMICS[k].cost) && <p className="px-5 py-3 text-xs text-rose-700 dark:text-rose-400">A price is below your cost. You would lose money on every message of that type.</p>}
     </Panel>
   );
 }
@@ -239,7 +239,7 @@ function CouponsPanel() {
             <div className="space-y-1.5">
               <Label htmlFor="coupon-code">Code</Label>
               <Input id="coupon-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16))} placeholder="WELCOME15" className="font-mono" />
-              {exists && <p className="text-xs text-rose-600">That code already exists.</p>}
+              {exists && <p className="text-xs text-rose-700 dark:text-rose-400">That code already exists.</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -313,7 +313,7 @@ function NewPlanDialog({ open, onOpenChange, existing }: { open: boolean; onOpen
           <div className="space-y-1.5">
             <Label htmlFor="np-name">Plan name</Label>
             <Input id="np-name" value={d.name} maxLength={30} onChange={(e) => setD({ ...d, name: e.target.value })} placeholder="Business" />
-            {taken && <p className="text-xs text-rose-600">A plan with this name already exists.</p>}
+            {taken && <p className="text-xs text-rose-700 dark:text-rose-400">A plan with this name already exists.</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">

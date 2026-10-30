@@ -583,6 +583,7 @@
   "Contacts": {
     "page": {
       "title": "Contatos",
+      "rowActions": "Ações da linha",
       "subtitle": "Gerencie sua lista de contatos. {count} contatos no total.",
       "subtitleZero": "Gerencie sua lista de contatos.",
       "customFieldsBtn": "Campos personalizados",

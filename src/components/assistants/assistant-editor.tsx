@@ -53,7 +53,7 @@ export function AssistantEditor({ id }: { id: string }) {
       <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
         <AssistantAvatar assistant={a} className="size-12 rounded-2xl" />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold tracking-tight text-foreground">{a.name}</h1>
+          <h2 className="truncate text-xl font-bold tracking-tight text-foreground">{a.name}</h2>
           <p className="text-sm text-muted-foreground">
             {t(`role_${a.role}`)} · {t(`audience_${a.audience}`)}
           </p>
@@ -126,8 +126,8 @@ export function AssistantEditor({ id }: { id: string }) {
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium text-foreground">
                           {tool.name}
-                          {!tool.builtin && <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{t("custom")}</span>}
-                          {!tool.enabled && <span className="ml-2 text-[11px] text-muted-foreground">{t("toolOffEverywhere")}</span>}
+                          {!tool.builtin && <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{t("custom")}</span>}
+                          {!tool.enabled && <span className="ml-2 text-xs text-muted-foreground">{t("toolOffEverywhere")}</span>}
                         </span>
                         <span className="block text-xs text-muted-foreground">{tool.description}</span>
                       </span>

@@ -123,14 +123,14 @@ function NavBadges({ href, active, counts, onRail }: { href: string; active: boo
   const { totalUnread, unreadNotifications } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
-      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white">
+      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white">
         {totalUnread > 9 ? "9+" : totalUnread}
       </span>
     );
   }
   if (href === "/notifications" && unreadNotifications > 0) {
     return (
-      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"}>
+      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground"}>
         {unreadNotifications > 9 ? "9+" : unreadNotifications}
       </span>
     );
@@ -148,7 +148,7 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
         if (!items.length) return null;
         return (
           <div key={group.labelKey} className="pb-1">
-            <p className="px-2.5 pt-2.5 pb-1 text-[10px] font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</p>
+            <p className="px-2.5 pt-2.5 pb-1 text-xs font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</p>
             {items.map((item) => {
               const active = isActiveHref(pathname, item.href);
               return (
@@ -251,7 +251,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
         const item = itemFor(href);
         const active = isActiveHref(pathname, href);
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70 transition-colors", active && "rail-active opacity-100")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70 transition-colors", active && "rail-active opacity-100")}>
             <span className="relative">
               <item.icon className="size-5" />
               <NavBadges href={href} active={active} counts={counts} onRail />
@@ -261,7 +261,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70", inMore && "rail-active opacity-100")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
           {t("more")}
         </SheetTrigger>

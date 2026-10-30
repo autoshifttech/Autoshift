@@ -186,7 +186,7 @@ function TimeGrid({
         <div className="relative grid" style={{ gridTemplateColumns: `56px repeat(${columns.length}, minmax(0, 1fr))` }}>
           <div>
             {hours.map((h) => (
-              <div key={h} style={{ height: HOUR_PX }} className="pr-2 text-right text-[11px] text-muted-foreground">
+              <div key={h} style={{ height: HOUR_PX }} className="pr-2 text-right text-xs text-muted-foreground">
                 <span className="relative -top-2">{`${String(h).padStart(2, "0")}:00`}</span>
               </div>
             ))}
@@ -216,9 +216,9 @@ function TimeGrid({
                       onClick={() => onOpen(b.id)}
                       style={{ top, height, left: `calc(${(lane / of) * 100}% + 3px)`, width: `calc(${100 / of}% - 6px)`, borderLeftColor: staff?.color ?? service?.color }}
                       className={cn(
-                        "absolute overflow-hidden rounded-lg border-l-4 bg-[var(--tone-mint)] px-2 py-1 text-left text-[11px] leading-tight shadow-sm transition hover:brightness-95",
+                        "absolute overflow-hidden rounded-lg border-l-4 bg-[var(--tone-mint)] px-2 py-1 text-left text-xs leading-tight shadow-sm transition hover:brightness-95",
                         b.status === "pending" && "bg-[var(--tone-butter)]",
-                        muted && "bg-muted opacity-60",
+                        muted && "bg-muted opacity-80",
                       )}
                     >
                       <span className={cn("block truncate font-semibold text-foreground", b.status === "cancelled" && "line-through")}>{b.contactName}</span>

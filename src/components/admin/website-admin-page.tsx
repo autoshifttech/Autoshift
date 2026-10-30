@@ -49,7 +49,7 @@ export function WebsiteAdminPage() {
           <ExternalLink className="size-3.5" />
           <span className="hidden sm:inline">View live site</span>
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-rose-600 hover:text-rose-600" onClick={() => setResetting(true)}>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-rose-700 dark:text-rose-400 hover:text-rose-600" onClick={() => setResetting(true)}>
           <RotateCcw className="size-3.5" />
           <span className="hidden sm:inline">Reset</span>
         </Button>

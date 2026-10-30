@@ -40,9 +40,9 @@ function AgentsPageInner() {
     <div>
       <div className="flex items-center gap-2">
         <Bot className="h-6 w-6 text-primary" />
-        <h1 className="sr-only">
+        <h2 className="sr-only">
           {t('title')}
-        </h1>
+        </h2>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         {t('description')}

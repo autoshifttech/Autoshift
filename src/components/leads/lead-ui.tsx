@@ -17,10 +17,10 @@ export function TempChip({ temp, score, className }: { temp: LeadTemp; score?: n
   const t = useTranslations("Leads");
   const Icon = ICON[temp];
   return (
-    <span className={cn("inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold", TONE[temp], className)}>
+    <span className={cn("inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", TONE[temp], className)}>
       <Icon className="size-3" />
       {t(`temp_${temp}`)}
-      {score !== undefined && <span className="font-normal opacity-80">· {score}</span>}
+      {score !== undefined && <span className="font-normal">· {score}</span>}
     </span>
   );
 }

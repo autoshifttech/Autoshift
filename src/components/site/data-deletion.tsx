@@ -123,7 +123,7 @@ export function DataDeletion() {
               I understand deleted data can&apos;t be recovered.
             </label>
             {error && (
-              <p role="alert" className="text-sm text-rose-600">
+              <p role="alert" className="text-sm text-rose-700 dark:text-rose-400">
                 {error}
               </p>
             )}

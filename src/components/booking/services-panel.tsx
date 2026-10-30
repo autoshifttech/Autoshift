@@ -102,7 +102,7 @@ function StaffSection({ staff }: { staff: Staff[] }) {
       <div className="mt-4 flex flex-wrap gap-2">
         {staff.map((st) => (
           <span key={st.id} className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pr-3 pl-1.5 text-sm text-foreground">
-            <span className="flex size-6 items-center justify-center rounded-full text-[11px] font-semibold text-white" style={{ background: st.color }}>
+            <span className="flex size-6 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ background: st.color }}>
               {st.name.charAt(0)}
             </span>
             {st.name}

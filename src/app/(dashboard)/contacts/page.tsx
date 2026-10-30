@@ -346,7 +346,7 @@ export default function ContactsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="sr-only">{t('title')}</h1>
+          <h2 className="sr-only">{t('title')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {totalCount > 0 ? t('subtitle', { count: totalCount }) : t('subtitleZero')}
           </p>
@@ -414,7 +414,7 @@ export default function ContactsPage() {
               <Filter className="size-4" />
               {t('filterByTags')}
               {selectedTagIds.length > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
                   {selectedTagIds.length}
                 </span>
               )}
@@ -473,7 +473,7 @@ export default function ContactsPage() {
               return (
                 <span
                   key={id}
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
                   style={{
                     backgroundColor: tag.color + '20',
                     color: tag.color,
@@ -550,7 +550,9 @@ export default function ContactsPage() {
               <TableHead className="text-muted-foreground hidden md:table-cell">{t('tableColumns.leadScore')}</TableHead>
               <TableHead className="text-muted-foreground hidden md:table-cell">{t('tableColumns.tags')}</TableHead>
               <TableHead className="text-muted-foreground hidden lg:table-cell">{t('tableColumns.createdAt')}</TableHead>
-              <TableHead className="text-muted-foreground w-12" />
+              <TableHead className="relative text-muted-foreground w-12">
+                <span className="sr-only">{t('rowActions')}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -624,7 +626,7 @@ export default function ContactsPage() {
                         contact.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag.id}
-                            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
+                            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                             style={{
                               backgroundColor: tag.color + '20',
                               color: tag.color,
@@ -637,7 +639,7 @@ export default function ContactsPage() {
                         <span className="text-muted-foreground text-xs">-</span>
                       )}
                       {contact.tags && contact.tags.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           +{contact.tags.length - 3}
                         </span>
                       )}
@@ -657,6 +659,7 @@ export default function ContactsPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
+                            aria-label={t('rowActions')}
                             className="text-muted-foreground hover:text-foreground"
                             onClick={(e) => e.stopPropagation()}
                           />

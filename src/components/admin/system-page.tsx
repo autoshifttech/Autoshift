@@ -15,7 +15,7 @@ import { act, adminStore, useAdmin } from "@/lib/admin/store";
 import { DataTable, EmptyState, PageHeader, Panel, Pill, td } from "./admin-ui";
 
 const SERVICE_ICON = { operational: CheckCircle2, degraded: CircleAlert, down: CircleX } as const;
-const SERVICE_TONE = { operational: "text-emerald-600", degraded: "text-amber-500", down: "text-rose-600" } as const;
+const SERVICE_TONE = { operational: "text-emerald-600", degraded: "text-amber-500", down: "text-rose-700 dark:text-rose-400" } as const;
 const SOURCE_LABEL: Record<SystemEvent["source"], string> = { meta: "Meta webhook", razorpay: "Razorpay", send: "Message send", ai: "AI" };
 
 function ServiceCard({ s }: { s: ServiceStatus }) {

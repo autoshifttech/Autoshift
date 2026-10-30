@@ -46,7 +46,7 @@ export function DataPrivacyPanel() {
 
       {deletion.eraseOn && (
         <div role="alert" className="flex flex-col gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 sm:flex-row sm:items-center">
-          <AlertTriangle className="size-5 shrink-0 text-rose-600" />
+          <AlertTriangle className="size-5 shrink-0 text-rose-700 dark:text-rose-400" />
           <p className="flex-1 text-sm text-foreground">{t("scheduledBanner", { date: day(deletion.eraseOn) })}</p>
           <Button
             variant="outline"

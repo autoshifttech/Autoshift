@@ -70,7 +70,7 @@ export function TeamCard({ data, now }: { data: DashboardOverview | null; now: n
                       <div className="flex min-w-0 items-center gap-2">
                         <Avatar size="sm">
                           {m.avatarUrl ? <AvatarImage src={m.avatarUrl} alt="" /> : null}
-                          <AvatarFallback className="text-[10px]">{initialsOf(name)}</AvatarFallback>
+                          <AvatarFallback className="text-xs">{initialsOf(name)}</AvatarFallback>
                           <AvatarBadge className={PRESENCE_CLASS[presence]} />
                         </Avatar>
                         <span className="truncate">{name}</span>

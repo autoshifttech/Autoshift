@@ -104,7 +104,7 @@ function itemFor(href: string) {
 
 function SupportBadge({ href, count }: { href: string; count: number }) {
   if (href !== "/admin/support" || count === 0) return null;
-  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white">{count}</span>;
+  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white">{count}</span>;
 }
 
 /** The pages that aren't on the rail, plus the website editor and the business app. */
@@ -116,7 +116,7 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
         if (!items.length) return null;
         return (
           <div key={group.label} className="pb-1">
-            <p className="px-2.5 pt-2.5 pb-1 text-[10px] font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{group.label}</p>
+            <p className="px-2.5 pt-2.5 pb-1 text-xs font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{group.label}</p>
             {items.map((item) => (
               <Link
                 key={item.href}
@@ -138,7 +138,7 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
           <Globe className="size-4" />
           <span className="flex-1">
             Website admin
-            <span className="block text-[11px] font-normal text-muted-foreground">Opens full screen</span>
+            <span className="block text-xs font-normal text-muted-foreground">Opens full screen</span>
           </span>
         </Link>
         <Link href="/dashboard" onClick={onPick} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-card-2 hover:text-foreground">
@@ -211,7 +211,7 @@ function AdminMobileNav() {
         const item = itemFor(href);
         const active = current?.href === href;
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold text-white/60", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
             <span className="relative">
               <item.icon className="size-5" />
               <SupportBadge href={href} count={openTickets} />
@@ -221,7 +221,7 @@ function AdminMobileNav() {
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70", inMore && "rail-active opacity-100")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
           More
         </SheetTrigger>
@@ -286,7 +286,7 @@ function BusinessSearch() {
           ) : (
             results.map((b) => (
               <button key={b.id} type="button" onClick={() => go(b.id)} className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted">
-                <Initials name={b.name} className="size-7 text-[10px]" />
+                <Initials name={b.name} className="size-7 text-xs" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-foreground">{b.name}</span>
                   <span className="block truncate text-xs text-muted-foreground">
@@ -347,7 +347,7 @@ function AdminMenu() {
         <Initials name="Founder Admin" className="size-8" />
         <span className="hidden text-left sm:block">
           <span className="block text-sm leading-tight font-medium text-foreground">{CURRENT_ADMIN.name}</span>
-          <span className="block text-[11px] leading-tight text-muted-foreground">{ROLE_LABEL[CURRENT_ADMIN.role]}</span>
+          <span className="block text-xs leading-tight text-muted-foreground">{ROLE_LABEL[CURRENT_ADMIN.role]}</span>
         </span>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-56 gap-1 p-1.5">
@@ -363,7 +363,7 @@ function AdminMenu() {
             setAdminCookie(false);
             router.push("/admin/login");
           }}
-          className="flex items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-rose-600 hover:bg-muted"
+          className="flex items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-rose-700 dark:text-rose-400 hover:bg-muted"
         >
           <LogOut className="size-4" />
           Sign out
@@ -383,7 +383,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="flex h-16 shrink-0 items-center gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
           <Link href="/admin" className="flex items-center gap-2 lg:hidden">
             <LogoMark className="size-8" />
-            <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">Admin</span>
+            <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-xs font-bold tracking-wider text-primary uppercase">Admin</span>
           </Link>
           <div className="flex flex-1 justify-end lg:justify-start">
             <BusinessSearch />

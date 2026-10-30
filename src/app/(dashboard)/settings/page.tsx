@@ -85,9 +85,9 @@ function SettingsPageInner() {
   return (
     <div>
       <div>
-        <h1 className="sr-only">
+        <h2 className="sr-only">
           {t('pageTitle')}
-        </h1>
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {t('pageDesc')}
         </p>

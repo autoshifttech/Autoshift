@@ -98,7 +98,7 @@ function Form({ saved }: { saved: NotifyPrefs }) {
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">{t("whatsappHint")}</p>
           <Input className={cn("mt-3 h-9", !waOk && "border-rose-500")} inputMode="tel" placeholder="+91 98765 43210" value={p.whatsapp} onChange={(ev) => setP({ ...p, whatsapp: ev.target.value })} aria-label={t("whatsappTo")} />
-          {!waOk && <p className="mt-1 text-xs text-rose-600">{t("whatsappInvalid")}</p>}
+          {!waOk && <p className="mt-1 text-xs text-rose-700 dark:text-rose-400">{t("whatsappInvalid")}</p>}
           {waOk && waDigits === 0 && usesWhatsapp && <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">{t("whatsappNeeded")}</p>}
           <label className="mt-4 flex items-center justify-between gap-3 text-sm text-foreground">
             <span>
@@ -140,7 +140,7 @@ function Form({ saved }: { saved: NotifyPrefs }) {
             {(Object.keys(EVENT_GROUPS) as (keyof typeof EVENT_GROUPS)[]).map((g) => (
               <tbody key={g} className="divide-y divide-border border-b border-border last:border-b-0">
                 <tr>
-                  <td colSpan={5} className="bg-muted/40 px-5 py-2 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                  <td colSpan={5} className="bg-muted/40 px-5 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     {t(`group_${g}`)}
                   </td>
                 </tr>

@@ -249,7 +249,7 @@ function MessageContent({
         <div>
           <span
             className={cn(
-              "mb-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium",
+              "mb-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
               isAgent
                 ? "bg-primary-foreground/20 text-primary-foreground"
                 : "bg-primary/20 text-primary",
@@ -275,7 +275,7 @@ function MessageContent({
           {view.footer && (
             <p
               className={cn(
-                "mt-1 break-words text-[11px]",
+                "mt-1 break-words text-xs",
                 isAgent ? "text-primary-foreground/70" : "text-muted-foreground",
               )}
             >
@@ -336,7 +336,7 @@ function MessageContent({
       if (message.sender_type === "customer") {
         return (
           <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <CornerDownLeft className="h-3 w-3" />
               {t("buttonReply")}
             </span>
@@ -428,7 +428,7 @@ export function MessageBubble({
           )}
           <span
             className={cn(
-              "text-[10px]",
+              "text-xs",
               // Outbound bubbles sit on the primary fill, so the
               // timestamp must read against that (not the neutral
               // foreground) — otherwise it goes low-contrast in light
@@ -443,7 +443,7 @@ export function MessageBubble({
       </div>
       {failure && (
         <p
-          className="mt-0.5 px-1 text-[10px] leading-tight text-muted-foreground"
+          className="mt-0.5 px-1 text-xs leading-tight text-muted-foreground"
           title={failure}
         >
           {t("notDelivered")}: {failure}

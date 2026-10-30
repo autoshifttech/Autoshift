@@ -104,7 +104,7 @@ export function AiUsagePage() {
             <tr key={x.b.id}>
               <td className={td}>
                 <Link href={`/admin/businesses/${x.b.id}`} className="flex items-center gap-3 hover:underline">
-                  <Initials name={x.b.name} className="size-8 text-[10px]" />
+                  <Initials name={x.b.name} className="size-8 text-xs" />
                   <span className="font-medium text-foreground">{x.b.name}</span>
                 </Link>
               </td>
@@ -116,7 +116,7 @@ export function AiUsagePage() {
               <td className={cn(td, "tabular-nums")}>{inr(x.cost)}</td>
               <td className={cn(td, "tabular-nums")}>{inr(x.charged)}</td>
               <td className={cn(td, "font-medium tabular-nums")}>{inr(x.margin)}</td>
-              <td className={cn(td, "tabular-nums", x.errors / x.b.usage.ai > 0.01 && "text-rose-600")}>{num(x.errors)}</td>
+              <td className={cn(td, "tabular-nums", x.errors / x.b.usage.ai > 0.01 && "text-rose-700 dark:text-rose-400")}>{num(x.errors)}</td>
               <td className={cn(td, "tabular-nums")}>{num(x.handoffs)}</td>
             </tr>
           ))}

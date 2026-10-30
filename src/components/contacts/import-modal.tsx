@@ -64,7 +64,7 @@ function PreviewCell({
       className={cn(
         'block truncate',
         maxWidth,
-        mono && 'font-mono text-[11px]'
+        mono && 'font-mono text-xs'
       )}
       title={value}
     >
@@ -95,7 +95,7 @@ function ImportPreviewTags({
         return (
           <span
             key={name}
-            className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[10px] leading-none font-medium"
+            className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs leading-none font-medium"
             style={{
               backgroundColor: `${color}18`,
               color,
@@ -438,11 +438,11 @@ export function ImportModal({
             <DialogDescription className="leading-relaxed text-muted-foreground"
               dangerouslySetInnerHTML={{
                 __html: t.markup('desc', {
-                  phoneCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">${chunks}</code>`,
-                  nameCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">${chunks}</code>`,
-                  emailCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">${chunks}</code>`,
-                  companyCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">${chunks}</code>`,
-                  tagsCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-[11px] text-muted-foreground">${chunks}</code>`,
+                  phoneCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">${chunks}</code>`,
+                  nameCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">${chunks}</code>`,
+                  emailCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">${chunks}</code>`,
+                  companyCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">${chunks}</code>`,
+                  tagsCode: (chunks) => `<code class="rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">${chunks}</code>`,
                 })
               }}
             />
@@ -474,7 +474,7 @@ export function ImportModal({
                 >
                   {truncateFilename(file.name)}
                 </p>
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {t('rowsReady', { count: parsedRows.length })}
                 </span>
               </>
@@ -486,7 +486,7 @@ export function ImportModal({
                 <p className="text-sm text-muted-foreground">
                   {t('uploadDropzone')}
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('uploadHint')}
                 </p>
               </>
@@ -506,12 +506,12 @@ export function ImportModal({
           {preview.length > 0 && !result && (
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                   {t('preview', { count: preview.length })}
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5">
                   {tagStats.rowsWithTags > 0 && (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-muted/90 px-2 py-0.5 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted/90 px-2 py-0.5 text-xs text-muted-foreground">
                       <Tag className="text-primary/80 size-3" />
                       {t('previewTags', { tags: tagStats.unique, contacts: tagStats.rowsWithTags })}
                     </span>
@@ -594,7 +594,7 @@ export function ImportModal({
               </div>
 
               {parsedRows.length > PREVIEW_LIMIT && (
-                <p className="text-center text-[11px] text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground">
                   {t('moreRows', { count: parsedRows.length - PREVIEW_LIMIT })}
                 </p>
               )}
@@ -644,7 +644,7 @@ export function ImportModal({
 
               {result.failedDetails.length > 0 && (
                 <div className="mt-3 space-y-1 border-t border-border/80 pt-3">
-                  <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                  <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                     {t('failedRowsHeading')}
                   </p>
                   <ul className="max-h-32 space-y-1 overflow-y-auto text-xs">

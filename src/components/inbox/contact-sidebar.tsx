@@ -153,9 +153,9 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                 initials
               )}
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-foreground">
+            <h2 className="mt-3 text-sm font-semibold text-foreground">
               {displayName}
-            </h3>
+            </h2>
             {contact.company && (
               <p className="text-xs text-muted-foreground">{contact.company}</p>
             )}
@@ -202,7 +202,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                 tags.map((tag) => (
                   <span
                     key={tag.contact_tag_id}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    className="rounded-full px-2 py-0.5 text-xs font-medium"
                     style={{
                       backgroundColor: `${tag.color}20`,
                       color: tag.color,
@@ -251,7 +251,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                       </span>
                       {deal.stage && (
                         <span
-                          className="rounded-full px-1.5 py-0.5 text-[10px]"
+                          className="rounded-full px-1.5 py-0.5 text-xs"
                           style={{
                             backgroundColor: `${deal.stage.color}20`,
                             color: deal.stage.color,
@@ -304,7 +304,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                     <p className="whitespace-pre-wrap text-xs text-muted-foreground">
                       {note.note_text}
                     </p>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {format(new Date(note.created_at), "MMM d, yyyy HH:mm")}
                     </p>
                   </div>

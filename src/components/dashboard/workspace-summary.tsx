@@ -56,7 +56,7 @@ export function WorkspaceSummary() {
             </svg>
             <span className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl font-bold text-foreground">{trial ? daysLeft : "✓"}</span>
-              <span className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">{trial ? t("daysLeft") : t("active")}</span>
+              <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{trial ? t("daysLeft") : t("active")}</span>
             </span>
           </div>
           <div className="min-w-0 flex-1">

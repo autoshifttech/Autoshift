@@ -100,7 +100,7 @@ function Stepper({ current }: { current: number }) {
           >
             <span
               className={cn(
-                "flex size-5 items-center justify-center rounded-full border text-[11px]",
+                "flex size-5 items-center justify-center rounded-full border text-xs",
                 i <= current ? "border-primary" : "border-border",
                 i < current && "bg-primary text-primary-foreground",
               )}
@@ -331,7 +331,7 @@ function WhatsAppStep({ onBack, onNext }: { onBack: () => void; onNext: () => vo
           <ol className="mt-3 space-y-3 text-muted-foreground">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className="flex gap-2.5">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-foreground">{n}</span>
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{n}</span>
                 {t(`waHow${n}`)}
               </li>
             ))}

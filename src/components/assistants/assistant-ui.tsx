@@ -81,7 +81,7 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
               const tool = tools.find((x) => x.id === c.toolId);
               const Icon = tool ? toolIcon(tool) : Puzzle;
               return (
-                <span key={j} className="inline-flex max-w-[90%] items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] text-[#1E4C41] shadow-sm dark:bg-[#202c33] dark:text-emerald-300">
+                <span key={j} className="inline-flex max-w-[90%] items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-xs text-[#1E4C41] shadow-sm dark:bg-[#202c33] dark:text-emerald-300">
                   <Icon className="size-3 shrink-0" />
                   <span className="font-semibold">{tool?.name ?? c.toolId}</span>
                   <span className="truncate text-[#667781] dark:text-[#8696a0]">→ {c.output}</span>
@@ -96,7 +96,7 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
             >
               {l.text}
             </span>
-            {l.handoff && <span className="text-[11px] font-medium text-amber-700 dark:text-amber-300">{t("handedOff")}</span>}
+            {l.handoff && <span className="text-xs font-medium text-amber-700 dark:text-amber-300">{t("handedOff")}</span>}
           </div>
         ))}
       </div>

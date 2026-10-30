@@ -124,7 +124,7 @@ const LegendItem = ({
 }: LegendItemProps) => {
   const hasOnValueChange = !!onClick
   return (
-    <li
+    <div
       className={cx(
         "group inline-flex flex-nowrap items-center gap-1.5 rounded-sm px-2 py-1 whitespace-nowrap transition",
         hasOnValueChange
@@ -155,7 +155,7 @@ const LegendItem = ({
       >
         {name}
       </p>
-    </li>
+    </div>
   )
 }
 
@@ -216,7 +216,7 @@ const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
   )
 }
 
-interface LegendProps extends React.OlHTMLAttributes<HTMLOListElement> {
+interface LegendProps extends React.HTMLAttributes<HTMLDivElement> {
   categories: string[]
   colors?: AvailableChartColorsKeys[]
   onClickLegendItem?: (category: string, color: string) => void
@@ -229,7 +229,7 @@ type HasScrollProps = {
   right: boolean
 }
 
-const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
+const Legend = React.forwardRef<HTMLDivElement, LegendProps>((props, ref) => {
   const {
     categories,
     colors = AvailableChartColors,
@@ -325,7 +325,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
   }, [checkScroll, enableLegendSlider])
 
   return (
-    <ol
+    <div
       ref={ref}
       className={cx("relative overflow-hidden", className)}
       {...other}
@@ -380,7 +380,7 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
           </div>
         </>
       ) : null}
-    </ol>
+    </div>
   )
 })
 

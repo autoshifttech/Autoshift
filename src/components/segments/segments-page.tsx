@@ -53,7 +53,7 @@ export function SegmentsPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="sr-only">{t("title")}</h1>
+          <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
         <Button onClick={() => setEditing("new")} className="gap-1.5 self-start">
@@ -81,7 +81,7 @@ export function SegmentsPage() {
               <ul className="mt-4 flex flex-1 flex-wrap content-start gap-1.5">
                 {s.rules.map((r, i) => (
                   <li key={r.id} className="flex items-center gap-1.5">
-                    {i > 0 && <span className="text-[10px] font-semibold text-muted-foreground uppercase">{t(s.match === "all" ? "and" : "or")}</span>}
+                    {i > 0 && <span className="text-xs font-semibold text-muted-foreground uppercase">{t(s.match === "all" ? "and" : "or")}</span>}
                     <span className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs text-foreground">{ruleText(r)}</span>
                   </li>
                 ))}

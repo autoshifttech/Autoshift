@@ -510,7 +510,7 @@ export function WhatsAppConfig() {
   // them to Meta support (issue #505). The step names are wire values
   // from the route, shown verbatim.
   const renderMetaDetails = (meta: MetaErrorMeta) => (
-    <div className="mt-2 space-y-0.5 text-[11px] leading-relaxed text-muted-foreground break-all">
+    <div className="mt-2 space-y-0.5 text-xs leading-relaxed text-muted-foreground break-all">
       <p>
         {t('metaErrorStep')}: <code>{meta.step}</code>
         {meta.code !== null && meta.code !== undefined && (
@@ -706,7 +706,7 @@ export function WhatsAppConfig() {
             </AlertDescription>
 
             {registrationProbe && (
-              <div className="mt-3 rounded border border-border bg-card/60 px-3 py-2 space-y-1.5 text-[11px]">
+              <div className="mt-3 rounded border border-border bg-card/60 px-3 py-2 space-y-1.5 text-xs">
                 <p className="font-medium text-foreground">
                   {t('diagnosticLastRun')}
                   <span className={registrationProbe.live ? 'text-emerald-800 dark:text-emerald-400' : 'text-amber-800 dark:text-amber-400'}>
@@ -900,7 +900,7 @@ export function WhatsAppConfig() {
                     {t('mirrorInboundDesc')}
                   </p>
                   {!mirrorMedia && (
-                    <p className="mt-1 text-xs text-amber-600 dark:text-amber-500">
+                    <p className="mt-1 text-xs text-amber-700 dark:text-amber-500">
                       {t('mirrorInboundOffWarning')}
                     </p>
                   )}
