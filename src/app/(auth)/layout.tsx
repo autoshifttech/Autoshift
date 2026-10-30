@@ -42,13 +42,13 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
       {/* Plain <a>: "/" is the static public site, not an app route. */}
       <a
         href="/"
-        className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] hover:text-primary sm:top-6 sm:left-8"
+        className="liquid-glass absolute top-5 left-5 z-10 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold hover:brightness-105 sm:top-6 sm:left-8"
       >
         <LogoMark className="size-6" />
         AutoShift
       </a>
       {/* With the notice on a phone, the page below no longer needs a full screen of height. */}
-      <div className={configured ? undefined : "max-sm:[&>div]:min-h-0 max-sm:[&>div]:py-6"}>{children}</div>
+      <div className={configured ? undefined : "max-sm:[&>div]:min-h-0 max-sm:[&>div]:py-6 sm:[&>div]:pt-56"}>{children}</div>
     </div>
   );
 }
@@ -57,7 +57,7 @@ function SetupNotice({ title, desc, demo }: { title: string; desc: string; demo:
   return (
     <div
       role="status"
-      className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-800"
+      className="rounded-3xl bg-amber-50/90 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200 backdrop-blur dark:bg-amber-950/60 dark:text-amber-100 dark:ring-amber-800"
     >
       <p className="font-semibold">{title}</p>
       <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">{desc}</p>

@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
 
   if (status === "checking") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t("checking")}
@@ -93,8 +93,8 @@ export default function ResetPasswordPage() {
 
   if (status === "expired") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card px-2 py-6 sm:px-4">
+      <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
+        <Card className="liquid-glass lg-frost relative w-full max-w-md rounded-3xl border-0 bg-transparent px-2 py-6 ring-0 sm:px-4">
           <CardHeader className="items-center text-center">
             <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
               <MailX className="h-6 w-6 text-amber-800 dark:text-amber-400" />
@@ -128,8 +128,8 @@ export default function ResetPasswordPage() {
 
   if (status === "done") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card px-2 py-6 sm:px-4">
+      <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
+        <Card className="liquid-glass lg-frost relative w-full max-w-md rounded-3xl border-0 bg-transparent px-2 py-6 ring-0 sm:px-4">
           <CardHeader className="items-center text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <CheckCircle className="h-6 w-6 text-primary" />
@@ -162,8 +162,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card px-2 py-6 sm:px-4">
+    <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
+      <Card className="liquid-glass lg-frost relative w-full max-w-md rounded-3xl border-0 bg-transparent px-2 py-6 ring-0 sm:px-4">
         <CardHeader className="items-center text-center">
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
             <KeyRound className="h-6 w-6 text-primary" />

@@ -9,7 +9,7 @@ export const metadata: Metadata = { robots: { index: true, follow: true } };
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="app-canvas min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main id="main">{children}</main>
       <SiteFooter />

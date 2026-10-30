@@ -22,7 +22,7 @@ const NAV = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 px-4 pt-3 sm:px-8">
-      <div className="mx-auto flex h-16 max-w-[1180px] items-center justify-between gap-4 rounded-full bg-card/95 pr-2 pl-4 shadow-[0_16px_44px_rgb(26_29_27/0.09)] ring-1 ring-border/60 backdrop-blur sm:pl-5">
+      <div className="mx-auto flex h-16 max-w-[1180px] items-center justify-between gap-4 rounded-full liquid-glass lg-frost pr-2 pl-4 sm:pl-5">
         <a href="/" className="flex items-center gap-2.5" aria-label="AutoShift home">
           {/* Round, like the public site's header mark. */}
           <LogoMark className="size-9 overflow-hidden rounded-full" />
