@@ -177,7 +177,7 @@ export function DataTable({ head, children, empty, className }: { head: ReactNod
           <tr className="border-b border-border bg-muted/40 text-left text-xs font-semibold tracking-wide text-muted-foreground">
             {head.map((h, i) => (
               <th key={i} className="relative px-3 py-2 font-semibold whitespace-nowrap first:pl-5 last:pr-5">
-                {typeof h === "string" ? tr(h) : h || <span className="sr-only">{tr("Actions")}</span>}
+                {h === "" || h == null || h === false ? <span className="sr-only">{tr("Actions")}</span> : typeof h === "string" ? tr(h) : h}
               </th>
             ))}
           </tr>
