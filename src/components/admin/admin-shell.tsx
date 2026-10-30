@@ -95,8 +95,8 @@ function activeItem(pathname: string) {
 const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
 
 const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
-const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_0/0.6)] hover:bg-[#fffdf9] hover:text-[#1a1d1b]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-70 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+const railActive = "rail-active opacity-100";
 
 function itemFor(href: string) {
   return ALL_ITEMS.find((i) => i.href === href)!;
@@ -104,7 +104,7 @@ function itemFor(href: string) {
 
 function SupportBadge({ href, count }: { href: string; count: number }) {
   if (href !== "/admin/support" || count === 0) return null;
-  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white">{count}</span>;
+  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white">{count}</span>;
 }
 
 /** The pages that aren't on the rail, plus the website editor and the business app. */
@@ -162,7 +162,7 @@ function AdminRail() {
   const [moreOpen, setMoreOpen] = useState(false);
   const inMore = !!current && !RAIL_HREFS.includes(current.href);
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex">
+    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex">
       <Link href="/admin" aria-label="AutoShift admin" className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
       </Link>
@@ -181,7 +181,7 @@ function AdminRail() {
           <PopoverTrigger aria-label="More pages" data-tip="More" className={cn(railButton, inMore && railActive)}>
             <MoreHorizontal className="size-[18px]" />
           </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
+          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass lg-floating relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
             <div className="max-h-[78vh] overflow-y-auto">
               <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
             </div>
@@ -206,7 +206,7 @@ function AdminMobileNav() {
   const [open, setOpen] = useState(false);
   const inMore = !current || !BAR_HREFS.includes(current.href);
   return (
-    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full bg-[var(--rail)] px-3 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
+    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
       {BAR_HREFS.map((href) => {
         const item = itemFor(href);
         const active = current?.href === href;
@@ -221,7 +221,7 @@ function AdminMobileNav() {
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", inMore && "bg-[#fffdf9] text-[#1a1d1b]")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
           More
         </SheetTrigger>
@@ -277,7 +277,7 @@ function BusinessSearch() {
         }}
         placeholder="Find a business, owner, email or number…"
         aria-label="Find a business"
-        className="h-10 w-full rounded-xl border border-border bg-card pr-3 pl-9 text-sm text-foreground shadow-[var(--shadow-card)] outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
+        className="h-10 w-full rounded-full liquid-glass pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
       />
       {open && q.trim() && (
         <div className="absolute top-11 right-0 left-0 z-50 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
@@ -309,7 +309,7 @@ function AlertsBell() {
   const critical = alerts.filter((a) => a.severity !== "info").length;
   return (
     <Popover>
-      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground shadow-[var(--shadow-card)] hover:text-foreground">
+      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-full liquid-glass">
         <Bell className="size-[18px]" />
         {critical > 0 && <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white">{critical}</span>}
       </PopoverTrigger>
@@ -343,7 +343,7 @@ function AdminMenu() {
   const router = useRouter();
   return (
     <Popover>
-      <PopoverTrigger className="flex items-center gap-2 rounded-xl border border-border bg-card py-1 pr-3 pl-1 shadow-[var(--shadow-card)] hover:bg-card-2" aria-label="Admin account">
+      <PopoverTrigger className="flex items-center gap-2 rounded-full liquid-glass py-1 pr-3 pl-1" aria-label="Admin account">
         <Initials name="Founder Admin" className="size-8" />
         <span className="hidden text-left sm:block">
           <span className="block text-sm leading-tight font-medium text-foreground">{CURRENT_ADMIN.name}</span>

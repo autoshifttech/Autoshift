@@ -71,7 +71,7 @@ export function ThemedToaster() {
       toastOptions={{
         unstyled: true,
         classNames: {
-          toast: "island-toast liquid-glass",
+          toast: "island-toast liquid-glass lg-floating",
           content: "island-content",
           title: "island-title",
           description: "island-desc",

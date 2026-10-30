@@ -147,7 +147,7 @@ export function SearchButton() {
     <button
       type="button"
       onClick={openPalette}
-      className="hidden h-10 items-center gap-2 rounded-xl border border-border bg-card pr-2 pl-3 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-card-2 md:inline-flex"
+      className="hidden h-10 items-center gap-2 rounded-full pr-2 pl-3 text-sm font-semibold liquid-glass transition-[filter] hover:brightness-105 md:inline-flex"
     >
       <Search className="size-3.5" />
       <span className="w-24 text-left lg:w-36">{t("button")}</span>

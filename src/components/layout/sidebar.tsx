@@ -125,14 +125,14 @@ function NavBadges({ href, active, counts, onRail }: { href: string; active: boo
   const { totalUnread, unreadNotifications } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
-      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white">
+      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white">
         {totalUnread > 9 ? "9+" : totalUnread}
       </span>
     );
   }
   if (href === "/notifications" && unreadNotifications > 0) {
     return (
-      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--rail)] bg-[#e2673c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"}>
+      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#e2673c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"}>
         {unreadNotifications > 9 ? "9+" : unreadNotifications}
       </span>
     );
@@ -178,8 +178,8 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
 }
 
 const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
-const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_0/0.6)] hover:bg-[#fffdf9] hover:text-[#1a1d1b]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-70 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+const railActive = "rail-active opacity-100";
 
 /**
  * Desktop: a dark rail of icon buttons with tooltips, the rest of the
@@ -196,7 +196,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex"
+      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex"
     >
       <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
@@ -219,9 +219,9 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
         <Popover open={moreOpen} onOpenChange={setMoreOpen}>
           <PopoverTrigger aria-label={t("more")} data-tip={t("more")} className={cn(railButton, inMore && railActive)}>
             <MoreHorizontal className="size-[18px]" />
-            {moreBadge && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full border-2 border-[var(--rail)] bg-[#c2410c]" />}
+            {moreBadge && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full border-2 border-white/80 bg-[#c2410c]" />}
           </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
+          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass lg-floating relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
             <div className="max-h-[78vh] overflow-y-auto">
               <MorePages pathname={pathname} exclude={[...RAIL_HREFS, "/settings"]} onPick={() => setMoreOpen(false)} counts={counts} />
             </div>
@@ -251,12 +251,12 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
   }, [pathname]);
 
   return (
-    <nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full bg-[var(--rail)] px-3 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
+    <nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
       {BAR_HREFS.map((href) => {
         const item = itemFor(href);
         const active = isActiveHref(pathname, href);
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60 transition-colors", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70 transition-colors", active && "rail-active opacity-100")}>
             <span className="relative">
               <item.icon className="size-5" />
               <NavBadges href={href} active={active} counts={counts} onRail />
@@ -266,7 +266,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold text-white/60", inMore && "bg-[#fffdf9] text-[#1a1d1b]")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-semibold opacity-70", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
           {t("more")}
         </SheetTrigger>
