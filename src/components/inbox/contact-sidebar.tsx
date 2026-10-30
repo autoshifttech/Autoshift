@@ -205,7 +205,7 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                     className="rounded-full px-2 py-0.5 text-xs font-medium"
                     style={{
                       backgroundColor: `${tag.color}20`,
-                      color: tag.color,
+                      color: `color-mix(in oklab, ${tag.color} 45%, var(--foreground))`,
                     }}
                   >
                     {tag.name}

@@ -176,7 +176,7 @@ export function TagManager() {
                     className="group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
                     style={{
                       backgroundColor: `${tag.color}20`,
-                      color: tag.color,
+                      color: `color-mix(in oklab, ${tag.color} 45%, var(--foreground))`,
                       border: `1px solid ${tag.color}40`,
                     }}
                   >

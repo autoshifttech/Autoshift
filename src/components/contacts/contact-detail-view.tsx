@@ -575,7 +575,7 @@ export function ContactDetailView({
                             }`}
                             style={{
                               backgroundColor: tag.color + '20',
-                              color: tag.color,
+                              color: `color-mix(in oklab, ${tag.color} 45%, var(--foreground))`,
                             }}
                           >
                             {selected && <Check className="size-3 mr-1" />}

@@ -363,7 +363,7 @@ export function ContactForm({
                       }`}
                       style={{
                         backgroundColor: tag.color + '20',
-                        color: tag.color,
+                        color: `color-mix(in oklab, ${tag.color} 45%, var(--foreground))`,
                         borderColor: tag.color,
                       }}
                     >
