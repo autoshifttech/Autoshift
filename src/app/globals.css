@@ -119,7 +119,7 @@ html[data-mode="dark"] {
   /* New layout: the icon rail and the dark chart card. */
   --rail: #0a0d0c;
   --ink: #0b100e;
-  --canvas-glow: radial-gradient(1200px 600px at 80% -10%, rgb(95 191 159 / 0.07), transparent 60%);
+  --canvas-glow: radial-gradient(900px 560px at 85% -8%, rgb(40 110 220 / 0.38), transparent 62%), radial-gradient(800px 520px at 8% 6%, rgb(30 160 130 / 0.34), transparent 60%), radial-gradient(900px 600px at 55% 108%, rgb(150 70 200 / 0.26), transparent 60%);
   --sidebar: #181b19;
   --sidebar-foreground: #f4f2ed;
   --sidebar-accent: #262b28;
@@ -164,7 +164,7 @@ html[data-mode="light"] {
   --shadow-card: 0 1px 2px rgb(60 40 20 / 0.04), 0 10px 28px -18px rgb(60 40 20 / 0.25);
   --rail: #1c2320;
   --ink: #17201d;
-  --canvas-glow: radial-gradient(1200px 600px at 80% -10%, #fbf3ea, transparent 60%), radial-gradient(900px 500px at -10% 0%, #f0f4ef, transparent 60%);
+  --canvas-glow: radial-gradient(900px 560px at 85% -8%, rgb(110 175 255 / 0.55), transparent 62%), radial-gradient(800px 520px at 8% 6%, rgb(110 225 190 / 0.5), transparent 60%), radial-gradient(900px 600px at 55% 108%, rgb(255 185 150 / 0.45), transparent 60%), radial-gradient(600px 420px at 42% 22%, rgb(195 170 255 / 0.3), transparent 60%);
   --sidebar: #ffffff;
   --sidebar-foreground: #121413;
   --sidebar-accent: #f4f1ea;
@@ -464,7 +464,9 @@ html:not([data-theme="autoshift"]) {
   color: var(--lg-ink);
   border: 1px solid rgb(255 255 255 / 0.35);
   box-shadow:
-    inset 0 2px 5px rgb(255 255 255 / 0.55),
+    inset 1.5px 1.5px 0 rgb(150 210 255 / 0.55),
+    inset -1.5px -1.5px 0 rgb(255 175 215 / 0.4),
+    inset 0 2px 5px rgb(255 255 255 / 0.6),
     inset 0 -3px 8px rgb(255 255 255 / 0.2),
     inset 0 0 28px rgb(255 255 255 / 0.22),
     0 14px 24px -12px rgb(30 50 45 / 0.32),
@@ -492,7 +494,7 @@ html[data-lens] .liquid-glass {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1.5px;
+  padding: 2px;
   pointer-events: none;
   background: linear-gradient(135deg, var(--lg-rim) 0%, rgb(255 255 255 / 0.12) 30%, rgb(255 255 255 / 0.04) 55%, rgb(255 255 255 / 0.7) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);

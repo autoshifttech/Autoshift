@@ -40,7 +40,7 @@ export function LiquidGlassDefs() {
     <svg aria-hidden width="0" height="0" style={{ position: "absolute" }} focusable="false">
       <filter id="liquid-lens" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" colorInterpolationFilters="sRGB">
         <feImage href={LENS_MAP} x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map" />
-        <feDisplacementMap in="SourceGraphic" in2="map" scale="0.07" xChannelSelector="R" yChannelSelector="G" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="0.12" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
   );
