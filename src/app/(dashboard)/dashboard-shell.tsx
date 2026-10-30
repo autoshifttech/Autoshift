@@ -1,5 +1,6 @@
 "use client";
 
+import { PageSkeleton, Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -34,10 +35,10 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+      <div className="app-canvas flex h-dvh gap-4 bg-background p-4 sm:p-6" aria-label={t("loading")} role="status">
+        <Skeleton className="hidden h-[480px] w-[60px] shrink-0 self-center rounded-full lg:block" />
+        <div className="min-w-0 flex-1 pt-14">
+          <PageSkeleton />
         </div>
       </div>
     );

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
@@ -214,14 +215,6 @@ export function Meter({ value, max, className, tone = "bg-primary" }: { value: n
   );
 }
 
-export function EmptyState({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; detail?: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-      <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Icon className="size-5" />
-      </span>
-      <p className="mt-3 text-sm font-medium text-foreground">{title}</p>
-      {detail && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{detail}</p>}
-    </div>
-  );
+export function EmptyState({ icon, title, detail }: { icon: LucideIcon; title: string; detail?: string }) {
+  return <EmptyPanel icon={icon} title={title} description={detail} className="py-12" />;
 }

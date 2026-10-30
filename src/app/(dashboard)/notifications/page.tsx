@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -188,17 +189,7 @@ export default function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Bell className="h-6 w-6 text-primary" />
-          </div>
-          <p className="mt-3 text-sm font-medium text-foreground">
-            {t("emptyTitle")}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("emptyDesc")}
-          </p>
-        </div>
+        <EmptyPanel icon={Bell} title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-14" />
       ) : (
         <ul className="stack-in space-y-2">
           {notifications.map((n) => {

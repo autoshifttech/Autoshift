@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -333,26 +334,16 @@ function EmptyState({
 }) {
   const tGate = useTranslations("GatedButton");
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-        <Workflow className="h-6 w-6 text-muted-foreground" />
-      </div>
-      <h2 className="mt-4 text-base font-medium text-foreground">
-        {t("emptyTitle")}
-      </h2>
-      <p className="mt-1 max-w-md text-sm text-muted-foreground">
-        {t("emptyDesc")}
-      </p>
+    <EmptyPanel icon={Workflow} title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-14">
       <GatedButton
         canAct={canCreate}
         gateReason={tGate("reasons.createFlows")}
         onClick={onCreate}
-        className="mt-5"
       >
         <Plus className="h-4 w-4" />
         {t("createFirst")}
       </GatedButton>
-    </div>
+    </EmptyPanel>
   );
 }
 

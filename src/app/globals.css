@@ -293,6 +293,27 @@ html:not([data-theme="autoshift"]) {
 .app-canvas {
   background-image: var(--canvas-glow);
 }
+/* The hint under a field that failed validation turns into the error. */
+:is(input, textarea, select)[aria-invalid="true"] ~ p {
+  color: #b42318;
+  font-weight: 600;
+}
+html[data-mode="dark"] :is(input, textarea, select)[aria-invalid="true"] ~ p {
+  color: #fda29b;
+}
+/* Loading placeholders: a soft light sweep across a tinted block. */
+.skeleton {
+  background: linear-gradient(100deg, color-mix(in oklab, var(--foreground) 6%, transparent) 30%, color-mix(in oklab, var(--foreground) 12%, transparent) 50%, color-mix(in oklab, var(--foreground) 6%, transparent) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-sweep {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
 /* Rail hover names are drawn by components/layout/rail-tip.tsx. */
 /* Striped fill for "planned / waiting / not yet" parts of a meter. */
 .hatch {

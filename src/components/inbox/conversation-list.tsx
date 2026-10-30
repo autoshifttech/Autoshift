@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -401,9 +402,7 @@ export function ConversationList({
           parent's overflow-hidden with no scrollbar (issue #229). */}
       <ScrollArea className="min-h-0 flex-1">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
+          <ListSkeleton rows={7} />
         ) : filtered.length === 0 ? (
           <div className="px-4 py-12 text-center">
             <p className="text-sm text-muted-foreground">{t("noConversations")}</p>

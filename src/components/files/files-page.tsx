@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -143,7 +144,7 @@ export function FilesPage() {
           </button>
         ))}
       </div>
-      {shown.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">{t("empty")}</p>}
+      {shown.length === 0 && <EmptyPanel icon={FileText} title={t("empty")} />}
 
       <Sheet open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">

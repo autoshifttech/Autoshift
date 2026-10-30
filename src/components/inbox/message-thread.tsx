@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -958,15 +959,7 @@ export function MessageThread({
   if (!conversation || !contact) {
     return (
       <div className={cn("flex flex-1 flex-col items-center justify-center", DOODLE_BG_CLASSES)}>
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <MessageSquare className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h2 className="mt-4 text-sm font-medium text-muted-foreground">
-          {t("selectConversation")}
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {t("selectConversationHint")}
-        </p>
+        <EmptyPanel icon={MessageSquare} title={t("selectConversation")} description={t("selectConversationHint")} />
       </div>
     );
   }
