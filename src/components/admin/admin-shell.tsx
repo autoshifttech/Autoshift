@@ -95,7 +95,7 @@ function activeItem(pathname: string) {
 const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
 
 const railButton =
-  "rail-tip relative flex size-10 shrink-0 items-center justify-center rounded-xl text-white/55 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "bg-[#fffdf9] text-[#1a1d1b] shadow-[0_6px_18px_-8px_rgb(0_0_0/0.6)] hover:bg-[#fffdf9] hover:text-[#1a1d1b]";
 
 function itemFor(href: string) {
@@ -157,14 +157,14 @@ function AdminRail() {
   const openTickets = tickets.filter((t) => t.status === "open").length;
   const current = activeItem(pathname);
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 m-3 mr-0 hidden w-[58px] shrink-0 flex-col items-center gap-1 rounded-[20px] bg-[var(--rail)] py-3.5 ring-1 ring-white/[0.06] shadow-[0_24px_50px_-26px_rgb(20_14_8/0.7)] lg:flex">
-      <Link href="/admin" aria-label="AutoShift admin" className="mb-3 shrink-0">
-        <LogoMark className="logo-in size-9" />
+    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden max-h-[calc(100dvh-1.5rem)] w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full bg-[var(--rail)] py-3 ring-1 ring-white/[0.06] shadow-[0_28px_60px_-24px_rgb(20_14_8/0.75)] lg:flex">
+      <Link href="/admin" aria-label="AutoShift admin" className="mb-2 shrink-0">
+        <LogoMark className="logo-in size-8" />
       </Link>
       <nav className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto [scrollbar-width:none]">
         {ADMIN_NAV.map((group, gi) => (
           <div key={group.label} role="group" aria-label={group.label} className="flex flex-col items-center gap-1">
-            {gi > 0 && <span aria-hidden className="my-1 h-px w-6 bg-white/10" />}
+            {gi > 0 && <span aria-hidden className="my-1.5 h-px w-6 bg-white/15" />}
             {group.items.map((item) => {
               const active = current?.href === item.href;
               return (
@@ -177,14 +177,14 @@ function AdminRail() {
           </div>
         ))}
       </nav>
-      <span className="my-1.5 h-px w-6 shrink-0 bg-white/10" />
+      <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
       <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip="Website admin" className={railButton}>
         <Globe className="size-[18px]" />
       </Link>
       <Link href="/dashboard" aria-label="Open the business app" data-tip="Open the business app" className={railButton}>
         <BarChart3 className="size-[18px]" />
       </Link>
-      <ModeToggle tip className={cn(railButton, "size-10 rounded-xl")} />
+      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
     </aside>
   );
 }
@@ -198,7 +198,7 @@ function AdminMobileNav() {
   const [open, setOpen] = useState(false);
   const inMore = !current || !BAR_HREFS.includes(current.href);
   return (
-    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-[20px] bg-[var(--rail)] px-2 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
+    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full bg-[var(--rail)] px-3 shadow-[0_20px_40px_-18px_rgb(20_14_8/0.7)] lg:hidden">
       {BAR_HREFS.map((href) => {
         const item = itemFor(href);
         const active = current?.href === href;

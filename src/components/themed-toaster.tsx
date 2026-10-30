@@ -1,7 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { Toaster } from "sonner";
+import { useEffect, useSyncExternalStore } from "react";
+import { Toaster, useSonner } from "sonner";
 
 import { useTheme } from "@/hooks/use-theme";
 import { DEFAULT_MODE } from "@/lib/themes";
@@ -32,11 +32,36 @@ function useIsClient() {
  * user hydrates with a different sonner `theme` attribute than the
  * server emitted and React logs a hydration mismatch.
  */
+/** How long a message stays when the caller doesn't say. */
+const DEFAULT_MS = 4600;
+/** Time the closing beat (text fades, pill folds, circle rises) needs. */
+const CLOSE_MS = 1100;
+
+/**
+ * Tells each message when to start folding away. The closing animation is
+ * pure CSS, so it needs to know the message's own duration (some callers
+ * keep errors up for 10 seconds); sonner lists its toasts in the same
+ * order as their `data-index`, so the two are matched by that.
+ */
+function useCloseTimes() {
+  const { toasts } = useSonner();
+  useEffect(() => {
+    document.querySelectorAll<HTMLElement>("[data-sonner-toast]").forEach((el) => {
+      const t = toasts[Number(el.dataset.index)];
+      if (!t) return;
+      const ms = t.type === "loading" || t.duration === Infinity ? 1e9 : Math.max((t.duration ?? DEFAULT_MS) - CLOSE_MS, 1400);
+      el.style.setProperty("--island-out-delay", `${ms}ms`);
+    });
+  }, [toasts]);
+}
+
 export function ThemedToaster() {
   const { mode } = useTheme();
   const isClient = useIsClient();
+  useCloseTimes();
   return (
     <Toaster
+      duration={DEFAULT_MS}
       theme={isClient ? mode : DEFAULT_MODE}
       // Messages open like Apple's Dynamic Island: a black pill at the top
       // centre that grows out to fit the message (styles in globals.css).

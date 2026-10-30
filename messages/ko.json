@@ -58,7 +58,8 @@
     "optIns": "수신 동의 및 차단",
     "support": "도움말 및 지원",
     "more": "더보기",
-    "morePages": "모든 페이지"
+    "morePages": "모든 페이지",
+    "search": "검색"
   },
   "Header": {
     "dashboard": "대시보드",
