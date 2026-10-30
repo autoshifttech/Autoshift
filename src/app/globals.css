@@ -441,6 +441,114 @@ html:not([data-theme="autoshift"]) {
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.6); }
 }
+/* ============================================================
+ * Liquid glass (Apple style). One class, used by the notifications and
+ * the sidebar "more" panels:
+ *  - a very light tint, so the page shows through,
+ *  - the backdrop is blurred, saturated and *compressed in contrast*
+ *    (dark areas lift, bright areas dim), which keeps text readable over
+ *    any content without needing an opaque fill,
+ *  - on Chromium the edges also bend what is behind them (a lens),
+ *    through the SVG filter in components/motion/liquid-glass-defs.tsx,
+ *  - bright rim light on the top-left and bottom-right edges, a soft
+ *    inner glow and a sheen across the top.
+ * ============================================================ */
+.liquid-glass {
+  --lg-a: rgb(255 255 255 / 0.3);
+  --lg-b: rgb(255 255 255 / 0.24);
+  --lg-rim: rgb(255 255 255 / 0.95);
+  --lg-ink: #121413;
+  background: linear-gradient(135deg, var(--lg-a), var(--lg-b));
+  -webkit-backdrop-filter: blur(18px) saturate(1.9) contrast(0.62) brightness(1.5);
+  backdrop-filter: blur(18px) saturate(1.9) contrast(0.62) brightness(1.5);
+  color: var(--lg-ink);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  box-shadow:
+    inset 0 2px 5px rgb(255 255 255 / 0.55),
+    inset 0 -3px 8px rgb(255 255 255 / 0.2),
+    inset 0 0 28px rgb(255 255 255 / 0.22),
+    0 14px 24px -12px rgb(30 50 45 / 0.32),
+    0 1px 5px rgb(30 50 45 / 0.1);
+  isolation: isolate;
+}
+html[data-lens] .liquid-glass {
+  -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(0.62) brightness(1.5);
+  backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(0.62) brightness(1.5);
+}
+/* Sheen: light falling across the upper half. */
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 55%);
+  opacity: 0.6;
+}
+/* Rim light: a thin bright edge, strongest top-left and bottom-right. */
+.liquid-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--lg-rim) 0%, rgb(255 255 255 / 0.12) 30%, rgb(255 255 255 / 0.04) 55%, rgb(255 255 255 / 0.7) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+html[data-mode="dark"] .liquid-glass {
+  --lg-a: rgb(255 255 255 / 0.16);
+  --lg-b: rgb(255 255 255 / 0.05);
+  --lg-rim: rgb(255 255 255 / 0.7);
+  --lg-ink: #f7f7f6;
+  -webkit-backdrop-filter: blur(18px) saturate(1.8) contrast(0.6) brightness(0.8);
+  backdrop-filter: blur(18px) saturate(1.8) contrast(0.6) brightness(0.8);
+  border-color: rgb(255 255 255 / 0.2);
+  box-shadow:
+    inset 0 2px 5px rgb(255 255 255 / 0.22),
+    inset 0 -3px 8px rgb(255 255 255 / 0.06),
+    inset 0 0 28px rgb(255 255 255 / 0.07),
+    0 14px 24px -12px rgb(0 0 0 / 0.6),
+    0 1px 5px rgb(0 0 0 / 0.25);
+}
+html[data-mode="dark"][data-lens] .liquid-glass {
+  -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
+  backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
+}
+html[data-mode="dark"] .liquid-glass::before {
+  opacity: 0.16;
+}
+/* Menu items read in full ink so they stay legible over any backdrop. */
+.liquid-glass :is(a, button) {
+  color: var(--lg-ink);
+}
+/* Items inside a glass panel: no opaque hover fills. */
+.liquid-glass a:hover,
+.liquid-glass button:hover,
+.liquid-glass a[aria-current="page"] {
+  background-color: rgb(255 255 255 / 0.4);
+}
+html[data-mode="dark"] .liquid-glass a:hover,
+html[data-mode="dark"] .liquid-glass button:hover,
+html[data-mode="dark"] .liquid-glass a[aria-current="page"] {
+  background-color: rgb(255 255 255 / 0.12);
+}
+.liquid-glass p {
+  color: color-mix(in oklab, var(--lg-ink) 72%, transparent);
+}
+/* Browsers without backdrop-filter get a more solid glass so text stays readable. */
+@supports not (backdrop-filter: blur(1px)) {
+  .liquid-glass {
+    background: rgb(250 248 244 / 0.95);
+  }
+  html[data-mode="dark"] .liquid-glass {
+    background: rgb(40 44 42 / 0.95);
+  }
+}
+
 /* Dynamic Island messages (sonner toasts) as Apple "liquid glass", in four beats:
    1. a small glass circle drops in from the top of the screen,
    2. it opens out sideways into the message (a soft spring),
@@ -454,9 +562,6 @@ html:not([data-theme="autoshift"]) {
    reads over any page content. */
 .island-toast {
   --spring: linear(0, 0.0255, 0.0919, 0.1855, 0.2949, 0.4106, 0.5255, 0.6341, 0.7329, 0.8194, 0.8926, 0.9524, 0.9993, 1.0342, 1.0585, 1.0738, 1.0816, 1.0835, 1.0808, 1.0749, 1.0668, 1.0576, 1.0479, 1.0383, 1.0293, 1.0212, 1.0142, 1.0082, 1.0034, 0.9996, 0.9968, 0.9949, 1);
-  --glass-tint: rgb(255 255 255 / 0.68);
-  --glass-tint-2: rgb(255 255 255 / 0.5);
-  --glass-rim: rgb(255 255 255 / 0.85);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -470,56 +575,15 @@ html:not([data-theme="autoshift"]) {
   min-height: 46px;
   padding: 10px 20px 10px 12px;
   border-radius: 26px;
-  background: linear-gradient(135deg, var(--glass-tint), var(--glass-tint-2));
-  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  color: #121413;
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.35;
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.35);
-  border: 1px solid rgb(255 255 255 / 0.55);
-  box-shadow:
-    inset 0 1.5px 1px var(--glass-rim),
-    inset 0 -1.5px 1px rgb(255 255 255 / 0.3),
-    inset 0 0 22px rgb(255 255 255 / 0.28),
-    0 14px 22px -12px rgb(30 50 45 / 0.3),
-    0 1px 5px rgb(30 50 45 / 0.1);
-  isolation: isolate;
   /* `translate`/`scale` (not `transform`) so sonner's own transform keeps working. */
   animation:
     island-drop 0.8s cubic-bezier(0.3, 1.35, 0.5, 1) both,
     island-open 1.15s 0.42s var(--spring) both,
     island-fold 0.95s var(--island-out-delay, 3500ms) cubic-bezier(0.65, 0, 0.35, 1) forwards,
     island-lift 0.7s calc(var(--island-out-delay, 3500ms) + 0.78s) cubic-bezier(0.55, 0, 0.8, 0.4) forwards;
-}
-/* A soft highlight across the top half, like light on curved glass. */
-.island-toast::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 58%);
-  opacity: 0.55;
-}
-html[data-mode="dark"] .island-toast {
-  --glass-tint: rgb(26 30 28 / 0.58);
-  --glass-tint-2: rgb(26 30 28 / 0.4);
-  --glass-rim: rgb(255 255 255 / 0.5);
-  color: #f7f7f6;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
-  border-color: rgb(255 255 255 / 0.22);
-  box-shadow:
-    inset 0 1.5px 1px var(--glass-rim),
-    inset 0 -1.5px 1px rgb(255 255 255 / 0.1),
-    inset 0 0 22px rgb(255 255 255 / 0.08),
-    0 14px 22px -12px rgb(0 0 0 / 0.55),
-    0 1px 5px rgb(0 0 0 / 0.25);
-}
-html[data-mode="dark"] .island-toast::before {
-  opacity: 0.18;
 }
 .island-toast > * {
   animation:
@@ -629,15 +693,7 @@ html[data-mode="dark"] .island-cancel {
   background: rgb(255 255 255 / 0.18);
   color: #fff;
 }
-/* Browsers without backdrop-filter get a more solid glass so text stays readable. */
-@supports not (backdrop-filter: blur(1px)) {
-  .island-toast {
-    background: rgb(250 248 244 / 0.94);
-  }
-  html[data-mode="dark"] .island-toast {
-    background: rgb(40 44 42 / 0.94);
-  }
-}
+
 
 /* Smooth scrolling everywhere; sections rise in as they scroll into view
    (done by components/motion/scroll-reveal.tsx). */

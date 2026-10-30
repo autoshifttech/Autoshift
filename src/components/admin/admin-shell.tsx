@@ -181,8 +181,10 @@ function AdminRail() {
           <PopoverTrigger aria-label="More pages" data-tip="More" className={cn(railButton, inMore && railActive)}>
             <MoreHorizontal className="size-[18px]" />
           </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
-            <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
+          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
+            <div className="max-h-[78vh] overflow-y-auto">
+              <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
+            </div>
           </PopoverContent>
         </Popover>
       </nav>

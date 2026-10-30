@@ -6,6 +6,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ThemedToaster } from "@/components/themed-toaster";
+import { LiquidGlassDefs } from "@/components/motion/liquid-glass-defs";
 import {
   DEFAULT_MODE,
   DEFAULT_THEME,
@@ -125,6 +126,7 @@ export default async function RootLayout({
           <ThemeProvider>
             {children}
             <ThemedToaster />
+            <LiquidGlassDefs />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

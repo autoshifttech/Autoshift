@@ -221,8 +221,10 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
             <MoreHorizontal className="size-[18px]" />
             {moreBadge && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full border-2 border-[var(--rail)] bg-[#c2410c]" />}
           </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="max-h-[80vh] w-64 gap-0 overflow-y-auto rounded-2xl p-1.5">
-            <MorePages pathname={pathname} exclude={[...RAIL_HREFS, "/settings"]} onPick={() => setMoreOpen(false)} counts={counts} />
+          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
+            <div className="max-h-[78vh] overflow-y-auto">
+              <MorePages pathname={pathname} exclude={[...RAIL_HREFS, "/settings"]} onPick={() => setMoreOpen(false)} counts={counts} />
+            </div>
           </PopoverContent>
         </Popover>
       </nav>
