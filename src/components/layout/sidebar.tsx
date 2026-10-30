@@ -176,7 +176,7 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
 }
 
 const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-70 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
 /**
@@ -251,19 +251,19 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
         const item = itemFor(href);
         const active = isActiveHref(pathname, href);
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70 transition-colors", active && "rail-active opacity-100")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-85 transition-colors", active && "rail-active opacity-100")}>
             <span className="relative">
               <item.icon className="size-5" />
               <NavBadges href={href} active={active} counts={counts} onRail />
             </span>
-            {t(item.labelKey)}
+            <span className={cn(!active && "max-[400px]:sr-only")}>{t(item.labelKey)}</span>
           </Link>
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70", inMore && "rail-active opacity-100")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-85", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
-          {t("more")}
+          <span className={cn(!inMore && "max-[400px]:sr-only")}>{t("more")}</span>
         </SheetTrigger>
         <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
           <SheetTitle className="px-2.5 pb-1 text-base">{t("morePages")}</SheetTitle>

@@ -95,7 +95,7 @@ function activeItem(pathname: string) {
 const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
 
 const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-70 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
 function itemFor(href: string) {
@@ -211,19 +211,19 @@ function AdminMobileNav() {
         const item = itemFor(href);
         const active = current?.href === href;
         return (
-          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold text-white/60", active && "bg-[#fffdf9] text-[#1a1d1b]")}>
+          <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("relative flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-85 transition-colors", active && "rail-active opacity-100")}>
             <span className="relative">
               <item.icon className="size-5" />
               <SupportBadge href={href} count={openTickets} />
             </span>
-            {item.label === "Support inbox" ? "Support" : item.label}
+            <span className={cn(!active && "max-[400px]:sr-only")}>{item.label === "Support inbox" ? "Support" : item.label}</span>
           </Link>
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-70", inMore && "rail-active opacity-100")}>
+        <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-85", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
-          More
+          <span className={cn(!inMore && "max-[400px]:sr-only")}>More</span>
         </SheetTrigger>
         <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
           <div className="flex items-center justify-between px-2.5 pb-1">

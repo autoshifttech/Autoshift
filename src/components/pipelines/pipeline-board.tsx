@@ -284,6 +284,9 @@ function DraggableDealCard({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      // A group, not a button: the card holds its own links and menu.
+      role="group"
+      aria-label={deal.title}
       style={{ opacity: isDragging ? 0.3 : 1, touchAction: "none" }}
     >
       <DealCard deal={deal} stage={stage} onEdit={onEdit} />
