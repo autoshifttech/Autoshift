@@ -138,6 +138,15 @@
     "emptyState": {
       "title": "Ainda não há dados suficientes"
     },
+    "nextSteps": {
+      "title": "O que fazer agora",
+      "connect": "Conecte seu número de WhatsApp",
+      "reply": "{count, plural, one {Responda # cliente em espera} other {Responda # clientes em espera}}",
+      "topUp": "Recarregue sua carteira",
+      "trial": "{days, plural, =0 {Seu teste termina hoje} one {Seu teste termina em # dia} other {Seu teste termina em # dias}}: escolha um plano",
+      "broadcast": "Envie seu primeiro envio em massa",
+      "allClear": "Tudo em dia."
+    },
     "overview": {
       "loadFailed": "Não foi possível carregar o painel.",
       "retry": "Tentar novamente",

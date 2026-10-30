@@ -24,6 +24,7 @@ import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { AttentionRow } from '@/components/dashboard/attention-row'
 import { CampaignsCard } from '@/components/dashboard/campaigns-card'
 import { KpiRow } from '@/components/dashboard/kpi-row'
+import { NextSteps } from '@/components/dashboard/next-steps'
 import { OverviewBento } from '@/components/dashboard/overview-bento'
 import { OverviewHeader } from '@/components/dashboard/overview-header'
 import { PipelineCard } from '@/components/dashboard/pipeline-card'
@@ -160,6 +161,7 @@ function DashboardPageInner() {
       ) : (
         <>
           <OverviewBento data={data} now={now} />
+          <NextSteps data={data} />
           <WorkspaceSummary />
           <AttentionRow data={data} now={now} onlineCount={onlineCount} />
           <KpiRow data={data} currency={defaultCurrency} />

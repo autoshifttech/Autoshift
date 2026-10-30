@@ -51,7 +51,7 @@ export function ActivityFeed({ items, loading }: ActivityFeedProps) {
     i === 0 || totalLoaded > PAGE_SIZES[i - 1]
 
   return (
-    <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
       <header className="flex items-center justify-between border-b border-border px-5 py-4">
         <h2 className="text-base font-medium text-foreground">{t('title')}</h2>
         <Link
@@ -84,10 +84,10 @@ export function ActivityFeed({ items, loading }: ActivityFeedProps) {
               // Alternating row background for scanability. bg-muted/40
               // keeps the stripe visible in both light and dark modes
               // (bg-card/40 vanishes against a white card surface in light).
-              const stripe = i % 2 === 0 ? 'bg-transparent' : 'bg-muted/40'
+              const stripe = i % 2 === 0 ? 'bg-transparent' : 'bg-transparent'
               const row = (
                 <div className="flex items-center gap-3 px-5 py-2.5">
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Icon className="h-3.5 w-3.5" />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm text-foreground">

@@ -138,6 +138,15 @@
     "emptyState": {
       "title": "Aún no hay datos suficientes"
     },
+    "nextSteps": {
+      "title": "Qué hacer ahora",
+      "connect": "Conecta tu número de WhatsApp",
+      "reply": "{count, plural, one {Responde a # cliente en espera} other {Responde a # clientes en espera}}",
+      "topUp": "Recarga tu monedero",
+      "trial": "{days, plural, =0 {Tu prueba termina hoy} one {Tu prueba termina en # día} other {Tu prueba termina en # días}}: elige un plan",
+      "broadcast": "Envía tu primera difusión",
+      "allClear": "Todo al día."
+    },
     "overview": {
       "loadFailed": "No se pudo cargar el panel.",
       "retry": "Reintentar",

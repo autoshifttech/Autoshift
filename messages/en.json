@@ -138,6 +138,15 @@
     "emptyState": {
       "title": "Not enough data yet"
     },
+    "nextSteps": {
+      "title": "What to do next",
+      "connect": "Connect your WhatsApp number",
+      "reply": "{count, plural, one {Reply to # waiting customer} other {Reply to # waiting customers}}",
+      "topUp": "Top up your wallet",
+      "trial": "{days, plural, =0 {Your trial ends today} one {Your trial ends in # day} other {Your trial ends in # days}}: pick a plan",
+      "broadcast": "Send your first broadcast",
+      "allClear": "You are all caught up."
+    },
     "overview": {
       "loadFailed": "Couldn't load the dashboard.",
       "retry": "Try again",
