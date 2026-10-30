@@ -636,8 +636,8 @@ function InboxPageInner() {
             agent hasn't collapsed it via the thread-header toggle (#258).
             On mobile it's always hidden (the `lg:block` below), so the
             toggle — which is itself desktop-only — never affects it. */}
-        {contactPanelOpen && (
-          <div className="hidden overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)] lg:block">
+        {contactPanelOpen && hasActiveConv && (
+          <div className="hidden animate-in overflow-hidden rounded-[20px] duration-300 fade-in slide-in-from-right-4 border border-border bg-card shadow-[var(--shadow-card)] lg:block">
             <ContactSidebar contact={activeContact} />
           </div>
         )}
