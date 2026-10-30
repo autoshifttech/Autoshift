@@ -4127,6 +4127,8 @@
     "warm": "Warm",
     "cold": "Cold",
     "funnelTitle": "From chat to customer",
+    "routeTitle": "The customer route",
+    "routeDesc": "Where customers go from first message to paying customer.",
     "funnelDesc": "How many people move to each stage.",
     "ofPrevious": "{pct}% of previous",
     "stage_conversations": "Conversations",

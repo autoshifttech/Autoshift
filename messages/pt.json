@@ -4127,6 +4127,8 @@
     "warm": "Morno",
     "cold": "Frio",
     "funnelTitle": "Da conversa ao cliente",
+    "routeTitle": "A rota do cliente",
+    "routeDesc": "Por onde os clientes passam, da primeira mensagem até pagar.",
     "funnelDesc": "Quantas pessoas chegam a cada etapa.",
     "ofPrevious": "{pct}% da etapa anterior",
     "stage_conversations": "Conversas",

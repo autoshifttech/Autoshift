@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart } from "@/components/tremor/bar-chart";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
+import { FunnelChart, RouteCard } from "./journey-charts";
 import { RANGES, buildInsights, change, type Range } from "@/lib/insights/model";
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
@@ -114,30 +115,17 @@ export function InsightsPage() {
         </section>
       </div>
 
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+        <h2 className="font-semibold text-foreground">{t("routeTitle")}</h2>
+        <p className="text-sm text-muted-foreground">{t("routeDesc")}</p>
+        <RouteCard stages={data.funnel} />
+      </section>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <h2 className="font-semibold text-foreground">{t("funnelTitle")}</h2>
           <p className="text-sm text-muted-foreground">{t("funnelDesc")}</p>
-          <ul className="mt-4 space-y-3">
-            {data.funnel.map((f, i) => {
-              const pct = Math.round((f.value / data.funnel[0].value) * 100);
-              const step = i > 0 ? Math.round((f.value / data.funnel[i - 1].value) * 100) : null;
-              return (
-                <li key={f.stage}>
-                  <div className="flex items-baseline justify-between text-sm">
-                    <span className="text-foreground">{t(`stage_${f.stage}`)}</span>
-                    <span className="text-muted-foreground">
-                      <span className="font-semibold text-foreground">{f.value.toLocaleString(locale)}</span>
-                      {step !== null && ` · ${t("ofPrevious", { pct: step })}`}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(2, pct)}%`, opacity: 1 - i * 0.13 }} />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <FunnelChart stages={data.funnel} />
         </section>
         <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <h2 className="font-semibold text-foreground">{t("sourcesTitle")}</h2>

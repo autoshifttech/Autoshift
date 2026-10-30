@@ -4127,6 +4127,8 @@
     "warm": "Warm",
     "cold": "Cold",
     "funnelTitle": "채팅에서 고객까지",
+    "routeTitle": "고객 경로",
+    "routeDesc": "첫 메시지부터 결제 고객이 되기까지의 흐름입니다.",
     "funnelDesc": "각 단계로 넘어가는 사람 수입니다.",
     "ofPrevious": "이전 단계의 {pct}%",
     "stage_conversations": "대화",

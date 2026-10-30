@@ -4127,6 +4127,8 @@
     "warm": "Tibio",
     "cold": "Frío",
     "funnelTitle": "Del chat al cliente",
+    "routeTitle": "La ruta del cliente",
+    "routeDesc": "Por dónde pasan los clientes, del primer mensaje hasta pagar.",
     "funnelDesc": "Cuántas personas llegan a cada etapa.",
     "ofPrevious": "{pct}% de la anterior",
     "stage_conversations": "Conversaciones",

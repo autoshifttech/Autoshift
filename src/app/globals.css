@@ -301,6 +301,22 @@ html:not([data-theme="autoshift"]) {
 html[data-mode="dark"] :is(input, textarea, select)[aria-invalid="true"] ~ p {
   color: #fda29b;
 }
+/* Insights: funnel steps grow in from the left; the route line draws itself. */
+.funnel-step {
+  animation: funnel-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes funnel-in {
+  from { opacity: 0; transform: scaleX(0.4); }
+}
+.route-line {
+  animation: route-draw 1.4s ease-out backwards;
+}
+@keyframes route-draw {
+  from { stroke-dashoffset: 1; stroke-dasharray: 0 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .funnel-step, .route-line { animation: none; }
+}
 /* Loading placeholders: a soft light sweep across a tinted block. */
 .skeleton {
   background: linear-gradient(100deg, color-mix(in oklab, var(--foreground) 6%, transparent) 30%, color-mix(in oklab, var(--foreground) 12%, transparent) 50%, color-mix(in oklab, var(--foreground) 6%, transparent) 70%);
