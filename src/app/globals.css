@@ -474,7 +474,10 @@ html:not([data-theme="autoshift"]) {
     0 1px 5px rgb(30 50 45 / 0.1);
   isolation: isolate;
 }
-html[data-lens] .liquid-glass {
+/* The lens (an SVG filter) is costly, so only short-lived surfaces get it,
+   never the rails and bars that sit over scrolling content. */
+html[data-lens] .island-toast.liquid-glass,
+html[data-lens] [data-slot="popover-content"].liquid-glass {
   -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
   backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
 }
@@ -518,7 +521,8 @@ html[data-mode="dark"] .liquid-glass {
     0 14px 24px -12px rgb(0 0 0 / 0.6),
     0 1px 5px rgb(0 0 0 / 0.25);
 }
-html[data-mode="dark"][data-lens] .liquid-glass {
+html[data-mode="dark"][data-lens] .island-toast.liquid-glass,
+html[data-mode="dark"][data-lens] [data-slot="popover-content"].liquid-glass {
   -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
   backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
 }

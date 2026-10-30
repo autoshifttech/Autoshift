@@ -59,10 +59,10 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <NavFrame />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <ViewAsBanner />
-        <TrialBanner />
-        <LowBalanceBanner />
-        {/* The top bar scrolls with the page, so there's no band behind it. */}
+        {/* The banners and top bar scroll with the page, so there's no fixed band. */}
         <div id="app-scroll" className="smooth-scroll flex-1 overflow-y-auto">
+          <TrialBanner />
+          <LowBalanceBanner />
           <Header />
           {/* Room at the bottom on phones for the floating nav bar. */}
           <main className="px-4 pt-2 pb-24 sm:px-6 lg:pb-6">
