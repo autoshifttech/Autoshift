@@ -13,6 +13,7 @@ import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { BrowserNotificationsListener } from "@/components/notifications/browser-notifications-listener";
+import { SkipLink } from "@/components/layout/skip-link";
 import { AccountNotices } from "@/components/layout/account-notices";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HelpButton } from "@/components/layout/help-button";
@@ -26,6 +27,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const t = useTranslations("DashboardShell");
+  const tSide = useTranslations("Sidebar");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -50,6 +52,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
     <div className="app-canvas flex h-dvh overflow-hidden bg-background">
       {/* Reports this tab's online/away presence once we know a user is
           signed in. Headless — renders nothing. */}
+      <SkipLink label={tSide("skipToContent")} />
       <PresenceHeartbeat />
       {/* Desktop alerts for new customer messages (opt-in via Settings →
           Your profile). Headless — renders nothing. */}
@@ -64,7 +67,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
           <AccountNotices />
           <Header />
           {/* Room at the bottom on phones for the floating nav bar. */}
-          <main className="px-4 pt-2 pb-24 sm:px-6 lg:pb-6">
+          <main id="main-content" tabIndex={-1} className="px-4 pt-2 pb-24 outline-none sm:px-6 lg:pb-6">
             {/* Above every page: writes are being rejected and here's why.
                 Renders nothing unless the account/role failed to resolve. */}
             <AccountAccessAlert />

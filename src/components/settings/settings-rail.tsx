@@ -4,7 +4,9 @@ import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
+import { NativeSelect } from '@/components/ui/native-select';
 import {
+  RAIL_GROUPS,
   SECTION_META,
   SETTINGS_SECTIONS,
   type SettingsSection,
@@ -36,9 +38,29 @@ export function SettingsRail({
   }, [active]);
 
   return (
+    <>
+      {/* Phones: one grouped picker instead of fifteen tabs. */}
+      <div className="sm:hidden">
+        <NativeSelect
+          aria-label={t('sectionsNav')}
+          value={active}
+          onChange={(e) => onSelect(e.target.value as SettingsSection)}
+          className="w-full"
+        >
+          {RAIL_GROUPS.map(({ group }) => (
+            <optgroup key={group} label={group === 'top' ? t('sections.overview') : t(`groups.${group}`)}>
+              {SETTINGS_SECTIONS.filter((s) => SECTION_META[s].group === group).map((s) => (
+                <option key={s} value={s}>
+                  {t(`sections.${s}`)}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </NativeSelect>
+      </div>
     <nav
       aria-label={t('sectionsNav')}
-      className="settings-tabs flex items-center gap-1 overflow-x-auto px-5 py-1 [mask-image:linear-gradient(90deg,transparent,#000_20px,#000_calc(100%-20px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="settings-tabs hidden sm:flex items-center gap-1 overflow-x-auto px-5 py-1 [mask-image:linear-gradient(90deg,transparent,#000_20px,#000_calc(100%-20px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {SETTINGS_SECTIONS.map((s, i) => {
         const isActive = s === active;
@@ -67,5 +89,6 @@ export function SettingsRail({
         );
       })}
     </nav>
+    </>
   );
 }

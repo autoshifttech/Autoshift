@@ -58,6 +58,7 @@
     "optIns": "Opt-ins y bloqueos",
     "support": "Ayuda y soporte",
     "more": "Más",
+    "skipToContent": "Saltar al contenido",
     "morePages": "Todas las páginas",
     "search": "Buscar"
   },
@@ -2127,6 +2128,8 @@
       "useMode": "Usar el modo {mode}",
       "active": "Activo",
       "accentColor": "Color de acento",
+      "reduceTransparency": "Reducir transparencia",
+      "reduceTransparencyDesc": "Usa paneles sólidos en lugar de cristal translúcido. Más fácil de leer y más ligero en dispositivos antiguos.",
       "useTheme": "Usar el tema {name}",
       "themeId": "ID del tema: {id}"
     },

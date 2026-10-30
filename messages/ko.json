@@ -58,6 +58,7 @@
     "optIns": "수신 동의 및 차단",
     "support": "도움말 및 지원",
     "more": "더보기",
+    "skipToContent": "본문으로 건너뛰기",
     "morePages": "모든 페이지",
     "search": "검색"
   },
@@ -2127,6 +2128,8 @@
       "useMode": "{mode} 모드 사용",
       "active": "사용 중",
       "accentColor": "강조 색상",
+      "reduceTransparency": "투명도 줄이기",
+      "reduceTransparencyDesc": "투명한 유리 대신 불투명한 패널을 사용합니다. 읽기 쉽고 오래된 기기에서도 가볍습니다.",
       "useTheme": "{name} 테마 사용",
       "themeId": "테마 ID: {id}"
     },

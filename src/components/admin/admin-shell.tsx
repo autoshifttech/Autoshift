@@ -1,7 +1,9 @@
 "use client";
 
+import { adminTranslate, useAdminT } from "@/lib/admin/strings";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
@@ -37,6 +39,7 @@ import { buildAlerts } from "@/lib/admin/alerts";
 import { ROLE_LABEL } from "@/lib/admin/data";
 import { CURRENT_ADMIN, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { relTime } from "@/lib/admin/format";
+import { SkipLink } from "@/components/layout/skip-link";
 import { AdminCommandPalette } from "./admin-command-palette";
 import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
@@ -110,6 +113,7 @@ function SupportBadge({ href, count }: { href: string; count: number }) {
 
 /** The pages that aren't on the rail, plus the website editor and the business app. */
 function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; currentHref?: string; onPick?: () => void }) {
+  const tr = useAdminT();
   return (
     <>
       {ADMIN_NAV.map((group) => {
@@ -117,7 +121,7 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
         if (!items.length) return null;
         return (
           <div key={group.label} className="pb-1">
-            <p className="px-2.5 pt-2.5 pb-1 text-xs font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{group.label}</p>
+            <p className="px-2.5 pt-2.5 pb-1 text-xs font-bold tracking-[0.1em] text-muted-foreground/80 uppercase">{tr(group.label)}</p>
             {items.map((item) => (
               <Link
                 key={item.href}
@@ -127,7 +131,7 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
                 className={cn("flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors", currentHref === item.href ? "bg-card-2 font-semibold text-foreground" : "text-muted-foreground hover:bg-card-2 hover:text-foreground")}
               >
                 <item.icon className="size-4" />
-                {item.label}
+                {tr(item.label)}
               </Link>
             ))}
           </div>
@@ -156,6 +160,7 @@ const RAIL_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/pl
 
 /** Desktop: a short pill of the main pages, the rest behind the dots. */
 function AdminRail() {
+  const tr = useAdminT();
   const pathname = usePathname();
   const { tickets } = useAdmin();
   const openTickets = tickets.filter((t) => t.status === "open").length;
@@ -172,14 +177,14 @@ function AdminRail() {
           const item = itemFor(href);
           const active = current?.href === href;
           return (
-            <Link key={href} href={href} aria-label={item.label} data-tip={item.label} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+            <Link key={href} href={href} aria-label={tr(item.label)} data-tip={tr(item.label)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
               <item.icon className="size-[18px]" />
               <SupportBadge href={href} count={openTickets} />
             </Link>
           );
         })}
         <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-          <PopoverTrigger aria-label="More pages" data-tip="More" className={cn(railButton, inMore && railActive)}>
+          <PopoverTrigger aria-label="More pages" data-tip={tr("More")} className={cn(railButton, inMore && railActive)}>
             <MoreHorizontal className="size-[18px]" />
           </PopoverTrigger>
           <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass lg-floating relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
@@ -190,7 +195,7 @@ function AdminRail() {
         </Popover>
       </nav>
       <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
-      <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip="Website admin" className={railButton}>
+      <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip={tr("Website admin")} className={railButton}>
         <Globe className="size-[18px]" />
       </Link>
       <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
@@ -200,6 +205,7 @@ function AdminRail() {
 
 /** Phones: four pages and a "More" sheet. */
 function AdminMobileNav() {
+  const tr = useAdminT();
   const pathname = usePathname();
   const { tickets } = useAdmin();
   const openTickets = tickets.filter((t) => t.status === "open").length;
@@ -217,18 +223,18 @@ function AdminMobileNav() {
               <item.icon className="size-5" />
               <SupportBadge href={href} count={openTickets} />
             </span>
-            <span className={cn(!active && "max-[400px]:sr-only")}>{item.label === "Support inbox" ? "Support" : item.label}</span>
+            <span className={cn(!active && "max-[400px]:sr-only")}>{item.label === "Support inbox" ? tr("Support") : tr(item.label)}</span>
           </Link>
         );
       })}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger className={cn("flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-xs font-semibold opacity-85", inMore && "rail-active opacity-100")}>
           <MoreHorizontal className="size-5" />
-          <span className={cn(!inMore && "max-[400px]:sr-only")}>More</span>
+          <span className={cn(!inMore && "max-[400px]:sr-only")}>{tr("More")}</span>
         </SheetTrigger>
         <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
           <div className="flex items-center justify-between px-2.5 pb-1">
-            <SheetTitle className="text-base">All pages</SheetTitle>
+            <SheetTitle className="text-base">{tr("All pages")}</SheetTitle>
             <ModeToggle className="rounded-xl border border-border" />
           </div>
           <MoreList exclude={BAR_HREFS} currentHref={current?.href} onPick={() => setOpen(false)} />
@@ -239,21 +245,23 @@ function AdminMobileNav() {
 }
 
 function PaletteButton({ onOpen }: { onOpen: () => void }) {
+  const tr = useAdminT();
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label="Search the admin panel"
+      aria-label={tr("Search the admin panel")}
       className="hidden h-10 w-full max-w-sm items-center gap-2 rounded-full liquid-glass pr-2 pl-3.5 text-left text-sm font-semibold transition-[filter] hover:brightness-105 md:inline-flex"
     >
       <Search className="size-4 shrink-0" />
-      <span className="min-w-0 flex-1 truncate">Find a page, business, owner or number…</span>
+      <span className="min-w-0 flex-1 truncate">{tr("Find a page, business, owner or number…")}</span>
       <kbd className="rounded-md border border-foreground/15 px-1.5 py-0.5 text-xs font-medium">Ctrl K</kbd>
     </button>
   );
 }
 
 function AlertsBell() {
+  const tr = useAdminT();
   const businesses = useBusinesses();
   const state = useAdmin();
   const alerts = buildAlerts(businesses, state);
@@ -266,9 +274,9 @@ function AlertsBell() {
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-[min(24rem,calc(100vw-2rem))] gap-0 p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="text-sm font-semibold text-foreground">Alerts</p>
+          <p className="text-sm font-semibold text-foreground">{tr("Alerts")}</p>
           <Link href="/admin" className="text-xs font-medium text-primary hover:underline">
-            See all
+            {tr("See all")}
           </Link>
         </div>
         <ul className="stack-in max-h-96 divide-y divide-border overflow-y-auto">
@@ -291,6 +299,7 @@ function AlertsBell() {
 }
 
 function AdminMenu() {
+  const tr = useAdminT();
   const router = useRouter();
   return (
     <Popover>
@@ -325,9 +334,11 @@ function AdminMenu() {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  const locale = useLocale();
   const [paletteOpen, setPaletteOpen] = useState(false);
   return (
     <div className="app-canvas admin-canvas flex h-dvh overflow-hidden bg-background">
+      <SkipLink label={adminTranslate(locale, "Skip to content")} />
       <AdminCommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} nav={ADMIN_NAV} />
       <AdminRail />
       <RailTip />
@@ -346,7 +357,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <AdminMenu />
           </div>
         </header>
-        <main className="flex-1 px-4 pt-2 pb-24 sm:px-6 lg:pb-8">
+        <main id="main-content" tabIndex={-1} className="flex-1 px-4 pt-2 pb-24 outline-none sm:px-6 lg:pb-8">
           <PageMotion className="mx-auto max-w-[1400px] space-y-6">{children}</PageMotion>
           <ScrollReveal rootId="admin-scroll" />
         </main>

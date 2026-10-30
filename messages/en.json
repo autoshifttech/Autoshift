@@ -58,6 +58,7 @@
     "optIns": "Opt-ins & blocklist",
     "support": "Help & support",
     "more": "More",
+    "skipToContent": "Skip to content",
     "morePages": "All pages",
     "search": "Search"
   },
@@ -2127,6 +2128,8 @@
       "useMode": "Use {mode} mode",
       "active": "Active",
       "accentColor": "Accent color",
+      "reduceTransparency": "Reduce transparency",
+      "reduceTransparencyDesc": "Use solid panels instead of see-through glass. Easier to read, and lighter on older devices.",
       "useTheme": "Use {name} theme",
       "themeId": "Theme id: {id}"
     },

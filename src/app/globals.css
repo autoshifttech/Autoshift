@@ -611,6 +611,56 @@ html[data-mode="dark"][data-lens] .liquid-glass.lg-frost {
 .liquid-glass:not(.lg-frost:not(.lg-floating)) :is(a, button) {
   color: var(--lg-ink);
 }
+/* Phones and tablets: small controls get a 44px tap area without changing how they look. */
+@media (pointer: coarse) {
+  :where(button, [role="tab"], [role="checkbox"], [role="switch"], [role="radio"], summary):not(.liquid-glass):not([class*="absolute"]):not([class*="fixed"]):not([class*="sticky"]):not([class*="relative"]) {
+    position: relative;
+  }
+  :where(button, [role="tab"], [role="checkbox"], [role="switch"], [role="radio"], summary):not(.liquid-glass):not([data-slot="skeleton"])::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
+}
+/* Solid mode: the person (or the system) asked for less transparency. */
+html[data-solid] .liquid-glass,
+html[data-solid] .liquid-glass.lg-frost,
+html[data-solid] .liquid-glass.lg-floating {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--card);
+  color: var(--foreground);
+  text-shadow: none;
+}
+html[data-solid] .liquid-glass::before { display: none; }
+@media (prefers-reduced-transparency: reduce) {
+  html:not([data-solid="off"]) .liquid-glass,
+  html:not([data-solid="off"]) .liquid-glass.lg-frost,
+  html:not([data-solid="off"]) .liquid-glass.lg-floating {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--card);
+    color: var(--foreground);
+    text-shadow: none;
+  }
+  html:not([data-solid="off"]) .liquid-glass::before { display: none; }
+}
+/* Lite mode (older or low-memory devices): a single cheap blur on the bars that sit over scrolling content. */
+html[data-lite] .liquid-glass:not(.island-toast):not(.lg-frost) {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+html[data-lite] .liquid-glass::before { display: none; }
+/* Notification kinds also tint the glass rim. */
+[data-sonner-toast][data-type="error"].liquid-glass { --lg-rim: rgb(255 112 102 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(255 69 58 / 0.55), 0 14px 24px -12px rgb(180 30 20 / 0.35); }
+[data-sonner-toast][data-type="warning"].liquid-glass { --lg-rim: rgb(255 214 10 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(214 170 0 / 0.55), 0 14px 24px -12px rgb(120 90 0 / 0.3); }
+[data-sonner-toast][data-type="success"].liquid-glass { --lg-rim: rgb(48 209 88 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(30 160 70 / 0.5), 0 14px 24px -12px rgb(10 90 40 / 0.3); }
 /* Items inside a glass panel: no opaque hover fills. */
 .liquid-glass:not(.lg-frost:not(.lg-floating)) a:hover,
 .liquid-glass:not(.lg-frost:not(.lg-floating)) button:hover,

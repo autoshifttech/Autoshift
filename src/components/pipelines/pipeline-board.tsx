@@ -6,6 +6,7 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   useDroppable,
@@ -58,6 +59,8 @@ export function PipelineBoard({
   const sensors = useSensors(
     // 5px activation distance avoids clicks being interpreted as drags.
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    // Touch: press and hold to pick a card up, so a plain swipe still scrolls the board.
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
     // Keyboard drag support: focus a card, Space to pick up, arrows to move,
     // Space to drop, Escape to cancel.
     useSensor(KeyboardSensor),
@@ -287,7 +290,7 @@ function DraggableDealCard({
       // A group, not a button: the card holds its own links and menu.
       role="group"
       aria-label={deal.title}
-      style={{ opacity: isDragging ? 0.3 : 1, touchAction: "none" }}
+      style={{ opacity: isDragging ? 0.3 : 1, touchAction: "manipulation" }}
     >
       <DealCard deal={deal} stage={stage} onEdit={onEdit} />
     </div>

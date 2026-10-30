@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Building2, CornerDownLeft, Globe, Search, type LucideIcon } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useAdminT } from "@/lib/admin/strings";
 import { useBusinesses } from "@/lib/admin/store";
 import { cn } from "@/lib/utils";
 
@@ -20,17 +21,18 @@ interface Item {
 /** Opens on Ctrl/⌘ K (or from the top-bar button): jump to any admin page or business. */
 export function AdminCommandPalette({ open, onOpenChange, nav }: { open: boolean; onOpenChange: (open: boolean) => void; nav: { label: string; items: { href: string; label: string; icon: LucideIcon }[] }[] }) {
   const router = useRouter();
+  const tr = useAdminT();
   const businesses = useBusinesses();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
 
   const all = useMemo<Item[]>(() => {
-    const pages = nav.flatMap((g) => g.items.map((i) => ({ id: i.href, group: "Pages", label: i.label, hint: g.label, href: i.href, icon: i.icon })));
-    const actions: Item[] = [{ id: "website", group: "Pages", label: "Website admin", hint: "Opens full screen", href: "/admin/website", icon: Globe }];
+    const pages = nav.flatMap((g) => g.items.map((i) => ({ id: i.href, group: "Pages", label: tr(i.label), hint: tr(g.label), href: i.href, icon: i.icon })));
+    const actions: Item[] = [{ id: "website", group: "Pages", label: tr("Website admin"), hint: tr("Opens full screen"), href: "/admin/website", icon: Globe }];
     const biz = businesses.map((b) => ({ id: b.id, group: "Businesses", label: b.name, hint: `${b.owner.name} · ${b.city}`, href: `/admin/businesses/${b.id}`, icon: Building2 }));
     return [...pages, ...actions, ...biz];
-  }, [businesses, nav]);
+  }, [businesses, nav, tr]);
 
   const q = query.trim().toLowerCase();
   const results = useMemo(() => {
@@ -97,8 +99,8 @@ export function AdminCommandPalette({ open, onOpenChange, nav }: { open: boolean
                 go(results[current]);
               }
             }}
-            placeholder="Jump to a page, business, owner, email or number…"
-            aria-label="Search the admin panel"
+            placeholder={tr("Jump to a page, business, owner, email or number…")}
+            aria-label={tr("Search the admin panel")}
             className="h-12 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           <kbd className="rounded border border-border px-1.5 py-0.5 text-xs text-muted-foreground">Esc</kbd>
@@ -111,7 +113,7 @@ export function AdminCommandPalette({ open, onOpenChange, nav }: { open: boolean
             const Icon = item.icon;
             return (
               <li key={`${item.group}-${item.id}`} role="presentation">
-                {header && <p className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">{header}</p>}
+                {header && <p className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">{tr(header)}</p>}
                 <button
                   type="button"
                   role="option"

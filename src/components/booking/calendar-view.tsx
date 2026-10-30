@@ -228,7 +228,7 @@ function TimeGrid({
                   onCreate({ date: c.date, time: hhmm(start), staffId: c.staffId });
                 }}
                 onPointerCancel={() => setSel(null)}
-                className={cn("relative border-l border-border", c.date >= today && !holiday(c.date) && "cursor-cell", holiday(c.date) && "bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--muted)_6px,var(--muted)_8px)]")}
+                className={cn("relative touch-pan-y border-l border-border", c.date >= today && !holiday(c.date) && "cursor-cell", holiday(c.date) && "bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--muted)_6px,var(--muted)_8px)]")}
               >
                 {hours.map((h) => (
                   <div key={h} data-cell style={{ height: HOUR_PX }} className="border-b border-dashed border-border/70" />

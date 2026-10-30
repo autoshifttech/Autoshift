@@ -27,12 +27,25 @@ const LENS_MAP =
  * <html> when the browser can run it. Only Chromium applies SVG filters to
  * a backdrop; elsewhere the glass is the same blur and rim without the lens.
  */
+/** Storage key for the "reduce transparency" choice: "1" solid, "0" glass even if the system asks for less. */
+export const SOLID_KEY = "autoshift-solid";
+
 export function LiquidGlassDefs() {
   useEffect(() => {
     const brands = (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } }).userAgentData?.brands ?? [];
-    if (brands.some((b) => b.brand === "Chromium")) document.documentElement.dataset.lens = "1";
+    const root = document.documentElement;
+    if (brands.some((b) => b.brand === "Chromium")) root.dataset.lens = "1";
+    // Older or low-memory devices get the cheap glass.
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    if ((nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) || (nav.deviceMemory && nav.deviceMemory <= 4)) root.dataset.lite = "1";
+    try {
+      const pref = localStorage.getItem(SOLID_KEY);
+      if (pref === "1") root.dataset.solid = "1";
+      else if (pref === "0") root.dataset.solid = "off";
+    } catch {}
     return () => {
-      delete document.documentElement.dataset.lens;
+      delete root.dataset.lens;
+      delete root.dataset.lite;
     };
   }, []);
 

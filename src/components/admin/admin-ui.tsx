@@ -1,5 +1,6 @@
 "use client";
 
+import { useAdminT } from "@/lib/admin/strings";
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -11,11 +12,12 @@ import type { BusinessStatus, NumberStatus, Quality, TicketPriority, TicketStatu
 import type { Severity } from "@/lib/admin/alerts";
 
 export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+  const tr = useAdminT();
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="title-weight text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{title}</h1>
-        {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>}
+        <h1 className="title-weight text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{tr(title)}</h1>
+        {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{tr(description)}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -23,13 +25,14 @@ export function PageHeader({ title, description, actions }: { title: string; des
 }
 
 export function Panel({ title, description, actions, children, className, bodyClassName }: { title?: string; description?: string; actions?: ReactNode; children: ReactNode; className?: string; bodyClassName?: string }) {
+  const tr = useAdminT();
   return (
     <section className={cn("min-w-0 rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)]", className)}>
       {(title || actions) && (
         <div className="flex flex-wrap items-start justify-between gap-2 px-5 pt-4">
           <div className="min-w-0">
-            {title && <h2 className="text-base font-semibold text-foreground">{title}</h2>}
-            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+            {title && <h2 className="text-base font-semibold text-foreground">{tr(title)}</h2>}
+            {description && <p className="text-sm text-muted-foreground">{tr(description)}</p>}
           </div>
           {actions}
         </div>
@@ -40,6 +43,7 @@ export function Panel({ title, description, actions, children, className, bodyCl
 }
 
 export function Kpi({ label, value, hint, delta, icon: Icon, tone = "mint", href }: { label: string; value: string; hint?: string; delta?: number; icon?: LucideIcon; tone?: "mint" | "peach" | "sky" | "lilac" | "butter"; href?: string }) {
+  const tr = useAdminT();
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
@@ -51,7 +55,7 @@ export function Kpi({ label, value, hint, delta, icon: Icon, tone = "mint", href
         {delta !== undefined && <Delta value={delta} />}
       </div>
       <p className="mt-3 text-2xl font-bold tracking-tight text-foreground tabular-nums"><RollingNumber>{value}</RollingNumber></p>
-      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-sm text-muted-foreground">{tr(label)}</p>
       {hint && <p className="mt-0.5 text-xs text-muted-foreground/80">{hint}</p>}
     </>
   );
@@ -165,6 +169,7 @@ export function Initials({ name, className }: { name: string; className?: string
 
 /** Simple responsive table shell: scrolls sideways on small screens. */
 export function DataTable({ head, children, empty, className }: { head: ReactNode[]; children: ReactNode; empty?: ReactNode; className?: string }) {
+  const tr = useAdminT();
   return (
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full min-w-[640px] text-sm">
@@ -172,7 +177,7 @@ export function DataTable({ head, children, empty, className }: { head: ReactNod
           <tr className="border-b border-border bg-muted/40 text-left text-xs font-semibold tracking-wide text-muted-foreground">
             {head.map((h, i) => (
               <th key={i} className="relative px-3 py-2 font-semibold whitespace-nowrap first:pl-5 last:pr-5">
-                {h || <span className="sr-only">Actions</span>}
+                {typeof h === "string" ? tr(h) : h || <span className="sr-only">{tr("Actions")}</span>}
               </th>
             ))}
           </tr>

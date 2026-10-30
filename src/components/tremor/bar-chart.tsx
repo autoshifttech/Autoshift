@@ -114,13 +114,18 @@ interface LegendItemProps {
   color: AvailableChartColorsKeys
   onClick?: (name: string, color: AvailableChartColorsKeys) => void
   activeLegend?: string
+  /** Position in the legend: gives each series its own shape, not just a colour. */
+  index?: number
 }
+
+const LEGEND_SHAPES = ["rounded-xs", "rounded-full", "rotate-45 rounded-[1px]", "[clip-path:polygon(50%_0,100%_100%,0_100%)]"]
 
 const LegendItem = ({
   name,
   color,
   onClick,
   activeLegend,
+  index = 0,
 }: LegendItemProps) => {
   const hasOnValueChange = !!onClick
   return (
@@ -138,7 +143,8 @@ const LegendItem = ({
     >
       <span
         className={cx(
-          "size-2 shrink-0 rounded-xs",
+          "size-2.5 shrink-0",
+          LEGEND_SHAPES[index % LEGEND_SHAPES.length],
           getColorClassName(color, "bg"),
           activeLegend && activeLegend !== name ? "opacity-40" : "opacity-100",
         )}
@@ -347,6 +353,7 @@ const Legend = React.forwardRef<HTMLDivElement, LegendProps>((props, ref) => {
             key={`item-${index}`}
             name={category}
             color={colors[index] as AvailableChartColorsKeys}
+            index={index}
             onClick={onClickLegendItem}
             activeLegend={activeLegend}
           />
@@ -659,6 +666,10 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
         ref={forwardedRef}
         className={cx("h-80 w-full", className)}
         tremor-id="tremor-raw"
+        role="img"
+        aria-label={categories
+          .map((c) => `${c}: ${data.reduce((sum, row) => sum + (Number(row[c]) || 0), 0).toLocaleString()}`)
+          .join(", ")}
         {...other}
       >
         <ResponsiveContainer>

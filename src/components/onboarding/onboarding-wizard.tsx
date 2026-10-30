@@ -44,8 +44,8 @@ export function OnboardingWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur">
+    <div className="app-canvas min-h-dvh bg-background">
+      <header className="liquid-glass lg-frost sticky top-0 z-10 rounded-none border-x-0 border-t-0">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <span className="flex items-center gap-2 font-semibold text-foreground">
             <LogoMark className="size-7" />

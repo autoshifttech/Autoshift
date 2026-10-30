@@ -1,6 +1,10 @@
 "use client";
 
-import { Check, Moon, Palette, SunMoon, Sun } from "lucide-react";
+import { useState } from "react";
+import { Check, Layers, Moon, Palette, SunMoon, Sun } from "lucide-react";
+
+import { Switch } from "@/components/ui/switch";
+import { SOLID_KEY } from "@/components/motion/liquid-glass-defs";
 
 import { useTheme } from "@/hooks/use-theme";
 import { MODES, THEMES, type Mode, type ThemeId } from "@/lib/themes";
@@ -52,6 +56,8 @@ export function AppearancePanel() {
           ))}
         </div>
       </div>
+
+      <SolidToggle />
 
       <div className="mt-8 space-y-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -184,5 +190,37 @@ function ThemeCard({
       </div>
       <span className="sr-only">{t("themeId", { id })}</span>
     </button>
+  );
+}
+
+/** Turns the see-through glass into plain solid surfaces. */
+function SolidToggle() {
+  const t = useTranslations("Settings.appearance");
+  const [solid, setSolid] = useState(() => {
+    if (typeof document === "undefined") return false;
+    const v = document.documentElement.dataset.solid;
+    if (v === "1") return true;
+    if (v === "off") return false;
+    return window.matchMedia("(prefers-reduced-transparency: reduce)").matches;
+  });
+  const change = (on: boolean) => {
+    setSolid(on);
+    const root = document.documentElement;
+    root.dataset.solid = on ? "1" : "off";
+    try {
+      localStorage.setItem(SOLID_KEY, on ? "1" : "0");
+    } catch {}
+  };
+  return (
+    <div className="mt-8 flex max-w-md items-start justify-between gap-4 rounded-2xl border border-border bg-card p-4">
+      <div>
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Layers className="size-4 text-muted-foreground" />
+          {t("reduceTransparency")}
+        </h3>
+        <p className="mt-1 text-sm text-muted-foreground">{t("reduceTransparencyDesc")}</p>
+      </div>
+      <Switch checked={solid} onCheckedChange={change} aria-label={t("reduceTransparency")} />
+    </div>
   );
 }
