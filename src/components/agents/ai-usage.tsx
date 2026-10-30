@@ -80,6 +80,13 @@ export function AiUsageCard() {
         setData(null);
         return;
       }
+      // A response without the expected shape (an error page, a proxy) must not
+      // crash the page: treat it as a failed load.
+      if (!json || !Array.isArray(json.daily) || !json.totals || !Array.isArray(json.by_model) || !json.by_mode) {
+        toast.error(t('loadFailed'));
+        setData(null);
+        return;
+      }
       setData(json as UsageResponse);
     } catch {
       toast.error(t('loadFailed'));
