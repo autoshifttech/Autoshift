@@ -1,11 +1,9 @@
 'use client';
 
-import { Suspense, useMemo, type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { useAuth } from '@/hooks/use-auth';
-import { useTheme } from '@/hooks/use-theme';
 import { SettingsRail } from '@/components/settings/settings-rail';
 import { SettingsOverview } from '@/components/settings/settings-overview';
 import { ProfileForm } from '@/components/settings/profile-form';
@@ -47,8 +45,6 @@ export default function SettingsPage() {
 function SettingsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { defaultCurrency } = useAuth();
-  const { mode } = useTheme();
   const t = useTranslations('Settings');
 
   // The URL (`?tab=`) is the single source of truth for the active
@@ -62,17 +58,6 @@ function SettingsPageInner() {
     params.set('tab', next);
     router.replace(`/settings?${params.toString()}`, { scroll: false });
   };
-
-  // Cheap, fetch-free rail hints. The Overview landing carries the
-  // full live status/counts; the rail just surfaces the two that are
-  // already in context.
-  const hints: Partial<Record<SettingsSection, ReactNode>> = useMemo(
-    () => ({
-      appearance: mode.charAt(0).toUpperCase() + mode.slice(1),
-      deals: defaultCurrency,
-    }),
-    [mode, defaultCurrency],
-  );
 
   const panel: Record<SettingsSection, ReactNode> = {
     overview: <SettingsOverview onSelect={go} />,
@@ -108,8 +93,8 @@ function SettingsPageInner() {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[236px_minmax(0,1fr)] lg:items-start">
-        <SettingsRail active={section} onSelect={go} hints={hints} />
+      <div className="mt-4 space-y-6">
+        <SettingsRail active={section} onSelect={go} />
         <div className="min-w-0">{panel[section]}</div>
       </div>
     </div>
