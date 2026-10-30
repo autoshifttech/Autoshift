@@ -39,7 +39,7 @@ export function HelpButton() {
   ];
 
   return (
-    <div ref={panel} className={cn("fixed right-4 bottom-24 z-40 flex-col items-end gap-3 sm:right-6 lg:bottom-6 lg:flex", hideOnPhone ? "hidden" : "flex")}>
+    <div ref={panel} className={cn("no-print fixed right-4 bottom-24 z-40 flex-col items-end gap-3 sm:right-6 lg:bottom-6 lg:flex", hideOnPhone ? "hidden" : "flex")}>
       {open && (
         <div role="dialog" aria-label={t("title")} className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-popover shadow-[0_16px_40px_-12px_rgb(0_0_0/0.25)]">
           <div className="bg-[#1E4C41] px-5 py-4 text-white">

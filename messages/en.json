@@ -139,6 +139,26 @@
     "emptyState": {
       "title": "Not enough data yet"
     },
+    "customize": {
+      "button": "Customise",
+      "title": "Show, hide and reorder",
+      "show": "Show {name}",
+      "hide": "Hide {name}",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "reset": "Reset to default",
+      "sections": {
+        "nextSteps": "What to do next",
+        "summary": "Plan and channels",
+        "attention": "Needs attention",
+        "kpis": "Key numbers",
+        "queue": "Reply queue",
+        "team": "Team",
+        "pipeline": "Pipeline",
+        "campaigns": "Campaigns",
+        "activity": "Recent activity"
+      }
+    },
     "nextSteps": {
       "title": "What to do next",
       "connect": "Connect your WhatsApp number",
@@ -802,6 +822,8 @@
       "empty": "No custom fields yet.",
       "renameAria": "Rename {name}",
       "deleteTitle": "Delete field",
+      "confirmDelete": "Delete",
+      "cancelBtn": "Cancel",
       "deleteConfirm": "Delete \"{name}\"? This also removes its stored value on every contact. This cannot be undone.",
       "toastNoAccount": "Your profile is not linked to an account.",
       "toastDuplicate": "A field named \"{name}\" already exists.",
@@ -4130,6 +4152,7 @@
     "warm": "Warm",
     "cold": "Cold",
     "funnelTitle": "From chat to customer",
+    "print": "Print",
     "routeTitle": "The customer route",
     "routeDesc": "Where customers go from first message to paying customer.",
     "funnelDesc": "How many people move to each stage.",

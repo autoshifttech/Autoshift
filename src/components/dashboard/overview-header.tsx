@@ -19,6 +19,7 @@ import {
   type DashboardOverview,
   type OverviewRange,
 } from '@/lib/dashboard/overview'
+import { DashboardCustomize } from './customize'
 import { Skeleton } from './skeleton'
 import { useFormatDuration } from './use-format-duration'
 
@@ -86,6 +87,7 @@ export function OverviewHeader({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        <DashboardCustomize />
         <Tabs value={String(range)} onValueChange={(v) => onRangeChange(Number(v) as OverviewRange)}>
           <TabsList aria-label={t('rangeLabel')}>
             {OVERVIEW_RANGES.map((r) => (

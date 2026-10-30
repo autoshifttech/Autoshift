@@ -33,6 +33,8 @@ import { SetupChecklist } from '@/components/dashboard/setup-checklist'
 import { TeamCard } from '@/components/dashboard/team-card'
 import { WorkspaceSummary } from '@/components/dashboard/workspace-summary'
 
+import { FULL_WIDTH, useDashboardLayout } from '@/lib/dashboard/layout'
+
 const POLL_MS = 60_000
 const REALTIME_DEBOUNCE_MS = 2_000
 
@@ -50,6 +52,7 @@ function DashboardPageInner() {
   const searchParams = useSearchParams()
   const range = parseOverviewRange(searchParams.get('range'))
   const { defaultCurrency, profile } = useAuth()
+  const layout = useDashboardLayout()
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [failed, setFailed] = useState(false)
@@ -161,19 +164,24 @@ function DashboardPageInner() {
       ) : (
         <>
           <OverviewBento data={data} now={now} />
-          <NextSteps data={data} />
-          <WorkspaceSummary />
-          <AttentionRow data={data} now={now} onlineCount={onlineCount} />
-          <KpiRow data={data} currency={defaultCurrency} />
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <ReplyQueueCard data={data} now={now} />
-            <TeamCard data={data} now={now} />
-            <PipelineCard data={data} currency={defaultCurrency} />
-            <CampaignsCard data={data} />
+            {layout.order
+              .filter((id) => !layout.hidden.includes(id))
+              .map((id, i) => (
+                <div key={id} style={{ order: i }} className={FULL_WIDTH.includes(id) ? 'min-w-0 lg:col-span-2' : 'min-w-0'}>
+                  {id === 'nextSteps' && <NextSteps data={data} />}
+                  {id === 'summary' && <WorkspaceSummary />}
+                  {id === 'attention' && <AttentionRow data={data} now={now} onlineCount={onlineCount} />}
+                  {id === 'kpis' && <KpiRow data={data} currency={defaultCurrency} />}
+                  {id === 'queue' && <ReplyQueueCard data={data} now={now} />}
+                  {id === 'team' && <TeamCard data={data} now={now} />}
+                  {id === 'pipeline' && <PipelineCard data={data} currency={defaultCurrency} />}
+                  {id === 'campaigns' && <CampaignsCard data={data} />}
+                  {id === 'activity' && <ActivityFeed items={activity} loading={activityLoading} />}
+                </div>
+              ))}
           </div>
-
-          <ActivityFeed items={activity} loading={activityLoading} />
         </>
       )}
     </div>

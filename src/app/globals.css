@@ -628,6 +628,19 @@ html[data-mode="dark"][data-lens] .liquid-glass.lg-frost {
     transform: translate(-50%, -50%);
   }
 }
+/* Printing: just the page, on white, with cards kept whole. */
+@media print {
+  html, body { background: #fff !important; }
+  .app-canvas { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
+  #app-scroll, #admin-scroll { overflow: visible !important; height: auto !important; }
+  aside, [aria-label="Admin navigation"], [aria-label="Primary navigation"], header, [data-sonner-toaster], .rail-tip-layer,
+  [aria-label="Skip to content"], a[href="#main-content"], section[aria-label][role="status"], nav.fixed { display: none !important; }
+  .liquid-glass { background: #fff !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: none !important; }
+  [data-slot="card"], section, .break-avoid { break-inside: avoid; box-shadow: none !important; }
+  main { padding: 0 !important; }
+  a { text-decoration: none !important; }
+  .no-print { display: none !important; }
+}
 /* Solid mode: the person (or the system) asked for less transparency. */
 html[data-solid] .liquid-glass,
 html[data-solid] .liquid-glass.lg-frost,

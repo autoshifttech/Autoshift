@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowDownRight, ArrowUpRight, Bot, CalendarCheck, Download, IndianRupee, MessageSquare, Target, Timer } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Bot, CalendarCheck, Download, Printer, IndianRupee, MessageSquare, Target, Timer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { BarChart } from "@/components/tremor/bar-chart";
@@ -82,7 +82,11 @@ export function InsightsPage() {
               </button>
             ))}
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={exportCsv}>
+          <Button variant="outline" size="sm" className="no-print gap-1.5" onClick={() => window.print()}>
+            <Printer className="size-3.5" />
+            {t("print")}
+          </Button>
+          <Button variant="outline" size="sm" className="no-print gap-1.5" onClick={exportCsv}>
             <Download className="size-3.5" />
             {t("export")}
           </Button>

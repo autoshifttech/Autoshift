@@ -139,6 +139,26 @@
     "emptyState": {
       "title": "Aún no hay datos suficientes"
     },
+    "customize": {
+      "button": "Personalizar",
+      "title": "Mostrar, ocultar y reordenar",
+      "show": "Mostrar {name}",
+      "hide": "Ocultar {name}",
+      "moveUp": "Subir {name}",
+      "moveDown": "Bajar {name}",
+      "reset": "Restablecer",
+      "sections": {
+        "nextSteps": "Qué hacer ahora",
+        "summary": "Plan y canales",
+        "attention": "Requiere atención",
+        "kpis": "Cifras clave",
+        "queue": "Cola de respuestas",
+        "team": "Equipo",
+        "pipeline": "Embudo",
+        "campaigns": "Campañas",
+        "activity": "Actividad reciente"
+      }
+    },
     "nextSteps": {
       "title": "Qué hacer ahora",
       "connect": "Conecta tu número de WhatsApp",
@@ -802,6 +822,8 @@
       "empty": "Aún no hay campos personalizados.",
       "renameAria": "Renombrar {name}",
       "deleteTitle": "Eliminar campo",
+      "confirmDelete": "Eliminar",
+      "cancelBtn": "Cancelar",
       "deleteConfirm": "¿Eliminar \"{name}\"? Esto también elimina su valor guardado en todos los contactos. No se puede deshacer.",
       "toastNoAccount": "Tu perfil no está vinculado a una cuenta.",
       "toastDuplicate": "Ya existe un campo llamado \"{name}\".",
@@ -4130,6 +4152,7 @@
     "warm": "Tibio",
     "cold": "Frío",
     "funnelTitle": "Del chat al cliente",
+    "print": "Imprimir",
     "routeTitle": "La ruta del cliente",
     "routeDesc": "Por dónde pasan los clientes, del primer mensaje hasta pagar.",
     "funnelDesc": "Cuántas personas llegan a cada etapa.",

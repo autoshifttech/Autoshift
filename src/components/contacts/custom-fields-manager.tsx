@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface CustomFieldsManagerProps {
   open: boolean;
@@ -56,6 +57,7 @@ export function CustomFieldsManager({
  */
 export function CustomFieldsPanel() {
   const t = useTranslations('Contacts.customFields');
+  const [pending, setPending] = useState<CustomField | null>(null);
   const supabase = createClient();
   const { user, accountId } = useAuth();
 
@@ -151,13 +153,6 @@ export function CustomFieldsPanel() {
   }
 
   async function handleDelete(field: CustomField) {
-    if (
-      !window.confirm(
-        t('deleteConfirm', { name: field.field_name })
-      )
-    ) {
-      return;
-    }
     setBusyId(field.id);
     const { error } = await supabase
       .from('custom_fields')
@@ -173,6 +168,7 @@ export function CustomFieldsPanel() {
   }
 
   return (
+    <>
     <div className="space-y-4">
       {/* Create */}
       <div className="flex items-center gap-2">
@@ -221,13 +217,23 @@ export function CustomFieldsPanel() {
                 field={field}
                 busy={busyId === field.id}
                 onRename={handleRename}
-                onDelete={handleDelete}
+                onDelete={(f) => setPending(f)}
               />
             ))}
           </ul>
         )}
       </div>
     </div>
+    <ConfirmDialog
+      open={!!pending}
+      onOpenChange={(o) => !o && setPending(null)}
+      title={t('deleteTitle')}
+      description={pending ? t('deleteConfirm', { name: pending.field_name }) : undefined}
+      confirmLabel={t('confirmDelete')}
+      cancelLabel={t('cancelBtn')}
+      onConfirm={() => pending && void handleDelete(pending)}
+    />
+    </>
   );
 }
 

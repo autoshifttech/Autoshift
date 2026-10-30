@@ -139,6 +139,26 @@
     "emptyState": {
       "title": "아직 데이터가 충분하지 않습니다"
     },
+    "customize": {
+      "button": "맞춤 설정",
+      "title": "표시, 숨기기, 순서 변경",
+      "show": "{name} 표시",
+      "hide": "{name} 숨기기",
+      "moveUp": "{name} 위로 이동",
+      "moveDown": "{name} 아래로 이동",
+      "reset": "기본값으로 되돌리기",
+      "sections": {
+        "nextSteps": "지금 할 일",
+        "summary": "요금제 및 채널",
+        "attention": "확인 필요",
+        "kpis": "핵심 수치",
+        "queue": "답장 대기열",
+        "team": "팀",
+        "pipeline": "파이프라인",
+        "campaigns": "캠페인",
+        "activity": "최근 활동"
+      }
+    },
     "nextSteps": {
       "title": "지금 할 일",
       "connect": "WhatsApp 번호를 연결하세요",
@@ -802,6 +822,8 @@
       "empty": "아직 커스텀 필드가 없습니다.",
       "renameAria": "{name} 이름 변경",
       "deleteTitle": "필드 삭제",
+      "confirmDelete": "삭제",
+      "cancelBtn": "취소",
       "deleteConfirm": "\"{name}\"을(를) 삭제하시겠습니까? 모든 연락처에 저장된 값도 함께 삭제되며, 되돌릴 수 없습니다.",
       "toastNoAccount": "프로필이 계정에 연결되어 있지 않습니다.",
       "toastDuplicate": "\"{name}\"이라는 필드가 이미 존재합니다.",
@@ -4130,6 +4152,7 @@
     "warm": "Warm",
     "cold": "Cold",
     "funnelTitle": "채팅에서 고객까지",
+    "print": "인쇄",
     "routeTitle": "고객 경로",
     "routeDesc": "첫 메시지부터 결제 고객이 되기까지의 흐름입니다.",
     "funnelDesc": "각 단계로 넘어가는 사람 수입니다.",
