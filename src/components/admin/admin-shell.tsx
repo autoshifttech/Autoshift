@@ -104,7 +104,7 @@ function itemFor(href: string) {
 
 function SupportBadge({ href, count }: { href: string; count: number }) {
   if (href !== "/admin/support" || count === 0) return null;
-  return <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white">{count}</span>;
+  return <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">{count}</span>;
 }
 
 /** The pages that aren't on the rail, plus the website editor and the business app. */
@@ -311,7 +311,7 @@ function AlertsBell() {
     <Popover>
       <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-full liquid-glass">
         <Bell className="size-[18px]" />
-        {critical > 0 && <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white">{critical}</span>}
+        {critical > 0 && <span className="absolute top-1 right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-xs font-bold text-white">{critical}</span>}
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-[min(24rem,calc(100vw-2rem))] gap-0 p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">

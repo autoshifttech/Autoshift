@@ -419,7 +419,7 @@ export function MessageBubble({
               glance. */}
           {message.ai_generated && (
             <span
-              className="inline-flex items-center gap-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-px text-[9px] font-semibold uppercase leading-none tracking-wide text-primary-foreground"
+              className="inline-flex items-center gap-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-px text-xs font-semibold uppercase leading-none tracking-wide text-primary-foreground"
               title={t("aiBadgeTitle")}
             >
               <Sparkles className="h-2.5 w-2.5" />

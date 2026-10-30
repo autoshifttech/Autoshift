@@ -502,7 +502,7 @@ export default function ContactsPage() {
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/40 px-4 py-2">
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-muted/40 px-4 py-2">
           <p className="text-sm text-foreground">
             {t('selectedCount', { count: selected.size })}
           </p>
@@ -530,7 +530,7 @@ export default function ContactsPage() {
       )}
 
       {/* Table */}
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">

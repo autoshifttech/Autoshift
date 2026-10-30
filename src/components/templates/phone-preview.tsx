@@ -27,7 +27,7 @@ function fillVariables(text: string, samples: string[]): ReactNode[] {
     return value ? (
       <Fragment key={i}>{value}</Fragment>
     ) : (
-      <span key={i} className="rounded bg-[#d9fdd3] px-0.5 font-mono text-[11px] text-[#1E4C41] dark:bg-[#005c4b] dark:text-[#d9fdd3]">
+      <span key={i} className="rounded bg-[#d9fdd3] px-0.5 font-mono text-xs text-[#1E4C41] dark:bg-[#005c4b] dark:text-[#d9fdd3]">
         {part}
       </span>
     );
@@ -85,7 +85,7 @@ export function TemplatePhonePreview({ template, businessName, className, screen
       <div className="rounded-[2.6rem] bg-[#1b1b1d] p-2.5 shadow-[0_24px_48px_-20px_rgb(0_0_0/0.45)] ring-1 ring-black/10">
         <div className={cn("relative flex flex-col overflow-hidden rounded-[2.1rem] bg-[#efeae2] dark:bg-[#0b141a]", screenClassName)}>
           {/* Status bar and camera island */}
-          <div className="relative flex items-center justify-between bg-[#1E4C41] px-6 pt-2.5 pb-1 text-[11px] font-semibold text-white">
+          <div className="relative flex items-center justify-between bg-[#1E4C41] px-6 pt-2.5 pb-1 text-xs font-semibold text-white">
             <span>9:41</span>
             <span className="absolute top-2 left-1/2 h-5 w-20 -translate-x-1/2 rounded-full bg-black" />
             <span className="flex items-center gap-1">
@@ -100,7 +100,7 @@ export function TemplatePhonePreview({ template, businessName, className, screen
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-semibold">{businessName.charAt(0).toUpperCase()}</span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] leading-tight font-semibold">{businessName}</span>
-              <span className="block text-[10px] text-white/75">{t("previewBusinessAccount")}</span>
+              <span className="block text-xs text-white/75">{t("previewBusinessAccount")}</span>
             </span>
             <Video className="size-4 shrink-0" />
             <Phone className="size-4 shrink-0" />
@@ -109,7 +109,7 @@ export function TemplatePhonePreview({ template, businessName, className, screen
 
           {/* Conversation */}
           <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3 [background-image:radial-gradient(rgb(0_0_0/0.035)_1px,transparent_1px)] [background-size:14px_14px]">
-            <p className="mx-auto mb-3 w-fit rounded-md bg-white/90 px-2 py-0.5 text-[10px] text-[#54656f] shadow-sm dark:bg-[#182229] dark:text-[#8696a0]">{t("previewToday")}</p>
+            <p className="mx-auto mb-3 w-fit rounded-md bg-white/90 px-2 py-0.5 text-xs text-[#54656f] shadow-sm dark:bg-[#182229] dark:text-[#8696a0]">{t("previewToday")}</p>
             {hasContent ? (
               <div className="max-w-[88%]">
                 <div className="rounded-lg rounded-tl-none bg-white p-1.5 text-[13px] leading-snug text-[#111b21] shadow-sm dark:bg-[#202c33] dark:text-[#e9edef]">
@@ -121,8 +121,8 @@ export function TemplatePhonePreview({ template, businessName, className, screen
                     ) : (
                       <p className="text-[#8696a0] italic">{t("previewBodyEmpty")}</p>
                     )}
-                    {footer_text.trim() && <p className="mt-1 text-[11px] text-[#667781] dark:text-[#8696a0]">{footer_text}</p>}
-                    <p className="mt-0.5 text-right text-[10px] text-[#667781] dark:text-[#8696a0]">9:41</p>
+                    {footer_text.trim() && <p className="mt-1 text-xs text-[#667781] dark:text-[#8696a0]">{footer_text}</p>}
+                    <p className="mt-0.5 text-right text-xs text-[#667781] dark:text-[#8696a0]">9:41</p>
                   </div>
                   {buttons.length > 0 && (
                     <div className="mt-1 -mb-0.5 border-t border-[#e9edef] dark:border-[#2a3942]">

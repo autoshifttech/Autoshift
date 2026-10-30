@@ -73,9 +73,12 @@ export function Header() {
 
       <div className="flex items-center gap-2">
         <SearchButton />
-        <span className="hidden xl:inline-flex">
-          <WhatsAppHealthChip />
-        </span>
+        {/* The Inbox shows its own, fuller connection notice. */}
+        {pathname !== "/inbox" && (
+          <span className="hidden xl:inline-flex">
+            <WhatsAppHealthChip />
+          </span>
+        )}
         <CreditsBadge />
 
         <DropdownMenu>

@@ -12,8 +12,7 @@ import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { BrowserNotificationsListener } from "@/components/notifications/browser-notifications-listener";
-import { TrialBanner } from "@/components/billing/trial-banner";
-import { LowBalanceBanner } from "@/components/wallet/credits-badge";
+import { AccountNotices } from "@/components/layout/account-notices";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HelpButton } from "@/components/layout/help-button";
 import { ViewAsBanner } from "@/components/admin/view-as-banner";
@@ -61,8 +60,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <ViewAsBanner />
         {/* The banners and top bar scroll with the page, so there's no fixed band. */}
         <div id="app-scroll" className="smooth-scroll flex-1 overflow-y-auto">
-          <TrialBanner />
-          <LowBalanceBanner />
+          <AccountNotices />
           <Header />
           {/* Room at the bottom on phones for the floating nav bar. */}
           <main className="px-4 pt-2 pb-24 sm:px-6 lg:pb-6">

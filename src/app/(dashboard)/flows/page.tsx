@@ -201,16 +201,14 @@ export default function FlowsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="sr-only">{t("title")}</h2>
+          <h2 className="sr-only">{t("title")}</h2>
+          <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
               {t("beta")}
             </span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
             {t("description")}
           </p>
         </div>

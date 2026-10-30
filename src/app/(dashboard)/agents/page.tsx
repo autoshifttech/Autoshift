@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Bot, Sparkles, Settings2, BarChart3, Target, Wand2, Users } from 'lucide-react';
+import { Sparkles, Settings2, BarChart3, Target, Wand2, Users } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AiPlayground } from '@/components/agents/ai-playground';
 import { AiUsageCard } from '@/components/agents/ai-usage';
@@ -38,13 +38,8 @@ function AgentsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center gap-2">
-        <Bot className="h-6 w-6 text-primary" />
-        <h2 className="sr-only">
-          {t('title')}
-        </h2>
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <h2 className="sr-only">{t('title')}</h2>
+      <p className="text-sm text-muted-foreground">
         {t('description')}
       </p>
 

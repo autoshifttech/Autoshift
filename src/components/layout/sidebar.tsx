@@ -123,14 +123,14 @@ function NavBadges({ href, active, counts, onRail }: { href: string; active: boo
   const { totalUnread, unreadNotifications } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
-      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white">
+      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">
         {totalUnread > 9 ? "9+" : totalUnread}
       </span>
     );
   }
   if (href === "/notifications" && unreadNotifications > 0) {
     return (
-      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-[9px] font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground"}>
+      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground"}>
         {unreadNotifications > 9 ? "9+" : unreadNotifications}
       </span>
     );
