@@ -29,6 +29,7 @@ type View = "day" | "week" | "list";
 const DAY_START = 8 * 60;
 const DAY_END = 21 * 60;
 const HOUR_PX = 56;
+const SNAP_MIN = 30;
 
 export function CalendarView() {
   const t = useTranslations("Bookings");
@@ -40,6 +41,7 @@ export function CalendarView() {
   const [staffFilter, setStaffFilter] = useState<string>("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const [reschedule, setReschedule] = useState<Booking | null>(null);
+  const [draft, setDraft] = useState<{ date: string; time: string; staffId: string | null } | null>(null);
 
   const bookings = state.bookings.filter((b) => staffFilter === "all" || b.staffId === staffFilter);
   const days = view === "week" ? Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(anchor), i)) : [anchor];
@@ -120,10 +122,11 @@ export function CalendarView() {
         </div>
       </div>
 
+      {view !== "list" && <p className="text-sm text-muted-foreground">{t("dragHint")}</p>}
       {view === "list" ? (
         <ListView state={state} bookings={bookings} onOpen={setOpenId} />
       ) : (
-        <TimeGrid state={state} days={days} bookings={bookings} today={today} onOpen={setOpenId} staffColumns={view === "day"} staffFilter={staffFilter} />
+        <TimeGrid state={state} days={days} bookings={bookings} today={today} onOpen={setOpenId} onCreate={setDraft} staffColumns={view === "day"} staffFilter={staffFilter} />
       )}
 
       <Sheet open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
@@ -140,6 +143,7 @@ export function CalendarView() {
           )}
         </SheetContent>
       </Sheet>
+      {draft && <BookingDialog open onOpenChange={(o) => !o && setDraft(null)} defaults={{ date: draft.date, time: draft.time, staffId: draft.staffId ?? undefined }} />}
       {reschedule && <BookingDialog open booking={reschedule} onOpenChange={(o) => !o && setReschedule(null)} />}
     </div>
   );
@@ -151,6 +155,7 @@ function TimeGrid({
   bookings,
   today,
   onOpen,
+  onCreate,
   staffColumns,
   staffFilter,
 }: {
@@ -159,6 +164,7 @@ function TimeGrid({
   bookings: Booking[];
   today: string;
   onOpen: (id: string) => void;
+  onCreate: (d: { date: string; time: string; staffId: string | null }) => void;
   staffColumns: boolean;
   staffFilter: string;
 }) {
@@ -170,6 +176,14 @@ function TimeGrid({
     ? state.staff.filter((s) => staffFilter === "all" || s.id === staffFilter).map((s) => ({ key: s.id, title: s.name, date: days[0], staffId: s.id }))
     : days.map((d) => ({ key: d, title: label(d), date: d, staffId: null as string | null }));
   const holiday = (d: string) => state.holidays.find((h) => h.date === d);
+  // Drag across free space to pick a time range; a plain click picks the slot you clicked.
+  const [sel, setSel] = useState<{ key: string; from: number; to: number } | null>(null);
+  const minuteAt = (e: React.PointerEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const raw = DAY_START + ((e.clientY - rect.top) / HOUR_PX) * 60;
+    return Math.max(DAY_START, Math.min(DAY_END - SNAP_MIN, Math.floor(raw / SNAP_MIN) * SNAP_MIN));
+  };
+  const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
@@ -197,11 +211,40 @@ function TimeGrid({
             return (
               <div
                 key={c.key}
-                className={cn("relative border-l border-border", holiday(c.date) && "bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--muted)_6px,var(--muted)_8px)]")}
+                onPointerDown={(e) => {
+                  if (e.button !== 0 || e.target !== e.currentTarget && !(e.target as HTMLElement).dataset.cell) return;
+                  if (c.date < today || holiday(c.date)) return;
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  const m = minuteAt(e);
+                  setSel({ key: c.key, from: m, to: m });
+                }}
+                onPointerMove={(e) => {
+                  if (sel?.key === c.key) setSel({ ...sel, to: minuteAt(e) });
+                }}
+                onPointerUp={() => {
+                  if (sel?.key !== c.key) return;
+                  const start = Math.min(sel.from, sel.to);
+                  setSel(null);
+                  onCreate({ date: c.date, time: hhmm(start), staffId: c.staffId });
+                }}
+                onPointerCancel={() => setSel(null)}
+                className={cn("relative border-l border-border", c.date >= today && !holiday(c.date) && "cursor-cell", holiday(c.date) && "bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--muted)_6px,var(--muted)_8px)]")}
               >
                 {hours.map((h) => (
-                  <div key={h} style={{ height: HOUR_PX }} className="border-b border-dashed border-border/70" />
+                  <div key={h} data-cell style={{ height: HOUR_PX }} className="border-b border-dashed border-border/70" />
                 ))}
+                {sel?.key === c.key && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-1 z-10 rounded-lg border border-primary bg-primary/15 px-2 py-1 text-xs font-semibold text-primary"
+                    style={{
+                      top: ((Math.min(sel.from, sel.to) - DAY_START) / 60) * HOUR_PX,
+                      height: ((Math.abs(sel.to - sel.from) + SNAP_MIN) / 60) * HOUR_PX,
+                    }}
+                  >
+                    {hhmm(Math.min(sel.from, sel.to))}–{hhmm(Math.max(sel.from, sel.to) + SNAP_MIN)}
+                  </div>
+                )}
                 {items.map((b) => {
                   const service = state.services.find((s) => s.id === b.serviceId);
                   const staff = state.staff.find((s) => s.id === b.staffId);

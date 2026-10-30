@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -37,7 +37,7 @@ export function BookingDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   booking?: Booking;
-  defaults?: { contactName?: string; phone?: string; date?: string };
+  defaults?: { contactName?: string; phone?: string; date?: string; time?: string; staffId?: string };
 }) {
   const t = useTranslations("Bookings");
   const state = useBookingState();
@@ -51,7 +51,8 @@ export function BookingDialog({
   const [serviceId, setServiceId] = useState(booking?.serviceId ?? services[0]?.id ?? "");
   const service = state.services.find((s) => s.id === serviceId);
   const staffOptions = state.staff.filter((st) => service?.staffIds.includes(st.id));
-  const [staffId, setStaffId] = useState(booking?.staffId ?? staffOptions[0]?.id ?? "");
+  const wantedStaff = booking?.staffId ?? defaults?.staffId;
+  const [staffId, setStaffId] = useState(staffOptions.some((st) => st.id === wantedStaff) ? (wantedStaff as string) : (staffOptions[0]?.id ?? ""));
   const staff = state.staff.find((s) => s.id === staffId) ?? staffOptions[0];
   const [date, setDate] = useState(booking?.date ?? defaults?.date ?? today);
   const [time, setTime] = useState<string | null>(null);
@@ -61,6 +62,12 @@ export function BookingDialog({
   // A rescheduled booking shouldn't block its own old slot.
   const others = booking ? { ...state, bookings: state.bookings.filter((b) => b.id !== booking.id) } : state;
   const slots = service && staff ? availableSlots(others, service, staff, date) : [];
+
+  // Opened from a drag on the calendar: pre-pick that start time when it is free.
+  useEffect(() => {
+    if (defaults?.time && slots.includes(defaults.time)) setTime(defaults.time);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on open
+  }, []);
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(today, i));
   const valid = name.trim() && phone.trim() && service && staff && time;

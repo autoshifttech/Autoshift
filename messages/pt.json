@@ -3381,6 +3381,7 @@
     "title": "Agendamentos",
     "description": "Horários marcados pelos clientes no WhatsApp, pelo seu assistente de IA ou pela sua equipe.",
     "newBooking": "Novo agendamento",
+    "dragHint": "Dica: arraste sobre um horário livre no calendário para iniciar uma reserva.",
     "tab_calendar": "Agenda",
     "tab_services": "Serviços e equipe",
     "tab_availability": "Horário de funcionamento",

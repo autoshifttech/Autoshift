@@ -3381,6 +3381,7 @@
     "title": "예약",
     "description": "고객이 WhatsApp에서, AI 어시스턴트가, 또는 팀이 잡은 예약입니다.",
     "newBooking": "새 예약",
+    "dragHint": "팁: 캘린더의 빈 시간대를 드래그하면 예약을 시작할 수 있어요.",
     "tab_calendar": "캘린더",
     "tab_services": "서비스 및 직원",
     "tab_availability": "영업시간",

@@ -3381,6 +3381,7 @@
     "title": "Bookings",
     "description": "Appointments booked by customers in WhatsApp, by your AI assistant, or by your team.",
     "newBooking": "New booking",
+    "dragHint": "Tip: drag across free time on the calendar to start a booking.",
     "tab_calendar": "Calendar",
     "tab_services": "Services & staff",
     "tab_availability": "Opening hours",

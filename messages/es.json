@@ -3381,6 +3381,7 @@
     "title": "Reservas",
     "description": "Citas reservadas por los clientes en WhatsApp, por tu asistente de IA o por tu equipo.",
     "newBooking": "Nueva reserva",
+    "dragHint": "Consejo: arrastra sobre un horario libre del calendario para iniciar una reserva.",
     "tab_calendar": "Calendario",
     "tab_services": "Servicios y equipo",
     "tab_availability": "Horario de atención",
