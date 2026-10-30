@@ -570,11 +570,11 @@ function InboxPageInner() {
       {/* WhatsApp connection banner — in the flex column, not absolute,
           so it pushes the panels down instead of overlapping them. */}
       {whatsappConnected === false && (
-        <div className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-2">
-          <WifiOff className="h-4 w-4 text-amber-800 dark:text-amber-400" />
-          <p className="text-xs text-amber-800 dark:text-amber-400">
-            {t("whatsappNotConnected")}
-          </p>
+        <div role="status" className="flex shrink-0 justify-center">
+          <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-red-800/25 bg-red-700/10 px-4 py-2 text-red-900 dark:border-red-400/30 dark:bg-red-500/15 dark:text-red-300">
+            <WifiOff className="size-4 shrink-0" />
+            <p className="text-sm font-semibold">{t("whatsappNotConnected")}</p>
+          </div>
         </div>
       )}
 
