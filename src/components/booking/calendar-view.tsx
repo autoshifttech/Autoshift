@@ -249,7 +249,7 @@ function TimeGrid({
                   const service = state.services.find((s) => s.id === b.serviceId);
                   const staff = state.staff.find((s) => s.id === b.staffId);
                   const top = ((toMinutes(b.start) - DAY_START) / 60) * HOUR_PX;
-                  const height = Math.max(26, ((service?.durationMin ?? 30) / 60) * HOUR_PX - 3);
+                  const height = Math.max(30, ((service?.durationMin ?? 30) / 60) * HOUR_PX - 3);
                   const muted = b.status === "cancelled" || b.status === "no_show";
                   const { lane, of } = lanes.get(b.id) ?? { lane: 0, of: 1 };
                   return (
@@ -257,17 +257,26 @@ function TimeGrid({
                       key={b.id}
                       type="button"
                       onClick={() => onOpen(b.id)}
+                      title={`${b.contactName} · ${b.start} · ${service?.name ?? ""}`}
                       style={{ top, height, left: `calc(${(lane / of) * 100}% + 3px)`, width: `calc(${100 / of}% - 6px)`, borderLeftColor: staff?.color ?? service?.color }}
                       className={cn(
                         "absolute overflow-hidden rounded-lg border-l-4 bg-[var(--tone-mint)] px-2 py-1 text-left text-xs leading-tight shadow-sm transition hover:brightness-95",
                         b.status === "pending" && "bg-[var(--tone-butter)]",
-                        muted && "bg-muted opacity-80",
+                        muted && "bg-muted text-foreground/80",
                       )}
                     >
-                      <span className={cn("block truncate font-semibold text-foreground", b.status === "cancelled" && "line-through")}>{b.contactName}</span>
-                      <span className="block truncate text-muted-foreground">
-                        {b.start} · {service?.name}
-                      </span>
+                      {height < 46 ? (
+                        <span className={cn("block truncate font-semibold text-foreground", b.status === "cancelled" && "line-through")}>
+                          {b.contactName} <span className="font-medium text-foreground/80">· {b.start}</span>
+                        </span>
+                      ) : (
+                        <>
+                          <span className={cn("block truncate font-semibold text-foreground", b.status === "cancelled" && "line-through")}>{b.contactName}</span>
+                          <span className="block truncate text-foreground/80">
+                            {b.start} · {service?.name}
+                          </span>
+                        </>
+                      )}
                       {b.source === "ai" && height > 44 && (
                         <span className="mt-0.5 inline-flex items-center gap-0.5 text-primary">
                           <Bot className="size-3" /> {t("byAi")}
