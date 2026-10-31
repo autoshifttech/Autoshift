@@ -91,7 +91,7 @@ export function OverviewHeader({
         <Tabs value={String(range)} onValueChange={(v) => onRangeChange(Number(v) as OverviewRange)}>
           <TabsList aria-label={t('rangeLabel')}>
             {OVERVIEW_RANGES.map((r) => (
-              <TabsTrigger key={r} value={String(r)} className="px-2.5 text-xs">
+              <TabsTrigger key={r} value={String(r)} className="px-3 text-sm font-semibold">
                 {t(`range.${r}`)}
               </TabsTrigger>
             ))}
