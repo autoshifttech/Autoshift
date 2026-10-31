@@ -628,6 +628,13 @@ html[data-mode="dark"][data-lens] .liquid-glass.lg-frost {
     transform: translate(-50%, -50%);
   }
 }
+/* The app shells fill the window and scroll inside; the page itself must never scroll
+   (it dragged the side bar away and cut the page off). */
+html:has(.app-canvas.h-dvh),
+html:has(.app-canvas.h-dvh) body {
+  overflow: hidden;
+  height: 100%;
+}
 /* Printing: just the page, on white, with cards kept whole. */
 @media print {
   html, body { background: #fff !important; }
