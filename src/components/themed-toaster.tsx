@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { Toaster, useSonner } from "sonner";
+import { Toaster, toast, useSonner } from "sonner";
 
 import { useTheme } from "@/hooks/use-theme";
 import { DEFAULT_MODE } from "@/lib/themes";
@@ -52,6 +52,11 @@ function useCloseTimes() {
       const ms = t.type === "loading" || t.duration === Infinity ? 1e9 : Math.max((t.duration ?? DEFAULT_MS) - CLOSE_MS, 1400);
       el.style.setProperty("--island-out-delay", `${ms}ms`);
     });
+    // One message at a time: when a new one arrives, the older ones leave
+    // (a quick fade out) instead of piling up behind it.
+    toasts.slice(1).forEach((t) => {
+      if (t.type !== "loading") toast.dismiss(t.id);
+    });
   }, [toasts]);
 }
 
@@ -71,7 +76,7 @@ export function ThemedToaster() {
       toastOptions={{
         unstyled: true,
         classNames: {
-          toast: "island-toast liquid-glass lg-floating",
+          toast: "island-toast liquid-glass lg-water",
           content: "island-content",
           title: "island-title",
           description: "island-desc",
