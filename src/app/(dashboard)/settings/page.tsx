@@ -80,7 +80,7 @@ function SettingsPageInner() {
         <h2 className="sr-only">
           {t('pageTitle')}
         </h2>
-        <p className="mx-auto mt-1 max-w-4xl text-center text-sm text-muted-foreground">
+        <p className="mx-auto mt-1 max-w-4xl text-sm text-muted-foreground sm:text-center">
           {t('pageDesc')}
         </p>
       </div>
