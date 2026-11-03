@@ -15,7 +15,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          {LEGAL.product} is a software platform run by {LEGAL.company} ({LEGAL.address}). Businesses use it to connect their WhatsApp Business number, answer customers with a shared inbox and AI assistants, send messages, take bookings and capture leads.
+          {LEGAL.product} is a software platform run by {LEGAL.company} ({LEGAL.address}). Businesses use it to connect their WhatsApp Business number, answer customers with a shared inbox and AI assistants, send messages and capture leads.
         </p>
         <p>
           This policy covers two groups of people: <strong>businesses</strong> that sign up for AutoShift and their team members, and the <strong>customers</strong> of those businesses who chat with them on WhatsApp.
