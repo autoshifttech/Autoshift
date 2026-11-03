@@ -80,14 +80,14 @@ function SettingsPageInner() {
         <h2 className="sr-only">
           {t('pageTitle')}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mx-auto mt-1 max-w-4xl text-center text-sm text-muted-foreground">
           {t('pageDesc')}
         </p>
       </div>
 
       <div className="mt-4 space-y-6">
         <SettingsRail active={section} onSelect={go} />
-        <div className="min-w-0">{panel[section]}</div>
+        <div className="mx-auto w-full min-w-0 max-w-4xl [&>*]:mx-auto">{panel[section]}</div>
       </div>
     </div>
   );
