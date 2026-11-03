@@ -263,7 +263,27 @@ export function WalletPage() {
           <h2 className="font-semibold text-foreground">{t("ratesTitle")}</h2>
           <p className="text-xs text-muted-foreground">{t("ratesNote")}</p>
         </div>
-        <div className="overflow-x-auto">
+        {/* Phones: one stacked row per rate, so the price is never off-screen. */}
+        <ul className="divide-y divide-border sm:hidden">
+          {RATES.map((r) => {
+            const Icon = KIND_ICON[r.kind];
+            return (
+              <li key={r.kind} className="px-5 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Icon className="size-4 shrink-0 text-muted-foreground" />
+                    {t(`kind_${r.kind}`)}
+                  </span>
+                  <span className="shrink-0 text-sm font-medium text-foreground">
+                    {r.price === 0 ? t("free") : t(r.kind === "ai" ? "perReply" : "perMessage", { price: formatMoney(r.price, locale) })}
+                  </span>
+                </div>
+                <p className="mt-1 pl-6 text-xs text-muted-foreground">{t(`when_${r.kind}`)}</p>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="text-left text-xs text-muted-foreground">
