@@ -162,7 +162,7 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
 }
 
 const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+  "rail-tip relative flex size-8 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
 /**
@@ -177,15 +177,15 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative z-30 my-3 ml-3 hidden w-[50px] shrink-0 flex-col items-center gap-0 self-center rounded-full py-2 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
-        <LogoMark className="logo-in size-8" />
+      <Link href="/dashboard" aria-label={t("title")} className="mb-1 shrink-0">
+        <LogoMark className="logo-in size-7" />
       </Link>
-      <nav className="flex flex-col items-center gap-0.5">
+      <nav className="flex flex-col items-center gap-0">
         {navGroups.map((group, gi) => (
-          <div key={group.labelKey} className="flex flex-col items-center gap-0.5">
-            {gi > 0 && <span aria-hidden className="my-1 h-px w-5 shrink-0 bg-foreground/15" />}
+          <div key={group.labelKey} className="flex flex-col items-center gap-0">
+            {gi > 0 && <span aria-hidden className="my-0.5 h-px w-4 shrink-0 bg-foreground/15" />}
             {group.items
               .filter((item) => item.href !== "/settings")
               .map((item) => {
@@ -200,8 +200,8 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           </div>
         ))}
       </nav>
-      <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
-      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
+      <span className="my-1 h-px w-4 shrink-0 bg-foreground/15" />
+      <ModeToggle tip className={cn(railButton, "size-8 rounded-full")} />
       <Link href="/settings" aria-label={t("settings")} data-tip={t("settings")} aria-current={isActiveHref(pathname, "/settings") ? "page" : undefined} className={cn(railButton, isActiveHref(pathname, "/settings") && railActive)}>
         <Settings className="size-[18px]" />
       </Link>

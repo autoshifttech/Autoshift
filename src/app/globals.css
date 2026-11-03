@@ -676,6 +676,34 @@ html:has(.app-canvas.h-dvh) body {
   a { text-decoration: none !important; }
   .no-print { display: none !important; }
 }
+/* Glass chip: the light glass for everyday controls (outline buttons, segmented tracks). One cheap blur,
+   a bright top edge and a soft drop, like the tiles in Apple's Control Center. */
+.lg-chip {
+  color: var(--foreground);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.3));
+  -webkit-backdrop-filter: blur(10px) saturate(1.7);
+  backdrop-filter: blur(10px) saturate(1.7);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.95),
+    inset 0 -1px 2px rgb(30 40 35 / 0.05),
+    0 1px 2px rgb(30 40 35 / 0.1),
+    0 8px 16px -10px rgb(30 40 35 / 0.28);
+}
+html[data-mode="dark"] .lg-chip {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.05));
+  border-color: rgb(255 255 255 / 0.2);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.3),
+    inset 0 -1px 2px rgb(0 0 0 / 0.25),
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 8px 16px -10px rgb(0 0 0 / 0.6);
+}
+html[data-solid] .lg-chip {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--card);
+}
 /* Solid mode: the person (or the system) asked for less transparency. */
 html[data-solid] .liquid-glass,
 html[data-solid] .liquid-glass.lg-frost,
