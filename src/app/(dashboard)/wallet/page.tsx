@@ -1,5 +1,6 @@
-import { WalletPage } from "@/components/wallet/wallet-page";
+import { redirect } from "next/navigation";
 
+/** Moved into Settings. */
 export default function Page() {
-  return <WalletPage />;
+  redirect("/settings?tab=wallet");
 }

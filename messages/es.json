@@ -2079,7 +2079,10 @@
       "api": "Claves de API",
       "billing": "Plan y facturación",
       "privacy": "Datos y privacidad",
-      "alerts": "Alertas por correo y WhatsApp"
+      "alerts": "Alertas por correo y WhatsApp",
+      "wallet": "Monedero",
+      "opt-ins": "Consentimientos y bloqueos",
+      "files": "Archivos"
     },
     "groups": {
       "account": "Cuenta",

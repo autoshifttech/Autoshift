@@ -2079,7 +2079,10 @@
       "api": "API 키",
       "billing": "요금제 및 결제",
       "privacy": "데이터 및 개인정보",
-      "alerts": "이메일 및 WhatsApp 알림"
+      "alerts": "이메일 및 WhatsApp 알림",
+      "wallet": "지갑",
+      "opt-ins": "수신 동의 및 차단",
+      "files": "파일"
     },
     "groups": {
       "account": "계정",

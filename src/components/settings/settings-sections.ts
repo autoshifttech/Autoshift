@@ -1,6 +1,7 @@
 import {
   BellRing,
   Coins,
+  FolderOpen,
   FileLock2,
   CreditCard,
   FileText,
@@ -10,9 +11,11 @@ import {
   Palette,
   PlugZap,
   Shield,
+  ShieldCheck,
   Tags,
   User,
   UsersRound,
+  Wallet,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -39,6 +42,9 @@ export const SETTINGS_SECTIONS = [
   'deals',
   'members',
   'billing',
+  'wallet',
+  'opt-ins',
+  'files',
   'privacy',
   'api',
 ] as const;
@@ -69,6 +75,9 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   deals: { id: 'deals', label: 'Deals & currency', icon: Coins, group: 'workspace' },
   members: { id: 'members', label: 'Team members', icon: UsersRound, group: 'workspace' },
   billing: { id: 'billing', label: 'Plan & billing', icon: CreditCard, group: 'workspace' },
+  wallet: { id: 'wallet', label: 'Wallet', icon: Wallet, group: 'workspace' },
+  'opt-ins': { id: 'opt-ins', label: 'Opt-ins & blocklist', icon: ShieldCheck, group: 'workspace' },
+  files: { id: 'files', label: 'Files', icon: FolderOpen, group: 'workspace' },
   privacy: { id: 'privacy', label: 'Data & privacy', icon: FileLock2, group: 'workspace' },
   api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'developer' },
 };

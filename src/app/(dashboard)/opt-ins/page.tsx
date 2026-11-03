@@ -1,5 +1,6 @@
-import { ConsentPage } from "@/components/consent/consent-page";
+import { redirect } from "next/navigation";
 
+/** Moved into Settings. */
 export default function Page() {
-  return <ConsentPage />;
+  redirect("/settings?tab=opt-ins");
 }

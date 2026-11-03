@@ -1,5 +1,6 @@
-import { FilesPage } from "@/components/files/files-page";
+import { redirect } from "next/navigation";
 
+/** Moved into Settings. */
 export default function Page() {
-  return <FilesPage />;
+  redirect("/settings?tab=files");
 }

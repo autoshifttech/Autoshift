@@ -15,7 +15,6 @@ import {
   Bot,
   FileText,
   Filter,
-  FolderOpen,
   GitBranch,
   LayoutDashboard,
   LifeBuoy,
@@ -25,16 +24,13 @@ import {
   Radio,
   Repeat,
   Settings,
-  ShieldCheck,
   Target,
   Users,
-  Wallet,
   Wrench,
   Zap,
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 
 interface NavItem {
@@ -77,16 +73,13 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/broadcasts", labelKey: "broadcasts", icon: Radio },
       { href: "/drips", labelKey: "drips", icon: Repeat },
       { href: "/segments", labelKey: "segments", icon: Filter },
-      { href: "/opt-ins", labelKey: "optIns", icon: ShieldCheck },
       { href: "/automations", labelKey: "automations", icon: Zap },
       { href: "/templates", labelKey: "templates", icon: FileText },
-      { href: "/files", labelKey: "files", icon: FolderOpen },
     ],
   },
   {
     labelKey: "groupAccount",
     items: [
-      { href: "/wallet", labelKey: "wallet", icon: Wallet },
       { href: "/support", labelKey: "support", icon: LifeBuoy },
       { href: "/settings", labelKey: "settings", icon: Settings },
     ],
@@ -95,9 +88,6 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
 
 /** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
 const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/contacts"];
-
-/** The desktop rail shows these seven; the rest open from the dots. */
-const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/contacts", "/automations", "/insights", "/pipelines"];
 
 const allItems = navGroups.flatMap((g) => g.items);
 const itemFor = (href: string) => allItems.find((i) => i.href === href)!;
@@ -178,48 +168,39 @@ const railButton =
 const railActive = "rail-active opacity-100";
 
 /**
- * Desktop: a dark rail of icon buttons with tooltips, the rest of the
- * pages under "More". Phones get a bottom bar instead (see MobileNav).
+ * Desktop: a glass rail with an icon for every page and a tooltip name on
+ * hover; opt-ins, files and the wallet live in Settings. Phones get a bottom
+ * bar instead (see MobileNav).
  */
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
-  const [moreOpen, setMoreOpen] = useState(false);
-  const current = [...allItems].sort((x, y) => y.href.length - x.href.length).find((i) => isActiveHref(pathname, i.href));
-  const inMore = !!current && !RAIL_HREFS.includes(current.href) && current.href !== "/settings";
-  const moreBadge = counts.unreadNotifications > 0;
 
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex"
+      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
       </Link>
       <nav className="flex flex-col items-center gap-0.5">
-        {RAIL_HREFS.map((href) => {
-          const item = itemFor(href);
-          const active = isActiveHref(pathname, href);
-          return (
-            <Link key={href} href={href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
-              <item.icon className="size-[18px]" />
-              <NavBadges href={href} active={active} counts={counts} onRail />
-            </Link>
-          );
-        })}
-        {/* Everything else opens from the dots. */}
-        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-          <PopoverTrigger aria-label={t("more")} data-tip={t("more")} className={cn(railButton, inMore && railActive)}>
-            <MoreHorizontal className="size-[18px]" />
-            {moreBadge && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full border-2 border-white/80 bg-[#c2410c]" />}
-          </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass lg-floating relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
-            <div className="max-h-[78vh] overflow-y-auto">
-              <MorePages pathname={pathname} exclude={[...RAIL_HREFS, "/settings"]} onPick={() => setMoreOpen(false)} counts={counts} />
-            </div>
-          </PopoverContent>
-        </Popover>
+        {navGroups.map((group, gi) => (
+          <div key={group.labelKey} className="flex flex-col items-center gap-0.5">
+            {gi > 0 && <span aria-hidden className="my-1 h-px w-5 shrink-0 bg-foreground/15" />}
+            {group.items
+              .filter((item) => item.href !== "/settings")
+              .map((item) => {
+                const active = isActiveHref(pathname, item.href);
+                return (
+                  <Link key={item.href} href={item.href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+                    <item.icon className="size-[18px]" />
+                    <NavBadges href={item.href} active={active} counts={counts} onRail />
+                  </Link>
+                );
+              })}
+          </div>
+        ))}
       </nav>
       <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
       <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />

@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { SettingsRail } from '@/components/settings/settings-rail';
+import { WalletPage } from '@/components/wallet/wallet-page';
+import { ConsentPage } from '@/components/consent/consent-page';
+import { FilesPage } from '@/components/files/files-page';
 import { SettingsOverview } from '@/components/settings/settings-overview';
 import { ProfileForm } from '@/components/settings/profile-form';
 import { SecurityPanel } from '@/components/settings/security-panel';
@@ -78,6 +81,9 @@ function SettingsPageInner() {
     deals: <DealsSettings />,
     members: <MembersTab />,
     billing: <BillingPanel />,
+    wallet: <WalletPage />,
+    'opt-ins': <ConsentPage />,
+    files: <FilesPage />,
     privacy: <DataPrivacyPanel />,
     api: <ApiKeysSettings />,
   };
