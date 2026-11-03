@@ -2298,14 +2298,12 @@
     "description": "WhatsApp에서 고객에게 답하고 리드를 모으는 어시스턴트입니다. 제공한 도구와 지식을 사용합니다.",
     "tabPlayground": "플레이그라운드",
     "tabSetup": "설정",
-    "tabUsage": "사용량",
     "playground": {
       "title": "플레이그라운드",
       "subtitle": "— 고객 입장에서 답변을 테스트하세요",
       "reset": "초기화",
       "emptyTitle": "메시지를 보내 에이전트가 어떻게 답하는지 확인하세요.",
       "emptyDesc": "지식베이스를 사용하며 자동 응답 봇과 똑같이 동작합니다 — 인계까지 포함해서요.",
-      "goToSetup": "아직 설정하지 않았나요? 설정으로 이동",
       "handoff": "여기서 사람에게 인계합니다",
       "thinking": "생각 중…",
       "placeholder": "고객 메시지를 입력하세요…",
@@ -2332,8 +2330,7 @@
     },
     "tabLeads": "리드 수집",
     "tabPresets": "업종별 기본 설정",
-    "tabAssistants": "어시스턴트",
-    "tabModel": "AI 모델"
+    "tabAssistants": "어시스턴트"
   },
   "Interactive": {
     "replyButtons": "답장 버튼",

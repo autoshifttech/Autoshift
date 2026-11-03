@@ -2298,14 +2298,12 @@
     "description": "Asistentes que responden a tus clientes en WhatsApp y captan leads, con las herramientas y el conocimiento que les des.",
     "tabPlayground": "Playground",
     "tabSetup": "Configuración",
-    "tabUsage": "Uso",
     "playground": {
       "title": "Playground",
       "subtitle": "— prueba respuestas como si fueras un cliente",
       "reset": "Reiniciar",
       "emptyTitle": "Envía un mensaje para ver cómo respondería tu agente.",
       "emptyDesc": "Usa tu base de conocimiento y se comporta exactamente como el bot de respuesta automática, incluida la derivación.",
-      "goToSetup": "¿Aún no está configurado? Ve a Configuración",
       "handoff": "Aquí derivaría la conversación a una persona",
       "thinking": "Pensando…",
       "placeholder": "Escribe un mensaje de cliente…",
@@ -2332,8 +2330,7 @@
     },
     "tabLeads": "Captación de leads",
     "tabPresets": "Plantillas de negocio",
-    "tabAssistants": "Asistentes",
-    "tabModel": "Modelo de IA"
+    "tabAssistants": "Asistentes"
   },
   "Interactive": {
     "replyButtons": "Botones de respuesta",

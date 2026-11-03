@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from "@/lib/toast";
 import { useTranslations } from 'next-intl';
-import { Bot, RotateCcw, Send, Loader2, UserCircle2, ArrowRight } from 'lucide-react';
+import { Bot, RotateCcw, Send, Loader2, UserCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -14,7 +14,7 @@ interface Turn {
   handoff?: boolean;
 }
 
-export function AiPlayground({ onGoToSetup }: { onGoToSetup?: () => void }) {
+export function AiPlayground() {
   const t = useTranslations('Agents.playground');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState('');
@@ -112,16 +112,6 @@ export function AiPlayground({ onGoToSetup }: { onGoToSetup?: () => void }) {
             <p className="mt-1 text-xs">
               {t('emptyDesc')}
             </p>
-            {onGoToSetup && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={onGoToSetup}
-                className="mt-1 h-auto p-0 text-xs"
-              >
-                {t('goToSetup')} <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
-            )}
           </div>
         )}
 

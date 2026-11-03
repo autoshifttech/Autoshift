@@ -17,6 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
 import { assistantsStore, updateAssistant, useAssistants, type Assistant, type Audience, type Tone } from "@/lib/assistants/model";
+import { AiKnowledgeCard } from "@/components/settings/ai-knowledge";
+import { useAuth } from "@/hooks/use-auth";
+import { canEditSettings } from "@/lib/auth/roles";
 import { AssistantAvatar, TestChat, toolIcon } from "./assistant-ui";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
@@ -224,6 +227,8 @@ function ProfileTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) => 
 
 function KnowledgeTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) => void }) {
   const t = useTranslations("Assistants");
+  const { accountId, accountRole } = useAuth();
+  const canEdit = accountRole ? canEditSettings(accountRole) : false;
   const update = (i: number, patch: Partial<Assistant["knowledge"][number]>) => set({ knowledge: a.knowledge.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
@@ -251,12 +256,9 @@ function KnowledgeTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) =
           </div>
         ))}
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        {t("docsHint")}{" "}
-        <Link href="/agents?tab=setup" className="font-medium text-primary hover:underline">
-          {t("docsLink")}
-        </Link>
-      </p>
+      <div className="mt-6">
+        <AiKnowledgeCard accountId={accountId} canEdit={canEdit} hasEmbeddingsKey />
+      </div>
     </section>
   );
 }

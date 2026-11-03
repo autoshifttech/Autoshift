@@ -18,6 +18,7 @@ import {
   LifeBuoy,
   LogOut,
   Mail,
+  Sparkles,
   Megaphone,
   MoreHorizontal,
   Search,
@@ -73,6 +74,7 @@ export const ADMIN_NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/whatsapp", label: "WhatsApp health", icon: ShieldCheck },
       { href: "/admin/ai", label: "AI usage", icon: Bot },
+      { href: "/admin/ai-models", label: "AI models", icon: Sparkles },
       { href: "/admin/system", label: "System status", icon: Activity },
     ],
   },
