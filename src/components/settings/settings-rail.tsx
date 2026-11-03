@@ -1,21 +1,16 @@
 'use client';
 
-import { Fragment, useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
-import { NativeSelect } from '@/components/ui/native-select';
-import {
-  RAIL_GROUPS,
-  SECTION_META,
-  SETTINGS_SECTIONS,
-  type SettingsSection,
-} from './settings-sections';
+import { SETTINGS_SECTIONS, type SettingsSection } from './settings-sections';
 
 /**
- * The settings section tabs — one scrolling row of pills across the top
- * of the page. The active section is the dark pill and auto-scrolls into
- * view so a deep-linked section is never off-screen.
+ * The settings sections as one row of rounded pills across the top of the
+ * page, on every screen size. The active section is the dark pill and
+ * scrolls into view, so a deep-linked section is never off-screen; on a
+ * phone the row swipes sideways with a soft fade at both ends.
  */
 export function SettingsRail({
   active,
@@ -38,57 +33,30 @@ export function SettingsRail({
   }, [active]);
 
   return (
-    <>
-      {/* Phones: one grouped picker instead of fifteen tabs. */}
-      <div className="sm:hidden">
-        <NativeSelect
-          aria-label={t('sectionsNav')}
-          value={active}
-          onChange={(e) => onSelect(e.target.value as SettingsSection)}
-          className="w-full"
-        >
-          {RAIL_GROUPS.map(({ group }) => (
-            <optgroup key={group} label={group === 'top' ? t('sections.overview') : t(`groups.${group}`)}>
-              {SETTINGS_SECTIONS.filter((s) => SECTION_META[s].group === group).map((s) => (
-                <option key={s} value={s}>
-                  {t(`sections.${s}`)}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </NativeSelect>
-      </div>
     <nav
       aria-label={t('sectionsNav')}
-      className="settings-tabs hidden sm:flex items-center gap-1 overflow-x-auto px-5 py-1 [mask-image:linear-gradient(90deg,transparent,#000_20px,#000_calc(100%-20px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="settings-tabs flex items-center gap-1 overflow-x-auto px-1 py-1 [mask-image:linear-gradient(90deg,#000_calc(100%-24px),transparent)] [scrollbar-width:none] sm:px-5 sm:[mask-image:linear-gradient(90deg,transparent,#000_20px,#000_calc(100%-20px),transparent)] [&::-webkit-scrollbar]:hidden"
     >
-      {SETTINGS_SECTIONS.map((s, i) => {
+      {SETTINGS_SECTIONS.map((s) => {
         const isActive = s === active;
-        const startsGroup =
-          i > 0 && SECTION_META[s].group !== SECTION_META[SETTINGS_SECTIONS[i - 1]].group;
         return (
-          <Fragment key={s}>
-            {startsGroup ? (
-              <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-foreground/15" />
-            ) : null}
-            <button
-              ref={isActive ? activeRef : undefined}
-              type="button"
-              onClick={() => onSelect(s)}
-              aria-current={isActive ? 'page' : undefined}
-              className={cn(
-                'inline-flex h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95 lg:h-10',
-                isActive
-                  ? 'bg-foreground text-background'
-                  : 'text-foreground/80 hover:bg-foreground/[0.07] hover:text-foreground',
-              )}
-            >
-              {t(`sections.${s}`)}
-            </button>
-          </Fragment>
+          <button
+            key={s}
+            ref={isActive ? activeRef : undefined}
+            type="button"
+            onClick={() => onSelect(s)}
+            aria-current={isActive ? 'page' : undefined}
+            className={cn(
+              'inline-flex h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95 lg:h-10',
+              isActive
+                ? 'bg-foreground text-background'
+                : 'text-foreground/80 hover:bg-foreground/[0.07] hover:text-foreground',
+            )}
+          >
+            {t(`sections.${s}`)}
+          </button>
         );
       })}
     </nav>
-    </>
   );
 }

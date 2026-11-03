@@ -9,18 +9,11 @@ import { WalletPage } from '@/components/wallet/wallet-page';
 import { ConsentPage } from '@/components/consent/consent-page';
 import { SupportPage } from '@/components/support/support-page';
 import { FilesPage } from '@/components/files/files-page';
-import { SettingsOverview } from '@/components/settings/settings-overview';
 import { ProfileForm } from '@/components/settings/profile-form';
 import { SecurityPanel } from '@/components/settings/security-panel';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
 import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
-import { TemplateManager } from '@/components/settings/template-manager';
-import { QuickRepliesManager } from '@/components/settings/quick-replies-manager';
-import { FieldsAndTagsPanel } from '@/components/settings/fields-and-tags-panel';
-import { DealsSettings } from '@/components/settings/deals-settings';
-import { InboxSettings } from '@/components/settings/inbox-settings';
 import { MembersTab } from '@/components/settings/members-tab';
-import { ApiKeysSettings } from '@/components/settings/api-keys-settings';
 import { BillingPanel } from '@/components/billing/billing-panel';
 import { DataPrivacyPanel } from '@/components/settings/data-privacy-panel';
 import { OwnerAlertsPanel } from '@/components/settings/owner-alerts-panel';
@@ -52,9 +45,7 @@ function SettingsPageInner() {
   const t = useTranslations('Settings');
 
   // The URL (`?tab=`) is the single source of truth for the active
-  // section — deep-linkable, and it keeps the existing links in the
-  // app sidebar/header working. Legacy tab values (tags, custom-fields)
-  // resolve onto their new home; unknown/empty → the Overview landing.
+  // section — deep-linkable. Unknown or removed tab values open Your profile.
   const section = resolveSection(searchParams.get('tab'));
 
   const go = (next: SettingsSection) => {
@@ -64,7 +55,6 @@ function SettingsPageInner() {
   };
 
   const panel: Record<SettingsSection, ReactNode> = {
-    overview: <SettingsOverview onSelect={go} />,
     profile: <ProfileForm />,
     security: <SecurityPanel />,
     appearance: <AppearancePanel />,
@@ -75,11 +65,6 @@ function SettingsPageInner() {
         <WhatsAppConfig />
       </div>
     ),
-    templates: <TemplateManager />,
-    'quick-replies': <QuickRepliesManager />,
-    fields: <FieldsAndTagsPanel />,
-    inbox: <InboxSettings />,
-    deals: <DealsSettings />,
     members: <MembersTab />,
     billing: <BillingPanel />,
     wallet: <WalletPage />,
@@ -87,7 +72,6 @@ function SettingsPageInner() {
     files: <FilesPage />,
     support: <SupportPage />,
     privacy: <DataPrivacyPanel />,
-    api: <ApiKeysSettings />,
   };
 
   return (

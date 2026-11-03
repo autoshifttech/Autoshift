@@ -35,7 +35,6 @@ export function HelpButton() {
     { href: "/settings?tab=whatsapp", icon: PlugZap, label: t("guideWhatsapp") },
     { href: "/agents", icon: Sparkles, label: t("guideAssistant") },
     { href: "/wallet", icon: Wallet, label: t("guideWallet") },
-    { href: "/settings?tab=api", icon: Code2, label: t("guideApi") },
   ];
 
   return (
