@@ -135,7 +135,7 @@ export function SupportPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid h-[calc(100dvh-16rem)] min-h-[480px] grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] lg:grid-cols-[340px_minmax(0,1fr)]">
+        <div className={cn("grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] lg:h-[calc(100dvh-16rem)] lg:min-h-[480px] lg:grid-cols-[340px_minmax(0,1fr)]", selected && "h-[calc(100dvh-16rem)] min-h-[480px]")}>
           <ul className={cn("min-h-0 overflow-y-auto border-border lg:border-r", selected && "hidden lg:block")}>
             {mine.map((x) => (
               <li key={x.id}>

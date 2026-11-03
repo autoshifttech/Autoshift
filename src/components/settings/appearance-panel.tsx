@@ -103,7 +103,7 @@ function ModeCard({
       aria-checked={isActive}
       aria-label={t("useMode", { mode })}
       className={cn(
-        "flex items-center gap-3 rounded-lg border bg-card p-4 text-left transition-colors",
+        "flex items-center gap-2 rounded-lg border bg-card p-3 text-left transition-colors sm:gap-3 sm:p-4",
         isActive
           ? "border-primary/60 ring-2 ring-primary/40"
           : "border-border hover:border-border hover:bg-muted/40",
@@ -115,13 +115,13 @@ function ModeCard({
       >
         <Icon className="h-4 w-4" />
       </span>
-      <span className="flex-1 text-sm font-semibold capitalize text-foreground">
+      <span className="min-w-0 flex-1 truncate text-sm font-semibold capitalize text-foreground">
         {mode}
       </span>
       {isActive && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
           <Check className="h-3 w-3" />
-          {t("active")}
+          <span className="sr-only sm:not-sr-only">{t("active")}</span>
         </span>
       )}
     </button>
