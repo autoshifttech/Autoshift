@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Settings as SettingsIcon, User } from "lucide-react";
+import { useUnreadNotifications } from "@/hooks/use-unread-notifications";
+import { Bell, LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
@@ -79,6 +80,7 @@ export function Header() {
           </span>
         )}
         <CreditsBadge />
+        <NotificationsLink />
 
         <DropdownMenu>
         <DropdownMenuTrigger
@@ -145,5 +147,25 @@ export function Header() {
         </DropdownMenu>
       </div>
     </header>
+  );
+}
+
+/** The bell: opens Notifications, with the unread count on it. */
+function NotificationsLink() {
+  const t = useTranslations("Sidebar");
+  const unread = useUnreadNotifications();
+  return (
+    <Link
+      href="/notifications"
+      aria-label={unread > 0 ? `${t("notifications")} (${unread})` : t("notifications")}
+      className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-card-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      <Bell className="size-[18px]" />
+      {unread > 0 && (
+        <span aria-hidden className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-[#c2410c] px-1 text-xs font-bold text-white">
+          {unread > 9 ? "9+" : unread}
+        </span>
+      )}
+    </Link>
   );
 }

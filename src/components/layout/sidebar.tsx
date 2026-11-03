@@ -8,10 +8,8 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
-import { useUnreadNotifications } from "@/hooks/use-unread-notifications";
 import {
   BarChart3,
-  Bell,
   Bot,
   FileText,
   Filter,
@@ -54,7 +52,6 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/inbox", labelKey: "inbox", icon: MessageSquare },
       { href: "/leads", labelKey: "leads", icon: Target },
       { href: "/insights", labelKey: "insights", icon: BarChart3 },
-      { href: "/notifications", labelKey: "notifications", icon: Bell },
       { href: "/contacts", labelKey: "contacts", icon: Users },
       { href: "/pipelines", labelKey: "pipelines", icon: GitBranch },
     ],
@@ -96,28 +93,20 @@ function isActiveHref(pathname: string, href: string) {
 
 export interface NavCounts {
   totalUnread: number;
-  unreadNotifications: number;
 }
 
 /** Subscribes once; the shell passes the counts to both navs. */
 export function useNavCounts(): NavCounts {
-  return { totalUnread: useTotalUnread(), unreadNotifications: useUnreadNotifications() };
+  return { totalUnread: useTotalUnread() };
 }
 
-function NavBadges({ href, active, counts, onRail }: { href: string; active: boolean; counts: NavCounts; onRail?: boolean }) {
+function NavBadges({ href, active, counts }: { href: string; active: boolean; counts: NavCounts; onRail?: boolean }) {
   const t = useTranslations("Sidebar");
-  const { totalUnread, unreadNotifications } = counts;
+  const { totalUnread } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
       <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">
         {totalUnread > 9 ? "9+" : totalUnread}
-      </span>
-    );
-  }
-  if (href === "/notifications" && unreadNotifications > 0) {
-    return (
-      <span aria-label={t("unreadNotifications", { count: unreadNotifications })} className={onRail ? "absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white" : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground"}>
-        {unreadNotifications > 9 ? "9+" : unreadNotifications}
       </span>
     );
   }
@@ -162,7 +151,7 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
 }
 
 const railButton =
-  "rail-tip relative flex size-8 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
 /**
@@ -177,15 +166,15 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden w-[50px] shrink-0 flex-col items-center gap-0 self-center rounded-full py-2 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      <Link href="/dashboard" aria-label={t("title")} className="mb-1 shrink-0">
-        <LogoMark className="logo-in size-7" />
+      <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
+        <LogoMark className="logo-in size-8" />
       </Link>
-      <nav className="flex flex-col items-center gap-0">
+      <nav className="flex flex-col items-center gap-0.5">
         {navGroups.map((group, gi) => (
-          <div key={group.labelKey} className="flex flex-col items-center gap-0">
-            {gi > 0 && <span aria-hidden className="my-0.5 h-px w-4 shrink-0 bg-foreground/15" />}
+          <div key={group.labelKey} className="flex flex-col items-center gap-0.5">
+            {gi > 0 && <span aria-hidden className="my-1 h-px w-5 shrink-0 bg-foreground/15" />}
             {group.items
               .filter((item) => item.href !== "/settings")
               .map((item) => {
@@ -200,8 +189,8 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           </div>
         ))}
       </nav>
-      <span className="my-1 h-px w-4 shrink-0 bg-foreground/15" />
-      <ModeToggle tip className={cn(railButton, "size-8 rounded-full")} />
+      <span className="my-1.5 h-px w-6 shrink-0 bg-foreground/15" />
+      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
       <Link href="/settings" aria-label={t("settings")} data-tip={t("settings")} aria-current={isActiveHref(pathname, "/settings") ? "page" : undefined} className={cn(railButton, isActiveHref(pathname, "/settings") && railActive)}>
         <Settings className="size-[18px]" />
       </Link>

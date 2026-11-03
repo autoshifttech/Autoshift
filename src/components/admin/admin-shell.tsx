@@ -99,7 +99,7 @@ function activeItem(pathname: string) {
 const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
 
 const railButton =
-  "rail-tip relative flex size-8 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
+  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
 function itemFor(href: string) {
@@ -168,7 +168,7 @@ function AdminRail() {
   const [moreOpen, setMoreOpen] = useState(false);
   const inMore = !!current && !RAIL_HREFS.includes(current.href);
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[50px] shrink-0 flex-col items-center gap-0 self-center rounded-full py-2 liquid-glass lg:flex">
+    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex">
       <Link href="/admin" aria-label="AutoShift admin" className="mb-2 shrink-0">
         <LogoMark className="logo-in size-8" />
       </Link>
@@ -198,7 +198,7 @@ function AdminRail() {
       <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip={tr("Website admin")} className={railButton}>
         <Globe className="size-[18px]" />
       </Link>
-      <ModeToggle tip className={cn(railButton, "size-8 rounded-full")} />
+      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
     </aside>
   );
 }
