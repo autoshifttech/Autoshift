@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Copy, Pause, Play, Plus, Repeat } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

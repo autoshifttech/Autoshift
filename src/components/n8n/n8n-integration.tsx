@@ -3,7 +3,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast";
 import {
   ArrowLeft,
   ArrowRight,

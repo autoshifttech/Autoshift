@@ -15,7 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { format, formatDistanceToNow } from "date-fns";
 
 import { useTranslations } from "next-intl";

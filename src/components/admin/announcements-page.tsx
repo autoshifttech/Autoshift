@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Eye, Megaphone, Newspaper, Pencil, Plus, Trash2, Wrench, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

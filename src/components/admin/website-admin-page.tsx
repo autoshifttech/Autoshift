@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Globe, Info, RotateCcw } from "lucide-react";
 

@@ -6,7 +6,7 @@ import { countAudience } from '@/lib/broadcast-audience';
 import { parseBroadcastCsv } from '@/lib/broadcast-csv';
 import { CustomField, Tag } from '@/types';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { toast } from "@/lib/toast";
 import {
   Users,
   Tags,

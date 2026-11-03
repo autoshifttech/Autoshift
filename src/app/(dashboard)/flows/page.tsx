@@ -3,7 +3,7 @@
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
   Workflow,
   Plus,

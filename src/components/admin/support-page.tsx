@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowLeft, Inbox, Lock, MessageSquareReply, Search, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Ban, CheckCircle2, Megaphone, Plus, Search, ShieldCheck, ShieldOff, UserMinus, UserPlus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

@@ -66,7 +66,7 @@ import {
   businessReactionOn,
   withBusinessReaction,
 } from "@/lib/inbox/business-reaction";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import {
   confirmedSendUpdate,

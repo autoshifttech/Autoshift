@@ -3,7 +3,7 @@
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Copy, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

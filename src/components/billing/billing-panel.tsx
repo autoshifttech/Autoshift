@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Download, FileText, Pencil, Receipt } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

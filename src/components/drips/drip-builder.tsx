@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowLeft, Clock, Flag, Pause, Play, Plus, Rocket, Trash2, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

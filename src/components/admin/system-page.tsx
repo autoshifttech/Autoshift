@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { CheckCircle2, CircleAlert, CircleX, Loader2, Play, RotateCcw } from "lucide-react";
 
 import { BarChart } from "@/components/tremor/bar-chart";

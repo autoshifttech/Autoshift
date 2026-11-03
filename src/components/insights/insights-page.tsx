@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowDownRight, ArrowUpRight, Bot, Download, Printer, MessageSquare, Target, Timer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

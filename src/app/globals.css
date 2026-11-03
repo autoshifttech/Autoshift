@@ -513,7 +513,6 @@ html[data-mode="dark"] :is(input, textarea, select)[aria-invalid="true"] ~ p {
 }
 /* The lens (an SVG filter) is costly, so only short-lived surfaces get it,
    never the rails and bars that sit over scrolling content. */
-html[data-lens] .island-toast.liquid-glass,
 html[data-lens] [data-slot="popover-content"].liquid-glass {
   -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
   backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
@@ -558,7 +557,6 @@ html[data-mode="dark"] .liquid-glass {
     0 14px 24px -12px rgb(0 0 0 / 0.6),
     0 1px 5px rgb(0 0 0 / 0.25);
 }
-html[data-mode="dark"][data-lens] .island-toast.liquid-glass,
 html[data-mode="dark"][data-lens] [data-slot="popover-content"].liquid-glass {
   -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
   backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
@@ -640,7 +638,7 @@ html:has(.app-canvas.h-dvh) body {
   html, body { background: #fff !important; }
   .app-canvas { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
   #app-scroll, #admin-scroll { overflow: visible !important; height: auto !important; }
-  aside, [aria-label="Admin navigation"], [aria-label="Primary navigation"], header, [data-sonner-toaster], .rail-tip-layer,
+  aside, [aria-label="Admin navigation"], [aria-label="Primary navigation"], header, .lgn, .rail-tip-layer,
   [aria-label="Skip to content"], a[href="#main-content"], section[aria-label][role="status"], nav.fixed { display: none !important; }
   .liquid-glass { background: #fff !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: none !important; }
   [data-slot="card"], section, .break-avoid { break-inside: avoid; box-shadow: none !important; }
@@ -672,15 +670,12 @@ html[data-solid] .liquid-glass::before { display: none; }
   html:not([data-solid="off"]) .liquid-glass::before { display: none; }
 }
 /* Lite mode (older or low-memory devices): a single cheap blur on the bars that sit over scrolling content. */
-html[data-lite] .liquid-glass:not(.island-toast):not(.lg-frost) {
+html[data-lite] .liquid-glass:not(.lg-frost) {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 html[data-lite] .liquid-glass::before { display: none; }
 /* Notification kinds also tint the glass rim. */
-[data-sonner-toast][data-type="error"].liquid-glass { --lg-rim: rgb(255 112 102 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(255 69 58 / 0.55), 0 14px 24px -12px rgb(180 30 20 / 0.35); }
-[data-sonner-toast][data-type="warning"].liquid-glass { --lg-rim: rgb(255 214 10 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(214 170 0 / 0.55), 0 14px 24px -12px rgb(120 90 0 / 0.3); }
-[data-sonner-toast][data-type="success"].liquid-glass { --lg-rim: rgb(48 209 88 / 0.95); box-shadow: inset 0 0 0 1.5px rgb(30 160 70 / 0.5), 0 14px 24px -12px rgb(10 90 40 / 0.3); }
 /* Items inside a glass panel: no opaque hover fills. */
 .liquid-glass:not(.lg-frost:not(.lg-floating)) a:hover,
 .liquid-glass:not(.lg-frost:not(.lg-floating)) button:hover,
@@ -705,152 +700,6 @@ html[data-mode="dark"] .liquid-glass a[aria-current="page"] {
   }
 }
 
-/* Dynamic Island messages (sonner toasts) as Apple "liquid glass", in four beats:
-   1. a small glass circle drops in from the top of the screen,
-   2. it opens out sideways into the message (a soft spring),
-   3. after a few seconds the text fades and the pill folds back to a circle,
-   4. the circle lifts away.
-   The opening and closing are separate animations: the closing ones start
-   after --island-out-delay (set per toast by ThemedToaster from its
-   duration), so a long-lived message stays on screen until its time is up.
-   Glass = a light tint, a strong blur of whatever is behind, a bright rim
-   and a soft highlight on top. Text stays dark (light in dark mode) so it
-   reads over any page content. */
-.island-toast {
-  --spring: linear(0, 0.0255, 0.0919, 0.1855, 0.2949, 0.4106, 0.5255, 0.6341, 0.7329, 0.8194, 0.8926, 0.9524, 0.9993, 1.0342, 1.0585, 1.0738, 1.0816, 1.0835, 1.0808, 1.0749, 1.0668, 1.0576, 1.0479, 1.0383, 1.0293, 1.0212, 1.0142, 1.0082, 1.0034, 0.9996, 0.9968, 0.9949, 1);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  /* Hug the message, centred in sonner's column. */
-  width: fit-content;
-  min-width: 180px;
-  max-width: min(calc(var(--width) + 64px), calc(100vw - 24px));
-  left: 0;
-  right: 0;
-  margin-inline: auto;
-  min-height: 46px;
-  padding: 10px 20px 10px 12px;
-  border-radius: 26px;
-  font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.35;
-  /* `translate`/`scale` (not `transform`) so sonner's own transform keeps working. */
-  animation:
-    island-drop 0.8s cubic-bezier(0.3, 1.35, 0.5, 1) both,
-    island-open 1.15s 0.42s var(--spring) both,
-    island-fold 0.95s var(--island-out-delay, 3500ms) cubic-bezier(0.65, 0, 0.35, 1) forwards,
-    island-lift 0.7s calc(var(--island-out-delay, 3500ms) + 0.78s) cubic-bezier(0.55, 0, 0.8, 0.4) forwards;
-}
-.island-toast > * {
-  animation:
-    island-text-in 0.5s 0.8s ease-out backwards,
-    island-text-out 0.32s var(--island-out-delay, 3500ms) ease-in forwards;
-}
-/* Frozen while sonner holds the message (hovered or being dragged). */
-.island-toast[data-expanded="true"],
-.island-toast[data-expanded="true"] > *,
-[data-sonner-toaster]:hover .island-toast,
-[data-sonner-toaster]:hover .island-toast > * {
-  animation-play-state: paused;
-}
-/* The drop: the circle falls from above the screen into place. */
-@keyframes island-drop {
-  from {
-    translate: 0 -72px;
-    scale: 0.7;
-  }
-  to {
-    translate: 0 0;
-    scale: 1;
-  }
-}
-/* The reveal: circle → message. The clip reaches past the edges at the end
-   so the soft shadow isn't cut off once the pill is open. */
-@keyframes island-open {
-  from {
-    clip-path: inset(0 calc(50% - 18px) calc(100% - 36px) round 18px);
-  }
-  to {
-    clip-path: inset(-22px -30px -34px -30px round 52px);
-  }
-}
-/* The fold: message → circle. */
-@keyframes island-fold {
-  from {
-    clip-path: inset(-22px -30px -34px -30px round 52px);
-  }
-  to {
-    clip-path: inset(0 calc(50% - 18px) calc(100% - 36px) round 18px);
-  }
-}
-/* The lift: the circle floats back up and fades. */
-@keyframes island-lift {
-  from {
-    translate: 0 0;
-    opacity: 1;
-  }
-  to {
-    translate: 0 -72px;
-    opacity: 0;
-  }
-}
-@keyframes island-text-in {
-  from { opacity: 0; filter: blur(6px); scale: 0.94; }
-}
-@keyframes island-text-out {
-  to { opacity: 0; filter: blur(6px); scale: 0.94; }
-}
-.island-content {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-}
-.island-desc {
-  font-weight: 500;
-  opacity: 0.75;
-}
-.island-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: rgb(18 20 19 / 0.12);
-}
-.island-icon svg {
-  width: 16px;
-  height: 16px;
-}
-[data-sonner-toast][data-type="success"] .island-icon { background: #30d158; color: #062b12; }
-[data-sonner-toast][data-type="error"] .island-icon { background: #ff453a; color: #2b0705; }
-[data-sonner-toast][data-type="warning"] .island-icon { background: #ffd60a; color: #2b2400; }
-[data-sonner-toast][data-type="info"] .island-icon { background: #0a84ff; color: #fff; }
-.island-action {
-  flex-shrink: 0;
-  border-radius: 999px;
-  background: #121413;
-  color: #fff;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.island-cancel {
-  background: rgb(18 20 19 / 0.12);
-  color: inherit;
-}
-html[data-mode="dark"] .island-action {
-  background: #fff;
-  color: #121413;
-}
-html[data-mode="dark"] .island-cancel {
-  background: rgb(255 255 255 / 0.18);
-  color: #fff;
-}
-
-
 /* Smooth scrolling everywhere; sections rise in as they scroll into view
    (done by components/motion/scroll-reveal.tsx). */
 html,
@@ -862,11 +711,6 @@ html,
   html,
   .smooth-scroll {
     scroll-behavior: auto;
-  }
-  .island-toast,
-  .island-toast > * {
-    animation: none !important;
-    transition: none !important;
   }
   .animate-grow-y,
   .animate-grow-x,
@@ -951,4 +795,10 @@ html,
       scrollbar-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent) transparent;
     }
   }
+}
+/* Notifications (public/liquid-notify.js): solid when the person asked for less transparency. */
+html[data-solid] .lgn-glass {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--card);
 }

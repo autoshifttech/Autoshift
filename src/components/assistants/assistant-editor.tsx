@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowLeft, BookOpen, Hand, Plus, Settings2, Trash2, Users, Wrench, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

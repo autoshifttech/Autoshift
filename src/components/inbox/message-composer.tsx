@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
   uploadAccountMedia,
   deleteAccountMedia,

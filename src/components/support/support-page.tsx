@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowLeft, Clock, LifeBuoy, MessageCircle, Plus, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

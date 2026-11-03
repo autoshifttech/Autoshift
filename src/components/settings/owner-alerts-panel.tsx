@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Bell, Lock, Mail, MessageCircle, Plus, Send, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

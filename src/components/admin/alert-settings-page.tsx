@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Bell, Mail, MessageCircle, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

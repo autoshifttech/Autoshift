@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Target, UserCheck } from "lucide-react";
 
 import { leadsStore, phoneKey, useLeadSettings, useLeads } from "@/lib/leads/model";

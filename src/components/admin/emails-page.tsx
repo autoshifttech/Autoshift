@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Lock, Mail, RotateCcw, Save, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

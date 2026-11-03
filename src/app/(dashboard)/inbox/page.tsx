@@ -14,7 +14,7 @@ import { ConversationList } from "@/components/inbox/conversation-list";
 import { parseInboxFilter } from "@/lib/inbox/inbox-filters";
 import { MessageThread } from "@/components/inbox/message-thread";
 import { ContactSidebar } from "@/components/inbox/contact-sidebar";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
