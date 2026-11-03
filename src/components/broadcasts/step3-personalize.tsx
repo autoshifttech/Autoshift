@@ -337,7 +337,7 @@ export function Step3Personalize({
                       <SelectTrigger className="w-full border-border bg-muted text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
+                      <SelectContent className="">
                         <SelectItem value="static">{t('personalize.typeStatic')}</SelectItem>
                         <SelectItem value="field">{t('personalize.typeContact')}</SelectItem>
                         <SelectItem value="custom_field">
@@ -370,7 +370,7 @@ export function Step3Personalize({
                         <SelectTrigger className="w-full border-border bg-muted text-foreground">
                           <SelectValue placeholder={t('personalize.selectContactField')} />
                         </SelectTrigger>
-                        <SelectContent className="border-border bg-popover">
+                        <SelectContent className="">
                           {contactFields.map((field) => (
                             <SelectItem key={field.value} value={field.value}>
                               {t(`personalize.fieldMap.${field.labelKey}`)}
@@ -396,7 +396,7 @@ export function Step3Personalize({
                             }
                           />
                         </SelectTrigger>
-                        <SelectContent className="border-border bg-popover">
+                        <SelectContent className="">
                           {customFields.map((f) => (
                             <SelectItem key={f.id} value={f.id}>
                               {f.field_name}

@@ -36,7 +36,7 @@ export function RailTip() {
   return (
     <div
       role="tooltip"
-      className="pointer-events-none fixed z-[70] hidden -translate-y-1/2 rounded-lg bg-[#1a1d1b] px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-white shadow-lg lg:block"
+      className="pointer-events-none fixed z-[70] hidden -translate-y-1/2 liquid-glass lg-floating rounded-xl px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap lg:block"
       style={{ left: tip.x, top: tip.y }}
     >
       {tip.text}

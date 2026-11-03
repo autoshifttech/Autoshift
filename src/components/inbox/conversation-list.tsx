@@ -248,7 +248,7 @@ export function ConversationList({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border bg-popover"
+              className=""
             >
               {FILTER_OPTIONS.map((opt) => (
                 <DropdownMenuItem
@@ -287,7 +287,7 @@ export function ConversationList({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="max-h-64 w-56 border-border bg-popover"
+                className="max-h-64 w-56"
               >
                 {tags.map((t) => (
                   <DropdownMenuCheckboxItem
@@ -324,7 +324,7 @@ export function ConversationList({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="max-h-64 w-56 border-border bg-popover"
+                className="max-h-64 w-56"
               >
                 <DropdownMenuItem
                   onClick={() => setSelectedCompany(null)}

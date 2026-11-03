@@ -811,7 +811,7 @@ export function TemplateManager() {
                   <SelectTrigger className="w-full bg-muted border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
+                  <SelectContent className="">
                     {CATEGORIES.map((cat) => (
                       <SelectItem
                         key={cat}
@@ -872,7 +872,7 @@ export function TemplateManager() {
                 <SelectTrigger className="w-full bg-muted border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
+                <SelectContent className="">
                   {HEADER_FORMATS.map((type) => (
                     <SelectItem
                       key={type}
@@ -1080,7 +1080,7 @@ export function TemplateManager() {
                           <SelectTrigger className="w-40 bg-muted border-border text-foreground h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-popover border-border">
+                          <SelectContent className="">
                             <SelectItem
                               value="QUICK_REPLY"
                               className="text-popover-foreground focus:bg-muted focus:text-popover-foreground"

@@ -100,7 +100,7 @@ export function Header() {
         <DropdownMenuContent
           align="end"
           sideOffset={6}
-          className="min-w-56 bg-popover text-popover-foreground ring-border"
+          className="min-w-56 ring-border"
         >
           <div className="px-2 py-1.5">
             <p className="truncate text-sm font-medium text-foreground">

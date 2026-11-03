@@ -669,7 +669,7 @@ export default function ContactsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="bg-popover border-border"
+                        className=""
                       >
                         <DropdownMenuItem
                           onClick={(e) => {

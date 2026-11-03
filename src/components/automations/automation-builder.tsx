@@ -1290,7 +1290,7 @@ function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
-          className="max-h-80 min-w-56 overflow-y-auto border-border bg-popover"
+          className="max-h-80 min-w-56 overflow-y-auto"
         >
           {ADDABLE_STEPS.map((tp) => {
             const Icon = STEP_META[tp].icon

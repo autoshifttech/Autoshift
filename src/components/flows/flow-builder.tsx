@@ -601,7 +601,7 @@ function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: Retur
         <Plus className="h-3.5 w-3.5" />
         {t('addNode')}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="border-border bg-popover">
+      <DropdownMenuContent align="end" className="">
         {groupNodeTypesByCategory(types).map((group, i) => (
           // A DropdownMenuGroup (base-ui Menu.Group) is REQUIRED here:
           // DropdownMenuLabel is base-ui's Menu.GroupLabel, which throws

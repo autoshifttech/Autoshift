@@ -743,7 +743,7 @@ function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="border-border bg-popover w-[268px] p-1.5"
+        className="w-[268px] p-1.5"
       >
         {groupNodeTypesByCategory(ADD_NODE_TYPES).map((group, i) => (
           // DropdownMenuGroup (base-ui Menu.Group) is REQUIRED: the

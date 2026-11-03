@@ -532,7 +532,7 @@ export default function BroadcastDetailPage() {
                   : tStatus(getRecipientStatus(statusFilter).label)}
                 <ChevronDown className="h-3 w-3" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="border-border bg-popover">
+              <DropdownMenuContent className="">
                 <DropdownMenuItem
                   onClick={() => setStatusFilter('all')}
                   className={
