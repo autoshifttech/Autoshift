@@ -21,7 +21,7 @@ const sections: LegalSection[] = [
   {
     id: "service",
     title: "The service",
-    body: <p>{LEGAL.product} lets you connect your WhatsApp Business number and use a shared inbox, AI assistants, lead capture, bookings, broadcasts, drip campaigns and automations. We may improve or change features; if we remove something important you pay for, we will tell you in advance.</p>,
+    body: <p>{LEGAL.product} lets you connect your WhatsApp Business number and use a shared inbox, AI assistants, lead capture, broadcasts, drip campaigns and automations. We may improve or change features; if we remove something important you pay for, we will tell you in advance.</p>,
   },
   {
     id: "account",

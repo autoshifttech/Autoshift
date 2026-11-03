@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight, Bot, CalendarCheck, Check, PartyPopper, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, Check, PartyPopper, Target } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/logo-mark";
 import { Button } from "@/components/ui/button";
@@ -366,7 +366,7 @@ function WhatsAppStep({ onBack, onNext }: { onBack: () => void; onNext: () => vo
   );
 }
 
-const FEATURE_ICON: Record<Feature, typeof Bot> = { ai_support: Bot, lead_capture: Target, booking: CalendarCheck };
+const FEATURE_ICON: Record<Feature, typeof Bot> = { ai_support: Bot, lead_capture: Target };
 
 function FeaturesStep({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
   const t = useTranslations("Onboarding");
@@ -428,7 +428,6 @@ function DoneStep() {
     setup.whatsapp !== "connected" && { href: "/settings?tab=whatsapp", label: t("doneConnect") },
     setup.features.includes("ai_support") && { href: "/agents", label: t("doneAi") },
     setup.features.includes("lead_capture") && { href: "/agents?tab=leads", label: t("doneLeads") },
-    setup.features.includes("booking") && { href: "/bookings?tab=services", label: t("doneBooking") },
   ].filter(Boolean) as { href: string; label: string }[];
   return (
     <section className="mx-auto max-w-xl text-center">

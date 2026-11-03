@@ -1,6 +1,6 @@
 /**
  * Segments: saved groups of customers built from rules (tags, lead
- * temperature, city, last message, bookings, marketing opt-in…). Used to
+ * temperature, city, last message, marketing opt-in…). Used to
  * target broadcasts and drip campaigns. Sample audience kept in the
  * browser until the contacts query runs on the backend.
  */
@@ -14,16 +14,15 @@ export interface Customer {
   tags: string[]
   temp: 'hot' | 'warm' | 'cold' | null
   lastMessageDays: number
-  bookings: number
   optedIn: boolean
   source: 'whatsapp_ad' | 'website' | 'campaign' | 'organic' | 'referral'
   joinedDays: number
 }
 
-export const SEGMENT_FIELDS = ['tag', 'temp', 'city', 'last_message', 'bookings', 'opted_in', 'source', 'joined'] as const
+export const SEGMENT_FIELDS = ['tag', 'temp', 'city', 'last_message', 'opted_in', 'source', 'joined'] as const
 export type SegmentField = (typeof SEGMENT_FIELDS)[number]
 
-export type SegmentOp = 'is' | 'is_not' | 'within' | 'older_than' | 'at_least' | 'none'
+export type SegmentOp = 'is' | 'is_not' | 'within' | 'older_than'
 
 export interface SegmentRule {
   id: string
@@ -47,7 +46,6 @@ export const FIELD_OPS: Record<SegmentField, SegmentOp[]> = {
   temp: ['is', 'is_not'],
   city: ['is', 'is_not'],
   last_message: ['within', 'older_than'],
-  bookings: ['at_least', 'none'],
   opted_in: ['is'],
   source: ['is', 'is_not'],
   joined: ['within', 'older_than'],
@@ -72,8 +70,6 @@ export function ruleMatches(c: Customer, r: SegmentRule): boolean {
       return r.op === 'older_than' ? c.lastMessageDays > n : c.lastMessageDays <= n
     case 'joined':
       return r.op === 'older_than' ? c.joinedDays > n : c.joinedDays <= n
-    case 'bookings':
-      return r.op === 'none' ? c.bookings === 0 : c.bookings >= (Number.isFinite(n) ? n : 1)
     case 'opted_in':
       return c.optedIn === (r.value !== 'no')
   }
@@ -97,8 +93,6 @@ export function defaultValue(field: SegmentField): string {
     case 'last_message':
     case 'joined':
       return '30'
-    case 'bookings':
-      return '1'
     case 'opted_in':
       return 'yes'
   }
@@ -123,7 +117,6 @@ export function sampleAudience(size = 240): Customer[] {
       tags,
       temp: pick(temps, 11),
       lastMessageDays: (h >>> 4) % 120,
-      bookings: (h >>> 9) % 5 === 0 ? 1 + ((h >>> 13) % 3) : 0,
       optedIn: (h >>> 2) % 5 !== 0,
       source: pick(SOURCES, 13),
       joinedDays: (h >>> 6) % 365,
@@ -138,7 +131,6 @@ export function sampleSegments(): Segment[] {
   return [
     { id: 'sg-hot', name: 'Hot leads in Chennai', description: 'Ready to buy — follow up first.', match: 'all', rules: [rule('temp', 'is', 'hot', 1), rule('city', 'is', 'Chennai', 2)], createdAt: at },
     { id: 'sg-inactive', name: 'Quiet for 60+ days', description: 'Win-back offers.', match: 'all', rules: [rule('last_message', 'older_than', '60', 1), rule('opted_in', 'is', 'yes', 2)], createdAt: at },
-    { id: 'sg-booked', name: 'Booked before', description: 'Customers with at least one appointment.', match: 'all', rules: [rule('bookings', 'at_least', '1', 1)], createdAt: at },
     { id: 'sg-vip', name: 'VIP or bridal', description: 'Priority customers for new collections.', match: 'any', rules: [rule('tag', 'is', 'VIP', 1), rule('tag', 'is', 'Bridal', 2)], createdAt: at },
   ]
 }

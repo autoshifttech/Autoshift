@@ -50,7 +50,6 @@ export function planFeatures(t: ReturnType<typeof useTranslations>, plan: Plan):
     limit(t, plan.seats, "featSeats"),
     limit(t, plan.contacts, "featContacts"),
     t("featAiReplies", { count: plan.aiReplies }),
-    limit(t, plan.bookingStaff, "featBooking"),
     ...(plan.id !== "starter" ? [t("featLeadScoring")] : []),
     ...(plan.id === "pro" ? [t("featPriority")] : []),
   ];

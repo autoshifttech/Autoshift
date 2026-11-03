@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 
 /**
  * A tiny client-side store for screens that don't have a backend yet
- * (onboarding, billing, booking, lead capture). State lives in memory and,
+ * (onboarding, billing, lead capture). State lives in memory and,
  * when `persistKey` is given, in localStorage — so it survives navigation
  * and reloads in this browser only. Swap for Supabase reads when the
  * backend lands; the hooks keep the same shape.

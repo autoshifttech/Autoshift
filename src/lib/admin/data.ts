@@ -408,7 +408,6 @@ export interface Job {
 export const JOBS: Job[] = [
   { id: 'j1', name: 'Send scheduled broadcasts', schedule: 'Every minute', lastRun: daysAgo(0.0008), durationS: 3, status: 'ok' },
   { id: 'j2', name: 'Run drip campaign steps', schedule: 'Every 5 minutes', lastRun: daysAgo(0.002), durationS: 11, status: 'ok' },
-  { id: 'j3', name: 'Booking reminders', schedule: 'Every 15 minutes', lastRun: daysAgo(0.006), durationS: 6, status: 'ok' },
   { id: 'j4', name: 'Charge wallet for Meta fees', schedule: 'Hourly', lastRun: daysAgo(0.02), durationS: 42, status: 'ok' },
   { id: 'j5', name: 'Sync template status from Meta', schedule: 'Hourly', lastRun: daysAgo(0.03), durationS: 18, status: 'failed' },
   { id: 'j6', name: 'Renew subscriptions (Razorpay)', schedule: 'Daily 02:00', lastRun: daysAgo(0.35), durationS: 64, status: 'ok' },

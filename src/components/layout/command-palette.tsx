@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bot, CalendarPlus, CornerDownLeft, Filter, Plus, Repeat, Search, Target, Wallet, type LucideIcon } from "lucide-react";
+import { Bot, CornerDownLeft, Filter, Plus, Repeat, Search, Target, Wallet, type LucideIcon } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,6 @@ export function CommandPalette() {
 
   const all: Item[] = [
     ...navGroups.flatMap((g) => g.items.map((i) => ({ id: `p${i.href}`, group: t("groupPages"), label: ts(i.labelKey), href: i.href, icon: i.icon }))),
-    { id: "a-booking", group: t("groupActions"), label: t("actionBooking"), href: "/bookings", icon: CalendarPlus },
     { id: "a-topup", group: t("groupActions"), label: t("actionTopUp"), href: "/wallet", icon: Wallet },
     { id: "a-drip", group: t("groupActions"), label: t("actionDrip"), href: "/drips", icon: Plus },
     { id: "a-assistant", group: t("groupActions"), label: t("actionAssistant"), href: "/agents", icon: Plus },

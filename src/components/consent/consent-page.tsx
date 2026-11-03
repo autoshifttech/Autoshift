@@ -27,7 +27,7 @@ import {
 } from "@/lib/consent/model";
 
 type Tab = "people" | "blocklist" | "rules" | "collect";
-const COLLECT: Exclude<ConsentSource, "manual">[] = ["website", "keyword", "ad", "booking", "import"];
+const COLLECT: Exclude<ConsentSource, "manual">[] = ["website", "keyword", "ad", "import"];
 
 function StatusPill({ status }: { status: ConsentStatus }) {
   const t = useTranslations("Consent");

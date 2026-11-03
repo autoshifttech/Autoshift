@@ -7,7 +7,7 @@
  */
 import { createStore, useStore } from '@/lib/workspace/store'
 
-export const CONSENT_SOURCES = ['website', 'keyword', 'ad', 'booking', 'import', 'manual'] as const
+export const CONSENT_SOURCES = ['website', 'keyword', 'ad', 'import', 'manual'] as const
 export type ConsentSource = (typeof CONSENT_SOURCES)[number]
 export type ConsentStatus = 'opted_in' | 'opted_out'
 
@@ -56,7 +56,7 @@ export const DEFAULT_SETTINGS: ConsentSettings = {
   optInReply: "Thanks! You'll now get our offers and updates on WhatsApp. Reply STOP any time to stop.",
   confirmOptOut: true,
   requireOptIn: true,
-  collect: { website: true, keyword: true, ad: true, booking: true, import: false },
+  collect: { website: true, keyword: true, ad: true, import: false },
   checkboxText: 'Send me offers and updates on WhatsApp. I can reply STOP any time.',
 }
 
@@ -101,7 +101,7 @@ function sample(): ConsentState {
       r('c2', 'Priya Raman', '+91 98765 43210', 'opted_in', 'website', DEFAULT_SETTINGS.checkboxText, 5),
       r('c3', 'Arjun Mehta', '+91 99620 11873', 'opted_in', 'ad', 'Clicked “Festive sale” ad and messaged first', 9),
       r('c4', 'Vikram Rao', '+91 90030 55621', 'opted_out', 'keyword', 'Unsubscribe', 20),
-      r('c5', 'Sara Thomas', '+91 97410 88234', 'opted_in', 'booking', 'Ticked WhatsApp updates while booking', 26),
+      r('c5', 'Sara Thomas', '+91 97410 88234', 'opted_in', 'website', 'Ticked WhatsApp updates at checkout', 26),
       r('c6', 'Leo Fernandes', '+91 98201 67745', 'opted_in', 'keyword', 'START', 31),
       r('c7', 'Meena Iyer', '+91 94440 11290', 'opted_in', 'import', 'Imported from POS list with consent column', 48),
       r('c8', 'Rohit Shah', '+91 98190 33421', 'opted_out', 'keyword', 'stop all', 60),

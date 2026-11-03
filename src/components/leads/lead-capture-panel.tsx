@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/booking/whatsapp-preview";
-import { selectClass } from "@/components/booking/booking-ui";
+import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/ui/whatsapp-preview";
+import { selectClass } from "@/components/ui/form-classes";
 import { cn } from "@/lib/utils";
 import { useSetup } from "@/lib/workspace/setup";
 import {

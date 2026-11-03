@@ -49,7 +49,6 @@ export function BillingPanel() {
     { key: "seats", used: SAMPLE_USAGE.seats, max: plan.seats },
     { key: "contacts", used: SAMPLE_USAGE.contacts, max: plan.contacts },
     { key: "aiReplies", used: SAMPLE_USAGE.aiReplies, max: plan.aiReplies },
-    { key: "bookingStaff", used: SAMPLE_USAGE.bookingStaff, max: plan.bookingStaff },
   ] as const;
 
   const actionLabel = (id: PlanId) => {

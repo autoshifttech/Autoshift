@@ -13,14 +13,13 @@ export interface Plan {
   seats: number | null
   contacts: number | null
   aiReplies: number
-  bookingStaff: number | null
   popular?: boolean
 }
 
 export const PLANS: Record<PlanId, Plan> = {
-  starter: { id: 'starter', monthly: 999, seats: 2, contacts: 1000, aiReplies: 1000, bookingStaff: 1 },
-  growth: { id: 'growth', monthly: 2499, seats: 5, contacts: 10000, aiReplies: 5000, bookingStaff: 5, popular: true },
-  pro: { id: 'pro', monthly: 5999, seats: 15, contacts: null, aiReplies: 20000, bookingStaff: null },
+  starter: { id: 'starter', monthly: 999, seats: 2, contacts: 1000, aiReplies: 1000 },
+  growth: { id: 'growth', monthly: 2499, seats: 5, contacts: 10000, aiReplies: 5000, popular: true },
+  pro: { id: 'pro', monthly: 5999, seats: 15, contacts: null, aiReplies: 20000 },
 }
 
 export const GST_RATE = 0.18
@@ -67,7 +66,7 @@ const SERVER_SUB = initialSubscription()
 export const useSubscription = () => useStore(subscriptionStore, SERVER_SUB)
 
 /** Sample usage this billing period. */
-export const SAMPLE_USAGE = { seats: 2, contacts: 842, aiReplies: 4310, bookingStaff: 3 }
+export const SAMPLE_USAGE = { seats: 2, contacts: 842, aiReplies: 4310 }
 
 export const SAMPLE_INVOICES = [
   { id: 'INV-2026-0091', date: '2026-09-25', amount: 2499, status: 'paid' as const },

@@ -14,7 +14,6 @@ export interface DayPoint {
   hot: number
   warm: number
   cold: number
-  bookings: number
 }
 
 export interface Insights {
@@ -24,14 +23,12 @@ export interface Insights {
     aiResolved: number
     medianReplySec: number
     leads: number
-    bookings: number
-    revenue: number
-    previous: { conversations: number; leads: number; bookings: number; revenue: number }
+    previous: { conversations: number; leads: number }
   }
-  funnel: { stage: 'conversations' | 'leads' | 'qualified' | 'booked' | 'won'; value: number }[]
+  funnel: { stage: 'conversations' | 'leads' | 'qualified' | 'won'; value: number }[]
   sources: { source: 'whatsapp_ad' | 'website' | 'campaign' | 'organic' | 'referral'; leads: number; won: number }[]
-  assistants: { name: string; replies: number; resolved: number; leads: number; bookings: number; handoffs: number }[]
-  campaigns: { name: string; kind: 'broadcast' | 'drip'; sent: number; read: number; replied: number; booked: number; cost: number }[]
+  assistants: { name: string; replies: number; resolved: number; leads: number; handoffs: number }[]
+  campaigns: { name: string; kind: 'broadcast' | 'drip'; sent: number; read: number; replied: number; cost: number }[]
   /** 7 rows (Mon–Sun) × 24 hours of incoming messages. */
   heat: number[][]
 }
@@ -54,15 +51,13 @@ export function buildInsights(range: Range, now = new Date('2026-10-25T12:00:00Z
       hot: Math.round(3 * wave(k, 1.9, 0.6)),
       warm: Math.round(5 * wave(k + 1, 2.2, 0.5)),
       cold: Math.round(4 * wave(k + 2, 2.8, 0.5)),
-      bookings: Math.round(4 * wave(k + 1, 2.4, 0.5) * weekend),
     }
   })
   const sum = (f: (d: DayPoint) => number) => days.reduce((s, d) => s + f(d), 0)
   const conversations = sum((d) => d.aiConversations + d.teamConversations)
   const leads = sum((d) => d.hot + d.warm + d.cold)
-  const bookings = sum((d) => d.bookings)
   const qualified = sum((d) => d.hot + d.warm)
-  const won = Math.round(bookings * 0.55)
+  const won = Math.round(qualified * 0.24)
   const scale = range / 30
 
   const heat = Array.from({ length: 7 }, (_, day) =>
@@ -81,15 +76,12 @@ export function buildInsights(range: Range, now = new Date('2026-10-25T12:00:00Z
       aiResolved: Math.round(sum((d) => d.aiConversations) * 0.78),
       medianReplySec: 14,
       leads,
-      bookings,
-      revenue: bookings * 1450,
-      previous: { conversations: Math.round(conversations * 0.86), leads: Math.round(leads * 0.8), bookings: Math.round(bookings * 0.9), revenue: Math.round(bookings * 1450 * 0.84) },
+      previous: { conversations: Math.round(conversations * 0.86), leads: Math.round(leads * 0.8) },
     },
     funnel: [
       { stage: 'conversations', value: conversations },
       { stage: 'leads', value: leads },
       { stage: 'qualified', value: qualified },
-      { stage: 'booked', value: bookings },
       { stage: 'won', value: won },
     ],
     sources: [
@@ -100,14 +92,14 @@ export function buildInsights(range: Range, now = new Date('2026-10-25T12:00:00Z
       { source: 'referral', leads: Math.round(leads * 0.08), won: Math.round(won * 0.12) },
     ],
     assistants: [
-      { name: 'Sales assistant', replies: Math.round(1156 * scale), resolved: 74, leads: Math.round(64 * scale), bookings: Math.round(41 * scale), handoffs: Math.round(38 * scale) },
-      { name: 'Support assistant', replies: Math.round(768 * scale), resolved: 82, leads: 0, bookings: Math.round(6 * scale), handoffs: Math.round(52 * scale) },
+      { name: 'Sales assistant', replies: Math.round(1156 * scale), resolved: 74, leads: Math.round(64 * scale), handoffs: Math.round(38 * scale) },
+      { name: 'Support assistant', replies: Math.round(768 * scale), resolved: 82, leads: 0, handoffs: Math.round(52 * scale) },
     ],
     campaigns: [
-      { name: 'New lead nurture', kind: 'drip', sent: Math.round(1077 * scale), read: 82, replied: 17, booked: Math.round(64 * scale), cost: Math.round(1077 * scale * 0.7) },
-      { name: 'Festive sale', kind: 'broadcast', sent: 1900, read: 69, replied: 11, booked: 38, cost: 1881 },
-      { name: 'Win-back after 60 days', kind: 'drip', sent: Math.round(175 * scale), read: 70, replied: 10, booked: Math.round(9 * scale), cost: Math.round(175 * scale * 0.99) },
-      { name: 'Restock alert — linen', kind: 'broadcast', sent: 640, read: 68, replied: 9, booked: 12, cost: 634 },
+      { name: 'New lead nurture', kind: 'drip', sent: Math.round(1077 * scale), read: 82, replied: 17, cost: Math.round(1077 * scale * 0.7) },
+      { name: 'Festive sale', kind: 'broadcast', sent: 1900, read: 69, replied: 11, cost: 1881 },
+      { name: 'Win-back after 60 days', kind: 'drip', sent: Math.round(175 * scale), read: 70, replied: 10, cost: Math.round(175 * scale * 0.99) },
+      { name: 'Restock alert — linen', kind: 'broadcast', sent: 640, read: 68, replied: 9, cost: 634 },
     ],
     heat,
   }

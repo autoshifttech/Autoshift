@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { CalendarCheck, Hand, MessageSquare, Plus, Target, Wrench } from "lucide-react";
+import { Hand, MessageSquare, Plus, Target, Wrench } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -68,11 +68,10 @@ export function AssistantsList() {
                 <Switch checked={a.enabled} onCheckedChange={(enabled) => updateAssistant(a.id, { enabled })} aria-label={t("enabledLabel", { name: a.name })} />
               </div>
               <p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted-foreground">{a.instructions || t("noInstructions")}</p>
-              <dl className="mt-4 grid grid-cols-4 gap-2 text-center">
+              <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
                 {[
                   { icon: MessageSquare, value: a.stats.replies, label: t("statReplies") },
                   { icon: Target, value: a.stats.leads, label: t("statLeads") },
-                  { icon: CalendarCheck, value: a.stats.bookings, label: t("statBookings") },
                   { icon: Hand, value: a.stats.handoffs, label: t("statHandoffs") },
                 ].map(({ icon: Icon, value, label }) => (
                   <div key={label} className="rounded-xl bg-muted/60 px-1 py-2">

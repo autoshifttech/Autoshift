@@ -83,7 +83,7 @@ export function AiUsagePage() {
               );
             })}
           </ul>
-          <p className="mt-5 rounded-xl bg-muted p-3 text-xs text-muted-foreground">Fast handles simple questions. Smart is used for bookings, long questions and Pro workspaces. Both are charged the same to businesses.</p>
+          <p className="mt-5 rounded-xl bg-muted p-3 text-xs text-muted-foreground">Fast handles simple questions. Smart is used for long questions and Pro workspaces. Both are charged the same to businesses.</p>
         </Panel>
       </div>
 

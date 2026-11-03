@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { members, ruleMatches, sampleAudience, sampleSegments, type Customer, type SegmentRule } from './model'
 
-const c: Customer = { id: 'c', name: 'A', phone: '+91', city: 'Chennai', tags: ['VIP'], temp: 'hot', lastMessageDays: 70, bookings: 2, optedIn: true, source: 'website', joinedDays: 10 }
+const c: Customer = { id: 'c', name: 'A', phone: '+91', city: 'Chennai', tags: ['VIP'], temp: 'hot', lastMessageDays: 70, optedIn: true, source: 'website', joinedDays: 10 }
 const r = (p: Partial<SegmentRule>): SegmentRule => ({ id: 'r', field: 'tag', op: 'is', value: 'VIP', ...p })
 
 describe('segments', () => {
@@ -11,8 +11,6 @@ describe('segments', () => {
     expect(ruleMatches(c, r({ field: 'temp', value: 'warm' }))).toBe(false)
     expect(ruleMatches(c, r({ field: 'last_message', op: 'older_than', value: '60' }))).toBe(true)
     expect(ruleMatches(c, r({ field: 'last_message', op: 'within', value: '60' }))).toBe(false)
-    expect(ruleMatches(c, r({ field: 'bookings', op: 'at_least', value: '2' }))).toBe(true)
-    expect(ruleMatches(c, r({ field: 'bookings', op: 'none', value: '' }))).toBe(false)
     expect(ruleMatches(c, r({ field: 'opted_in', value: 'no' }))).toBe(false)
     expect(ruleMatches(c, r({ field: 'joined', op: 'within', value: '30' }))).toBe(true)
   })

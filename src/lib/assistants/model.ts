@@ -6,7 +6,7 @@
  */
 import { createStore, useStore } from '@/lib/workspace/store'
 
-export const ASSISTANT_ROLES = ['sales', 'support', 'booking', 'custom'] as const
+export const ASSISTANT_ROLES = ['sales', 'support', 'custom'] as const
 export type AssistantRole = (typeof ASSISTANT_ROLES)[number]
 export type Tone = 'friendly' | 'professional' | 'concise'
 export type Audience = 'all' | 'new_contacts' | 'tagged' | 'after_hours'
@@ -33,11 +33,11 @@ export interface Assistant {
   audience: Audience
   tags: string[]
   handoff: { onRequest: boolean; onUnknown: boolean; maxReplies: number }
-  stats: { replies: number; handoffs: number; leads: number; bookings: number }
+  stats: { replies: number; handoffs: number; leads: number }
   createdAt: string
 }
 
-export const TOOL_CATEGORIES = ['booking', 'leads', 'messaging', 'team', 'custom'] as const
+export const TOOL_CATEGORIES = ['leads', 'messaging', 'team', 'custom'] as const
 export type ToolCategory = (typeof TOOL_CATEGORIES)[number]
 
 export interface ToolParam {
@@ -77,10 +77,6 @@ const builtin = (id: string, category: ToolCategory, name: string, description: 
 
 export function defaultTools(): Tool[] {
   return [
-    builtin('check_availability', 'booking', 'Check free slots', 'Use when the customer asks when they can come in or wants to book. Returns free times for a service.', 412),
-    builtin('book_appointment', 'booking', 'Book appointment', 'Use after the customer picks a time. Creates the booking and sends the WhatsApp confirmation.', 168),
-    builtin('reschedule_appointment', 'booking', 'Reschedule appointment', 'Use when the customer wants to move an existing booking to another time.', 23),
-    builtin('cancel_appointment', 'booking', 'Cancel appointment', 'Use when the customer asks to cancel their booking.', 9),
     builtin('capture_lead', 'leads', 'Save lead details', 'Use when the customer shares their name, budget, location or need. Saves the answers and updates the lead score.', 236),
     builtin('add_tag', 'leads', 'Add a tag', 'Use to label the contact, for example “Interested” or “VIP”.', 141),
     builtin('move_stage', 'leads', 'Move in pipeline', 'Use when a lead is qualified or ready to buy, to move their deal to the next stage.', 37),
@@ -110,9 +106,9 @@ export const ROLE_PRESETS: Record<AssistantRole, Pick<Assistant, 'name' | 'color
     color: '#1E4C41',
     tone: 'friendly',
     instructions:
-      'You help new customers find the right product and book a visit. Answer questions about products, prices and offers. Ask the lead questions naturally, one at a time. When a customer is ready to buy or book, offer free slots.',
+      'You help new customers find the right product. Answer questions about products, prices and offers. Ask the lead questions naturally, one at a time. When a customer is ready to buy, hand over to the team.',
     greeting: 'Hi! 👋 Welcome to Olive & Thread. What are you looking for today?',
-    toolIds: ['check_availability', 'book_appointment', 'capture_lead', 'add_tag', 'move_stage', 'send_file', 'handoff'],
+    toolIds: ['capture_lead', 'add_tag', 'move_stage', 'send_file', 'handoff'],
     captureLeads: true,
     audience: 'new_contacts',
   },
@@ -121,19 +117,9 @@ export const ROLE_PRESETS: Record<AssistantRole, Pick<Assistant, 'name' | 'color
     color: '#2563EB',
     tone: 'professional',
     instructions:
-      'You help existing customers with orders, delivery, returns and bookings. Be clear and short. If you can’t solve it, apologise and hand the chat to the team.',
-    greeting: 'Hello! How can I help with your order or booking today?',
-    toolIds: ['order_status', 'reschedule_appointment', 'cancel_appointment', 'send_template', 'handoff'],
-    captureLeads: false,
-    audience: 'all',
-  },
-  booking: {
-    name: 'Booking assistant',
-    color: '#7C5CBF',
-    tone: 'friendly',
-    instructions: 'You book, move and cancel appointments. Always offer real free slots and confirm the service, date and time before booking.',
-    greeting: 'Hi! Would you like to book an appointment? Tell me the service and I’ll show you free times.',
-    toolIds: ['check_availability', 'book_appointment', 'reschedule_appointment', 'cancel_appointment', 'handoff'],
+      'You help existing customers with orders, delivery and returns. Be clear and short. If you can’t solve it, apologise and hand the chat to the team.',
+    greeting: 'Hello! How can I help with your order today?',
+    toolIds: ['order_status', 'send_template', 'handoff'],
     captureLeads: false,
     audience: 'all',
   },
@@ -158,7 +144,7 @@ export function newAssistant(role: AssistantRole, id = `as-${Date.now()}`): Assi
     knowledge: [],
     tags: [],
     handoff: { onRequest: true, onUnknown: true, maxReplies: 15 },
-    stats: { replies: 0, handoffs: 0, leads: 0, bookings: 0 },
+    stats: { replies: 0, handoffs: 0, leads: 0 },
     createdAt: new Date().toISOString(),
     ...structuredClone(ROLE_PRESETS[role]),
   }
@@ -172,7 +158,7 @@ function sampleState(): AssistantsState {
       { q: 'Do you deliver?', a: 'Yes, across India. Orders ship within 24 hours and arrive in 2–4 days.' },
       { q: 'Where is the store?', a: '12 Cathedral Road, Chennai. Open Monday to Saturday, 10am to 8pm.' },
     ],
-    stats: { replies: 1156, handoffs: 38, leads: 64, bookings: 41 },
+    stats: { replies: 1156, handoffs: 38, leads: 64 },
   }
   const support = {
     ...newAssistant('support', 'as-support'),
@@ -180,10 +166,9 @@ function sampleState(): AssistantsState {
       { q: 'How do I return an item?', a: 'Reply RETURN with your order number within 7 days. We’ll arrange a free pickup.' },
       { q: 'When will I get my refund?', a: 'Refunds reach your account 3–5 working days after we receive the item.' },
     ],
-    stats: { replies: 768, handoffs: 52, leads: 0, bookings: 6 },
+    stats: { replies: 768, handoffs: 52, leads: 0 },
   }
-  const booking = { ...newAssistant('booking', 'as-booking'), enabled: false, stats: { replies: 0, handoffs: 0, leads: 0, bookings: 0 } }
-  return { assistants: [sales, support, booking], tools: defaultTools() }
+  return { assistants: [sales, support], tools: defaultTools() }
 }
 
 export const assistantsStore = createStore<AssistantsState>(sampleState, 'autoshift.assistants')
@@ -228,26 +213,6 @@ export function simulateReply(a: Assistant, tools: Tool[], message: string): Sim
     return reply('Sure — I’m connecting you with our team now. Someone will reply here shortly.', true)
   }
 
-  // A time like "14:30", "2.30" or "11 am" — not any number (budgets, order ids).
-  const clock = m.match(/\b(\d{1,2})[:.](\d{2})\b/) ?? m.match(/\b(\d{1,2})\s*(am|pm)\b/)
-  const slot = clock
-    ? { hour: clock[2] === 'pm' && +clock[1] < 12 ? String(+clock[1] + 12) : clock[1], minute: /^\d{2}$/.test(clock[2] ?? '') ? clock[2] : '00' }
-    : null
-  if (/\b(book|appointment|slot|visit|come in|available)\b/.test(m) && !slot) {
-    if (has(a, 'check_availability', tools)) {
-      calls.push({ toolId: 'check_availability', input: 'service: Haircut & styling, date: tomorrow', output: '11:00, 14:30, 16:00' })
-      return reply('I can book you in tomorrow at 11:00, 14:30 or 16:00. Which time works for you?')
-    }
-  }
-  if (slot && has(a, 'book_appointment', tools)) {
-    const time = `${slot.hour.padStart(2, '0')}:${slot.minute}`
-    calls.push({ toolId: 'book_appointment', input: `service: Haircut & styling, time: tomorrow ${time}`, output: 'booking confirmed · confirmation sent' })
-    return reply(`Done! ✅ You’re booked for tomorrow at ${time}. I’ve sent the confirmation here on WhatsApp.`)
-  }
-  if (/\b(cancel)\b/.test(m) && has(a, 'cancel_appointment', tools)) {
-    calls.push({ toolId: 'cancel_appointment', input: 'booking: next upcoming', output: 'cancelled' })
-    return reply('Your booking is cancelled. Would you like to pick another time?')
-  }
   if (/\b(order|delivery|where is my|track)\b/.test(m) && has(a, 'order_status', tools)) {
     const id = message.match(/[A-Z]{2}-?\d{3,}/i)?.[0]
     if (!id) return reply('I can check that for you. What is your order number? It looks like OT-1042.')

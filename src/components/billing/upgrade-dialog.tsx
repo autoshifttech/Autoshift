@@ -6,7 +6,7 @@ import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-/** Shown when an action would pass a plan limit (contacts, AI replies, seats, booking staff). */
+/** Shown when an action would pass a plan limit (contacts, AI replies, seats). */
 export function UpgradeDialog({
   open,
   onOpenChange,
@@ -15,7 +15,7 @@ export function UpgradeDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  limitKey: "seats" | "contacts" | "aiReplies" | "bookingStaff";
+  limitKey: "seats" | "contacts" | "aiReplies";
   onUpgrade: () => void;
 }) {
   const t = useTranslations("Billing");

@@ -47,7 +47,7 @@ const sections: LegalSection[] = [
           <strong>From Meta when a business connects WhatsApp</strong> (through Meta&apos;s Embedded Signup): the WhatsApp Business Account ID, phone number ID, display name, phone number, quality rating, messaging limit, message templates and an access token that lets AutoShift send and receive messages for that number.
         </p>
         <p>
-          <strong>From customers who message a business:</strong> WhatsApp profile name and number, the messages, photos, files and voice notes sent and received, delivery and read status, answers to lead or booking questions, and whether they opted in or out of marketing.
+          <strong>From customers who message a business:</strong> WhatsApp profile name and number, the messages, photos, files and voice notes sent and received, delivery and read status, answers to lead questions, and whether they opted in or out of marketing.
         </p>
         <p>
           <strong>Automatically:</strong> device and browser type, IP address, pages used and error logs, kept for security and to fix problems.
@@ -60,7 +60,7 @@ const sections: LegalSection[] = [
     title: "How we use it",
     body: (
       <ul>
-        <li>To run the service: deliver and store messages, show the inbox, run AI replies, bookings, broadcasts and automations the business sets up.</li>
+        <li>To run the service: deliver and store messages, show the inbox, run AI replies, broadcasts and automations the business sets up.</li>
         <li>To bill: plans, wallet top-ups, and charging the wallet for Meta&apos;s message fees and AI replies.</li>
         <li>To keep accounts safe: sign-in, preventing spam and abuse, and following WhatsApp&apos;s Business and Commerce policies.</li>
         <li>To support businesses when they ask us for help.</li>

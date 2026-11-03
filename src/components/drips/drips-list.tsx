@@ -45,7 +45,7 @@ function DripsListInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  const totals = drips.reduce((s, d) => ({ active: s.active + d.stats.active, replied: s.replied + d.stats.replied, booked: s.booked + d.stats.booked, enrolled: s.enrolled + d.stats.enrolled }), { active: 0, replied: 0, booked: 0, enrolled: 0 });
+  const totals = drips.reduce((s, d) => ({ active: s.active + d.stats.active, replied: s.replied + d.stats.replied, enrolled: s.enrolled + d.stats.enrolled }), { active: 0, replied: 0, enrolled: 0 });
 
   return (
     <div className="space-y-5">
@@ -60,12 +60,11 @@ function DripsListInner() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {[
           [t("statInProgress"), totals.active],
           [t("statEnrolled"), totals.enrolled],
           [t("statReplyRate"), `${totals.enrolled ? Math.round((totals.replied / totals.enrolled) * 100) : 0}%`],
-          [t("statBooked"), totals.booked],
         ].map(([k, v]) => (
           <div key={String(k)} className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
             <p className="text-xs text-muted-foreground">{k}</p>
@@ -93,12 +92,11 @@ function DripsListInner() {
                 </p>
               </div>
             </div>
-            <dl className="grid grid-cols-4 gap-4 text-center lg:w-[400px]">
+            <dl className="grid grid-cols-3 gap-4 text-center lg:w-[300px]">
               {[
                 [t("colEnrolled"), d.stats.enrolled],
                 [t("colActive"), d.stats.active],
                 [t("colReplied"), d.stats.enrolled ? `${Math.round((d.stats.replied / d.stats.enrolled) * 100)}%` : "—"],
-                [t("colBooked"), d.stats.booked],
               ].map(([k, v]) => (
                 <div key={String(k)}>
                   <dt className="text-xs text-muted-foreground">{k}</dt>
@@ -129,7 +127,7 @@ function DripsListInner() {
                 size="icon-sm"
                 aria-label={t("duplicate")}
                 onClick={() => {
-                  dripsStore.set((s) => ({ drips: [...s.drips, { ...structuredClone(d), id: `dr-${Date.now()}`, name: t("copyOf", { name: d.name }), status: "draft", stats: { enrolled: 0, active: 0, completed: 0, replied: 0, booked: 0 } }] }));
+                  dripsStore.set((s) => ({ drips: [...s.drips, { ...structuredClone(d), id: `dr-${Date.now()}`, name: t("copyOf", { name: d.name }), status: "draft", stats: { enrolled: 0, active: 0, completed: 0, replied: 0 } }] }));
                   toast.success(t("duplicated"));
                 }}
               >

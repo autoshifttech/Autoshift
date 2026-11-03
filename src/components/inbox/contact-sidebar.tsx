@@ -21,7 +21,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { contactHandle } from "@/lib/whatsapp/wa-identity";
-import { ContactBookings } from "@/components/booking/contact-bookings";
 import { LeadCard } from "@/components/leads/lead-card";
 
 interface ContactSidebarProps {
@@ -220,9 +219,6 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
 
           {/* Lead score */}
           <LeadCard phone={contact.phone} />
-
-          {/* Bookings */}
-          <ContactBookings name={displayName} phone={contact.phone} />
 
           <div className="my-4 border-t border-border" />
 

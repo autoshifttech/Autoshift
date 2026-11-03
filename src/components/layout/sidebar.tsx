@@ -13,7 +13,6 @@ import {
   BarChart3,
   Bell,
   Bot,
-  CalendarDays,
   FileText,
   Filter,
   FolderOpen,
@@ -62,7 +61,6 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/insights", labelKey: "insights", icon: BarChart3 },
       { href: "/notifications", labelKey: "notifications", icon: Bell },
       { href: "/contacts", labelKey: "contacts", icon: Users },
-      { href: "/bookings", labelKey: "bookings", icon: CalendarDays },
       { href: "/pipelines", labelKey: "pipelines", icon: GitBranch },
     ],
   },
@@ -96,10 +94,10 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
 ];
 
 /** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
-const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings"];
+const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/contacts"];
 
 /** The desktop rail shows these seven; the rest open from the dots. */
-const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/bookings", "/contacts", "/automations", "/insights"];
+const RAIL_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/contacts", "/automations", "/insights", "/pipelines"];
 
 const allItems = navGroups.flatMap((g) => g.items);
 const itemFor = (href: string) => allItems.find((i) => i.href === href)!;

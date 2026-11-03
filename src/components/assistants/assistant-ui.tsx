@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Bot, CalendarCheck, Hand, ListChecks, MessageSquare, Puzzle, Send, Sparkles, Tag, Webhook, type LucideIcon } from "lucide-react";
+import { Bot, Hand, ListChecks, MessageSquare, Puzzle, Send, Sparkles, Tag, Webhook, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { simulateReply, type Assistant, type Tool, type ToolCall, type ToolCategory } from "@/lib/assistants/model";
 
 export const CATEGORY_ICON: Record<ToolCategory, LucideIcon> = {
-  booking: CalendarCheck,
   leads: ListChecks,
   messaging: MessageSquare,
   team: Hand,

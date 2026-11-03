@@ -1,10 +1,10 @@
 import { createStore, useStore } from './store'
 
-/** Business types offered in onboarding; each one seeds AI, lead and booking presets. */
+/** Business types offered in onboarding; each one seeds AI, and lead presets. */
 export const INDUSTRIES = ['clinic', 'salon', 'real_estate', 'retail', 'education', 'restaurant', 'services', 'other'] as const
 export type Industry = (typeof INDUSTRIES)[number]
 
-export const FEATURES = ['ai_support', 'lead_capture', 'booking'] as const
+export const FEATURES = ['ai_support', 'lead_capture'] as const
 export type Feature = (typeof FEATURES)[number]
 
 export type WhatsAppStatus = 'not_started' | 'connected' | 'skipped'
@@ -57,7 +57,7 @@ export function emptySetup(): WorkspaceSetup {
     business: { name: '', industry: '', country: 'IN', timeZone: 'Asia/Kolkata', currency: 'INR', displayName: '', website: '' },
     whatsapp: 'not_started',
     number: null,
-    features: ['ai_support', 'lead_capture', 'booking'],
+    features: ['ai_support', 'lead_capture'],
     completedAt: null,
   }
 }

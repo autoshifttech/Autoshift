@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowDownRight, ArrowUpRight, Bot, CalendarCheck, Download, Printer, IndianRupee, MessageSquare, Target, Timer } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Bot, Download, Printer, MessageSquare, Target, Timer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { BarChart } from "@/components/tremor/bar-chart";
@@ -28,7 +28,6 @@ function Delta({ value }: { value: number | null }) {
 export function InsightsPage() {
   const t = useTranslations("Insights");
   const tl = useTranslations("LeadsPage");
-  const tb = useTranslations("Bookings");
   const locale = useLocale();
   const [range, setRange] = useState<Range>(30);
   const data = buildInsights(range);
@@ -44,13 +43,11 @@ export function InsightsPage() {
     { icon: Bot, label: t("kpiAiResolved"), value: `${Math.round((tt.aiResolved / tt.conversations) * 100)}%`, delta: null },
     { icon: Timer, label: t("kpiReply"), value: t("seconds", { count: tt.medianReplySec }), delta: null },
     { icon: Target, label: t("kpiLeads"), value: tt.leads.toLocaleString(locale), delta: change(tt.leads, tt.previous.leads) },
-    { icon: CalendarCheck, label: t("kpiBookings"), value: tt.bookings.toLocaleString(locale), delta: change(tt.bookings, tt.previous.bookings) },
-    { icon: IndianRupee, label: t("kpiRevenue"), value: formatMoney(tt.revenue, locale, 0), delta: change(tt.revenue, tt.previous.revenue) },
   ];
 
   const exportCsv = () => {
-    const head = ["Date", "AI conversations", "Team conversations", "Hot leads", "Warm leads", "Cold leads", "Bookings"];
-    const rows = data.days.map((d) => [d.date, d.aiConversations, d.teamConversations, d.hot, d.warm, d.cold, d.bookings]);
+    const head = ["Date", "AI conversations", "Team conversations", "Hot leads", "Warm leads", "Cold leads"];
+    const rows = data.days.map((d) => [d.date, d.aiConversations, d.teamConversations, d.hot, d.warm, d.cold]);
     const url = URL.createObjectURL(new Blob([[head, ...rows].map((r) => r.join(",")).join("\n")], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
@@ -93,7 +90,7 @@ export function InsightsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
         {kpis.map(({ icon: Icon, label: l, value, delta }) => (
           <div key={l} className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
             <div className="flex items-center justify-between">
@@ -167,7 +164,6 @@ export function InsightsPage() {
                 <th className="pb-2 text-right font-medium">{t("colReplies")}</th>
                 <th className="pb-2 text-right font-medium">{t("colResolved")}</th>
                 <th className="pb-2 text-right font-medium">{t("colLeads")}</th>
-                <th className="pb-2 text-right font-medium">{t("colBookings")}</th>
                 <th className="pb-2 text-right font-medium">{t("colHandoffs")}</th>
               </tr>
             </thead>
@@ -178,7 +174,6 @@ export function InsightsPage() {
                   <td className="py-2.5 text-right">{a.replies.toLocaleString(locale)}</td>
                   <td className="py-2.5 text-right text-primary">{a.resolved}%</td>
                   <td className="py-2.5 text-right">{a.leads}</td>
-                  <td className="py-2.5 text-right">{a.bookings}</td>
                   <td className="py-2.5 text-right">{a.handoffs}</td>
                 </tr>
               ))}
@@ -194,7 +189,6 @@ export function InsightsPage() {
                 <th className="pb-2 text-right font-medium">{t("colSent")}</th>
                 <th className="pb-2 text-right font-medium">{t("colRead")}</th>
                 <th className="pb-2 text-right font-medium">{t("colReplied")}</th>
-                <th className="pb-2 text-right font-medium">{t("colBookings")}</th>
                 <th className="pb-2 text-right font-medium">{t("colCost")}</th>
               </tr>
             </thead>
@@ -208,7 +202,6 @@ export function InsightsPage() {
                   <td className="py-2.5 text-right">{c.sent.toLocaleString(locale)}</td>
                   <td className="py-2.5 text-right">{c.read}%</td>
                   <td className="py-2.5 text-right">{c.replied}%</td>
-                  <td className="py-2.5 text-right">{c.booked}</td>
                   <td className="py-2.5 text-right">{formatMoney(c.cost, locale, 0)}</td>
                 </tr>
               ))}
@@ -230,7 +223,7 @@ export function InsightsPage() {
             ))}
             {data.heat.map((row, d) => (
               <div key={d} className="contents">
-                <span className="pr-2 text-right text-xs text-muted-foreground">{tb(`weekday_${WEEKDAYS[d]}`).slice(0, 3)}</span>
+                <span className="pr-2 text-right text-xs text-muted-foreground">{new Date(2024, 0, 7 + WEEKDAYS[d]).toLocaleDateString(locale, { weekday: "short" })}</span>
                 {row.map((v, h) => (
                   <span
                     key={h}

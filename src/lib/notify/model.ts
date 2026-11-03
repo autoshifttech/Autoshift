@@ -11,7 +11,7 @@ export type Channel = (typeof CHANNELS)[number]
 export const EVENT_GROUPS = {
   billing: ['trialEnding', 'paymentFailed', 'invoice', 'walletLow', 'walletEmpty'],
   whatsapp: ['templateApproved', 'templateRejected', 'qualityDropped', 'numberDisconnected'],
-  customers: ['hotLead', 'newBooking', 'handoff', 'dailySummary'],
+  customers: ['hotLead', 'handoff', 'dailySummary'],
 } as const
 
 export type NotifyEvent = (typeof EVENT_GROUPS)[keyof typeof EVENT_GROUPS][number]
@@ -43,7 +43,6 @@ export function defaultPrefs(): NotifyPrefs {
       qualityDropped: on(true, true),
       numberDisconnected: on(true, true),
       hotLead: on(false, true),
-      newBooking: on(false, false),
       handoff: on(false, false),
       dailySummary: on(true, false, false),
     },

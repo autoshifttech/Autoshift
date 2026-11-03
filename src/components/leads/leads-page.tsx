@@ -4,13 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { CalendarPlus, Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-react";
+import { Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { BookingDialog } from "@/components/booking/booking-dialog";
 import { useDrips } from "@/lib/drips/model";
 import { cn } from "@/lib/utils";
 import {
@@ -244,7 +243,6 @@ export function LeadsPage() {
 function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number; temp: LeadTemp; settings: LeadSettings }) {
   const t = useTranslations("LeadsPage");
   const locale = useLocale();
-  const [booking, setBooking] = useState(false);
   const drips = useDrips().filter((d) => d.status !== "draft");
   const matched = scoreBreakdown(lead.answers, settings.rules);
   const qName = (id: string) => settings.questions.find((q) => q.id === id)?.saveAs ?? id;
@@ -291,16 +289,10 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Link href="/inbox" className={cn(buttonVariants({ variant: "outline" }), "gap-1.5")}>
-            <MessageSquare className="size-4" />
-            {t("openChat")}
-          </Link>
-          <Button variant="outline" className="gap-1.5" onClick={() => setBooking(true)}>
-            <CalendarPlus className="size-4" />
-            {t("book")}
-          </Button>
-        </div>
+        <Link href="/inbox" className={cn(buttonVariants({ variant: "outline" }), "w-full gap-1.5")}>
+          <MessageSquare className="size-4" />
+          {t("openChat")}
+        </Link>
 
         <label className="grid gap-1.5 text-sm">
           <span className="text-xs text-muted-foreground">{t("addToDrip")}</span>
@@ -362,9 +354,7 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
                         ? t("ev_handoff", { name: e.text })
                         : e.kind === "status"
                           ? t("ev_status", { status: t(`status_${e.text}`) })
-                          : e.kind === "booked"
-                            ? t("ev_booked", { what: e.text })
-                            : e.text}
+                          : e.text}
                 </span>
                 <span className="block text-xs text-muted-foreground">{new Date(e.at).toLocaleString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
               </li>
@@ -372,7 +362,6 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
           </ol>
         </section>
       </div>
-      {booking && <BookingDialog open onOpenChange={setBooking} defaults={{ contactName: lead.name, phone: lead.phone }} />}
     </>
   );
 }

@@ -32,8 +32,6 @@ export function useTriggerText() {
         return t("trigger_new_lead_text", { temp: t(`temp_${trigger.value}`) });
       case "tag_added":
         return t("trigger_tag_added_text", { tag: trigger.value });
-      case "after_booking":
-        return t("trigger_after_booking_text");
       case "manual":
         return t("trigger_manual_text");
     }

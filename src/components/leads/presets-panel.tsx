@@ -66,11 +66,7 @@ export function PresetsPanel() {
               ))}
             </ul>
           </div>
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("presetBooking")}</p>
-            <p className="mt-2 text-sm text-foreground">{to(`preset_booking_${pick}`)}</p>
-            <p className="mt-3 text-xs text-muted-foreground">{t("presetLanguageNote")}</p>
-          </div>
+          <p className="text-xs text-muted-foreground">{t("presetLanguageNote")}</p>
         </div>
         <Button
           className="mt-4"

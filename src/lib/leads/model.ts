@@ -79,7 +79,7 @@ export type LeadSource = (typeof LEAD_SOURCES)[number]
 
 export interface LeadEvent {
   at: string
-  kind: 'captured' | 'answered' | 'scored' | 'handoff' | 'status' | 'booked' | 'note'
+  kind: 'captured' | 'answered' | 'scored' | 'handoff' | 'status' | 'note'
   text: string
 }
 
@@ -348,7 +348,7 @@ export function sampleLeads(now = Date.now()): Lead[] {
       { at: ago(m - 3), kind: 'answered', text: String(Object.keys(answers).length) },
     ]
     if (handedOffTo) events.push({ at: ago(m - 6), kind: 'handoff', text: handedOffTo })
-    if (status === 'won') events.push({ at: ago(m - 600), kind: 'booked', text: 'Site visit' }, { at: ago(m - 2000), kind: 'status', text: 'won' })
+    if (status === 'won') events.push({ at: ago(m - 2000), kind: 'status', text: 'won' })
     if (status === 'lost') events.push({ at: ago(m - 1500), kind: 'status', text: 'lost' })
     return { id: `l${i + 1}`, name, phone, answers, capturedAt: ago(m), handedOffTo, status, source, assistant, events }
   })

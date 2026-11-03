@@ -141,7 +141,6 @@ function ValueInput({ rule, onChange }: { rule: SegmentRule; onChange: (v: strin
                   ["no", t("no")],
                 ]
               : null;
-  if (rule.field === "bookings" && rule.op === "none") return <span />;
   if (opts) {
     return (
       <NativeSelect value={rule.value} aria-label={t("value")} onChange={(e) => onChange(e.target.value)}>
@@ -156,7 +155,7 @@ function ValueInput({ rule, onChange }: { rule: SegmentRule; onChange: (v: strin
   return (
     <div className="flex items-center gap-2">
       <Input type="number" min={0} value={rule.value} aria-label={t("value")} onChange={(e) => onChange(e.target.value)} />
-      {rule.field !== "bookings" && <span className="shrink-0 text-sm text-muted-foreground">{t("days")}</span>}
+      <span className="shrink-0 text-sm text-muted-foreground">{t("days")}</span>
     </div>
   );
 }

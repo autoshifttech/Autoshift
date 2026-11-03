@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/booking/whatsapp-preview";
+import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/ui/whatsapp-preview";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
 import { AUDIENCE, TAGS, members, useSegments } from "@/lib/segments/model";
@@ -34,7 +34,7 @@ import {
 } from "@/lib/drips/model";
 import { DripStatusChip } from "./drip-ui";
 
-const TRIGGER_DEFAULT: Record<TriggerKind, string> = { segment: "sg-hot", new_lead: "hot", tag_added: TAGS[0], after_booking: "completed", manual: "" };
+const TRIGGER_DEFAULT: Record<TriggerKind, string> = { segment: "sg-hot", new_lead: "hot", tag_added: TAGS[0], manual: "" };
 
 export function DripBuilder({ id }: { id: string }) {
   const t = useTranslations("Drips");
@@ -281,10 +281,6 @@ export function DripBuilder({ id }: { id: string }) {
               {t("stopOnReply")}
             </label>
             <label className="flex items-center gap-3 text-sm">
-              <Switch checked={d.stopOnBooking} onCheckedChange={(stopOnBooking) => set({ stopOnBooking })} />
-              {t("stopOnBooking")}
-            </label>
-            <label className="flex items-center gap-3 text-sm">
               <Switch checked={d.skipWeekends} onCheckedChange={(skipWeekends) => set({ skipWeekends })} />
               {t("skipWeekends")}
             </label>
@@ -315,10 +311,6 @@ export function DripBuilder({ id }: { id: string }) {
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">{t("colEnrolled")}</dt>
                 <dd className="font-semibold text-foreground">{d.stats.enrolled}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">{t("colBooked")}</dt>
-                <dd className="font-semibold text-foreground">{d.stats.booked}</dd>
               </div>
             </dl>
             <p className="mt-3 text-xs text-muted-foreground">{t("costNote")}</p>

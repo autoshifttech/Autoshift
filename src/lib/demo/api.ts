@@ -51,10 +51,9 @@ const DEMO_PHONE_INFO = { display_phone_number: '+91 98765 43210', verified_name
 function aiReply(message: string): string {
   const m = message.toLowerCase()
   if (/price|cost|how much|rate/.test(m)) return 'Our linen shirts start at ₹1,499 and kurtas at ₹1,899. Would you like the catalogue link?'
-  if (/book|appointment|slot|visit/.test(m)) return 'Happy to help you book! We have free slots tomorrow at 11:00, 14:30 and 16:00. Which one suits you?'
   if (/hour|open|timing|time/.test(m)) return 'We’re open Monday to Saturday, 10am to 8pm.'
   if (/deliver|shipping/.test(m)) return 'Orders ship within 24 hours and usually arrive in 2–4 days.'
-  return 'Thanks for your message! I can help with prices, sizes, delivery and bookings. What would you like to know?'
+  return 'Thanks for your message! I can help with prices, sizes and delivery. What would you like to know?'
 }
 
 export function handleAppApi(db: DemoDb, method: string, path: string, rawBody: string | null): DemoResponse {
