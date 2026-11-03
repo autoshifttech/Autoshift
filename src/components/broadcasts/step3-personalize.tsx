@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Eye, ImageIcon, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { TemplatePhonePreview } from '@/components/templates/phone-preview';
+import { Bubble, QuickButtons, WhatsAppPreview } from '@/components/ui/whatsapp-preview';
 import { useSetup } from '@/lib/workspace/setup';
 
 type VariableType = 'static' | 'field' | 'custom_field';
@@ -444,8 +444,8 @@ export function Step3Personalize({
 
       {/* Live preview: the template on a phone, filled in for the first
           contact (or sample data), as the recipient will see it. */}
-      <aside className="lg:sticky lg:top-0 lg:self-start">
-        <div className="mb-3 flex items-center justify-center gap-2">
+      <aside className="order-first lg:sticky lg:top-0 lg:order-none lg:self-start">
+        <div className="mb-3 flex items-center gap-2">
           <Eye className="h-4 w-4 text-primary" />
           <p className="text-sm font-medium text-foreground">{t('personalize.preview')}</p>
           <span className="truncate text-xs text-muted-foreground">({previewLabel})</span>
@@ -453,24 +453,26 @@ export function Step3Personalize({
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           )}
         </div>
-        <TemplatePhonePreview
-          businessName={businessName}
-          screenClassName="h-[560px] lg:h-[min(600px,calc(100dvh-13rem))] lg:min-h-[420px]"
-          template={{
-            header_format: isMediaHeaderType(template.header_type)
-              ? template.header_type
-              : template.header_type === 'text'
-                ? 'text'
-                : 'none',
-            header_content: template.header_content ?? '',
-            header_sample: template.sample_values?.header?.[0] ?? '',
-            header_media_url: headerMediaUrl,
-            body_text: previewText,
-            body_samples: [],
-            footer_text: template.footer_text ?? '',
-            buttons: template.buttons ?? [],
-          }}
-        />
+        <WhatsAppPreview title={businessName}>
+          <Bubble from="business" time="9:41">
+            {template.header_type === 'text' && template.header_content && (
+              <strong className="mb-1 block font-semibold">{template.header_content}</strong>
+            )}
+            {mediaHeaderType && headerMediaUrl.trim() && headerMediaError === null && mediaHeaderType === 'image' ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={headerMediaUrl.trim()} alt={t('personalize.headerPreviewAlt')} className="mb-1.5 max-h-36 w-full rounded-md object-cover" />
+            ) : mediaHeaderType ? (
+              <span className="mb-1.5 flex h-20 items-center justify-center rounded-md bg-muted text-xs font-medium uppercase text-muted-foreground">{mediaHeaderType}</span>
+            ) : null}
+            {previewText}
+            {template.footer_text && (
+              <span className="mt-1 block text-xs text-[#667781] dark:text-[#8696a0]">{template.footer_text}</span>
+            )}
+          </Bubble>
+          {(template.buttons ?? []).length > 0 && (
+            <QuickButtons labels={(template.buttons ?? []).map((b) => b.text).filter(Boolean).slice(0, 3)} />
+          )}
+        </WhatsAppPreview>
       </aside>
       </div>
     </div>
