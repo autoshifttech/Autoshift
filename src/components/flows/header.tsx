@@ -68,11 +68,11 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
           onClick={() => router.push("/flows")}
           title={t("backToFlows")}
           aria-label={t("backToFlows")}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="order-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+        <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary sm:flex">
           <Workflow className="h-[18px] w-[18px]" />
         </span>
         <input
@@ -81,8 +81,10 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
           placeholder={t("namePlaceholder")}
           spellCheck={false}
           aria-label={t("namePlaceholder")}
-          className="min-h-10 min-w-[9.5rem] max-w-[340px] flex-1 rounded-lg border border-border bg-card px-3 py-1 text-lg font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted/60 focus:border-primary focus:bg-card focus:shadow-[0_0_0_3px_var(--primary-soft)]"
+          className="order-2 min-h-10 min-w-[6rem] max-w-[340px] flex-1 rounded-lg border border-border bg-card px-3 py-1 text-lg font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted/60 focus:border-primary focus:bg-card focus:shadow-[0_0_0_3px_var(--primary-soft)]"
         />
+        <div className="order-4 h-0 basis-full sm:hidden" aria-hidden />
+        <div className="order-5 flex items-center gap-3 sm:order-none">
         <StatusChip status={state.status} />
         {dirty && (
           <span
@@ -90,15 +92,16 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
             title={t("unsavedHint")}
             aria-live="polite"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-            {t("edited")}
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            <span className="sr-only sm:not-sr-only">{t("edited")}</span>
           </span>
         )}
+        </div>
 
         {/* ---- right: runs · delete · activate · save ---- */}
         {viewToggle && <div className="hidden md:block">{viewToggle}</div>}
 
-        <div className="flex w-full items-center justify-end gap-1.5 sm:ml-auto sm:w-auto">
+        <div className="order-6 ml-auto flex items-center gap-1.5 sm:order-none">
           <Button
             variant="ghost"
             size="sm"
@@ -156,7 +159,8 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
               {t("activate")}
             </Button>
           )}
-          <Button onClick={() => void save()} disabled={saving} size="sm" className="min-h-10 sm:min-h-0">
+        </div>
+        <Button onClick={() => void save()} disabled={saving} size="sm" className="order-3 min-h-10 sm:order-none sm:min-h-0">
             {saving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
@@ -164,7 +168,6 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
             )}
             {t("save")}
           </Button>
-        </div>
       </div>
 
       {/* ---- description note (subtle, inline-editable) ---- */}
@@ -175,7 +178,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
         }
         placeholder={t("descriptionPlaceholder")}
         aria-label={t("descriptionLabel")}
-        className="w-full max-w-[78ch] rounded-md border border-transparent bg-transparent px-2 py-1 text-[13px] text-muted-foreground outline-none transition-colors placeholder:text-muted-foreground/60 hover:bg-muted/50 focus:border-primary focus:bg-transparent focus:text-foreground"
+        className="hidden w-full max-w-[78ch] rounded-md border border-transparent bg-transparent px-2 py-1 text-[13px] sm:block text-muted-foreground outline-none transition-colors placeholder:text-muted-foreground/60 hover:bg-muted/50 focus:border-primary focus:bg-transparent focus:text-foreground"
       />
     </div>
   );
