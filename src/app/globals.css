@@ -605,6 +605,36 @@ html[data-mode="dark"][data-lens] .liquid-glass.lg-frost {
 .liquid-glass::placeholder {
   color: color-mix(in oklab, var(--lg-ink) 70%, transparent);
 }
+/* Menus, pickers and the command palette: real liquid glass. Airy and bright, the page shows through,
+   the rim catches light and (Chrome, Edge) the edges bend what is behind. A dialog that opts in with
+   lg-floating wins over its frost default. */
+.liquid-glass.lg-frost.lg-floating {
+  --lg-a: rgb(255 255 255 / 0.3);
+  --lg-b: rgb(255 255 255 / 0.2);
+  --lg-con: 0.64;
+  --lg-br: 1.5;
+  color: var(--lg-ink);
+  text-shadow: 0 0 10px rgb(255 255 255 / 0.55);
+}
+html[data-mode="dark"] .liquid-glass.lg-frost.lg-floating {
+  --lg-a: rgb(255 255 255 / 0.16);
+  --lg-b: rgb(255 255 255 / 0.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.8) contrast(0.6) brightness(0.8);
+  backdrop-filter: blur(18px) saturate(1.8) contrast(0.6) brightness(0.8);
+  text-shadow: 0 0 10px rgb(0 0 0 / 0.5);
+}
+html[data-lens] [data-slot="dropdown-menu-content"].liquid-glass,
+html[data-lens] [data-slot="select-content"].liquid-glass,
+html[data-lens] [data-slot="dialog-content"].lg-floating {
+  -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
+  backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.9) contrast(var(--lg-con, 0.7)) brightness(var(--lg-br, 1.3));
+}
+html[data-mode="dark"][data-lens] [data-slot="dropdown-menu-content"].liquid-glass,
+html[data-mode="dark"][data-lens] [data-slot="select-content"].liquid-glass,
+html[data-mode="dark"][data-lens] [data-slot="dialog-content"].lg-floating {
+  -webkit-backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
+  backdrop-filter: url(#liquid-lens) blur(14px) saturate(1.8) contrast(0.6) brightness(0.8);
+}
 /* Menu items read in full ink so they stay legible over any backdrop. */
 .liquid-glass:not(.lg-frost:not(.lg-floating)) :is(a, button) {
   color: var(--lg-ink);

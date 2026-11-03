@@ -76,7 +76,7 @@ export function AdminCommandPalette({ open, onOpenChange, nav }: { open: boolean
         if (!o) setQuery("");
       }}
     >
-      <DialogContent showCloseButton={false} className="top-[15%] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-xl">
+      <DialogContent showCloseButton={false} className="lg-floating top-[15%] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-xl">
         <DialogTitle className="sr-only">Search the admin panel</DialogTitle>
         <div className="flex items-center gap-2 border-b border-border px-4">
           <Search className="size-4 shrink-0 text-muted-foreground" />

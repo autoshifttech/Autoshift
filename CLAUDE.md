@@ -26,3 +26,12 @@ Rules for design work:
 - Use semantic colour tokens, not raw hex; keep text at 4.5:1 contrast or better; touch targets 44px
   on phones; visible focus; respect `prefers-reduced-motion`; add every new string in all four
   languages (en, pt, es, ko).
+
+## Liquid glass
+
+`.claude/skills/liquid-glass` (MIT, from `haider-nawaz/liquid-glass-skill`) is installed. It is written for
+SwiftUI, so its code does not apply to this web app; its rules do: glass is for the navigation and control
+layer (rails, bars, menus, pickers, palettes, notifications), never for content cards or text blocks; glass
+cannot sit on glass; keep tints light; respect Reduce Transparency (`html[data-solid]`). On the web, use the
+`.liquid-glass` classes in `src/app/globals.css` (`lg-floating` for menus and pickers, `lg-frost` for forms
+and dialogs).
