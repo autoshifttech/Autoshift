@@ -64,13 +64,13 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   applyEdgeConnection,
   deriveCanvasEdges,
@@ -512,7 +512,7 @@ function FlowCanvasInner() {
 
   if (rfNodes.length === 0) {
     return (
-      <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-3 text-sm">
+      <div className="text-muted-foreground flex h-full flex-col items-center justify-start gap-3 pt-[14vh] text-sm">
         <p>{t('noNodesYet')}</p>
         <CanvasAddNodeButton t={t} />
       </div>
@@ -614,73 +614,65 @@ function NodeEditSheet({
   onSetEntry: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  // Sheet is controlled — opens when a node is selected, closes via
-  // Esc / overlay / close button (all delegated to onClose).
-  const open = node !== null;
-  if (!node) {
-    return (
-      <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-        <SheetContent side="right" className="w-full sm:max-w-md" />
-      </Sheet>
-    );
-  }
-  const meta = NODE_META[node.node_type];
-  const c = nodeColors(node.node_type);
+  // A centred, rounded dialog: opens when a node is selected and closes via
+  // Esc / outside click / the close button (all delegated to onClose).
+  const meta = node ? nodeColors(node.node_type) : null;
   return (
-    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent
-        side="right"
-        className="border-border bg-popover flex w-full flex-col gap-0 border-l p-0 sm:max-w-md"
-      >
-        <SheetHeader className="border-border flex-row items-center gap-3 space-y-0 border-b px-5 py-4">
-          <NodeIconChip type={node.node_type} size={36} iconSize={18} />
-          <div className="min-w-0 flex-1">
-            <SheetTitle className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
-              <span style={{ color: c.text }}>{t(`nodes.${node.node_type}.label`)}</span>
-              {isEntry && (
-                <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-semibold tracking-wider text-emerald-800 dark:text-emerald-300 uppercase">
-                  {t('badgeEntry')}
-                </span>
+    <Dialog open={node !== null} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="flex max-h-[min(85dvh,44rem)] w-full flex-col gap-0 rounded-3xl p-0 sm:max-w-xl">
+        {node && meta && (
+          <>
+            <DialogHeader className="border-border flex-row items-center gap-3 border-b px-5 py-4 pr-14">
+              <NodeIconChip type={node.node_type} size={40} iconSize={20} />
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold tracking-wider uppercase">
+                  <span style={{ color: meta.text }}>{t(`nodes.${node.node_type}.label`)}</span>
+                  {isEntry && (
+                    <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-semibold tracking-wider text-emerald-800 uppercase dark:text-emerald-300">
+                      {t('badgeEntry')}
+                    </span>
+                  )}
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground mt-0.5 text-xs">
+                  {t(`nodes.${node.node_type}.blurb`)}
+                </DialogDescription>
+              </div>
+              <code className="bg-muted text-muted-foreground hidden shrink-0 rounded px-1.5 py-0.5 font-mono text-xs sm:block">
+                {node.node_key}
+              </code>
+            </DialogHeader>
+
+            <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
+              <NodeConfigForm
+                node={node}
+                allNodes={allNodes}
+                showAdvanced={false}
+                onUpdateConfig={onUpdateConfig}
+              />
+            </div>
+
+            <DialogFooter className="border-border mx-0 mb-0 rounded-b-3xl border-t px-5 py-3 sm:justify-between">
+              {!isEntry ? (
+                <Button variant="ghost" size="sm" onClick={onSetEntry} className="min-h-10">
+                  {t('setAsEntry')}
+                </Button>
+              ) : (
+                <span />
               )}
-            </SheetTitle>
-            <SheetDescription className="text-muted-foreground mt-0.5 text-xs">
-              {t(`nodes.${node.node_type}.blurb`)}
-            </SheetDescription>
-          </div>
-          <code className="bg-muted text-muted-foreground shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
-            {node.node_key}
-          </code>
-        </SheetHeader>
-
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
-          <NodeConfigForm
-            node={node}
-            allNodes={allNodes}
-            showAdvanced={false}
-            onUpdateConfig={onUpdateConfig}
-          />
-        </div>
-
-        <SheetFooter className="border-border border-t px-5 py-3 sm:flex-row sm:justify-between">
-          {!isEntry ? (
-            <Button variant="ghost" size="sm" onClick={onSetEntry}>
-              {t('setAsEntry')}
-            </Button>
-          ) : (
-            <span />
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onDelete}
-            className="text-red-700 dark:text-red-400 hover:bg-red-500/10 hover:text-red-300"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            {t('deleteNode')}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                className="min-h-10 text-red-700 hover:bg-red-500/10 hover:text-red-300 dark:text-red-400"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {t('deleteNode')}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

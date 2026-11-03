@@ -68,7 +68,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
           onClick={() => router.push("/flows")}
           title={t("backToFlows")}
           aria-label={t("backToFlows")}
-          className="order-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="order-1 sm:order-none inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -81,7 +81,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
           placeholder={t("namePlaceholder")}
           spellCheck={false}
           aria-label={t("namePlaceholder")}
-          className="order-2 min-h-10 min-w-[6rem] max-w-[340px] flex-1 rounded-lg border border-border bg-card px-3 py-1 text-lg font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted/60 focus:border-primary focus:bg-card focus:shadow-[0_0_0_3px_var(--primary-soft)]"
+          className="order-2 sm:order-none field-sizing-content min-h-10 min-w-[6rem] max-w-[min(340px,100%)] flex-1 sm:flex-none rounded-lg border border-border bg-card px-3 py-1 text-[clamp(0.95rem,0.8rem+0.6vw,1.2rem)] font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted/60 focus:border-primary focus:bg-card focus:shadow-[0_0_0_3px_var(--primary-soft)]"
         />
         <div className="order-4 h-0 basis-full sm:hidden" aria-hidden />
         <div className="order-5 flex items-center gap-3 sm:order-none">
