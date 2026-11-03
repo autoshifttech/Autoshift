@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, BookOpen, Hand, Plus, Settings2, Trash2, Users, Wrench, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, Hand, Plus, Settings2, Trash2, Users, Wrench, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
@@ -21,6 +21,7 @@ import { AiKnowledgeCard } from "@/components/settings/ai-knowledge";
 import { useAuth } from "@/hooks/use-auth";
 import { canEditSettings } from "@/lib/auth/roles";
 import { AssistantAvatar, TestChat, toolIcon } from "./assistant-ui";
+import { AssistantModelPicker } from "./assistant-model-picker";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
 const AUDIENCES: Audience[] = ["all", "new_contacts", "tagged", "after_hours"];
@@ -30,6 +31,8 @@ export function AssistantEditor({ id }: { id: string }) {
   const t = useTranslations("Assistants");
   const { assistants, tools } = useAssistants();
   const router = useRouter();
+  const wizard = useSearchParams().get("new") === "1";
+  const [step, setStep] = useState(0);
   const a = assistants.find((x) => x.id === id);
 
   if (!a) {
@@ -81,75 +84,51 @@ export function AssistantEditor({ id }: { id: string }) {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <Tabs defaultValue="profile">
-          <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <TabsTrigger value="profile">
-              <Settings2 className="mr-1.5 h-4 w-4" />
-              {t("tabProfile")}
-            </TabsTrigger>
-            <TabsTrigger value="knowledge">
-              <BookOpen className="mr-1.5 h-4 w-4" />
-              {t("tabKnowledge")}
-            </TabsTrigger>
-            <TabsTrigger value="tools">
-              <Wrench className="mr-1.5 h-4 w-4" />
-              {t("tabTools")}
-            </TabsTrigger>
-            <TabsTrigger value="audience">
-              <Users className="mr-1.5 h-4 w-4" />
-              {t("tabAudience")}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="profile" className="mt-4">
-            <ProfileTab a={a} set={set} />
-          </TabsContent>
-          <TabsContent value="knowledge" className="mt-4">
-            <KnowledgeTab a={a} set={set} />
-          </TabsContent>
-          <TabsContent value="tools" className="mt-4">
-            <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-semibold text-foreground">{t("toolsTitle")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("toolsDesc")}</p>
-                </div>
-                <Link href="/ai-tools" className="shrink-0 text-sm font-medium text-primary hover:underline">
-                  {t("manageTools")}
-                </Link>
-              </div>
-              <ul className="divide-y divide-border">
-                {tools.map((tool) => {
-                  const Icon = toolIcon(tool);
-                  const on = a.toolIds.includes(tool.id);
-                  return (
-                    <li key={tool.id} className={cn("flex items-start gap-3 py-3", !tool.enabled && "opacity-50")}>
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--tone-mint)] text-primary">
-                        <Icon className="size-4" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium text-foreground">
-                          {tool.name}
-                          {!tool.builtin && <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{t("custom")}</span>}
-                          {!tool.enabled && <span className="ml-2 text-xs text-muted-foreground">{t("toolOffEverywhere")}</span>}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">{tool.description}</span>
-                      </span>
-                      <Switch
-                        checked={on}
-                        disabled={!tool.enabled}
-                        aria-label={tool.name}
-                        onCheckedChange={(v) => set({ toolIds: v ? [...a.toolIds, tool.id] : a.toolIds.filter((x) => x !== tool.id) })}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          </TabsContent>
-          <TabsContent value="audience" className="mt-4">
-            <AudienceTab a={a} set={set} />
-          </TabsContent>
-        </Tabs>
+        {wizard ? (
+          <WizardSteps
+            a={a}
+            set={set}
+            step={step}
+            setStep={setStep}
+            onDone={(finished) => {
+              if (finished) toast.success(t("wizardDone", { name: a.name }));
+              router.replace(`/agents/${a.id}`);
+            }}
+          />
+        ) : (
+          <Tabs defaultValue="profile">
+            <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <TabsTrigger value="profile">
+                <Settings2 className="mr-1.5 h-4 w-4" />
+                {t("tabProfile")}
+              </TabsTrigger>
+              <TabsTrigger value="knowledge">
+                <BookOpen className="mr-1.5 h-4 w-4" />
+                {t("tabKnowledge")}
+              </TabsTrigger>
+              <TabsTrigger value="tools">
+                <Wrench className="mr-1.5 h-4 w-4" />
+                {t("tabTools")}
+              </TabsTrigger>
+              <TabsTrigger value="audience">
+                <Users className="mr-1.5 h-4 w-4" />
+                {t("tabAudience")}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile" className="mt-4">
+              <ProfileTab a={a} set={set} />
+            </TabsContent>
+            <TabsContent value="knowledge" className="mt-4">
+              <KnowledgeTab a={a} set={set} />
+            </TabsContent>
+            <TabsContent value="tools" className="mt-4">
+              <ToolsTab a={a} set={set} />
+            </TabsContent>
+            <TabsContent value="audience" className="mt-4">
+              <AudienceTab a={a} set={set} />
+            </TabsContent>
+          </Tabs>
+        )}
 
         <div className="space-y-4 xl:sticky xl:top-0 xl:self-start">
           <TestChat key={a.id + a.greeting} assistant={a} tools={tools} className="h-[560px]" />
@@ -165,18 +144,13 @@ function ProfileTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) => 
   const tl = useTranslations("Leads");
   return (
     <section className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <Label htmlFor="as-name">{t("name")}</Label>
-          <Input id="as-name" value={a.name} onChange={(e) => set({ name: e.target.value })} />
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="as-model">{t("model")}</Label>
-          <NativeSelect id="as-model" value={a.model} onChange={(e) => set({ model: e.target.value as Assistant["model"] })}>
-            <option value="fast">{t("model_fast")}</option>
-            <option value="smart">{t("model_smart")}</option>
-          </NativeSelect>
-        </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="as-name">{t("name")}</Label>
+        <Input id="as-name" value={a.name} onChange={(e) => set({ name: e.target.value })} />
+      </div>
+      <div>
+        <p className="mb-3 text-sm font-medium text-foreground">{t("pickBrain")}</p>
+        <AssistantModelPicker a={a} set={set} />
       </div>
       <div>
         <p className="mb-2 text-sm font-medium text-foreground">{t("colour")}</p>
@@ -388,6 +362,138 @@ function SaveRow() {
   return (
     <div className="flex justify-end">
       <Button onClick={() => toast.success(t("saved"))}>{t("save")}</Button>
+    </div>
+  );
+}
+
+function ToolsTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) => void }) {
+  const t = useTranslations("Assistants");
+  const { tools } = useAssistants();
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-semibold text-foreground">{t("toolsTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("toolsDesc")}</p>
+        </div>
+        <Link href="/ai-tools" className="shrink-0 text-sm font-medium text-primary hover:underline">
+          {t("manageTools")}
+        </Link>
+      </div>
+      <ul className="divide-y divide-border">
+        {tools.map((tool) => {
+          const Icon = toolIcon(tool);
+          const on = a.toolIds.includes(tool.id);
+          return (
+            <li key={tool.id} className={cn("flex items-start gap-3 py-3", !tool.enabled && "opacity-50")}>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--tone-mint)] text-primary">
+                <Icon className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium text-foreground">
+                  {tool.name}
+                  {!tool.builtin && <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{t("custom")}</span>}
+                  {!tool.enabled && <span className="ml-2 text-xs text-muted-foreground">{t("toolOffEverywhere")}</span>}
+                </span>
+                <span className="block text-xs text-muted-foreground">{tool.description}</span>
+              </span>
+              <Switch
+                checked={on}
+                disabled={!tool.enabled}
+                aria-label={tool.name}
+                onCheckedChange={(v) => set({ toolIds: v ? [...a.toolIds, tool.id] : a.toolIds.filter((x) => x !== tool.id) })}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+const WIZARD_STEPS = [
+  { id: "profile", icon: Settings2, label: "tabProfile" },
+  { id: "knowledge", icon: BookOpen, label: "tabKnowledge" },
+  { id: "tools", icon: Wrench, label: "tabTools" },
+  { id: "audience", icon: Users, label: "tabAudience" },
+] as const;
+
+/** New assistants are set up one step at a time, with Previous and Next. */
+function WizardSteps({
+  a,
+  set,
+  step,
+  setStep,
+  onDone,
+}: {
+  a: Assistant;
+  set: (p: Partial<Assistant>) => void;
+  step: number;
+  setStep: (n: number) => void;
+  onDone: (finished: boolean) => void;
+}) {
+  const t = useTranslations("Assistants");
+  const last = step === WIZARD_STEPS.length - 1;
+  const current = WIZARD_STEPS[step];
+  return (
+    <div className="space-y-4">
+      <nav aria-label={t("wizardSteps")}>
+        <ol className="flex items-center gap-2">
+          {WIZARD_STEPS.map((st, i) => {
+            const done = i < step;
+            const active = i === step;
+            return (
+              <li key={st.id} className="flex min-w-0 flex-1 items-center gap-2 last:flex-none">
+                <button
+                  type="button"
+                  onClick={() => setStep(i)}
+                  aria-current={active ? "step" : undefined}
+                  className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                  <span
+                    className={cn(
+                      "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold",
+                      active ? "border-primary bg-primary text-primary-foreground" : done ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground",
+                    )}
+                  >
+                    {done ? <Check className="size-4" aria-hidden /> : i + 1}
+                  </span>
+                  <span className={cn("truncate text-sm font-medium", active ? "text-foreground" : "hidden text-muted-foreground sm:inline")}>{t(st.label)}</span>
+                </button>
+                {i < WIZARD_STEPS.length - 1 && <span aria-hidden className={cn("h-px flex-1", done ? "bg-primary" : "bg-border")} />}
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t("wizardStep", { n: step + 1, total: WIZARD_STEPS.length })}</p>
+
+      {current.id === "profile" && <ProfileTab a={a} set={set} />}
+      {current.id === "knowledge" && <KnowledgeTab a={a} set={set} />}
+      {current.id === "tools" && <ToolsTab a={a} set={set} />}
+      {current.id === "audience" && <AudienceTab a={a} set={set} />}
+
+      <div className="sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)] backdrop-blur">
+        <Button variant="outline" className="min-h-11 rounded-full px-5" onClick={() => setStep(step - 1)} disabled={step === 0}>
+          <ArrowLeft className="size-4" />
+          {t("wizardPrevious")}
+        </Button>
+        <button type="button" onClick={() => onDone(false)} className="hidden min-h-11 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:block">
+          {t("wizardSkip")}
+        </button>
+        {last ? (
+          <Button className="min-h-11 rounded-full px-6" onClick={() => onDone(true)}>
+            <Check className="size-4" />
+            {t("wizardFinish")}
+          </Button>
+        ) : (
+          <Button className="min-h-11 rounded-full px-6" onClick={() => setStep(step + 1)}>
+            {t("wizardNext")}
+            <ArrowRight className="size-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

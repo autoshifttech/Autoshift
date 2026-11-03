@@ -1,48 +1,52 @@
 import { createStore, useStore } from '@/lib/workspace/store'
+import { CATALOG, VENDORS, type CatalogModel, type ModelTierKey, type VendorId } from '@/lib/ai/catalog'
 
 /**
- * The AI models AutoShift offers to every business. The platform pays the
- * provider bill; businesses are charged per reply from their wallet. Keys are
- * entered here only — the browser keeps just the last four characters.
+ * What the admin switches on for every business: which providers (each with
+ * its own API key) and which of their models. The platform pays the provider
+ * bill; businesses are charged per reply from their wallet. The browser keeps
+ * only the last four characters of a key.
  */
-export type AiVendor = 'openai' | 'google' | 'anthropic'
-
-export interface AiModelEntry {
-  vendor: AiVendor
-  /** Name shown to the team, e.g. "ChatGPT". */
-  label: string
-  provider: string
-  model: string
+export interface ProviderState {
   enabled: boolean
   /** Last four characters of the saved key; null until one is saved. */
   keyTail: string | null
   savedAt: string | null
 }
 
-export interface AiModelsState {
-  models: AiModelEntry[]
-  /** The vendor used when a business hasn't chosen one. */
-  defaultVendor: AiVendor
+export interface ModelState extends CatalogModel {
+  enabled: boolean
+  /** Added by hand rather than from the built-in list. */
+  custom?: boolean
 }
 
-export const VENDOR_KEY_HINT: Record<AiVendor, string> = {
-  openai: 'sk-...',
-  google: 'AIza...',
-  anthropic: 'sk-ant-...',
+export interface AiModelsState {
+  providers: Record<VendorId, ProviderState>
+  models: Record<VendorId, ModelState[]>
+  /** Used when a business hasn't picked a model. */
+  defaultChoice: { vendor: VendorId; model: string }
 }
 
 function initialAiModels(): AiModelsState {
-  return {
-    models: [
-      { vendor: 'openai', label: 'ChatGPT', provider: 'OpenAI', model: 'gpt-5.4-mini', enabled: false, keyTail: null, savedAt: null },
-      { vendor: 'google', label: 'Gemini', provider: 'Google', model: 'gemini-2.5-flash', enabled: false, keyTail: null, savedAt: null },
-      { vendor: 'anthropic', label: 'Claude', provider: 'Anthropic', model: 'claude-haiku-5-5', enabled: false, keyTail: null, savedAt: null },
-    ],
-    defaultVendor: 'openai',
-  }
+  const providers = Object.fromEntries(
+    VENDORS.map((v) => [v.id, { enabled: v.id === 'openai' || v.id === 'google' || v.id === 'anthropic', keyTail: null, savedAt: null }]),
+  ) as Record<VendorId, ProviderState>
+  const models = Object.fromEntries(VENDORS.map((v) => [v.id, CATALOG[v.id].map((m) => ({ ...m, enabled: true }))])) as Record<VendorId, ModelState[]>
+  return { providers, models, defaultChoice: { vendor: 'openai', model: 'gpt-5.4-mini' } }
 }
 
-export const aiModelsStore = createStore<AiModelsState>(initialAiModels, 'autoshift.admin.ai-models.v1')
+export const aiModelsStore = createStore<AiModelsState>(initialAiModels, 'autoshift.admin.ai-models.v2')
 
 const SERVER = initialAiModels()
 export const useAiModels = () => useStore(aiModelsStore, SERVER)
+
+/** Providers that are on and have at least one model on — what businesses can pick from. */
+export function availableChoices(state: AiModelsState): { vendor: VendorId; models: ModelState[] }[] {
+  return VENDORS.filter((v) => state.providers[v.id]?.enabled)
+    .map((v) => ({ vendor: v.id, models: (state.models[v.id] ?? []).filter((m) => m.enabled) }))
+    .filter((c) => c.models.length > 0)
+}
+
+export function tierOf(state: AiModelsState, vendor: VendorId, model: string): ModelTierKey {
+  return state.models[vendor]?.find((m) => m.id === model)?.tier ?? 'balanced'
+}

@@ -26,7 +26,7 @@ export function AssistantsList() {
   const create = () => {
     const a = newAssistant("custom");
     assistantsStore.set((s) => ({ ...s, assistants: [...s.assistants, a] }));
-    router.push(`/agents/${a.id}`);
+    router.push(`/agents/${a.id}?new=1`);
   };
 
   return (

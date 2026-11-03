@@ -27,6 +27,9 @@ export interface Assistant {
   instructions: string
   greeting: string
   model: ModelTier
+  /** The provider and model chosen from what the admin has switched on. */
+  provider?: import('@/lib/ai/catalog').VendorId
+  modelId?: string
   knowledge: Faq[]
   toolIds: string[]
   captureLeads: boolean
@@ -140,6 +143,8 @@ export function newAssistant(role: AssistantRole, id = `as-${Date.now()}`): Assi
     role,
     enabled: role !== 'custom',
     model: 'fast',
+    provider: 'openai',
+    modelId: 'gpt-5.4-mini',
     knowledge: [],
     tags: [],
     handoff: { onRequest: true, onUnknown: true, maxReplies: 15 },
