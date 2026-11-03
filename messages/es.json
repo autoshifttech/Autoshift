@@ -3056,11 +3056,6 @@
           "desc": "Envía una difusión de plantilla a hasta 1.000 destinatarios a la vez."
         }
       }
-    },
-    "banner": {
-      "title": "¿Prefieres n8n?",
-      "desc": "Envía y recibe mensajes de WhatsApp desde flujos de n8n con la API y los webhooks de AutoShift.",
-      "cta": "Configurar n8n"
     }
   },
   "Setup": {

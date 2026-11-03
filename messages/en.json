@@ -3056,11 +3056,6 @@
           "desc": "Send a template broadcast to up to 1,000 recipients at a time."
         }
       }
-    },
-    "banner": {
-      "title": "Prefer n8n?",
-      "desc": "Send and receive WhatsApp messages from n8n workflows using AutoShift’s API and webhooks.",
-      "cta": "Set up n8n"
     }
   },
   "Setup": {

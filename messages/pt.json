@@ -3056,11 +3056,6 @@
           "desc": "Envie uma transmissão de modelo para até 1.000 destinatários por vez."
         }
       }
-    },
-    "banner": {
-      "title": "Prefere o n8n?",
-      "desc": "Envie e receba mensagens de WhatsApp em fluxos do n8n usando a API e os webhooks da AutoShift.",
-      "cta": "Configurar n8n"
     }
   },
   "Setup": {

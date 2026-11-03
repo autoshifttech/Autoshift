@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "@/lib/toast";
 import {
@@ -17,14 +16,13 @@ import {
   Users,
   PhoneCall,
   Loader2,
-  ArrowRight,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/client"
 import { useCan } from "@/hooks/use-can"
 import { useTranslations } from "next-intl"
 import type { Automation } from "@/types"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { GatedButton } from "@/components/ui/gated-button"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -65,7 +63,6 @@ export default function AutomationsPage() {
   const canCreate = useCan("send-messages")
   const t = useTranslations("Automations.list")
   const tGate = useTranslations("GatedButton")
-  const tN8n = useTranslations("N8n.banner")
   const [automations, setAutomations] = useState<Automation[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Automation | null>(null)
@@ -181,20 +178,6 @@ export default function AutomationsPage() {
           {t("create")}
         </GatedButton>
       </div>
-
-      <Link
-        href="/automations/n8n"
-        className="group flex flex-wrap items-center gap-4 rounded-2xl bg-[var(--tone-lilac)] p-4 ring-1 ring-border transition hover:ring-primary/40 sm:flex-nowrap"
-      >
-        <span className="rounded-lg bg-[#C92A55] px-2 py-1 font-mono text-sm font-bold text-white">n8n</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground">{tN8n("title")}</span>
-          <span className="block text-sm text-muted-foreground">{tN8n("desc")}</span>
-        </span>
-        <span className={buttonVariants({ variant: "outline", size: "sm", className: "bg-card" })}>
-          {tN8n("cta")} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-        </span>
-      </Link>
 
       {showTemplates && (
         <section>
