@@ -51,7 +51,8 @@ import {
 } from "@/lib/flows/validate";
 import { useTranslations } from "next-intl";
 import { getT } from "@/lib/i18n/translate";
-import { unlinkNodeReferences } from "@/lib/flows/edges";
+import { deriveCanvasEdges, unlinkNodeReferences } from "@/lib/flows/edges";
+import { autoLayout } from "@/lib/flows/layout";
 import type { FlowNodeRow, FlowRow } from "@/lib/flows/types";
 import { NODE_META, slugify, type BuilderNode, type NodeType } from "./shared";
 
@@ -103,6 +104,22 @@ export interface FlowEditorContextValue {
     positions: Record<string, { x: number; y: number }>,
   ) => void;
   removeNode: (key: string) => void;
+  /** Copies a step next to the original; returns the new key (or null). */
+  duplicateNode: (key: string) => string | null;
+  /** Re-lays every step out top to bottom. */
+  autoArrange: () => void;
+
+  // History
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+
+  // Dialogs owned by the editor shell (settings + test chat)
+  settingsOpen: boolean;
+  setSettingsOpen: (open: boolean) => void;
+  testOpen: boolean;
+  setTestOpen: (open: boolean) => void;
 
   // Actions
   save: () => Promise<void>;
@@ -217,6 +234,11 @@ export function applyNodePositions(
 
 const FlowEditorCtx = createContext<FlowEditorContextValue | null>(null);
 
+/** Like useFlowEditor, but null outside the editor (for shared form pieces). */
+export function useFlowEditorOptional(): FlowEditorContextValue | null {
+  return useContext(FlowEditorCtx);
+}
+
 export function useFlowEditor(): FlowEditorContextValue {
   const ctx = useContext(FlowEditorCtx);
   if (!ctx) {
@@ -264,13 +286,74 @@ export function FlowEditorProvider({
   const [saving, setSaving] = useState(false);
   const [activating, setActivating] = useState(false);
   // dirty flips on user edits; status-only updates (after the activate
-  // API succeeds) use setStateRaw so they don't falsely re-flag the
-  // form as dirty.
+  // API succeeds) don't falsely re-flag the form as dirty.
   const [dirty, setDirty] = useState(false);
-  const setState = useCallback<typeof setStateRaw>((updaterOrValue) => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [testOpen, setTestOpen] = useState(false);
+
+  // Latest state kept in a ref so edits apply (and history records) in
+  // order even when several land in the same tick.
+  const stateRef = useRef(state);
+  const pastRef = useRef<BuilderState[]>([]);
+  const futureRef = useRef<BuilderState[]>([]);
+  const lastGroupRef = useRef<{ group: string; at: number } | null>(null);
+  const [historyTick, setHistoryTick] = useState(0);
+
+  const commit = useCallback(
+    (
+      updater: BuilderState | ((prev: BuilderState) => BuilderState),
+      opts: { dirty: boolean; track: boolean; group?: string },
+    ) => {
+      const prev = stateRef.current;
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      if (next === prev) return;
+      if (opts.track) {
+        // Drags fire many small updates; one history step per gesture.
+        const now = Date.now();
+        const last = lastGroupRef.current;
+        const merge = opts.group && last && last.group === opts.group && now - last.at < 900;
+        lastGroupRef.current = opts.group ? { group: opts.group, at: now } : null;
+        if (!merge) {
+          pastRef.current = [...pastRef.current.slice(-79), prev];
+          futureRef.current = [];
+          setHistoryTick((n) => n + 1);
+        }
+      }
+      stateRef.current = next;
+      setStateRaw(next);
+      if (opts.dirty) setDirty(true);
+    },
+    [],
+  );
+  const setState = useCallback<typeof setStateRaw>(
+    (updaterOrValue) => commit(updaterOrValue, { dirty: true, track: true }),
+    [commit],
+  );
+
+  const undo = useCallback(() => {
+    const previous = pastRef.current[pastRef.current.length - 1];
+    if (!previous) return;
+    pastRef.current = pastRef.current.slice(0, -1);
+    futureRef.current = [...futureRef.current, stateRef.current];
+    stateRef.current = previous;
+    setStateRaw(previous);
     setDirty(true);
-    setStateRaw(updaterOrValue);
+    setHistoryTick((n) => n + 1);
   }, []);
+  const redo = useCallback(() => {
+    const nextState = futureRef.current[futureRef.current.length - 1];
+    if (!nextState) return;
+    futureRef.current = futureRef.current.slice(0, -1);
+    pastRef.current = [...pastRef.current, stateRef.current];
+    stateRef.current = nextState;
+    setStateRaw(nextState);
+    setDirty(true);
+    setHistoryTick((n) => n + 1);
+  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const canUndo = useMemo(() => pastRef.current.length > 0, [historyTick]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const canRedo = useMemo(() => futureRef.current.length > 0, [historyTick]);
 
   // Cross-view "look here" signal (see FlowEditorContextValue docs).
   // Tracked via a ref alongside state so a rapid second click on a
@@ -387,7 +470,7 @@ export function FlowEditorProvider({
           const json = await res.json().catch(() => ({}));
           throw new Error(json.error ?? t("statusUpdateFailedStatus", { status: res.status }));
         }
-        setStateRaw((s) => ({ ...s, status: next }));
+        commit((s) => ({ ...s, status: next }), { dirty: false, track: false });
         toast.success(
           next === "active"
             ? t("statusActivated")
@@ -402,7 +485,7 @@ export function FlowEditorProvider({
         setActivating(false);
       }
     },
-    [canActivate, save, initialFlow.id, t],
+    [canActivate, save, commit, initialFlow.id, t],
   );
 
   // ---- Delete ----
@@ -450,16 +533,19 @@ export function FlowEditorProvider({
 
   const updateNodePosition = useCallback(
     (key: string, x: number, y: number) => {
-      setState((s) => ({
-        ...s,
-        nodes: s.nodes.map((n) =>
-          n.node_key === key
-            ? { ...n, position_x: Math.round(x), position_y: Math.round(y) }
-            : n,
-        ),
-      }));
+      commit(
+        (s) => ({
+          ...s,
+          nodes: s.nodes.map((n) =>
+            n.node_key === key
+              ? { ...n, position_x: Math.round(x), position_y: Math.round(y) }
+              : n,
+          ),
+        }),
+        { dirty: true, track: true, group: `move:${key}` },
+      );
     },
-    [setState],
+    [commit],
   );
 
   const updateNodePositions = useCallback(
@@ -467,22 +553,23 @@ export function FlowEditorProvider({
       // Initial Dagre layout hydration should not dirty the editor:
       // opening a legacy all-zero flow must not enable Save or arm
       // beforeunload before the user actually edits anything.
-      setStateRaw((s) => ({
-        ...s,
-        nodes: applyNodePositions(s.nodes, positions),
-      }));
+      commit(
+        (s) => ({
+          ...s,
+          nodes: applyNodePositions(s.nodes, positions),
+        }),
+        { dirty: false, track: false },
+      );
     },
-    [],
+    [commit],
   );
 
   const addNode = useCallback(
     (type: NodeType): string => {
       const meta = NODE_META[type];
       const base = slugify(meta.slugSeed, type);
-      let createdKey = base;
+      const node_key = uniqueNodeKey(base, stateRef.current.nodes);
       setState((s) => {
-        const node_key = uniqueNodeKey(base, s.nodes);
-        createdKey = node_key;
         const next: BuilderNode = {
           node_key,
           node_type: type,
@@ -498,10 +585,44 @@ export function FlowEditorProvider({
             (type === "start" ? node_key : s.entry_node_id ?? null),
         };
       });
-      return createdKey;
+      return node_key;
     },
     [setState],
   );
+
+  const duplicateNode = useCallback(
+    (key: string): string | null => {
+      const original = stateRef.current.nodes.find((n) => n.node_key === key);
+      if (!original) return null;
+      const base = key.replace(/_\d+$/, "");
+      const node_key = uniqueNodeKey(base, stateRef.current.nodes);
+      setState((s) => ({
+        ...s,
+        nodes: [
+          ...s.nodes,
+          {
+            ...original,
+            node_key,
+            config: JSON.parse(JSON.stringify(original.config)) as Record<string, unknown>,
+            position_x: (original.position_x ?? 0) + 40,
+            position_y: (original.position_y ?? 0) + 140,
+          },
+        ],
+      }));
+      return node_key;
+    },
+    [setState],
+  );
+
+  const autoArrange = useCallback(() => {
+    const nodes = stateRef.current.nodes;
+    if (nodes.length === 0) return;
+    const edges = deriveCanvasEdges(nodes).map((e) => ({ source: e.source, target: e.target }));
+    const laid = autoLayout(nodes.map((n) => ({ id: n.node_key, width: 240, height: 100 })), edges);
+    const positions: Record<string, { x: number; y: number }> = {};
+    laid.forEach((p, id) => (positions[id] = p));
+    setState((s) => ({ ...s, nodes: applyNodePositions(s.nodes, positions) }));
+  }, [setState]);
 
   const removeNode = useCallback(
     (key: string) => {
@@ -537,6 +658,16 @@ export function FlowEditorProvider({
       updateNodePosition,
       updateNodePositions,
       removeNode,
+      duplicateNode,
+      autoArrange,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
+      settingsOpen,
+      setSettingsOpen,
+      testOpen,
+      setTestOpen,
       save,
       setStatus,
       deleteFlow,
@@ -558,6 +689,14 @@ export function FlowEditorProvider({
       updateNodePosition,
       updateNodePositions,
       removeNode,
+      duplicateNode,
+      autoArrange,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
+      settingsOpen,
+      testOpen,
       save,
       setStatus,
       deleteFlow,

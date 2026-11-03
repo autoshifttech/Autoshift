@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { NODE_META, type BuilderNode } from "../shared";
+import { useFlowEditorOptional } from "../flow-editor-state";
 
 export function TextRow({
   label,
@@ -106,14 +107,27 @@ export function NodeKeySelect({
   className?: string;
 }) {
   const t = useTranslations("Flows.builder.form");
+  const tn = useTranslations("Flows.builder.nodes");
+  const editor = useFlowEditorOptional();
   const options = nodes.filter((n) => n.node_key !== excludeKey);
+  const picked = value ? nodes.find((n) => n.node_key === value) : undefined;
+  const label = (n: BuilderNode) => `${tn(`${n.node_type}.label`)} · ${n.node_key}`;
   return (
     <Select
       value={value ?? "__none__"}
-      onValueChange={(v) => onChange(v === "__none__" ? null : v)}
+      onValueChange={(v) => {
+        if (v === "__new__" && editor) {
+          // A fresh message step, already connected.
+          onChange(editor.addNode("send_message"));
+          return;
+        }
+        onChange(v === "__none__" ? null : v);
+      }}
     >
       <SelectTrigger className={cn("bg-muted", className)}>
-        <SelectValue placeholder={placeholder ?? "—"} />
+        <SelectValue placeholder={placeholder ?? "—"}>
+          {picked ? label(picked) : (placeholder ?? t("pickNextNode"))}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="__none__">{t("none")}</SelectItem>
@@ -122,14 +136,13 @@ export function NodeKeySelect({
           return (
             <SelectItem key={n.node_key} value={n.node_key}>
               <span className="inline-flex items-center gap-1.5">
-                <Icon
-                  className={cn("h-3 w-3", NODE_META[n.node_type].color)}
-                />
-                {n.node_key}
+                <Icon className={cn("h-3 w-3", NODE_META[n.node_type].color)} />
+                {label(n)}
               </span>
             </SelectItem>
           );
         })}
+        {editor && <SelectItem value="__new__">{t("newStep")}</SelectItem>}
       </SelectContent>
     </Select>
   );

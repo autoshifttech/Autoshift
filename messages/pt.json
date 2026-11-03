@@ -1444,13 +1444,15 @@
         "uploadFailed": "Falha no upload.",
         "fileTooLarge": "O arquivo tem {size} MB — o limite é 16 MB.",
         "defaultOptionTitle": "Opção",
-        "optionN": "Opção {n}"
+        "optionN": "Opção {n}",
+        "newStep": "+ Nova etapa de mensagem"
       },
       "categories": {
         "messaging": "Mensagens",
         "logic": "Lógica e dados",
         "flow": "Controle de fluxo",
-        "connections": "Conexões"
+        "connections": "Conexões",
+        "start": "Comece aqui"
       },
       "nodes": {
         "start": {
@@ -1528,7 +1530,64 @@
         "valuesHint": "Um valor por linha; cada linha preenche a próxima coluna.",
         "saveAs": "Salvar o link como",
         "saveAsHint": "Use em uma mensagem posterior como"
-      }
+      },
+      "addMenu": {
+        "title": "Adicionar etapa",
+        "desc": "Escolha o que acontece a seguir na conversa.",
+        "startHere": "Comece aqui",
+        "addStart": "Adicionar etapa Início"
+      },
+      "history": {
+        "undo": "Desfazer",
+        "redo": "Refazer",
+        "arrange": "Organizar layout"
+      },
+      "confirmDelete": {
+        "title": "Excluir esta etapa?",
+        "desc": "As etapas que apontam para ela perdem esse vínculo. Você pode desfazer logo em seguida.",
+        "cancel": "Manter"
+      },
+      "leave": {
+        "title": "Sair sem salvar?",
+        "desc": "Há alterações ainda não salvas.",
+        "confirm": "Sair",
+        "stay": "Continuar editando"
+      },
+      "settings": {
+        "open": "Configurações",
+        "title": "Configurações do fluxo",
+        "desc": "Nome, o que inicia este fluxo e a etapa em que ele começa.",
+        "done": "Concluir"
+      },
+      "test": {
+        "open": "Testar",
+        "title": "Testar este fluxo",
+        "desc": "Experimente como um cliente. Nada é enviado.",
+        "untitled": "Fluxo sem nome",
+        "restart": "Recomeçar",
+        "typeReply": "Digite uma resposta",
+        "send": "Enviar",
+        "options": "Opções",
+        "hint": "Toque em um botão ou digite uma resposta.",
+        "finished": "O teste chegou ao fim.",
+        "notes": {
+          "tagAdd": "O contato receberia uma tag aqui.",
+          "tagRemove": "Uma tag seria removida do contato aqui.",
+          "action": "Etapa conectada: {service}. Roda de verdade quando estiver no ar.",
+          "handoff": "Passado para uma pessoa.",
+          "end": "Fim do fluxo.",
+          "stuck": "Parou: a etapa “{key}” não existe.",
+          "loop": "Parou: o fluxo entrou em um laço.",
+          "noEntry": "Escolha primeiro uma etapa inicial (Configurações).",
+          "service": {
+            "google_sheets_append": "adicionar linha no Google Planilhas",
+            "google_calendar_event": "criar evento no Google Agenda",
+            "razorpay_link": "link de pagamento Razorpay",
+            "cashfree_link": "link de pagamento Cashfree"
+          }
+        }
+      },
+      "duplicateNode": "Duplicar"
     },
     "validation": {
       "noIssues": "Nenhum problema. Pronto para ativar.",
@@ -2592,32 +2651,32 @@
   "Validation": {
     "flows": {
       "nameRequired": "O nome do fluxo é obrigatório.",
-      "entryRequired": "Escolha um nó de entrada antes de ativar.",
-      "needsNode": "Um fluxo precisa de pelo menos um nó antes da ativação.",
+      "entryRequired": "Escolha em qual etapa o fluxo começa (abra Configurações ou adicione uma etapa Início).",
+      "needsNode": "Adicione a primeira etapa com “Adicionar etapa”. Uma etapa Início é um bom começo.",
       "entryMissing": "O nó de entrada \"{id}\" não existe.",
       "duplicateNodeKey": "node_key duplicado: \"{key}\".",
-      "unreachable": "O nó \"{key}\" não pode ser alcançado a partir do nó de entrada.",
+      "unreachable": "“{key}” não pode ser alcançada. Conecte uma etapa a ela ou exclua-a.",
       "autoAdvanceCycle": "Os nós {keys} voltam uns para os outros sem esperar pelo cliente, então o fluxo continuaria enviando mensagens. Adicione uma etapa de botões, lista ou pergunta ao loop, ou interrompa-o.",
-      "keywordsRequired": "Gatilhos por palavra-chave precisam de pelo menos uma palavra-chave.",
+      "keywordsRequired": "Adicione pelo menos uma palavra-chave que inicia este fluxo (abra Configurações).",
       "blankKeywords": "{count} {count, plural, =1 {palavra-chave está em branco} other {palavras-chave estão em branco}} — elas não vão corresponder a nada.",
-      "startNeedsNext": "O nó Início precisa apontar para um próximo nó.",
+      "startNeedsNext": "Conecte a etapa Início à etapa que vem depois.",
       "startMissingNext": "O nó Início aponta para um nó inexistente: \"{key}\".",
-      "sendMessageNeedsText": "O nó Enviar mensagem precisa de um texto.",
-      "sendMessageNeedsNext": "O nó Enviar mensagem precisa apontar para um próximo nó.",
+      "sendMessageNeedsText": "Digite a mensagem que esta etapa deve enviar.",
+      "sendMessageNeedsNext": "Escolha a etapa que vem depois desta mensagem.",
       "sendMessageMissingNext": "O nó Enviar mensagem aponta para um nó inexistente: \"{key}\".",
       "sendMediaNeedsType": "O nó Enviar mídia precisa de um tipo de mídia (imagem, vídeo ou documento).",
       "sendMediaNeedsFile": "O nó Enviar mídia precisa de um arquivo (envie um antes de ativar).",
       "captionTooLong": "A legenda excede {max} caracteres (limite do WhatsApp).",
       "sendMediaNeedsNext": "O nó Enviar mídia precisa apontar para um próximo nó.",
       "sendMediaMissingNext": "O nó Enviar mídia aponta para um nó inexistente: \"{key}\".",
-      "sendButtonsNeedsText": "O nó Enviar botões precisa de um texto.",
-      "sendButtonsNeedsButton": "O nó Enviar botões precisa de pelo menos um botão.",
+      "sendButtonsNeedsText": "Digite a mensagem exibida acima dos botões.",
+      "sendButtonsNeedsButton": "Adicione pelo menos um botão.",
       "tooManyButtons": "O WhatsApp permite no máximo {max} botões por mensagem.",
       "buttonNeedsReplyId": "O botão {n} precisa de um ID de resposta.",
       "duplicateButtonReplyId": "ID de resposta de botão duplicado: \"{id}\".",
-      "buttonNeedsTitle": "O botão {n} precisa de um título.",
+      "buttonNeedsTitle": "Botão {n}: dê um nome a ele.",
       "buttonTitleTooLong": "O título do botão {n} tem mais de {max} caracteres (limite do WhatsApp).",
-      "buttonNeedsNext": "O botão {n} precisa de um próximo nó.",
+      "buttonNeedsNext": "Botão {n}: escolha a etapa para onde ele leva.",
       "buttonMissingNext": "O botão {n} aponta para um nó inexistente: \"{key}\".",
       "sendListNeedsText": "O nó Enviar lista precisa de um texto.",
       "sendListNeedsLabel": "O nó Enviar lista precisa de um rótulo de botão (o texto que abre a lista).",
@@ -2630,10 +2689,10 @@
       "rowDescriptionTooLong": "A descrição da linha {n} excede {max} caracteres.",
       "rowNeedsNext": "A linha {n} precisa de um próximo nó.",
       "rowMissingNext": "A linha {n} aponta para um nó inexistente: \"{key}\".",
-      "collectNeedsPrompt": "O nó Coletar resposta precisa de uma pergunta para enviar ao cliente.",
+      "collectNeedsPrompt": "Digite a pergunta para o cliente.",
       "collectNeedsVarKey": "O nó Coletar resposta precisa de uma var_key para guardar a resposta.",
       "invalidVarKey": "A var_key \"{key}\" deve conter apenas letras, números e sublinhado, e começar com uma letra ou sublinhado.",
-      "collectNeedsNext": "O nó Coletar resposta precisa apontar para um próximo nó.",
+      "collectNeedsNext": "Escolha a etapa que vem depois da resposta do cliente.",
       "collectMissingNext": "O nó Coletar resposta aponta para um nó inexistente: \"{key}\".",
       "conditionNeedsSubject": "A condição precisa de um assunto (var / tag / contact_field).",
       "conditionNeedsSubjectKey": "A condição precisa de uma subject_key (nome da variável, ID da tag ou nome do campo).",

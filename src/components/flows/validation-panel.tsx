@@ -25,7 +25,7 @@ import type { ValidationIssue } from "@/lib/flows/validate";
 import { useFlowEditor } from "./flow-editor-state";
 
 export function ValidationPanel() {
-  const { issues, requestFlash } = useFlowEditor();
+  const { issues, requestFlash, setSettingsOpen } = useFlowEditor();
   const t = useTranslations("Flows.validation");
   // Collapsed by default so the list never squeezes the canvas.
   const [open, setOpen] = useState(false);
@@ -67,7 +67,7 @@ export function ValidationPanel() {
       {open && (
         <div className="absolute inset-x-0 bottom-full mb-2 flex max-h-[min(50dvh,18rem)] flex-col gap-1 overflow-y-auto rounded-xl border border-border bg-background px-2 py-2 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)]">
           {issues.map((i, ix) => (
-            <IssueLine key={ix} issue={i} onJump={requestFlash} t={t} />
+            <IssueLine key={ix} issue={i} onJump={requestFlash} onOpenSettings={() => setSettingsOpen(true)} t={t} />
           ))}
         </div>
       )}
@@ -84,10 +84,13 @@ export function ValidationPanel() {
 export function IssueLine({
   issue,
   onJump,
+  onOpenSettings,
   t,
 }: {
   issue: ValidationIssue;
   onJump?: (key: string) => void;
+  /** Flow-level problems (trigger, entry step) open the settings dialog. */
+  onOpenSettings?: () => void;
   t?: ReturnType<typeof useTranslations>;
 }) {
   const tone =
@@ -121,6 +124,20 @@ export function IssueLine({
           tone,
         )}
         aria-label={t ? t("jumpToNode", { key: issue.node_key! }) : `Jump to node ${issue.node_key}`}
+      >
+        {body}
+      </button>
+    );
+  }
+  if (!issue.node_key && onOpenSettings) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        className={cn(
+          "flex min-h-9 w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+          tone,
+        )}
       >
         {body}
       </button>

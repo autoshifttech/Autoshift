@@ -22,6 +22,7 @@
  * /flows/[id]/runs) — those don't belong in the hook.
  */
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -34,9 +35,14 @@ import {
   Save,
   Trash2,
   Workflow,
+  FlaskConical,
+  Redo2,
+  SlidersHorizontal,
+  Undo2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import {
   useFlowEditor,
@@ -57,7 +63,17 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
     save,
     setStatus,
     deleteFlow,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    setSettingsOpen,
+    setTestOpen,
+    issues,
   } = useFlowEditor();
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const tBuilder = useTranslations("Flows.builder");
+  const triggerProblem = issues.some((i) => i.scope === "trigger" && i.severity === "error");
 
   return (
     <div className="flex flex-col gap-1 bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 sm:px-5">
@@ -65,7 +81,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
         {/* ---- left: back · icon · name · status · edited ---- */}
         <button
           type="button"
-          onClick={() => router.push("/flows")}
+          onClick={() => (dirty ? setLeaveOpen(true) : router.push("/flows"))}
           title={t("backToFlows")}
           aria-label={t("backToFlows")}
           className="order-1 sm:order-none inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -102,6 +118,29 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
         {viewToggle && <div className="hidden md:block">{viewToggle}</div>}
 
         <div className="order-6 ml-auto flex items-center gap-1.5 sm:order-none">
+          <div className="hidden items-center gap-0.5 sm:flex">
+            <Button variant="ghost" size="icon" className="size-9" onClick={undo} disabled={!canUndo} aria-label={tBuilder("history.undo")} title={tBuilder("history.undo")}>
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="size-9" onClick={redo} disabled={!canRedo} aria-label={tBuilder("history.redo")} title={tBuilder("history.redo")}>
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={tBuilder("settings.open")}
+            onClick={() => setSettingsOpen(true)}
+            className="relative min-h-10 sm:min-h-0"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <span className="hidden lg:inline">{tBuilder("settings.open")}</span>
+            {triggerProblem && <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-600" aria-hidden />}
+          </Button>
+          <Button variant="ghost" size="sm" aria-label={tBuilder("test.open")} onClick={() => setTestOpen(true)} className="min-h-10 sm:min-h-0">
+            <FlaskConical className="h-3.5 w-3.5" />
+            <span className="hidden lg:inline">{tBuilder("test.open")}</span>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -179,6 +218,16 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
         placeholder={t("descriptionPlaceholder")}
         aria-label={t("descriptionLabel")}
         className="hidden w-full max-w-[78ch] rounded-md border border-transparent bg-transparent px-2 py-1 text-[13px] sm:block text-muted-foreground outline-none transition-colors placeholder:text-muted-foreground/60 hover:bg-muted/50 focus:border-primary focus:bg-transparent focus:text-foreground"
+      />
+
+      <ConfirmDialog
+        open={leaveOpen}
+        onOpenChange={setLeaveOpen}
+        title={tBuilder("leave.title")}
+        description={tBuilder("leave.desc")}
+        confirmLabel={tBuilder("leave.confirm")}
+        cancelLabel={tBuilder("leave.stay")}
+        onConfirm={() => router.push("/flows")}
       />
     </div>
   );

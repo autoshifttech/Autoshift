@@ -57,12 +57,14 @@ import {
   type OnNodeDrag,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Plus, Trash2 } from 'lucide-react';
+import { Copy, LayoutDashboard, Plus, Redo2, Trash2, Undo2 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { AddNodeMenu } from './add-node-menu';
 import {
   Dialog,
   DialogContent,
@@ -282,8 +284,15 @@ function FlowCanvasInner() {
     updateNodePosition,
     updateNodePositions,
     removeNode,
+    duplicateNode,
+    autoArrange,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     flashKey,
   } = useFlowEditor();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const reactFlow = useReactFlow();
   const builderNodes = state.nodes;
   const entryNodeId = state.entry_node_id;
@@ -514,7 +523,7 @@ function FlowCanvasInner() {
     return (
       <div className="text-muted-foreground flex h-full flex-col items-center justify-start gap-3 pt-[14vh] text-sm">
         <p>{t('noNodesYet')}</p>
-        <CanvasAddNodeButton t={t} />
+        <CanvasAddNodeButton t={t} quickStart />
       </div>
     );
   }
@@ -570,10 +579,36 @@ function FlowCanvasInner() {
             className="!border-border !bg-card !rounded-xl !border !shadow-[0_6px_20px_-8px_rgba(0,0,0,0.5)]"
           />
           <Panel position="top-left" className="!top-4 !left-4">
-            <CanvasAddNodeButton t={t} />
+            <div className="flex items-center gap-2">
+              <CanvasAddNodeButton t={t} />
+              <div className="border-border bg-card flex items-center gap-0.5 rounded-full border p-0.5 shadow-[var(--shadow-card)]">
+                <Button variant="ghost" size="icon" className="size-9 rounded-full" onClick={undo} disabled={!canUndo} aria-label={t('history.undo')} title={t('history.undo')}>
+                  <Undo2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-9 rounded-full" onClick={redo} disabled={!canRedo} aria-label={t('history.redo')} title={t('history.redo')}>
+                  <Redo2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-9 rounded-full" onClick={autoArrange} aria-label={t('history.arrange')} title={t('history.arrange')}>
+                  <LayoutDashboard className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </Panel>
         </ReactFlow>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={t('confirmDelete.title')}
+        description={t('confirmDelete.desc')}
+        confirmLabel={t('deleteNode')}
+        cancelLabel={t('confirmDelete.cancel')}
+        onConfirm={() => {
+          handleDeleteSelected();
+          setConfirmDelete(false);
+        }}
+      />
 
       <NodeEditSheet
         node={selectedNode}
@@ -581,7 +616,12 @@ function FlowCanvasInner() {
         allNodes={builderNodes}
         onClose={() => setSelectedNodeKey(null)}
         onUpdateConfig={onSelectedUpdateConfig}
-        onDelete={handleDeleteSelected}
+        onDelete={() => setConfirmDelete(true)}
+        onDuplicate={() => {
+          if (!selectedNodeKey) return;
+          const copy = duplicateNode(selectedNodeKey);
+          if (copy) setSelectedNodeKey(copy);
+        }}
         onSetEntry={handleSetEntry}
         t={t}
       />
@@ -602,6 +642,7 @@ function NodeEditSheet({
   onClose,
   onUpdateConfig,
   onDelete,
+  onDuplicate,
   onSetEntry,
   t,
 }: {
@@ -611,6 +652,7 @@ function NodeEditSheet({
   onClose: () => void;
   onUpdateConfig: (patch: Record<string, unknown>) => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onSetEntry: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -652,13 +694,17 @@ function NodeEditSheet({
             </div>
 
             <DialogFooter className="border-border mx-0 mb-0 rounded-b-3xl border-t px-5 py-3 sm:justify-between">
-              {!isEntry ? (
-                <Button variant="ghost" size="sm" onClick={onSetEntry} className="min-h-10">
-                  {t('setAsEntry')}
+              <div className="flex items-center gap-1">
+                {!isEntry && (
+                  <Button variant="ghost" size="sm" onClick={onSetEntry} className="min-h-10">
+                    {t('setAsEntry')}
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={onDuplicate} className="min-h-10">
+                  <Copy className="h-3.5 w-3.5" />
+                  {t('duplicateNode')}
                 </Button>
-              ) : (
-                <span />
-              )}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -683,21 +729,7 @@ function NodeEditSheet({
 // center of the visible viewport rather than appending to a list.
 // ============================================================
 
-const ADD_NODE_TYPES: NodeType[] = [
-  'start',
-  'send_buttons',
-  'send_list',
-  'send_message',
-  'send_media',
-  'collect_input',
-  'condition',
-  'set_tag',
-  'action',
-  'handoff',
-  'end',
-];
-
-function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
+function CanvasAddNodeButton({ t, quickStart = false }: { t: ReturnType<typeof useTranslations>; quickStart?: boolean }) {
   const reactFlow = useReactFlow();
   const { addNode, updateNodePosition, state } = useFlowEditor();
 
@@ -730,61 +762,22 @@ function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
     );
   };
 
+  const hasStart = state.nodes.some((n) => n.node_type === 'start');
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none shadow-[0_6px_20px_-8px_rgba(0,0,0,0.5)] transition-colors"
-        aria-label={t('addNode')}
-      >
-        <Plus className="h-4 w-4" />
-        {t('addNode')}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      {quickStart && !hasStart && (
+        <Button onClick={() => handleAdd('start')} className="min-h-10 rounded-full px-4">
+          <Plus className="h-4 w-4" />
+          {t('addMenu.addStart')}
+        </Button>
+      )}
+      <AddNodeMenu
+        onAdd={handleAdd}
+        hasStart={hasStart}
+        variant={quickStart && !hasStart ? 'outline' : 'primary'}
         side="right"
         align="start"
-        sideOffset={10}
-        className="w-[268px] p-1.5"
-      >
-        {groupNodeTypesByCategory(ADD_NODE_TYPES).map((group, i) => (
-          // DropdownMenuGroup (base-ui Menu.Group) is REQUIRED: the
-          // DropdownMenuLabel below is base-ui's Menu.GroupLabel, which
-          // throws at render without a Menu.Group ancestor. A plain <div>
-          // here crashed the page when this menu opened (issue #336).
-          <Fragment key={group.id}>
-            {i > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
-                {t(`categories.${group.id}`)}
-              </DropdownMenuLabel>
-              {group.types.map((t_type) => {
-                const meta = NODE_META[t_type];
-                return (
-                  <DropdownMenuItem
-                    key={t_type}
-                    onClick={() => handleAdd(t_type)}
-                    className="gap-3 py-2"
-                  >
-                    <NodeIconChip
-                      type={t_type}
-                      size={28}
-                      iconSize={16}
-                      className="rounded-md"
-                    />
-                    <span className="flex flex-col">
-                      <span className="text-popover-foreground text-[13px] font-semibold">
-                        {t(`nodes.${t_type}.label`)}
-                      </span>
-                      <span className="text-muted-foreground text-xs">
-                        {t(`nodes.${t_type}.blurb`)}
-                      </span>
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuGroup>
-          </Fragment>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      />
+    </div>
   );
 }

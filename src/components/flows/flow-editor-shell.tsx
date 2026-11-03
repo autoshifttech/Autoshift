@@ -32,6 +32,9 @@ import { FlowCanvas } from "./flow-canvas";
 import { FlowEditorProvider } from "./flow-editor-state";
 import { EditorHeader } from "./header";
 import { ValidationPanel } from "./validation-panel";
+import { FlowSettingsDialog } from "./flow-settings-dialog";
+import { FlowTester } from "./flow-tester";
+import { useFlowEditor } from "./flow-editor-state";
 import { cn } from "@/lib/utils";
 import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
 import { useTranslations } from "next-intl";
@@ -132,8 +135,34 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
           </div>
         </div>
       </div>
+      <FlowSettingsDialog />
+      <FlowTester />
+      <HistoryShortcuts />
     </FlowEditorProvider>
   );
+}
+
+/** Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z (or Ctrl+Y) redoes, unless you are typing. */
+function HistoryShortcuts() {
+  const { undo, redo } = useFlowEditor();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      const k = e.key.toLowerCase();
+      if (k === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if ((k === "z" && e.shiftKey) || k === "y") {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo, redo]);
+  return null;
 }
 
 /**

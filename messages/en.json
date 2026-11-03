@@ -1444,13 +1444,15 @@
         "uploadFailed": "Upload failed.",
         "fileTooLarge": "File is {size} MB — limit is 16 MB.",
         "defaultOptionTitle": "Option",
-        "optionN": "Option {n}"
+        "optionN": "Option {n}",
+        "newStep": "+ New message step"
       },
       "categories": {
         "messaging": "Messaging",
         "logic": "Logic & data",
         "flow": "Flow control",
-        "connections": "Connections"
+        "connections": "Connections",
+        "start": "Start here"
       },
       "nodes": {
         "start": {
@@ -1528,7 +1530,64 @@
         "valuesHint": "One value per line; each line fills the next column.",
         "saveAs": "Save the link as",
         "saveAsHint": "Use it in a later message as"
-      }
+      },
+      "addMenu": {
+        "title": "Add a step",
+        "desc": "Pick what should happen next in the conversation.",
+        "startHere": "Start here",
+        "addStart": "Add a Start step"
+      },
+      "history": {
+        "undo": "Undo",
+        "redo": "Redo",
+        "arrange": "Tidy up layout"
+      },
+      "confirmDelete": {
+        "title": "Delete this step?",
+        "desc": "Steps that point to it will lose that link. You can undo this right after.",
+        "cancel": "Keep it"
+      },
+      "leave": {
+        "title": "Leave without saving?",
+        "desc": "You have changes that aren’t saved yet.",
+        "confirm": "Leave",
+        "stay": "Keep editing"
+      },
+      "settings": {
+        "open": "Settings",
+        "title": "Flow settings",
+        "desc": "Name, what starts this flow, and the step it begins at.",
+        "done": "Done"
+      },
+      "test": {
+        "open": "Test",
+        "title": "Test this flow",
+        "desc": "Try it as a customer would. Nothing is sent.",
+        "untitled": "Untitled flow",
+        "restart": "Start over",
+        "typeReply": "Type a reply",
+        "send": "Send",
+        "options": "Options",
+        "hint": "Tap a button or type a reply.",
+        "finished": "This test has reached the end.",
+        "notes": {
+          "tagAdd": "The contact would be tagged here.",
+          "tagRemove": "A tag would be removed from the contact here.",
+          "action": "Connected step: {service}. It runs for real once live.",
+          "handoff": "Handed to a person.",
+          "end": "End of the flow.",
+          "stuck": "Stopped: step “{key}” doesn’t exist.",
+          "loop": "Stopped: the flow went round in a loop.",
+          "noEntry": "Choose a starting step first (Settings).",
+          "service": {
+            "google_sheets_append": "add a row to Google Sheets",
+            "google_calendar_event": "create a Google Calendar event",
+            "razorpay_link": "Razorpay payment link",
+            "cashfree_link": "Cashfree payment link"
+          }
+        }
+      },
+      "duplicateNode": "Duplicate"
     },
     "validation": {
       "noIssues": "No issues. Ready to activate.",
@@ -2592,32 +2651,32 @@
   "Validation": {
     "flows": {
       "nameRequired": "Flow name is required.",
-      "entryRequired": "Pick an entry node before activating.",
-      "needsNode": "A flow needs at least one node before activation.",
+      "entryRequired": "Choose which step the flow starts at (open Settings, or add a Start step).",
+      "needsNode": "Add your first step with “Add node”. A Start step is a good place to begin.",
       "entryMissing": "Entry node \"{id}\" doesn't exist.",
       "duplicateNodeKey": "Duplicate node_key \"{key}\".",
-      "unreachable": "Node \"{key}\" is unreachable from the entry node.",
+      "unreachable": "“{key}” can’t be reached. Connect a step to it, or delete it.",
       "autoAdvanceCycle": "Nodes {keys} loop back to each other without waiting for the customer, so the flow would keep sending messages. Add a buttons, list or question step to the loop, or break it.",
-      "keywordsRequired": "Keyword triggers need at least one keyword.",
+      "keywordsRequired": "Add at least one keyword that starts this flow (open Settings).",
       "blankKeywords": "{count} {count, plural, =1 {keyword is} other {keywords are}} blank — they won't match anything.",
-      "startNeedsNext": "Start node must point to a next node.",
+      "startNeedsNext": "Connect the Start step to the step that should come next.",
       "startMissingNext": "Start points to non-existent node \"{key}\".",
-      "sendMessageNeedsText": "Send-message node needs a text body.",
-      "sendMessageNeedsNext": "Send-message node must point to a next node.",
+      "sendMessageNeedsText": "Type the message this step should send.",
+      "sendMessageNeedsNext": "Choose the step that comes after this message.",
       "sendMessageMissingNext": "Send-message points to non-existent node \"{key}\".",
       "sendMediaNeedsType": "Send-media node needs a media type (image, video, or document).",
       "sendMediaNeedsFile": "Send-media node needs a file (upload one before activating).",
       "captionTooLong": "Caption exceeds {max} chars (WhatsApp limit).",
       "sendMediaNeedsNext": "Send-media node must point to a next node.",
       "sendMediaMissingNext": "Send-media points to non-existent node \"{key}\".",
-      "sendButtonsNeedsText": "Send-buttons node needs a text body.",
-      "sendButtonsNeedsButton": "Send-buttons needs at least one button.",
+      "sendButtonsNeedsText": "Type the message shown above the buttons.",
+      "sendButtonsNeedsButton": "Add at least one button.",
       "tooManyButtons": "WhatsApp allows at most {max} buttons per message.",
       "buttonNeedsReplyId": "Button {n} needs a reply id.",
       "duplicateButtonReplyId": "Duplicate button reply id \"{id}\".",
-      "buttonNeedsTitle": "Button {n} needs a title.",
+      "buttonNeedsTitle": "Button {n}: give it a label.",
       "buttonTitleTooLong": "Button {n} title is over {max} chars (WhatsApp limit).",
-      "buttonNeedsNext": "Button {n} needs a next node.",
+      "buttonNeedsNext": "Button {n}: choose the step it leads to.",
       "buttonMissingNext": "Button {n} points to non-existent node \"{key}\".",
       "sendListNeedsText": "Send-list node needs a text body.",
       "sendListNeedsLabel": "Send-list needs a button label (the tap-to-expand text).",
@@ -2630,10 +2689,10 @@
       "rowDescriptionTooLong": "Row {n} description exceeds {max} chars.",
       "rowNeedsNext": "Row {n} needs a next node.",
       "rowMissingNext": "Row {n} points to non-existent node \"{key}\".",
-      "collectNeedsPrompt": "Collect-input needs a prompt to send the customer.",
+      "collectNeedsPrompt": "Type the question to ask the customer.",
       "collectNeedsVarKey": "Collect-input needs a var_key to store the answer under.",
       "invalidVarKey": "var_key \"{key}\" must be alphanumeric+underscore and start with a letter or underscore.",
-      "collectNeedsNext": "Collect-input must point to a next node.",
+      "collectNeedsNext": "Choose the step that comes after the customer answers.",
       "collectMissingNext": "Collect-input points to non-existent node \"{key}\".",
       "conditionNeedsSubject": "Condition needs a subject (var / tag / contact_field).",
       "conditionNeedsSubjectKey": "Condition needs a subject_key (var name, tag id, or field name).",

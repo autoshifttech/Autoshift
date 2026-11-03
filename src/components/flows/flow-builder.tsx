@@ -26,9 +26,12 @@ import {
   ChevronDown,
   ChevronUp,
   CornerDownRight,
+  Copy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { AddNodeMenu } from './add-node-menu';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -84,7 +87,9 @@ export function FlowBuilder() {
     updateNode,
     updateNodeConfig,
     removeNode: removeNodeCtx,
+    duplicateNode,
   } = useFlowEditor();
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
 
   // List-only UI state: which cards are expanded + scroll refs for
   // jump-to-node. The flash itself is read from context (flashKey)
@@ -170,12 +175,17 @@ export function FlowBuilder() {
           <h2 className="text-foreground text-sm font-semibold">
             {t('nodesTitle', { count: state.nodes.length })}
           </h2>
-          <AddNodeButton onAdd={addNode} t={t} />
+          <AddNodeButton onAdd={addNode} hasStart={state.nodes.some((n) => n.node_type === 'start')} />
         </div>
 
         {state.nodes.length === 0 ? (
           <div className="border-border bg-card/50 text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
             {t.rich('nodesEmpty', { strong: (chunks) => <strong>{chunks}</strong> })}
+            <div className="mt-4">
+              <Button onClick={() => addNode('start')} className="min-h-10 rounded-full px-4">
+                {t('addMenu.addStart')}
+              </Button>
+            </div>
           </div>
         ) : (
           state.nodes.map((node) => (
@@ -193,7 +203,11 @@ export function FlowBuilder() {
               onToggle={() => toggleExpanded(node.node_key)}
               onUpdate={(patch) => updateNode(node.node_key, patch)}
               onUpdateConfig={(patch) => updateNodeConfig(node.node_key, patch)}
-              onRemove={() => removeNode(node.node_key)}
+              onRemove={() => setPendingRemove(node.node_key)}
+              onDuplicate={() => {
+                const copy = duplicateNode(node.node_key);
+                if (copy) setExpanded((prev) => new Set([...prev, copy]));
+              }}
               onSetEntry={() =>
                 setState((s) => ({ ...s, entry_node_id: node.node_key }))
               }
@@ -202,6 +216,19 @@ export function FlowBuilder() {
           ))
         )}
       </section>
+
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        onOpenChange={(o) => !o && setPendingRemove(null)}
+        title={t('confirmDelete.title')}
+        description={t('confirmDelete.desc')}
+        confirmLabel={t('removeNode')}
+        cancelLabel={t('confirmDelete.cancel')}
+        onConfirm={() => {
+          if (pendingRemove) removeNode(pendingRemove);
+          setPendingRemove(null);
+        }}
+      />
     </div>
   );
 }
@@ -261,7 +288,7 @@ function KeywordsInput({
 // Trigger panel
 // ============================================================
 
-function TriggerPanel({
+export function TriggerPanel({
   state,
   setState,
   triggerIssues,
@@ -344,7 +371,7 @@ function TriggerPanel({
 // Entry-node picker
 // ============================================================
 
-function EntryPicker({
+export function EntryPicker({
   state,
   setState,
   t,
@@ -385,6 +412,7 @@ function NodeCard({
   onUpdate,
   onUpdateConfig,
   onRemove,
+  onDuplicate,
   onSetEntry,
   t,
 }: {
@@ -399,6 +427,7 @@ function NodeCard({
   onUpdate: (patch: Partial<BuilderNode>) => void;
   onUpdateConfig: (patch: Record<string, unknown>) => void;
   onRemove: () => void;
+  onDuplicate: () => void;
   onSetEntry: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -476,18 +505,22 @@ function NodeCard({
             t={t}
           />
           <div className="border-border mt-4 flex items-center justify-between border-t pt-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {!isEntry && (
-                <Button variant="ghost" size="sm" onClick={onSetEntry}>
+                <Button variant="ghost" size="sm" onClick={onSetEntry} className="min-h-10">
                   {t('setAsEntry')}
                 </Button>
               )}
+              <Button variant="ghost" size="sm" onClick={onDuplicate} className="min-h-10">
+                <Copy className="h-3.5 w-3.5" />
+                {t('duplicateNode')}
+              </Button>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="text-red-700 dark:text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              className="min-h-10 text-red-700 dark:text-red-400 hover:bg-red-500/10 hover:text-red-300"
             >
               <Trash2 className="h-3.5 w-3.5" />
               {t('removeNode')}
@@ -579,61 +612,6 @@ function NodeConfigWithAdvanced({
 // Add-node menu
 // ============================================================
 
-function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: ReturnType<typeof useTranslations> }) {
-  const types: NodeType[] = [
-    'start',
-    'send_buttons',
-    'send_list',
-    'send_message',
-    'send_media',
-    'collect_input',
-    'condition',
-    'set_tag',
-    'action',
-    'handoff',
-    'end',
-  ];
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className="border-border bg-card text-foreground hover:bg-muted inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium shadow-[var(--shadow-card)] transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        aria-label={t('addNode')}
-      >
-        <Plus className="h-3.5 w-3.5" />
-        {t('addNode')}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72 p-1.5">
-        {groupNodeTypesByCategory(types).map((group, i) => (
-          // A DropdownMenuGroup (base-ui Menu.Group) is REQUIRED here:
-          // DropdownMenuLabel is base-ui's Menu.GroupLabel, which throws
-          // at render if it can't find a Menu.Group ancestor context. A
-          // plain <div> wrapper made opening this menu crash the page.
-          <Fragment key={group.id}>
-            {i > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
-                {t(`categories.${group.id}`)}
-              </DropdownMenuLabel>
-              {group.types.map((t_type) => {
-                const meta = NODE_META[t_type];
-                return (
-                  <DropdownMenuItem key={t_type} onClick={() => onAdd(t_type)} className="gap-3 py-2">
-                    <NodeIconChip type={t_type} size={28} iconSize={16} className="rounded-md" />
-                    <span className="flex min-w-0 flex-col">
-                      <span className="text-popover-foreground text-[13px] font-semibold">
-                        {t(`nodes.${t_type}.label`)}
-                      </span>
-                      <span className="text-muted-foreground text-xs">
-                        {t(`nodes.${t_type}.blurb`)}
-                      </span>
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuGroup>
-          </Fragment>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+function AddNodeButton({ onAdd, hasStart }: { onAdd: (type: NodeType) => void; hasStart: boolean }) {
+  return <AddNodeMenu onAdd={onAdd} hasStart={hasStart} variant="outline" side="bottom" align="end" />;
 }

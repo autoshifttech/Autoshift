@@ -1444,13 +1444,15 @@
         "uploadFailed": "업로드에 실패했습니다.",
         "fileTooLarge": "파일이 {size}MB입니다 — 제한은 16MB입니다.",
         "defaultOptionTitle": "옵션",
-        "optionN": "옵션 {n}"
+        "optionN": "옵션 {n}",
+        "newStep": "+ 새 메시지 단계"
       },
       "categories": {
         "messaging": "메시징",
         "logic": "로직 & 데이터",
         "flow": "플로우 제어",
-        "connections": "연결"
+        "connections": "연결",
+        "start": "여기서 시작"
       },
       "nodes": {
         "start": {
@@ -1528,7 +1530,64 @@
         "valuesHint": "한 줄에 값 하나씩, 각 줄이 다음 열을 채웁니다.",
         "saveAs": "링크를 다음 이름으로 저장",
         "saveAsHint": "이후 메시지에서 다음과 같이 사용:"
-      }
+      },
+      "addMenu": {
+        "title": "단계 추가",
+        "desc": "대화에서 다음에 일어날 일을 선택하세요.",
+        "startHere": "여기서 시작",
+        "addStart": "시작 단계 추가"
+      },
+      "history": {
+        "undo": "실행 취소",
+        "redo": "다시 실행",
+        "arrange": "레이아웃 정리"
+      },
+      "confirmDelete": {
+        "title": "이 단계를 삭제할까요?",
+        "desc": "이 단계를 가리키던 단계는 연결이 끊깁니다. 바로 실행 취소할 수 있습니다.",
+        "cancel": "유지"
+      },
+      "leave": {
+        "title": "저장하지 않고 나갈까요?",
+        "desc": "저장되지 않은 변경 사항이 있습니다.",
+        "confirm": "나가기",
+        "stay": "계속 편집"
+      },
+      "settings": {
+        "open": "설정",
+        "title": "플로우 설정",
+        "desc": "이름, 플로우를 시작하는 조건, 시작 단계를 설정합니다.",
+        "done": "완료"
+      },
+      "test": {
+        "open": "테스트",
+        "title": "플로우 테스트",
+        "desc": "고객처럼 직접 해 보세요. 아무것도 전송되지 않습니다.",
+        "untitled": "이름 없는 플로우",
+        "restart": "다시 시작",
+        "typeReply": "답장 입력",
+        "send": "보내기",
+        "options": "옵션",
+        "hint": "버튼을 누르거나 답장을 입력하세요.",
+        "finished": "테스트가 끝까지 도달했습니다.",
+        "notes": {
+          "tagAdd": "여기서 연락처에 태그가 추가됩니다.",
+          "tagRemove": "여기서 연락처에서 태그가 제거됩니다.",
+          "action": "연결된 단계: {service}. 실제 운영 시 실행됩니다.",
+          "handoff": "상담원에게 전달됨.",
+          "end": "플로우 종료.",
+          "stuck": "중단: “{key}” 단계가 없습니다.",
+          "loop": "중단: 플로우가 반복에 빠졌습니다.",
+          "noEntry": "먼저 시작 단계를 선택하세요 (설정).",
+          "service": {
+            "google_sheets_append": "Google 스프레드시트에 행 추가",
+            "google_calendar_event": "Google 캘린더 일정 만들기",
+            "razorpay_link": "Razorpay 결제 링크",
+            "cashfree_link": "Cashfree 결제 링크"
+          }
+        }
+      },
+      "duplicateNode": "복제"
     },
     "validation": {
       "noIssues": "문제가 없습니다. 활성화할 준비가 되었습니다.",
@@ -2592,32 +2651,32 @@
   "Validation": {
     "flows": {
       "nameRequired": "플로우 이름은 필수입니다.",
-      "entryRequired": "활성화하기 전에 시작 노드를 선택하세요.",
-      "needsNode": "활성화하려면 플로우에 노드가 하나 이상 있어야 합니다.",
+      "entryRequired": "플로우가 시작되는 단계를 선택하세요 (설정을 열거나 시작 단계를 추가).",
+      "needsNode": "“단계 추가”로 첫 단계를 추가하세요. 시작 단계부터 만드는 것이 좋습니다.",
       "entryMissing": "시작 노드 \"{id}\"이(가) 존재하지 않습니다.",
       "duplicateNodeKey": "중복된 node_key \"{key}\".",
-      "unreachable": "노드 \"{key}\"은(는) 시작 노드에서 도달할 수 없습니다.",
+      "unreachable": "“{key}”에 도달할 수 없습니다. 다른 단계와 연결하거나 삭제하세요.",
       "autoAdvanceCycle": "노드 {keys}이(가) 고객 응답을 기다리지 않고 서로 반복되어 플로우가 메시지를 계속 보내게 됩니다. 반복 구간에 버튼, 목록 또는 질문 단계를 추가하거나 반복을 끊으세요.",
-      "keywordsRequired": "키워드 트리거에는 키워드가 하나 이상 필요합니다.",
+      "keywordsRequired": "이 플로우를 시작하는 키워드를 하나 이상 추가하세요 (설정 열기).",
       "blankKeywords": "키워드 {count}개가 비어 있습니다 — 아무것과도 일치하지 않습니다.",
-      "startNeedsNext": "시작 노드는 다음 노드를 가리켜야 합니다.",
+      "startNeedsNext": "시작 단계를 다음에 올 단계와 연결하세요.",
       "startMissingNext": "시작 노드가 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
-      "sendMessageNeedsText": "메시지 보내기 노드에는 본문 텍스트가 필요합니다.",
-      "sendMessageNeedsNext": "메시지 보내기 노드는 다음 노드를 가리켜야 합니다.",
+      "sendMessageNeedsText": "이 단계에서 보낼 메시지를 입력하세요.",
+      "sendMessageNeedsNext": "이 메시지 다음에 올 단계를 선택하세요.",
       "sendMessageMissingNext": "메시지 보내기 노드가 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
       "sendMediaNeedsType": "미디어 보내기 노드에는 미디어 유형(이미지, 동영상 또는 문서)이 필요합니다.",
       "sendMediaNeedsFile": "미디어 보내기 노드에는 파일이 필요합니다(활성화하기 전에 업로드하세요).",
       "captionTooLong": "캡션이 {max}자를 초과합니다(WhatsApp 제한).",
       "sendMediaNeedsNext": "미디어 보내기 노드는 다음 노드를 가리켜야 합니다.",
       "sendMediaMissingNext": "미디어 보내기 노드가 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
-      "sendButtonsNeedsText": "버튼 보내기 노드에는 본문 텍스트가 필요합니다.",
-      "sendButtonsNeedsButton": "버튼 보내기에는 버튼이 하나 이상 필요합니다.",
+      "sendButtonsNeedsText": "버튼 위에 표시할 메시지를 입력하세요.",
+      "sendButtonsNeedsButton": "버튼을 하나 이상 추가하세요.",
       "tooManyButtons": "WhatsApp는 메시지당 최대 {max}개의 버튼만 허용합니다.",
       "buttonNeedsReplyId": "버튼 {n}에 응답 ID가 필요합니다.",
       "duplicateButtonReplyId": "중복된 버튼 응답 ID \"{id}\".",
-      "buttonNeedsTitle": "버튼 {n}에 제목이 필요합니다.",
+      "buttonNeedsTitle": "버튼 {n}: 이름을 지정하세요.",
       "buttonTitleTooLong": "버튼 {n}의 제목이 {max}자를 초과합니다(WhatsApp 제한).",
-      "buttonNeedsNext": "버튼 {n}에 다음 노드가 필요합니다.",
+      "buttonNeedsNext": "버튼 {n}: 이동할 단계를 선택하세요.",
       "buttonMissingNext": "버튼 {n}이(가) 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
       "sendListNeedsText": "목록 보내기 노드에는 본문 텍스트가 필요합니다.",
       "sendListNeedsLabel": "목록 보내기에는 버튼 라벨(탭하여 펼치는 텍스트)이 필요합니다.",
@@ -2630,10 +2689,10 @@
       "rowDescriptionTooLong": "행 {n}의 설명이 {max}자를 초과합니다.",
       "rowNeedsNext": "행 {n}에 다음 노드가 필요합니다.",
       "rowMissingNext": "행 {n}이(가) 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
-      "collectNeedsPrompt": "입력 수집에는 고객에게 보낼 질문이 필요합니다.",
+      "collectNeedsPrompt": "고객에게 물어볼 질문을 입력하세요.",
       "collectNeedsVarKey": "입력 수집에는 답변을 저장할 var_key가 필요합니다.",
       "invalidVarKey": "var_key \"{key}\"는 영문자, 숫자, 밑줄만 사용할 수 있으며 영문자나 밑줄로 시작해야 합니다.",
-      "collectNeedsNext": "입력 수집 노드는 다음 노드를 가리켜야 합니다.",
+      "collectNeedsNext": "고객이 답한 다음에 올 단계를 선택하세요.",
       "collectMissingNext": "입력 수집 노드가 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
       "conditionNeedsSubject": "조건에는 대상(var / tag / contact_field)이 필요합니다.",
       "conditionNeedsSubjectKey": "조건에는 subject_key(변수 이름, 태그 ID 또는 필드 이름)가 필요합니다.",

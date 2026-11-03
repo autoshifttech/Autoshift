@@ -1444,13 +1444,15 @@
         "uploadFailed": "Error al subir.",
         "fileTooLarge": "El archivo pesa {size} MB; el límite es 16 MB.",
         "defaultOptionTitle": "Opción",
-        "optionN": "Opción {n}"
+        "optionN": "Opción {n}",
+        "newStep": "+ Nuevo paso de mensaje"
       },
       "categories": {
         "messaging": "Mensajería",
         "logic": "Lógica y datos",
         "flow": "Control de flujo",
-        "connections": "Conexiones"
+        "connections": "Conexiones",
+        "start": "Empieza aquí"
       },
       "nodes": {
         "start": {
@@ -1528,7 +1530,64 @@
         "valuesHint": "Un valor por línea; cada línea rellena la siguiente columna.",
         "saveAs": "Guardar el enlace como",
         "saveAsHint": "Úsalo en un mensaje posterior como"
-      }
+      },
+      "addMenu": {
+        "title": "Añadir un paso",
+        "desc": "Elige qué debe pasar a continuación en la conversación.",
+        "startHere": "Empieza aquí",
+        "addStart": "Añadir paso Inicio"
+      },
+      "history": {
+        "undo": "Deshacer",
+        "redo": "Rehacer",
+        "arrange": "Ordenar diseño"
+      },
+      "confirmDelete": {
+        "title": "¿Eliminar este paso?",
+        "desc": "Los pasos que apuntan a él perderán ese enlace. Puedes deshacerlo justo después.",
+        "cancel": "Conservar"
+      },
+      "leave": {
+        "title": "¿Salir sin guardar?",
+        "desc": "Tienes cambios sin guardar.",
+        "confirm": "Salir",
+        "stay": "Seguir editando"
+      },
+      "settings": {
+        "open": "Ajustes",
+        "title": "Ajustes del flujo",
+        "desc": "Nombre, qué inicia este flujo y el paso con el que empieza.",
+        "done": "Hecho"
+      },
+      "test": {
+        "open": "Probar",
+        "title": "Probar este flujo",
+        "desc": "Pruébalo como lo haría un cliente. No se envía nada.",
+        "untitled": "Flujo sin nombre",
+        "restart": "Empezar de nuevo",
+        "typeReply": "Escribe una respuesta",
+        "send": "Enviar",
+        "options": "Opciones",
+        "hint": "Toca un botón o escribe una respuesta.",
+        "finished": "La prueba llegó al final.",
+        "notes": {
+          "tagAdd": "Aquí se etiquetaría al contacto.",
+          "tagRemove": "Aquí se quitaría una etiqueta del contacto.",
+          "action": "Paso conectado: {service}. Se ejecuta de verdad cuando esté activo.",
+          "handoff": "Pasado a una persona.",
+          "end": "Fin del flujo.",
+          "stuck": "Detenido: el paso “{key}” no existe.",
+          "loop": "Detenido: el flujo entró en un bucle.",
+          "noEntry": "Elige primero un paso inicial (Ajustes).",
+          "service": {
+            "google_sheets_append": "añadir una fila en Google Sheets",
+            "google_calendar_event": "crear un evento en Google Calendar",
+            "razorpay_link": "enlace de pago de Razorpay",
+            "cashfree_link": "enlace de pago de Cashfree"
+          }
+        }
+      },
+      "duplicateNode": "Duplicar"
     },
     "validation": {
       "noIssues": "Sin problemas. Listo para activar.",
@@ -2592,32 +2651,32 @@
   "Validation": {
     "flows": {
       "nameRequired": "El nombre del flujo es obligatorio.",
-      "entryRequired": "Elige un nodo de entrada antes de activar.",
-      "needsNode": "Un flujo necesita al menos un nodo antes de activarse.",
+      "entryRequired": "Elige en qué paso empieza el flujo (abre Ajustes o añade un paso Inicio).",
+      "needsNode": "Añade tu primer paso con “Añadir paso”. Un paso Inicio es un buen comienzo.",
       "entryMissing": "El nodo de entrada \"{id}\" no existe.",
       "duplicateNodeKey": "node_key duplicado: \"{key}\".",
-      "unreachable": "El nodo \"{key}\" no es accesible desde el nodo de entrada.",
+      "unreachable": "No se puede llegar a “{key}”. Conecta un paso con él o elimínalo.",
       "autoAdvanceCycle": "Los nodos {keys} vuelven unos a otros sin esperar al cliente, así que el flujo seguiría enviando mensajes. Añade un paso de botones, lista o pregunta al bucle, o rómpelo.",
-      "keywordsRequired": "Los disparadores por palabra clave necesitan al menos una palabra clave.",
+      "keywordsRequired": "Añade al menos una palabra clave que inicie este flujo (abre Ajustes).",
       "blankKeywords": "{count} {count, plural, =1 {palabra clave está vacía} other {palabras clave están vacías}}: no coincidirán con nada.",
-      "startNeedsNext": "El nodo Inicio debe apuntar a un nodo siguiente.",
+      "startNeedsNext": "Conecta el paso Inicio con el paso que sigue.",
       "startMissingNext": "El nodo Inicio apunta a un nodo inexistente: \"{key}\".",
-      "sendMessageNeedsText": "El nodo Enviar mensaje necesita un texto.",
-      "sendMessageNeedsNext": "El nodo Enviar mensaje debe apuntar a un nodo siguiente.",
+      "sendMessageNeedsText": "Escribe el mensaje que debe enviar este paso.",
+      "sendMessageNeedsNext": "Elige el paso que sigue a este mensaje.",
       "sendMessageMissingNext": "El nodo Enviar mensaje apunta a un nodo inexistente: \"{key}\".",
       "sendMediaNeedsType": "El nodo Enviar archivo necesita un tipo de medio (imagen, video o documento).",
       "sendMediaNeedsFile": "El nodo Enviar archivo necesita un archivo (sube uno antes de activar).",
       "captionTooLong": "El pie de foto supera los {max} caracteres (límite de WhatsApp).",
       "sendMediaNeedsNext": "El nodo Enviar archivo debe apuntar a un nodo siguiente.",
       "sendMediaMissingNext": "El nodo Enviar archivo apunta a un nodo inexistente: \"{key}\".",
-      "sendButtonsNeedsText": "El nodo Enviar botones necesita un texto.",
-      "sendButtonsNeedsButton": "El nodo Enviar botones necesita al menos un botón.",
+      "sendButtonsNeedsText": "Escribe el mensaje que aparece sobre los botones.",
+      "sendButtonsNeedsButton": "Añade al menos un botón.",
       "tooManyButtons": "WhatsApp permite como máximo {max} botones por mensaje.",
       "buttonNeedsReplyId": "El botón {n} necesita un ID de respuesta.",
       "duplicateButtonReplyId": "ID de respuesta de botón duplicado: \"{id}\".",
-      "buttonNeedsTitle": "El botón {n} necesita un título.",
+      "buttonNeedsTitle": "Botón {n}: ponle un nombre.",
       "buttonTitleTooLong": "El título del botón {n} supera los {max} caracteres (límite de WhatsApp).",
-      "buttonNeedsNext": "El botón {n} necesita un nodo siguiente.",
+      "buttonNeedsNext": "Botón {n}: elige el paso al que lleva.",
       "buttonMissingNext": "El botón {n} apunta a un nodo inexistente: \"{key}\".",
       "sendListNeedsText": "El nodo Enviar lista necesita un texto.",
       "sendListNeedsLabel": "El nodo Enviar lista necesita una etiqueta de botón (el texto que despliega la lista).",
@@ -2630,10 +2689,10 @@
       "rowDescriptionTooLong": "La descripción de la fila {n} supera los {max} caracteres.",
       "rowNeedsNext": "La fila {n} necesita un nodo siguiente.",
       "rowMissingNext": "La fila {n} apunta a un nodo inexistente: \"{key}\".",
-      "collectNeedsPrompt": "El nodo Capturar respuesta necesita una pregunta para enviar al cliente.",
+      "collectNeedsPrompt": "Escribe la pregunta para el cliente.",
       "collectNeedsVarKey": "El nodo Capturar respuesta necesita una var_key para guardar la respuesta.",
       "invalidVarKey": "La var_key \"{key}\" solo puede contener letras, números y guion bajo, y debe empezar con una letra o guion bajo.",
-      "collectNeedsNext": "El nodo Capturar respuesta debe apuntar a un nodo siguiente.",
+      "collectNeedsNext": "Elige el paso que sigue a la respuesta del cliente.",
       "collectMissingNext": "El nodo Capturar respuesta apunta a un nodo inexistente: \"{key}\".",
       "conditionNeedsSubject": "La condición necesita un sujeto (var / tag / contact_field).",
       "conditionNeedsSubjectKey": "La condición necesita una subject_key (nombre de variable, ID de etiqueta o nombre de campo).",

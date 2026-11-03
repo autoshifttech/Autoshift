@@ -81,10 +81,10 @@ export interface BuilderNode {
 // the canvas, so `start` is just the entry point under Flow control.
 // ------------------------------------------------------------
 
-export type NodeCategory = 'messaging' | 'logic' | 'connections' | 'flow';
+export type NodeCategory = 'start' | 'messaging' | 'logic' | 'connections' | 'flow';
 
 /** The order categories render in the add-step menu. */
-export const NODE_CATEGORIES: NodeCategory[] = ['messaging', 'logic', 'connections', 'flow'];
+export const NODE_CATEGORIES: NodeCategory[] = ['start', 'messaging', 'logic', 'connections', 'flow'];
 
 export const NODE_META: Record<
   NodeType,
@@ -103,7 +103,7 @@ export const NODE_META: Record<
     slugSeed: 'Start',
     icon: PlayCircle,
     color: 'text-emerald-800 dark:text-emerald-400',
-    category: 'flow',
+    category: 'start',
   },
   send_message: {
     slugSeed: 'Send message',
