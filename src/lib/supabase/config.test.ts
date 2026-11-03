@@ -1,7 +1,14 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { isSupabaseConfigured, supabasePublicConfig } from './config'
 
 const saved = { url: process.env.NEXT_PUBLIC_SUPABASE_URL, key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY }
+
+// CI sets real-looking values for the build; these tests need a clean slate so the
+// defaults (read from the environment) don't turn an "undefined" case into a pass.
+beforeEach(() => {
+  delete process.env.NEXT_PUBLIC_SUPABASE_URL
+  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+})
 
 afterEach(() => {
   process.env.NEXT_PUBLIC_SUPABASE_URL = saved.url
