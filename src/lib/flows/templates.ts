@@ -64,8 +64,8 @@ export interface FlowTemplate {
   name: string;
   description: string;
   /** Used by the gallery to surface a relevant icon. lucide-react name. */
-  icon: "MessageSquare" | "HelpCircle" | "UserPlus" | "ShoppingBag" | "CalendarCheck";
-  trigger_type: "keyword" | "first_inbound_message" | "manual";
+  icon: "MessageSquare" | "HelpCircle" | "UserPlus" | "ShoppingBag" | "CalendarCheck" | "BadgeCheck";
+  trigger_type: "keyword" | "first_inbound_message" | "manual" | "payment_received";
   trigger_config: KeywordTriggerConfig | Record<string, unknown>;
   entry_node_id: string;
   nodes: FlowTemplateNode[];
@@ -421,6 +421,29 @@ const SITE_VISIT: FlowTemplate = {
   ],
 };
 
+
+// ============================================================
+// 6. Payment confirmed — starts when a payment link is paid
+// ============================================================
+const PAYMENT_CONFIRMED: FlowTemplate = {
+  slug: "payment_confirmed",
+  name: t("payment_confirmed.name"),
+  description: t("payment_confirmed.description"),
+  icon: "BadgeCheck",
+  trigger_type: "payment_received",
+  trigger_config: {},
+  entry_node_id: "start",
+  nodes: [
+    { node_key: "start", node_type: "start", config: { next_node_key: "confirm" } },
+    {
+      node_key: "confirm",
+      node_type: "send_message",
+      config: { text: t("payment_confirmed.message"), next_node_key: "end" } as SendMessageNodeConfig,
+    },
+    { node_key: "end", node_type: "end", config: {} },
+  ],
+};
+
 // ============================================================
 // Registry
 // ============================================================
@@ -431,6 +454,7 @@ const TEMPLATES: Record<string, FlowTemplate> = {
   lead_capture: LEAD_CAPTURE,
   order_payment: ORDER_PAYMENT,
   site_visit: SITE_VISIT,
+  payment_confirmed: PAYMENT_CONFIRMED,
 };
 
 export function getFlowTemplate(slug: string): FlowTemplate | null {

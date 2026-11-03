@@ -1343,7 +1343,8 @@
       "toastOff": "{name} 꺼짐",
       "deleteTitle": "“{name}”을(를) 삭제할까요?",
       "deleteDesc": "진행 중인 실행이 즉시 종료됩니다. 되돌릴 수 없습니다.",
-      "fromTemplate": "또는 템플릿으로 시작"
+      "fromTemplate": "또는 템플릿으로 시작",
+      "triggerPayment": "고객이 결제 링크로 결제하면 시작됩니다"
     },
     "edit": {
       "notFound": "플로우를 찾을 수 없습니다.",
@@ -1603,7 +1604,8 @@
           }
         }
       },
-      "duplicateNode": "복제"
+      "duplicateNode": "복제",
+      "triggerPaymentTitle": "결제가 완료되었을 때"
     },
     "validation": {
       "noIssues": "문제가 없습니다. 활성화할 준비가 되었습니다.",
@@ -2607,6 +2609,11 @@
       "askWhen": "언제 방문하고 싶으신가요? 예: 토요일 오전 11시.",
       "eventTitle": "방문 — {name}",
       "thanks": "감사합니다, {name}님! {time} 방문으로 접수했습니다. 곧 팀에서 확인해 드리겠습니다."
+    },
+    "payment_confirmed": {
+      "name": "결제 확인",
+      "description": "Razorpay 또는 Cashfree 결제 링크가 결제되는 즉시 감사 메시지를 보냅니다. 고객 태그 지정이나 팀 알림 단계를 추가할 수 있습니다.",
+      "message": "결제가 완료되었습니다. 감사합니다! 주문이 확정되었습니다."
     }
   },
   "LibErrors": {

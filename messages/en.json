@@ -1343,7 +1343,8 @@
       "toastOff": "{name} is off",
       "deleteTitle": "Delete “{name}”?",
       "deleteDesc": "Any active runs end immediately. This can’t be undone.",
-      "fromTemplate": "Or start from a template"
+      "fromTemplate": "Or start from a template",
+      "triggerPayment": "Starts when a customer pays a payment link"
     },
     "edit": {
       "notFound": "Flow not found.",
@@ -1603,7 +1604,8 @@
           }
         }
       },
-      "duplicateNode": "Duplicate"
+      "duplicateNode": "Duplicate",
+      "triggerPaymentTitle": "When a payment is received"
     },
     "validation": {
       "noIssues": "No issues. Ready to activate.",
@@ -2607,6 +2609,11 @@
       "askWhen": "When would you like to visit? For example: Saturday 11am.",
       "eventTitle": "Site visit — {name}",
       "thanks": "Thanks {name}! We’ve noted your visit for {time}. Our team will confirm shortly."
+    },
+    "payment_confirmed": {
+      "name": "Payment confirmed",
+      "description": "Sends a thank-you the moment a Razorpay or Cashfree payment link is paid. Add steps to tag the customer or tell your team.",
+      "message": "Payment received — thank you! Your order is confirmed."
     }
   },
   "LibErrors": {

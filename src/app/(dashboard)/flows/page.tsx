@@ -23,6 +23,7 @@ import {
   Search,
   ShoppingBag,
   CalendarCheck,
+  BadgeCheck,
 } from "lucide-react";
 
 import { useLocale, useTranslations } from "next-intl";
@@ -56,7 +57,7 @@ interface FlowRow {
   name: string;
   description: string | null;
   status: "draft" | "active" | "archived";
-  trigger_type: "keyword" | "first_inbound_message" | "manual";
+  trigger_type: "keyword" | "first_inbound_message" | "manual" | "payment_received";
   trigger_config: { keywords?: string[] } | Record<string, unknown>;
   entry_node_id?: string | null;
   execution_count: number;
@@ -81,7 +82,7 @@ interface TemplateSummary {
   slug: string;
   name: string;
   description: string;
-  icon: "MessageSquare" | "HelpCircle" | "UserPlus" | "ShoppingBag" | "CalendarCheck";
+  icon: "MessageSquare" | "HelpCircle" | "UserPlus" | "ShoppingBag" | "CalendarCheck" | "BadgeCheck";
   trigger_type: string;
   node_count: number;
 }
@@ -92,6 +93,7 @@ const TEMPLATE_ICONS = {
   UserPlus,
   ShoppingBag,
   CalendarCheck,
+  BadgeCheck,
 } as const;
 
 export default function FlowsPage() {
@@ -602,6 +604,9 @@ function describeTrigger(flow: FlowRow, t: ReturnType<typeof useTranslations>): 
   }
   if (flow.trigger_type === "first_inbound_message") {
     return t("triggerFirstInbound");
+  }
+  if (flow.trigger_type === "payment_received") {
+    return t("triggerPayment");
   }
   return t("triggerManual");
 }

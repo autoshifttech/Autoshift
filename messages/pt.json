@@ -1343,7 +1343,8 @@
       "toastOff": "{name} está desligado",
       "deleteTitle": "Excluir “{name}”?",
       "deleteDesc": "As execuções ativas terminam imediatamente. Não é possível desfazer.",
-      "fromTemplate": "Ou comece por um modelo"
+      "fromTemplate": "Ou comece por um modelo",
+      "triggerPayment": "Inicia quando um cliente paga um link de pagamento"
     },
     "edit": {
       "notFound": "Fluxo não encontrado.",
@@ -1603,7 +1604,8 @@
           }
         }
       },
-      "duplicateNode": "Duplicar"
+      "duplicateNode": "Duplicar",
+      "triggerPaymentTitle": "Quando um pagamento é recebido"
     },
     "validation": {
       "noIssues": "Nenhum problema. Pronto para ativar.",
@@ -2607,6 +2609,11 @@
       "askWhen": "Quando gostaria de visitar? Por exemplo: sábado às 11h.",
       "eventTitle": "Visita — {name}",
       "thanks": "Obrigado, {name}! Anotamos sua visita para {time}. Nossa equipe confirmará em breve."
+    },
+    "payment_confirmed": {
+      "name": "Pagamento confirmado",
+      "description": "Envia um agradecimento assim que um link de pagamento Razorpay ou Cashfree é pago. Adicione etapas para etiquetar o cliente ou avisar sua equipe.",
+      "message": "Pagamento recebido — obrigado! Seu pedido está confirmado."
     }
   },
   "LibErrors": {

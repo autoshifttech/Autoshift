@@ -314,12 +314,20 @@ export function TriggerPanel({
                 ...s,
                 trigger_type: v as BuilderState['trigger_type'],
                 trigger_config:
-                  v === 'keyword' ? { keywords: [] } : v === 'manual' ? {} : {},
+                  v === 'keyword' ? { keywords: [] } : {},
               }))
             }
           >
             <SelectTrigger className="bg-muted">
-              <SelectValue />
+              <SelectValue>
+                {state.trigger_type === 'keyword'
+                  ? t('triggerKeywordTitle')
+                  : state.trigger_type === 'first_inbound_message'
+                    ? t('triggerFirstInboundTitle')
+                    : state.trigger_type === 'payment_received'
+                      ? t('triggerPaymentTitle')
+                      : t('triggerManualTitle')}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="keyword">
@@ -327,6 +335,9 @@ export function TriggerPanel({
               </SelectItem>
               <SelectItem value="first_inbound_message">
                 {t('triggerFirstInboundTitle')}
+              </SelectItem>
+              <SelectItem value="payment_received">
+                {t('triggerPaymentTitle')}
               </SelectItem>
               <SelectItem value="manual">
                 {t('triggerManualTitle')}
