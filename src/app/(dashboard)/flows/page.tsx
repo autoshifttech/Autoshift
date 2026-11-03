@@ -2,10 +2,12 @@
 
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import {
   Workflow,
+  Link2,
   Plus,
   Trash2,
   Pencil,
@@ -21,7 +23,7 @@ import {
 
 import { useTranslations } from "next-intl";
 import { useCan } from "@/hooks/use-can";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { GatedButton } from "@/components/ui/gated-button";
 import {
   Dialog,
@@ -213,6 +215,11 @@ export default function FlowsPage() {
             {t("description")}
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+        <Link href="/flows/connections" className={buttonVariants({ variant: "outline" })}>
+          <Link2 className="h-4 w-4" />
+          {t("connections")}
+        </Link>
         <GatedButton
           canAct={canCreate}
           gateReason={tGate("reasons.createFlows")}
@@ -221,6 +228,7 @@ export default function FlowsPage() {
           <Plus className="h-4 w-4" />
           {t("newFlow")}
         </GatedButton>
+        </div>
       </header>
 
       {flows.length === 0 ? (

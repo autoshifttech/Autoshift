@@ -22,6 +22,7 @@ import {
   Settings,
   Target,
   Users,
+  Workflow,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -41,8 +42,6 @@ interface NavItem {
 }
 
 // Grouped like the reference layout: day-to-day work, AI, outreach, account.
-// Flows (beta) is hidden from the menu while Automations and n8n cover
-// automation; the /flows pages still work for anyone with a link.
 export const navGroups: { labelKey: string; items: NavItem[] }[] = [
   {
     labelKey: "groupWorkspace",
@@ -68,6 +67,7 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/drips", labelKey: "drips", icon: Repeat },
       { href: "/segments", labelKey: "segments", icon: Filter },
       { href: "/automations", labelKey: "automations", icon: Zap },
+      { href: "/flows", labelKey: "flows", icon: Workflow },
       { href: "/templates", labelKey: "templates", icon: FileText },
     ],
   },
