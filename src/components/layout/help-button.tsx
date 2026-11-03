@@ -64,7 +64,7 @@ export function HelpButton() {
               </li>
             </ul>
             <Link
-              href="/support?new=1"
+              href="/settings?tab=support&new=1"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 rounded-xl bg-[var(--tone-mint)] px-3 py-3 text-sm font-medium text-foreground hover:brightness-95"
             >
@@ -74,7 +74,7 @@ export function HelpButton() {
                 <span className="block text-xs font-normal text-muted-foreground">{t("contactHint")}</span>
               </span>
             </Link>
-            <Link href="/support" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-2 py-1 text-sm text-foreground hover:bg-muted">
+            <Link href="/settings?tab=support" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-2 py-1 text-sm text-foreground hover:bg-muted">
               <Inbox className="size-4 text-primary" />
               {t("myRequests")}
             </Link>

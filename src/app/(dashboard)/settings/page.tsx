@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { SettingsRail } from '@/components/settings/settings-rail';
 import { WalletPage } from '@/components/wallet/wallet-page';
 import { ConsentPage } from '@/components/consent/consent-page';
+import { SupportPage } from '@/components/support/support-page';
 import { FilesPage } from '@/components/files/files-page';
 import { SettingsOverview } from '@/components/settings/settings-overview';
 import { ProfileForm } from '@/components/settings/profile-form';
@@ -84,6 +85,7 @@ function SettingsPageInner() {
     wallet: <WalletPage />,
     'opt-ins': <ConsentPage />,
     files: <FilesPage />,
+    support: <SupportPage />,
     privacy: <DataPrivacyPanel />,
     api: <ApiKeysSettings />,
   };

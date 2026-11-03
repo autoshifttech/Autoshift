@@ -2082,7 +2082,8 @@
       "alerts": "이메일 및 WhatsApp 알림",
       "wallet": "지갑",
       "opt-ins": "수신 동의 및 차단",
-      "files": "파일"
+      "files": "파일",
+      "support": "도움말 및 지원"
     },
     "groups": {
       "account": "계정",

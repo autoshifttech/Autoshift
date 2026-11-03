@@ -2082,7 +2082,8 @@
       "alerts": "Email & WhatsApp alerts",
       "wallet": "Wallet",
       "opt-ins": "Opt-ins & blocklist",
-      "files": "Files"
+      "files": "Files",
+      "support": "Help & support"
     },
     "groups": {
       "account": "Account",

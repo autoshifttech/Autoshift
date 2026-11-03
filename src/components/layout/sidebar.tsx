@@ -17,7 +17,6 @@ import {
   Filter,
   GitBranch,
   LayoutDashboard,
-  LifeBuoy,
   LogOut,
   MessageSquare,
   MoreHorizontal,
@@ -80,7 +79,6 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
   {
     labelKey: "groupAccount",
     items: [
-      { href: "/support", labelKey: "support", icon: LifeBuoy },
       { href: "/settings", labelKey: "settings", icon: Settings },
     ],
   },

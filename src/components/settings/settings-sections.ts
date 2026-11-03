@@ -6,6 +6,7 @@ import {
   CreditCard,
   FileText,
   Inbox,
+  LifeBuoy,
   KeyRound,
   LayoutGrid,
   Palette,
@@ -45,6 +46,7 @@ export const SETTINGS_SECTIONS = [
   'wallet',
   'opt-ins',
   'files',
+  'support',
   'privacy',
   'api',
 ] as const;
@@ -78,6 +80,7 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   wallet: { id: 'wallet', label: 'Wallet', icon: Wallet, group: 'workspace' },
   'opt-ins': { id: 'opt-ins', label: 'Opt-ins & blocklist', icon: ShieldCheck, group: 'workspace' },
   files: { id: 'files', label: 'Files', icon: FolderOpen, group: 'workspace' },
+  support: { id: 'support', label: 'Help & support', icon: LifeBuoy, group: 'workspace' },
   privacy: { id: 'privacy', label: 'Data & privacy', icon: FileLock2, group: 'workspace' },
   api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'developer' },
 };

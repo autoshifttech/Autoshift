@@ -2082,7 +2082,8 @@
       "alerts": "Alertas por e-mail e WhatsApp",
       "wallet": "Carteira",
       "opt-ins": "Aceites e bloqueios",
-      "files": "Arquivos"
+      "files": "Arquivos",
+      "support": "Ajuda e suporte"
     },
     "groups": {
       "account": "Conta",
