@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import { Suspense, useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
@@ -565,8 +565,37 @@ function InboxPageInner() {
   // before, unchanged.
   const hasActiveConv = !!activeConversation;
 
+  // The inbox fills exactly what is left of the scrolling page below the top bar and any
+  // account notice, so its panels scroll inside themselves instead of running off the screen.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [fitHeight, setFitHeight] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const el = rootRef.current;
+      const scroller = document.getElementById("app-scroll");
+      if (!el || !scroller) return;
+      const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+      const main = el.closest("main");
+      const pb = main ? parseFloat(getComputedStyle(main).paddingBottom) || 0 : 0;
+      setFitHeight(Math.max(320, scroller.clientHeight - top - pb));
+    };
+    fit();
+    const scroller = document.getElementById("app-scroll");
+    const ro = new ResizeObserver(fit);
+    if (scroller) ro.observe(scroller);
+    window.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, []);
+
   return (
-    <div className="flex h-[calc(100dvh-10.5rem)] min-w-0 flex-col gap-3 lg:h-[calc(100dvh-6.5rem)]">
+    <div
+      ref={rootRef}
+      style={fitHeight ? { height: fitHeight } : undefined}
+      className="flex h-[calc(100dvh-10.5rem)] min-w-0 flex-col gap-3 lg:h-[calc(100dvh-6.5rem)]"
+    >
       {/* WhatsApp connection banner — in the flex column, not absolute,
           so it pushes the panels down instead of overlapping them. */}
       {whatsappConnected === false && (
@@ -637,7 +666,7 @@ function InboxPageInner() {
             On mobile it's always hidden (the `lg:block` below), so the
             toggle — which is itself desktop-only — never affects it. */}
         {contactPanelOpen && hasActiveConv && (
-          <div className="hidden animate-in overflow-hidden rounded-[20px] duration-300 fade-in slide-in-from-right-4 border border-border bg-card shadow-[var(--shadow-card)] lg:block">
+          <div className="hidden min-h-0 animate-in overflow-hidden rounded-[20px] duration-300 fade-in slide-in-from-right-4 border border-border bg-card shadow-[var(--shadow-card)] lg:block">
             <ContactSidebar contact={activeContact} />
           </div>
         )}
