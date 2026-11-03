@@ -23,7 +23,6 @@
     "inbox": "인박스",
     "notifications": "알림",
     "contacts": "연락처",
-    "pipelines": "파이프라인",
     "broadcasts": "브로드캐스트",
     "automations": "자동화",
     "flows": "플로우",
@@ -66,7 +65,6 @@
     "inbox": "인박스",
     "notifications": "알림",
     "contacts": "연락처",
-    "pipelines": "파이프라인",
     "broadcasts": "브로드캐스트",
     "automations": "자동화",
     "settings": "설정",
@@ -116,8 +114,6 @@
         "newMessage": "{who}에게서 새 메시지",
         "newMessages": "{who}님이 메시지 {count}개를 보냄",
         "newContact": "새 연락처: {name}",
-        "dealInStage": "딜 \"{title}\" - {stage} 단계",
-        "dealUpdated": "딜 \"{title}\" 업데이트됨",
         "broadcastSent": "브로드캐스트 \"{name}\" 연락처 {count}명에게 전송됨",
         "broadcastStatus": "브로드캐스트 \"{name}\" {status} (수신자 {count}명)",
         "broadcastStatusNames": {
@@ -152,7 +148,6 @@
         "kpis": "핵심 수치",
         "queue": "답장 대기열",
         "team": "팀",
-        "pipeline": "파이프라인",
         "campaigns": "캠페인",
         "activity": "최근 활동"
       }
@@ -192,7 +187,6 @@
         },
         "new": "새로 만들기",
         "newContact": "새 연락처",
-        "newDeal": "새 딜",
         "newBroadcast": "새 브로드캐스트",
         "newAutomation": "새 자동화"
       },
@@ -236,8 +230,6 @@
         "medianReplyInfo": "고객의 첫 미답장 메시지부터 팀원의 답장까지 걸린 일반적인 시간입니다. AI와 자동화 답장은 포함하지 않습니다.",
         "resolved": "해결됨",
         "resolvedInfo": "이 기간에 종료된 대화입니다.",
-        "dealsWon": "성사된 딜",
-        "dealsWonInfo": "이 기간에 성사로 표시된 딜과 총 금액입니다.",
         "readRate": "브로드캐스트 읽음률",
         "readRateInfo": "이 기간에 보낸 브로드캐스트의 읽은 메시지 수를 전달된 메시지 수로 나눈 값입니다.",
         "readOfDelivered": "전달 {delivered}건 중 {read}건 읽음",
@@ -289,21 +281,6 @@
         "handedOff": "AI가 넘김",
         "assigned": "배정됨",
         "unassigned": "미배정"
-      },
-      "pipeline": {
-        "title": "파이프라인",
-        "description": "단계별 진행 중인 딜",
-        "link": "파이프라인",
-        "choosePipeline": "파이프라인 선택",
-        "deals": "딜 {count}건",
-        "open": "진행 중",
-        "winRate": "성사율",
-        "avgToWin": "평균 성사 기간",
-        "days": "{count}일",
-        "none": "—",
-        "idle": "진행 중인 딜 {count}건이 7일 이상 활동이 없습니다",
-        "empty": "진행 중인 딜이 없습니다",
-        "emptyHint": "파이프라인에서 딜을 만들면 여기에 표시됩니다."
       },
       "team": {
         "title": "팀",
@@ -592,9 +569,7 @@
       "contactInfo": "연락처 정보",
       "tags": "태그",
       "notes": "메모",
-      "deals": "딜",
       "noTags": "태그 없음",
-      "noDeals": "딜 없음",
       "addNotePlaceholder": "메모 추가..."
     },
     "aiBanner": {
@@ -700,10 +675,8 @@
         "activity": "활동",
         "notes": "메모",
         "custom": "커스텀 필드",
-        "deals": "딜",
         "tags": "태그",
         "noTags": "태그 없음",
-        "noDeals": "딜 없음",
         "addNotePlaceholder": "메모 추가..."
       },
       "actions": {
@@ -732,9 +705,6 @@
         "placeholder": "메모를 작성하세요...",
         "save": "메모 추가",
         "noNotes": "아직 메모가 없습니다."
-      },
-      "dealsTab": {
-        "noDeals": "아직 딜이 없습니다"
       },
       "tagsTab": {
         "clickTagDesc": "태그를 클릭해 이 연락처에 추가하거나 제거하세요.",
@@ -830,128 +800,6 @@
       "toastRenameFailed": "필드 이름을 변경할 수 없습니다.",
       "toastDeleteFailed": "필드를 삭제할 수 없습니다.",
       "toastDeleted": "\"{name}\"을(를) 삭제했습니다."
-    }
-  },
-  "Pipelines": {
-    "page": {
-      "selectPipeline": "파이프라인 선택",
-      "noPipelinesYet": "아직 파이프라인이 없습니다",
-      "managePipelines": "파이프라인 관리",
-      "addPipeline": "파이프라인 추가",
-      "addDeal": "딜 추가",
-      "createToStartTracking": "파이프라인을 만들어 딜 추적을 시작하세요",
-      "createPipeline": "파이프라인 만들기",
-      "newPipeline": "새 파이프라인",
-      "pipelineName": "파이프라인 이름",
-      "pipelineNamePlaceholder": "예: 기업 영업",
-      "defaultStagesDesc": "기본 단계(신규 리드 → 성사)가 자동으로 생성됩니다.",
-      "cancel": "취소",
-      "creating": "만드는 중...",
-      "createPipelineBtn": "파이프라인 만들기",
-      "toastFailedLoadPipelines": "파이프라인을 불러오지 못했습니다",
-      "toastFailedMoveDeal": "딜을 이동하지 못했습니다",
-      "toastFailedCreatePipeline": "파이프라인을 만들지 못했습니다",
-      "toastPipelineCreated": "파이프라인이 생성되었습니다",
-      "toastNotLinkedToAccount": "프로필이 계정에 연결되어 있지 않습니다.",
-      "defaultPipelineName": "영업 파이프라인",
-      "defaultStages": {
-        "newLead": "신규 리드",
-        "qualified": "검증됨",
-        "proposalSent": "제안서 발송",
-        "negotiation": "협상",
-        "won": "성사"
-      }
-    },
-    "board": {
-      "dropDealHere": "여기에 딜을 놓으세요",
-      "addDeal": "딜 추가"
-    },
-    "card": {
-      "noContact": "연락처 없음",
-      "won": "성사",
-      "lost": "실패"
-    },
-    "form": {
-      "editDeal": "딜 수정",
-      "newDeal": "새 딜",
-      "title": "제목",
-      "titlePlaceholder": "딜 제목",
-      "contact": "연락처",
-      "selectContact": "연락처 선택",
-      "linkToConversation": "대화에 연결",
-      "value": "금액",
-      "currency": "통화",
-      "expectedCloseDate": "예상 마감일",
-      "stage": "단계",
-      "assignedTo": "담당자",
-      "unassigned": "담당자 없음",
-      "notes": "메모",
-      "notesPlaceholder": "메모 추가...",
-      "status": "상태",
-      "markAsWon": "성사로 표시",
-      "markAsLost": "실패로 표시",
-      "reopenDeal": "딜 재개",
-      "cancel": "취소",
-      "saving": "저장 중...",
-      "saveChanges": "변경 사항 저장",
-      "createDeal": "딜 만들기",
-      "deletePrompt": "이 딜을 삭제하시겠습니까?",
-      "confirm": "확인",
-      "deleting": "삭제 중...",
-      "deleteDeal": "딜 삭제",
-      "toastRequired": "제목, 연락처, 단계는 필수입니다",
-      "toastFailedSave": "딜을 저장하지 못했습니다",
-      "toastNotSignedIn": "로그인되어 있지 않습니다",
-      "toastNotLinked": "프로필이 계정에 연결되어 있지 않습니다.",
-      "toastFailedCreate": "딜을 만들지 못했습니다",
-      "toastUpdated": "딜이 업데이트되었습니다",
-      "toastCreated": "딜이 생성되었습니다",
-      "toastFailedStatus": "딜 상태를 업데이트하지 못했습니다",
-      "toastMarkedWon": "성사로 표시했습니다",
-      "toastMarkedLost": "실패로 표시했습니다",
-      "toastReopened": "딜이 재개되었습니다",
-      "toastFailedDelete": "딜을 삭제하지 못했습니다",
-      "toastDeleted": "딜이 삭제되었습니다"
-    },
-    "settings": {
-      "managePipeline": "파이프라인 관리",
-      "deletePipeline": "파이프라인 삭제",
-      "deletePipelineDesc": "이 파이프라인의 모든 딜이 보관 처리됩니다. 되돌릴 수 없습니다.",
-      "cancel": "취소",
-      "deleting": "삭제 중...",
-      "deletePipelineBtn": "파이프라인 삭제",
-      "pipelineName": "파이프라인 이름",
-      "stages": "단계",
-      "newStageNamePlaceholder": "새 단계 이름",
-      "add": "추가",
-      "createNewPipeline": "새 파이프라인 만들기",
-      "saving": "저장 중...",
-      "saveChanges": "변경 사항 저장",
-      "dragToReorder": "드래그하여 순서 변경",
-      "changeColor": "색상 변경",
-      "toastFailedSave": "파이프라인을 저장하지 못했습니다",
-      "toastSaved": "파이프라인이 저장되었습니다",
-      "toastFailedAddStage": "단계를 추가하지 못했습니다",
-      "toastMoveOrDeleteDeals": "먼저 이 단계의 딜을 이동하거나 삭제하세요",
-      "toastFailedDeleteStage": "단계를 삭제하지 못했습니다",
-      "toastFailedDeletePipeline": "파이프라인을 삭제하지 못했습니다",
-      "toastDeleted": "파이프라인이 삭제되었습니다",
-      "pickColor": "{color} 색상 선택"
-    },
-    "analytics": {
-      "totalDeals": "전체 딜",
-      "totalDealsTooltip": "실패로 표시되지 않은, 이 파이프라인의 모든 딜 수입니다. 성사된 딜도 포함됩니다.",
-      "pipelineValue": "파이프라인 금액",
-      "pipelineValueTooltip": "실패로 표시된 딜을 제외한, 이 파이프라인 내 모든 딜 금액의 합계입니다.",
-      "avgDealSize": "평균 딜 규모",
-      "avgDealSizeTooltip": "파이프라인 금액을 전체 딜 수로 나눈 값 — 실패하지 않은 개별 딜의 평균 금액입니다.",
-      "weightedValue": "가중 금액",
-      "weightedValueTooltip": "예상 매출: 진행 중인 각 딜의 금액 × 단계별 성사 확률. 첫 단계는 약 10%, 이후 단계는 최대 90%까지 상승하며, 성사 시 100%입니다. 실패한 딜은 제외됩니다.",
-      "wonThisMonth": "이번 달 성사",
-      "wonThisMonthTooltip": "이번 달 1일 이후 성사로 표시된 딜입니다.",
-      "lostThisMonth": "이번 달 실패",
-      "lostThisMonthTooltip": "이번 달 1일 이후 실패로 표시된 딜입니다.",
-      "howCalculated": "{label} 계산 방법"
     }
   },
   "Broadcasts": {
@@ -2073,7 +1921,7 @@
       "templates": "템플릿",
       "quick-replies": "빠른 답장",
       "fields": "필드 & 태그",
-      "deals": "딜 & 통화",
+      "deals": "통화",
       "inbox": "인박스",
       "members": "팀원",
       "api": "API 키",
@@ -2224,10 +2072,10 @@
       "networkError": "서버에 연결할 수 없습니다"
     },
     "deals": {
-      "title": "딜 & 통화",
-      "description": "새 딜과 파이프라인, 대시보드 합계에 사용되는 통화입니다.",
+      "title": "통화",
+      "description": "금액과 대시보드 합계에 사용하는 통화입니다.",
       "defaultCurrency": "기본 통화",
-      "defaultCurrencyDesc": "새 딜은 이 통화를 기본값으로 사용하며, 파이프라인과 대시보드 합계도 이 통화로 표시됩니다. 기존 딜은 저장 당시의 통화를 그대로 유지합니다.",
+      "defaultCurrencyDesc": "금액과 대시보드 합계가 이 통화로 표시됩니다.",
       "currencyLabel": "통화",
       "adminOnlyHint": "계정 관리자만 기본 통화를 변경할 수 있습니다.",
       "save": "저장",
@@ -2526,8 +2374,6 @@
       "addOrImportContacts": "연락처를 추가하거나 가져올",
       "deleteContacts": "연락처를 삭제할",
       "createFlows": "플로우를 만들",
-      "createPipelines": "파이프라인을 만들",
-      "createDeals": "거래를 만들",
       "sendMessages": "메시지를 보낼"
     }
   },
@@ -3450,13 +3296,6 @@
     "notifyInApp": "AutoShift 알림 (데스크톱 알림 포함)",
     "notifyEmail": "이메일",
     "handoffMessage": "넘길 때 고객에게 보내는 메시지",
-    "routingTitle": "리드를 파이프라인에 추가",
-    "routingDesc": "자동으로 거래를 만들어 놓치는 리드가 없게 합니다.",
-    "pipeline": "파이프라인",
-    "dealValue": "거래 금액 기준",
-    "noValue": "금액 설정 안 함",
-    "stageHot": "Hot 리드 단계",
-    "stageWarm": "Warm 리드 단계",
     "coldNote": "Cold 리드는 Cold 태그가 붙은 연락처로만 남고 거래는 만들어지지 않습니다.",
     "save": "변경 사항 저장",
     "saved": "변경 사항을 저장했습니다.",
@@ -3621,8 +3460,6 @@
     "toolsCount": "{count, plural, other {도구 #개}}",
     "costMonth": "이번 달 {amount}",
     "open": "열기",
-    "newTitle": "새 어시스턴트",
-    "newDesc": "시작점을 고르세요. 나중에 모두 바꿀 수 있습니다.",
     "notFound": "이 어시스턴트는 더 이상 없습니다.",
     "backToList": "전체 어시스턴트",
     "on": "켜짐",
@@ -3683,7 +3520,9 @@
     "try1": "영업시간이 어떻게 되나요?",
     "try2": "네, 14:30으로 부탁해요",
     "try3": "가격이 어떻게 되나요?",
-    "try4": "상담원과 이야기할 수 있나요?"
+    "try4": "상담원과 이야기할 수 있나요?",
+    "toastOn": "{name} 켜짐",
+    "toastOff": "{name} 꺼짐"
   },
   "AiTools": {
     "title": "AI 도구",

@@ -79,7 +79,6 @@ export function defaultTools(): Tool[] {
   return [
     builtin('capture_lead', 'leads', 'Save lead details', 'Use when the customer shares their name, budget, location or need. Saves the answers and updates the lead score.', 236),
     builtin('add_tag', 'leads', 'Add a tag', 'Use to label the contact, for example “Interested” or “VIP”.', 141),
-    builtin('move_stage', 'leads', 'Move in pipeline', 'Use when a lead is qualified or ready to buy, to move their deal to the next stage.', 37),
     builtin('send_template', 'messaging', 'Send a template', 'Use to send an approved WhatsApp template, such as a price list or brochure.', 54),
     builtin('send_file', 'messaging', 'Send a file', 'Use to share a catalogue, menu or PDF from your Files library.', 61),
     builtin('handoff', 'team', 'Hand off to a person', 'Use when the customer asks for a person, is upset, or asks something you can’t answer.', 48),
@@ -108,7 +107,7 @@ export const ROLE_PRESETS: Record<AssistantRole, Pick<Assistant, 'name' | 'color
     instructions:
       'You help new customers find the right product. Answer questions about products, prices and offers. Ask the lead questions naturally, one at a time. When a customer is ready to buy, hand over to the team.',
     greeting: 'Hi! 👋 Welcome to Olive & Thread. What are you looking for today?',
-    toolIds: ['capture_lead', 'add_tag', 'move_stage', 'send_file', 'handoff'],
+    toolIds: ['capture_lead', 'add_tag', 'send_file', 'handoff'],
     captureLeads: true,
     audience: 'new_contacts',
   },

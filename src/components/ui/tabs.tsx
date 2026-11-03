@@ -29,6 +29,8 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: "lg-chip",
+        /** No track: just the words, with the selected one in a white rounded box. */
+        plain: "bg-transparent",
         line: "gap-1 bg-transparent",
       },
     },

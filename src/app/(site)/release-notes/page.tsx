@@ -16,7 +16,7 @@ const RELEASES: Release[] = [
     title: "AutoShift CRM",
     category: "New",
     items: [
-      "Shared WhatsApp inbox, contacts with tags and custom fields, sales pipelines, broadcasts, automations, flows and AI replies in one workspace.",
+      "Shared WhatsApp inbox, contacts with tags and custom fields, broadcasts, automations, flows and AI replies in one workspace.",
       "A fresh look across the app: warm cream background, white rounded cards and AutoShift green, with light and dark modes.",
     ],
   },

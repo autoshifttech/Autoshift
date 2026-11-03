@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowDown, ArrowUp, GitBranch, Hand, ListChecks, Plus, Sparkles, Trash2, UserCheck, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Hand, ListChecks, Plus, Sparkles, Trash2, UserCheck, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ import { selectClass } from "@/components/ui/form-classes";
 import { cn } from "@/lib/utils";
 import { useSetup } from "@/lib/workspace/setup";
 import {
-  SAMPLE_PIPELINES,
   leadStore,
   scoreLead,
   temperature,
@@ -82,7 +81,6 @@ export function LeadCapturePanel() {
           <QuestionsSection />
           <ScoringSection />
           <HandoffSection />
-          <RoutingSection />
           <div className="flex justify-end">
             <Button onClick={() => toast.success(t("saved"))}>{t("save")}</Button>
           </div>
@@ -397,58 +395,6 @@ function HandoffSection() {
         <Label htmlFor="ho-msg">{t("handoffMessage")}</Label>
         <Textarea id="ho-msg" rows={2} value={h.handoffMessage} onChange={(e) => upd({ handoffMessage: e.target.value })} />
       </div>
-    </Section>
-  );
-}
-
-function RoutingSection() {
-  const t = useTranslations("Leads");
-  const s = useLeadSettings();
-  const r = s.routing;
-  const stages = SAMPLE_PIPELINES[r.pipeline] ?? [];
-  const upd = (patch: Partial<LeadSettings["routing"]>) => set({ routing: { ...r, ...patch } });
-  return (
-    <Section icon={GitBranch} title={t("routingTitle")} desc={t("routingDesc")} action={<Switch checked={r.enabled} onCheckedChange={(enabled) => upd({ enabled })} aria-label={t("routingTitle")} />}>
-      <div className={cn("grid gap-4 sm:grid-cols-2", !r.enabled && "pointer-events-none opacity-50")}>
-        <div className="grid gap-1.5">
-          <Label htmlFor="rt-pipeline">{t("pipeline")}</Label>
-          <NativeSelect id="rt-pipeline" className={selectClass} value={r.pipeline} onChange={(e) => upd({ pipeline: e.target.value, stageHot: SAMPLE_PIPELINES[e.target.value][1], stageWarm: SAMPLE_PIPELINES[e.target.value][0] })}>
-            {Object.keys(SAMPLE_PIPELINES).map((p) => (
-              <option key={p}>{p}</option>
-            ))}
-          </NativeSelect>
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="rt-value">{t("dealValue")}</Label>
-          <NativeSelect id="rt-value" className={selectClass} value={r.valueFromQuestionId ?? ""} onChange={(e) => upd({ valueFromQuestionId: e.target.value || null })}>
-            <option value="">{t("noValue")}</option>
-            {s.questions
-              .filter((q) => q.type === "number")
-              .map((q) => (
-                <option key={q.id} value={q.id}>
-                  {q.saveAs}
-                </option>
-              ))}
-          </NativeSelect>
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="rt-hot">{t("stageHot")}</Label>
-          <NativeSelect id="rt-hot" className={selectClass} value={r.stageHot} onChange={(e) => upd({ stageHot: e.target.value })}>
-            {stages.map((st) => (
-              <option key={st}>{st}</option>
-            ))}
-          </NativeSelect>
-        </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="rt-warm">{t("stageWarm")}</Label>
-          <NativeSelect id="rt-warm" className={selectClass} value={r.stageWarm} onChange={(e) => upd({ stageWarm: e.target.value })}>
-            {stages.map((st) => (
-              <option key={st}>{st}</option>
-            ))}
-          </NativeSelect>
-        </div>
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">{t("coldNote")}</p>
     </Section>
   );
 }

@@ -23,7 +23,6 @@
     "inbox": "Caixa de entrada",
     "notifications": "Notificações",
     "contacts": "Contatos",
-    "pipelines": "Pipelines",
     "broadcasts": "Disparos",
     "automations": "Automações",
     "flows": "Fluxos",
@@ -66,7 +65,6 @@
     "inbox": "Caixa de entrada",
     "notifications": "Notificações",
     "contacts": "Contatos",
-    "pipelines": "Pipelines",
     "broadcasts": "Disparos",
     "automations": "Automações",
     "settings": "Configurações",
@@ -116,8 +114,6 @@
         "newMessage": "Nova mensagem de {who}",
         "newMessages": "{who} enviou {count} mensagens",
         "newContact": "Novo contato: {name}",
-        "dealInStage": "Negócio \"{title}\" em {stage}",
-        "dealUpdated": "Negócio \"{title}\" atualizado",
         "broadcastSent": "Disparo \"{name}\" enviado para {count} contatos",
         "broadcastStatus": "Disparo \"{name}\" {status} ({count} destinatários)",
         "broadcastStatusNames": {
@@ -152,7 +148,6 @@
         "kpis": "Números principais",
         "queue": "Fila de respostas",
         "team": "Equipe",
-        "pipeline": "Funil",
         "campaigns": "Campanhas",
         "activity": "Atividade recente"
       }
@@ -192,7 +187,6 @@
         },
         "new": "Novo",
         "newContact": "Novo contato",
-        "newDeal": "Novo negócio",
         "newBroadcast": "Novo disparo",
         "newAutomation": "Nova automação"
       },
@@ -236,8 +230,6 @@
         "medianReplyInfo": "Tempo típico entre a primeira mensagem sem resposta de um cliente e a resposta de um colega. Respostas da IA e de automações não contam.",
         "resolved": "Resolvidas",
         "resolvedInfo": "Conversas fechadas neste período.",
-        "dealsWon": "Negócios ganhos",
-        "dealsWonInfo": "Negócios marcados como ganhos neste período e seu valor total.",
         "readRate": "Taxa de leitura dos disparos",
         "readRateInfo": "Mensagens lidas divididas pelas entregues, nos disparos enviados neste período.",
         "readOfDelivered": "{read} lidas de {delivered} entregues",
@@ -289,21 +281,6 @@
         "handedOff": "Transferida pela IA",
         "assigned": "Atribuída",
         "unassigned": "Sem responsável"
-      },
-      "pipeline": {
-        "title": "Pipeline",
-        "description": "Negócios abertos por etapa",
-        "link": "Pipelines",
-        "choosePipeline": "Escolha um pipeline",
-        "deals": "{count, plural, =1 {1 negócio} other {# negócios}}",
-        "open": "Em aberto",
-        "winRate": "Taxa de ganho",
-        "avgToWin": "Tempo médio até ganhar",
-        "days": "{count, plural, =1 {1 dia} other {# dias}}",
-        "none": "—",
-        "idle": "{count, plural, =1 {1 negócio aberto está} other {# negócios abertos estão}} sem atividade há 7 dias ou mais",
-        "empty": "Nenhum negócio aberto",
-        "emptyHint": "Crie negócios em Pipelines para vê-los aqui."
       },
       "team": {
         "title": "Equipe",
@@ -592,9 +569,7 @@
       "contactInfo": "Informações do contato",
       "tags": "Tags",
       "notes": "Notas",
-      "deals": "Negócios",
       "noTags": "Sem tags",
-      "noDeals": "Sem negócios",
       "addNotePlaceholder": "Adicionar uma nota..."
     },
     "aiBanner": {
@@ -700,10 +675,8 @@
         "activity": "Atividade",
         "notes": "Notas",
         "custom": "Campos personalizados",
-        "deals": "Negócios",
         "tags": "Tags",
         "noTags": "Sem tags",
-        "noDeals": "Sem negócios",
         "addNotePlaceholder": "Adicionar uma nota..."
       },
       "actions": {
@@ -732,9 +705,6 @@
         "placeholder": "Escreva uma nota...",
         "save": "Adicionar nota",
         "noNotes": "Nenhuma nota ainda."
-      },
-      "dealsTab": {
-        "noDeals": "Nenhum negócio ainda"
       },
       "tagsTab": {
         "clickTagDesc": "Clique em uma tag para adicioná-la ou removê-la deste contato.",
@@ -830,128 +800,6 @@
       "toastRenameFailed": "Não foi possível renomear o campo.",
       "toastDeleteFailed": "Não foi possível excluir o campo.",
       "toastDeleted": "\"{name}\" excluído."
-    }
-  },
-  "Pipelines": {
-    "page": {
-      "selectPipeline": "Selecionar pipeline",
-      "noPipelinesYet": "Nenhum pipeline ainda",
-      "managePipelines": "Gerenciar pipelines",
-      "addPipeline": "Adicionar pipeline",
-      "addDeal": "Adicionar negócio",
-      "createToStartTracking": "Crie um pipeline para começar a acompanhar negócios",
-      "createPipeline": "Criar pipeline",
-      "newPipeline": "Novo pipeline",
-      "pipelineName": "Nome do pipeline",
-      "pipelineNamePlaceholder": "ex.: Vendas corporativas",
-      "defaultStagesDesc": "As etapas padrão (Novo lead → Ganho) serão criadas automaticamente.",
-      "cancel": "Cancelar",
-      "creating": "Criando...",
-      "createPipelineBtn": "Criar pipeline",
-      "toastFailedLoadPipelines": "Falha ao carregar os pipelines",
-      "toastFailedMoveDeal": "Falha ao mover o negócio",
-      "toastFailedCreatePipeline": "Falha ao criar o pipeline",
-      "toastPipelineCreated": "Pipeline criado",
-      "toastNotLinkedToAccount": "Seu perfil não está vinculado a uma conta.",
-      "defaultPipelineName": "Pipeline de vendas",
-      "defaultStages": {
-        "newLead": "Novo lead",
-        "qualified": "Qualificado",
-        "proposalSent": "Proposta enviada",
-        "negotiation": "Negociação",
-        "won": "Ganho"
-      }
-    },
-    "board": {
-      "dropDealHere": "Solte um negócio aqui",
-      "addDeal": "Adicionar negócio"
-    },
-    "card": {
-      "noContact": "Sem contato",
-      "won": "Ganho",
-      "lost": "Perdido"
-    },
-    "form": {
-      "editDeal": "Editar negócio",
-      "newDeal": "Novo negócio",
-      "title": "Título",
-      "titlePlaceholder": "Título do negócio",
-      "contact": "Contato",
-      "selectContact": "Selecione um contato",
-      "linkToConversation": "Vincular a uma conversa",
-      "value": "Valor",
-      "currency": "Moeda",
-      "expectedCloseDate": "Data prevista de fechamento",
-      "stage": "Etapa",
-      "assignedTo": "Atribuído a",
-      "unassigned": "Não atribuído",
-      "notes": "Notas",
-      "notesPlaceholder": "Adicionar notas...",
-      "status": "Status",
-      "markAsWon": "Marcar como ganho",
-      "markAsLost": "Marcar como perdido",
-      "reopenDeal": "Reabrir negócio",
-      "cancel": "Cancelar",
-      "saving": "Salvando...",
-      "saveChanges": "Salvar alterações",
-      "createDeal": "Criar negócio",
-      "deletePrompt": "Excluir este negócio?",
-      "confirm": "Confirmar",
-      "deleting": "Excluindo...",
-      "deleteDeal": "Excluir negócio",
-      "toastRequired": "Título, contato e etapa são obrigatórios",
-      "toastFailedSave": "Falha ao salvar o negócio",
-      "toastNotSignedIn": "Você não está conectado",
-      "toastNotLinked": "Seu perfil não está vinculado a uma conta.",
-      "toastFailedCreate": "Falha ao criar o negócio",
-      "toastUpdated": "Negócio atualizado",
-      "toastCreated": "Negócio criado",
-      "toastFailedStatus": "Falha ao atualizar o status do negócio",
-      "toastMarkedWon": "Marcado como ganho",
-      "toastMarkedLost": "Marcado como perdido",
-      "toastReopened": "Negócio reaberto",
-      "toastFailedDelete": "Falha ao excluir o negócio",
-      "toastDeleted": "Negócio excluído"
-    },
-    "settings": {
-      "managePipeline": "Gerenciar pipeline",
-      "deletePipeline": "Excluir pipeline",
-      "deletePipelineDesc": "Isso arquivará todos os negócios deste pipeline. Não é possível desfazer.",
-      "cancel": "Cancelar",
-      "deleting": "Excluindo...",
-      "deletePipelineBtn": "Excluir pipeline",
-      "pipelineName": "Nome do pipeline",
-      "stages": "Etapas",
-      "newStageNamePlaceholder": "Nome da nova etapa",
-      "add": "Adicionar",
-      "createNewPipeline": "Criar um novo pipeline",
-      "saving": "Salvando...",
-      "saveChanges": "Salvar alterações",
-      "dragToReorder": "Arraste para reordenar",
-      "changeColor": "Mudar cor",
-      "toastFailedSave": "Falha ao salvar o pipeline",
-      "toastSaved": "Pipeline salvo",
-      "toastFailedAddStage": "Falha ao adicionar a etapa",
-      "toastMoveOrDeleteDeals": "Mova ou exclua os negócios desta etapa primeiro",
-      "toastFailedDeleteStage": "Falha ao excluir a etapa",
-      "toastFailedDeletePipeline": "Falha ao excluir o pipeline",
-      "toastDeleted": "Pipeline excluído",
-      "pickColor": "Escolher a cor {color}"
-    },
-    "analytics": {
-      "totalDeals": "Total de negócios",
-      "totalDealsTooltip": "Quantidade de negócios deste pipeline que não estão marcados como perdidos. Negócios ganhos continuam incluídos.",
-      "pipelineValue": "Valor do pipeline",
-      "pipelineValueTooltip": "Soma dos valores de todos os negócios deste pipeline, excluindo os marcados como perdidos.",
-      "avgDealSize": "Ticket médio",
-      "avgDealSizeTooltip": "Valor do pipeline dividido pelo total de negócios — o valor médio de um único negócio não perdido.",
-      "weightedValue": "Valor ponderado",
-      "weightedValueTooltip": "Receita esperada: o valor de cada negócio aberto × a probabilidade da sua etapa. Primeira etapa ≈ 10%, as etapas avançam até 90%, Ganho = 100%. Negócios perdidos são excluídos.",
-      "wonThisMonth": "Ganhos neste mês",
-      "wonThisMonthTooltip": "Negócios marcados como ganhos desde o primeiro dia do mês atual.",
-      "lostThisMonth": "Perdidos neste mês",
-      "lostThisMonthTooltip": "Negócios marcados como perdidos desde o primeiro dia do mês atual.",
-      "howCalculated": "Como {label} é calculado"
     }
   },
   "Broadcasts": {
@@ -2073,7 +1921,7 @@
       "templates": "Modelos",
       "quick-replies": "Respostas rápidas",
       "fields": "Campos e tags",
-      "deals": "Negócios e moeda",
+      "deals": "Moeda",
       "inbox": "Caixa de entrada",
       "members": "Membros da equipe",
       "api": "Chaves de API",
@@ -2224,10 +2072,10 @@
       "networkError": "Não foi possível conectar ao servidor"
     },
     "deals": {
-      "title": "Negócios e moeda",
-      "description": "A moeda usada em novos negócios e nos totais do pipeline e do painel.",
+      "title": "Moeda",
+      "description": "A moeda usada em valores e totais do painel.",
       "defaultCurrency": "Moeda padrão",
-      "defaultCurrencyDesc": "Novos negócios usam esta moeda por padrão, e os totais do pipeline e do painel são exibidos nela. Negócios existentes mantêm a moeda com que foram salvos.",
+      "defaultCurrencyDesc": "Valores e totais do painel são exibidos nesta moeda.",
       "currencyLabel": "Moeda",
       "adminOnlyHint": "Somente administradores da conta podem alterar a moeda padrão.",
       "save": "Salvar",
@@ -2526,8 +2374,6 @@
       "addOrImportContacts": "adicionar ou importar contatos",
       "deleteContacts": "excluir contatos",
       "createFlows": "criar fluxos",
-      "createPipelines": "criar pipelines",
-      "createDeals": "criar negócios",
       "sendMessages": "enviar mensagens"
     }
   },
@@ -3450,13 +3296,6 @@
     "notifyInApp": "Na AutoShift (e alerta no computador)",
     "notifyEmail": "Por e-mail",
     "handoffMessage": "Mensagem que o cliente recebe na transferência",
-    "routingTitle": "Adicionar leads a um funil",
-    "routingDesc": "Crie um negócio automaticamente para nenhum lead ser esquecido.",
-    "pipeline": "Funil",
-    "dealValue": "Valor do negócio a partir de",
-    "noValue": "Não definir valor",
-    "stageHot": "Etapa para leads Quentes",
-    "stageWarm": "Etapa para leads Mornos",
     "coldNote": "Leads Frios continuam como contatos com a etiqueta Frio — nenhum negócio é criado.",
     "save": "Salvar alterações",
     "saved": "Alterações salvas.",
@@ -3621,8 +3460,6 @@
     "toolsCount": "{count, plural, one {# ferramenta} other {# ferramentas}}",
     "costMonth": "{amount} este mês",
     "open": "Abrir",
-    "newTitle": "Novo assistente",
-    "newDesc": "Escolha um ponto de partida. Você pode mudar tudo depois.",
     "notFound": "Este assistente não existe mais.",
     "backToList": "Todos os assistentes",
     "on": "Ativo",
@@ -3683,7 +3520,9 @@
     "try1": "Qual é o horário de funcionamento?",
     "try2": "Sim, 14:30 por favor",
     "try3": "Quais são os preços?",
-    "try4": "Posso falar com alguém?"
+    "try4": "Posso falar com alguém?",
+    "toastOn": "{name} ligado",
+    "toastOff": "{name} desligado"
   },
   "AiTools": {
     "title": "Ferramentas de IA",

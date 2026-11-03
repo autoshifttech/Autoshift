@@ -3,7 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /** The sections of the overview a person can hide or move (the bento at the top is always first). */
-export const DASH_SECTIONS = ["nextSteps", "summary", "attention", "kpis", "queue", "team", "pipeline", "campaigns", "activity"] as const;
+export const DASH_SECTIONS = ["nextSteps", "summary", "attention", "kpis", "queue", "team", "campaigns", "activity"] as const;
 export type DashSection = (typeof DASH_SECTIONS)[number];
 /** Sections that fill the whole row; the rest sit two to a row on wide screens. */
 export const FULL_WIDTH: DashSection[] = ["nextSteps", "summary", "attention", "kpis", "activity"];

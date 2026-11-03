@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Hand, MessageSquare, Plus, Target, Wrench } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
-import { ASSISTANT_ROLES, ROLE_PRESETS, assistantsStore, newAssistant, updateAssistant, useAssistants, type AssistantRole } from "@/lib/assistants/model";
+import { assistantsStore, newAssistant, updateAssistant, useAssistants } from "@/lib/assistants/model";
+import { toast } from "@/lib/toast";
 import { AssistantAvatar } from "./assistant-ui";
 
 const AI_PRICE = RATES.find((r) => r.kind === "ai")?.price ?? 0;
@@ -22,12 +21,11 @@ export function AssistantsList() {
   const locale = useLocale();
   const router = useRouter();
   const { assistants, tools } = useAssistants();
-  const [creating, setCreating] = useState(false);
 
-  const create = (role: AssistantRole) => {
-    const a = newAssistant(role);
+  // "New assistant" goes straight to the editor with a blank assistant.
+  const create = () => {
+    const a = newAssistant("custom");
     assistantsStore.set((s) => ({ ...s, assistants: [...s.assistants, a] }));
-    setCreating(false);
     router.push(`/agents/${a.id}`);
   };
 
@@ -43,7 +41,7 @@ export function AssistantsList() {
             <Wrench className="size-4" />
             {t("manageTools")}
           </Link>
-          <Button onClick={() => setCreating(true)} className="gap-1.5">
+          <Button onClick={create} className="gap-1.5">
             <Plus className="size-4" />
             {t("newAssistant")}
           </Button>
@@ -65,7 +63,10 @@ export function AssistantsList() {
                     {t(`role_${a.role}`)} · {t(`audience_${a.audience}`)}
                   </p>
                 </div>
-                <Switch checked={a.enabled} onCheckedChange={(enabled) => updateAssistant(a.id, { enabled })} aria-label={t("enabledLabel", { name: a.name })} />
+                <Switch checked={a.enabled} onCheckedChange={(enabled) => {
+                    updateAssistant(a.id, { enabled });
+                    toast.success(t(enabled ? "toastOn" : "toastOff", { name: a.name }));
+                  }} aria-label={t("enabledLabel", { name: a.name })} />
               </div>
               <p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted-foreground">{a.instructions || t("noInstructions")}</p>
               <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -88,7 +89,10 @@ export function AssistantsList() {
                 <span>
                   {t("toolsCount", { count: activeTools })} · {t("costMonth", { amount: formatMoney(a.stats.replies * AI_PRICE, locale) })}
                 </span>
-                <Link href={`/agents/${a.id}`} className="font-medium text-primary hover:underline">
+                <Link
+                  href={`/agents/${a.id}`}
+                  className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-card px-6 text-sm font-semibold text-primary shadow-[var(--shadow-card)] transition-colors hover:bg-muted"
+                >
                   {t("open")}
                 </Link>
               </div>
@@ -97,38 +101,13 @@ export function AssistantsList() {
         })}
         <button
           type="button"
-          onClick={() => setCreating(true)}
+          onClick={create}
           className="flex min-h-56 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
         >
           <Plus className="size-6" />
           {t("newAssistant")}
         </button>
       </div>
-
-      <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("newTitle")}</DialogTitle>
-            <DialogDescription>{t("newDesc")}</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {ASSISTANT_ROLES.map((role) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => create(role)}
-                className="flex items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-primary/50 hover:bg-muted/50"
-              >
-                <AssistantAvatar assistant={ROLE_PRESETS[role]} className="size-9 rounded-lg" />
-                <span>
-                  <span className="block text-sm font-semibold text-foreground">{t(`role_${role}`)}</span>
-                  <span className="block text-xs text-muted-foreground">{t(`roleDesc_${role}`)}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

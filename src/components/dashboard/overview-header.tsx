@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Briefcase, ChevronDown, Plus, Radio, UserPlus, Zap } from 'lucide-react'
+import { ChevronDown, Plus, Radio, UserPlus, Zap } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { buttonVariants } from '@/components/ui/button'
@@ -25,7 +25,6 @@ import { useFormatDuration } from './use-format-duration'
 
 const NEW_ITEMS = [
   { key: 'newContact', href: '/contacts', icon: UserPlus },
-  { key: 'newDeal', href: '/pipelines', icon: Briefcase },
   { key: 'newBroadcast', href: '/broadcasts/new', icon: Radio },
   { key: 'newAutomation', href: '/automations/new', icon: Zap },
 ] as const

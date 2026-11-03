@@ -13,7 +13,6 @@ import {
   Bot,
   FileText,
   Filter,
-  GitBranch,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -53,7 +52,6 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/leads", labelKey: "leads", icon: Target },
       { href: "/insights", labelKey: "insights", icon: BarChart3 },
       { href: "/contacts", labelKey: "contacts", icon: Users },
-      { href: "/pipelines", labelKey: "pipelines", icon: GitBranch },
     ],
   },
   {

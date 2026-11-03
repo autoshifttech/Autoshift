@@ -1,7 +1,7 @@
 /**
  * Lead capture: the questions the AI asks in WhatsApp, how answers turn
  * into a Hot / Warm / Cold score, when a lead is handed to a person, and
- * which pipeline stage it lands in. Plus per-industry AI presets.
+ * Plus per-industry AI presets.
  * Kept in the browser until the Supabase tables exist.
  */
 import { createStore, useStore } from '@/lib/workspace/store'
@@ -47,14 +47,6 @@ export interface HandoffSettings {
   handoffMessage: string
 }
 
-export interface PipelineRouting {
-  enabled: boolean
-  pipeline: string
-  stageHot: string
-  stageWarm: string
-  valueFromQuestionId: string | null
-}
-
 export interface AiProfile {
   tone: 'friendly' | 'professional' | 'concise'
   faqs: { q: string; a: string }[]
@@ -68,7 +60,6 @@ export interface LeadSettings {
   rules: ScoreRule[]
   thresholds: Thresholds
   handoff: HandoffSettings
-  routing: PipelineRouting
   ai: AiProfile
 }
 
@@ -289,17 +280,11 @@ export function applyPreset(settings: LeadSettings, industry: Industry): LeadSet
     industry,
     questions: structuredClone(p.questions),
     rules: structuredClone(p.rules),
-    routing: { ...settings.routing, valueFromQuestionId: p.valueFrom },
     ai: { ...settings.ai, faqs: structuredClone(p.faqs) },
   }
 }
 
 // --- sample workspace -------------------------------------------------------
-
-export const SAMPLE_PIPELINES: Record<string, string[]> = {
-  Sales: ['New lead', 'Qualified', 'Proposal', 'Won'],
-  'Site visits': ['Requested', 'Scheduled', 'Visited', 'Booked'],
-}
 
 export function defaultLeadSettings(): LeadSettings {
   return applyPreset(
@@ -318,7 +303,6 @@ export function defaultLeadSettings(): LeadSettings {
         notifyEmail: false,
         handoffMessage: 'Thanks! I’m connecting you with our team — someone will reply here shortly.',
       },
-      routing: { enabled: true, pipeline: 'Sales', stageHot: 'Qualified', stageWarm: 'New lead', valueFromQuestionId: null },
       ai: { tone: 'friendly', faqs: [], fallback: 'Let me check that with the team and get back to you.' },
     },
     'real_estate',

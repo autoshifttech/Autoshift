@@ -27,7 +27,6 @@ import { KpiRow } from '@/components/dashboard/kpi-row'
 import { NextSteps } from '@/components/dashboard/next-steps'
 import { OverviewBento } from '@/components/dashboard/overview-bento'
 import { OverviewHeader } from '@/components/dashboard/overview-header'
-import { PipelineCard } from '@/components/dashboard/pipeline-card'
 import { ReplyQueueCard } from '@/components/dashboard/reply-queue-card'
 import { SetupChecklist } from '@/components/dashboard/setup-checklist'
 import { TeamCard } from '@/components/dashboard/team-card'
@@ -51,7 +50,7 @@ function DashboardPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const range = parseOverviewRange(searchParams.get('range'))
-  const { defaultCurrency, profile } = useAuth()
+  const { profile } = useAuth()
   const layout = useDashboardLayout()
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
@@ -173,10 +172,9 @@ function DashboardPageInner() {
                   {id === 'nextSteps' && <NextSteps data={data} />}
                   {id === 'summary' && <WorkspaceSummary />}
                   {id === 'attention' && <AttentionRow data={data} now={now} onlineCount={onlineCount} />}
-                  {id === 'kpis' && <KpiRow data={data} currency={defaultCurrency} />}
+                  {id === 'kpis' && <KpiRow data={data} />}
                   {id === 'queue' && <ReplyQueueCard data={data} now={now} />}
                   {id === 'team' && <TeamCard data={data} now={now} />}
-                  {id === 'pipeline' && <PipelineCard data={data} currency={defaultCurrency} />}
                   {id === 'campaigns' && <CampaignsCard data={data} />}
                   {id === 'activity' && <ActivityFeed items={activity} loading={activityLoading} />}
                 </div>
