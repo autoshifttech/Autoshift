@@ -740,7 +740,9 @@ function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
         {t('addNode')}
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        side="right"
         align="start"
+        sideOffset={10}
         className="w-[268px] p-1.5"
       >
         {groupNodeTypesByCategory(ADD_NODE_TYPES).map((group, i) => (
