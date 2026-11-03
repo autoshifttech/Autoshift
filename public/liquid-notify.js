@@ -32,7 +32,8 @@
     accentInk: '#c25200',          /* action-button text on light glass */
     font: "'Inter','Segoe UI',system-ui,-apple-system,Roboto,sans-serif",
     zIndex: 9999,
-    holdSeconds: 2.0
+    holdSeconds: 2.0,
+    scale: 0.8                     /* 1 = the original 470px wide stage; smaller values shrink the whole notification */
   };
 
   var W = 470, H = 228, CX = 235;
@@ -130,9 +131,11 @@
     goo.height = rimC.height = Math.max(1, Math.round(cv.height * q));
   }
   function place(){                                       /* notch, Dynamic Island, on-screen keyboard */
-    var vv = root.visualViewport; if (!vv || !box) return;
+    if (!box) return;
+    var vv = root.visualViewport, vw = vv ? vv.width : root.innerWidth;
+    box.style.width = Math.min(W * CFG.scale, vw) + 'px';
+    if (!vv) return;
     box.style.left = (vv.offsetLeft + vv.width / 2) + 'px';
-    box.style.width = Math.min(470, vv.width) + 'px';
     box.style.top = 'calc(env(safe-area-inset-top,0px) + ' + vv.offsetTop + 'px)';
   }
   function placeBox(el, x, y, w, h){
