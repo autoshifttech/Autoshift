@@ -56,34 +56,38 @@ export function AssistantEditor({ id }: { id: string }) {
           {t("backToList")}
         </Link>
       </div>
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
-        <AssistantAvatar assistant={a} className="size-12 rounded-2xl" />
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+        <AssistantAvatar assistant={a} className="size-10 shrink-0 rounded-xl sm:size-11" />
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl font-bold tracking-tight text-foreground">{a.name}</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="truncate text-[clamp(1rem,0.92rem+0.4vw,1.15rem)] font-bold tracking-tight text-foreground">{a.name}</h2>
+          <p className="truncate text-[13px] text-muted-foreground">
             {t(`role_${a.role}`)} · {t(`audience_${a.audience}`)}
           </p>
         </div>
-        <label className="flex items-center gap-2.5 text-sm font-medium text-foreground">
-          <Switch checked={a.enabled} onCheckedChange={(enabled) => set({ enabled })} />
-          {a.enabled ? t("on") : t("off")}
-        </label>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-destructive hover:text-destructive"
-          onClick={() => {
-            assistantsStore.set((s) => ({ ...s, assistants: s.assistants.filter((x) => x.id !== a.id) }));
-            toast.success(t("deleted", { name: a.name }));
-            router.push("/agents");
-          }}
-        >
-          <Trash2 className="size-4" />
-          {t("delete")}
-        </Button>
+        </div>
+        <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-4">
+          <label className="flex items-center gap-2.5 text-sm font-medium text-foreground">
+            <Switch checked={a.enabled} onCheckedChange={(enabled) => set({ enabled })} />
+            {a.enabled ? t("on") : t("off")}
+          </label>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-destructive hover:text-destructive"
+            onClick={() => {
+              assistantsStore.set((s) => ({ ...s, assistants: s.assistants.filter((x) => x.id !== a.id) }));
+              toast.success(t("deleted", { name: a.name }));
+              router.push("/agents");
+            }}
+          >
+            <Trash2 className="size-4" />
+            {t("delete")}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         {wizard ? (
           <WizardSteps
             a={a}
@@ -144,7 +148,7 @@ function ProfileTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) => 
   const tl = useTranslations("Leads");
   return (
     <section className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-      <div className="grid gap-1.5">
+      <div className="grid max-w-md gap-1.5">
         <Label htmlFor="as-name">{t("name")}</Label>
         <Input id="as-name" value={a.name} onChange={(e) => set({ name: e.target.value })} />
       </div>
@@ -436,14 +440,14 @@ function WizardSteps({
   const last = step === WIZARD_STEPS.length - 1;
   const current = WIZARD_STEPS[step];
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4 pb-2">
       <nav aria-label={t("wizardSteps")}>
         <ol className="flex items-center gap-2">
           {WIZARD_STEPS.map((st, i) => {
             const done = i < step;
             const active = i === step;
             return (
-              <li key={st.id} className="flex min-w-0 flex-1 items-center gap-2 last:flex-none">
+              <li key={st.id} className={cn("flex min-w-0 items-center gap-2 last:flex-none", active ? "flex-[2]" : "flex-1")}>
                 <button
                   type="button"
                   onClick={() => setStep(i)}
@@ -458,9 +462,9 @@ function WizardSteps({
                   >
                     {done ? <Check className="size-4" aria-hidden /> : i + 1}
                   </span>
-                  <span className={cn("truncate text-sm font-medium", active ? "text-foreground" : "hidden text-muted-foreground sm:inline")}>{t(st.label)}</span>
+                  <span className={cn("text-sm font-medium whitespace-nowrap", active ? "text-foreground" : "hidden text-muted-foreground sm:inline")}>{t(st.label)}</span>
                 </button>
-                {i < WIZARD_STEPS.length - 1 && <span aria-hidden className={cn("h-px flex-1", done ? "bg-primary" : "bg-border")} />}
+                {i < WIZARD_STEPS.length - 1 && <span aria-hidden className={cn("h-px min-w-2 flex-1", done ? "bg-primary" : "bg-border")} />}
               </li>
             );
           })}
@@ -474,21 +478,21 @@ function WizardSteps({
       {current.id === "tools" && <ToolsTab a={a} set={set} />}
       {current.id === "audience" && <AudienceTab a={a} set={set} />}
 
-      <div className="sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)] backdrop-blur">
-        <Button variant="outline" className="min-h-11 rounded-full px-5" onClick={() => setStep(step - 1)} disabled={step === 0}>
+      <div className="sticky bottom-3 z-10 mx-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-border bg-card/95 p-1.5 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)] backdrop-blur">
+        <Button variant="ghost" className="h-10 rounded-full px-4 text-sm" onClick={() => setStep(step - 1)} disabled={step === 0}>
           <ArrowLeft className="size-4" />
           {t("wizardPrevious")}
         </Button>
-        <button type="button" onClick={() => onDone(false)} className="hidden min-h-11 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:block">
+        <button type="button" onClick={() => onDone(false)} className="h-10 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:text-sm">
           {t("wizardSkip")}
         </button>
         {last ? (
-          <Button className="min-h-11 rounded-full px-6" onClick={() => onDone(true)}>
+          <Button className="h-10 rounded-full px-5 text-sm" onClick={() => onDone(true)}>
             <Check className="size-4" />
             {t("wizardFinish")}
           </Button>
         ) : (
-          <Button className="min-h-11 rounded-full px-6" onClick={() => setStep(step + 1)}>
+          <Button className="h-10 rounded-full px-5 text-sm" onClick={() => setStep(step + 1)}>
             {t("wizardNext")}
             <ArrowRight className="size-4" />
           </Button>
