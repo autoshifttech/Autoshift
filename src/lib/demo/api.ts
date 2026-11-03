@@ -6,6 +6,7 @@
  */
 import { DEMO_ACCOUNT_ID, DEMO_USER_ID } from './data'
 import type { DemoDb, DemoResponse, Row } from './rest'
+import { getFlowTemplate, listFlowTemplates } from '@/lib/flows/templates'
 
 const json = (status: number, body: unknown): DemoResponse => ({ status, headers: { 'content-type': 'application/json' }, body })
 const ok = (body: unknown = { success: true }) => json(200, body)
@@ -43,6 +44,27 @@ function automationSteps(db: DemoDb, id: string): ServerStep[] {
       .sort((a, b) => Number(a.position) - Number(b.position))
       .map((s) => ({ id: String(s.id), step_type: String(s.step_type), step_config: (s.step_config as Row) ?? {}, branches: { yes: [], no: [] } }))
   )
+}
+
+/** Flows are the one thing the demo keeps across reloads, so a built flow isn't lost. */
+const FLOWS_KEY = 'autoshift.demo.flows.v1'
+const flowsLoaded = new WeakSet<object>()
+function loadFlows(db: DemoDb) {
+  if (flowsLoaded.has(db)) return
+  flowsLoaded.add(db)
+  try {
+    const raw = localStorage.getItem(FLOWS_KEY)
+    if (raw) db.flows = JSON.parse(raw) as Row[]
+  } catch {
+    // No storage (tests, private mode): keep the in-memory list.
+  }
+}
+function saveFlows(db: DemoDb) {
+  try {
+    localStorage.setItem(FLOWS_KEY, JSON.stringify(db.flows))
+  } catch {
+    // Storage blocked or full: the in-memory copy still works.
+  }
 }
 
 const DEMO_PHONE_INFO = { display_phone_number: '+91 98765 43210', verified_name: 'Olive & Thread', quality_rating: 'GREEN', code_verification_status: 'VERIFIED' }
@@ -97,26 +119,42 @@ export function handleAppApi(db: DemoDb, method: string, path: string, rawBody: 
 
   // --- Flows (hidden from the menu, but keep them usable) ---------------------
   if (area === 'flows') {
-    if (a === 'templates') return ok({ templates: [] })
+    loadFlows(db)
+    if (a === 'templates') {
+      return ok({
+        templates: listFlowTemplates().map((t) => ({
+          slug: t.slug,
+          name: t.name,
+          description: t.description,
+          icon: t.icon,
+          trigger_type: t.trigger_type,
+          node_count: t.nodes.length,
+        })),
+      })
+    }
     if (!a) {
       if (method === 'GET') return ok({ flows: db.flows })
       if (method === 'POST') {
-        const flow = {
+        const template = typeof body.template_slug === 'string' ? getFlowTemplate(body.template_slug) : null
+        const flow: Row = {
           id: newId(),
           account_id: DEMO_ACCOUNT_ID,
           user_id: DEMO_USER_ID,
-          name: (body.name as string) || 'Untitled flow',
-          description: null,
+          name: (body.name as string) || template?.name || 'Untitled flow',
+          description: template?.description ?? null,
           status: 'draft',
-          trigger_type: 'keyword',
-          trigger_config: { keywords: [], match_type: 'contains' },
-          entry_node_id: null,
+          trigger_type: template?.trigger_type ?? 'keyword',
+          trigger_config: template?.trigger_config ?? { keywords: [], match_type: 'contains' },
+          entry_node_id: template?.entry_node_id ?? null,
           fallback_policy: 'restart',
           execution_count: 0,
+          last_executed_at: null,
           created_at: now(),
           updated_at: now(),
+          ...(template ? { nodes: template.nodes.map((n) => ({ node_key: n.node_key, node_type: n.node_type, config: n.config, position_x: 0, position_y: 0 })) } : {}),
         }
         db.flows.push(flow)
+        saveFlows(db)
         return json(201, { flow })
       }
     }
@@ -124,16 +162,20 @@ export function handleAppApi(db: DemoDb, method: string, path: string, rawBody: 
     if (!flow) return json(404, { error: 'Flow not found' })
     if (b === 'runs') return ok({ flow: { id: flow.id, name: flow.name }, runs: [], events: [] })
     if (b === 'activate') {
-      flow.status = method === 'DELETE' ? 'draft' : 'active'
+      flow.status = method === 'DELETE' ? 'draft' : (typeof body.status === 'string' ? body.status : 'active')
+      flow.updated_at = now()
+      saveFlows(db)
       return ok({ flow })
     }
     if (method === 'GET') return ok({ flow, nodes: (flow.nodes as unknown[]) ?? [] })
     if (method === 'PATCH' || method === 'PUT') {
       Object.assign(flow, body, { updated_at: now() })
+      saveFlows(db)
       return ok({ flow })
     }
     if (method === 'DELETE') {
       db.flows = db.flows.filter((x) => x !== flow)
+      saveFlows(db)
       return ok()
     }
   }

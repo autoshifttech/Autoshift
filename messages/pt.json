@@ -1327,7 +1327,23 @@
       "triggerFirstInbound": "Acionado pela primeira mensagem recebida de um contato",
       "triggerManual": "Acionamento manual",
       "cloneFailedStatus": "Falha ao clonar: {status}",
-      "connections": "Conexões"
+      "connections": "Conexões",
+      "descriptionShort": "Conversas no WhatsApp com botões.",
+      "searchPlaceholder": "Buscar fluxos",
+      "filterLabel": "Filtrar fluxos",
+      "filterAll": "Todos",
+      "noResults": "Nenhum fluxo corresponde à busca.",
+      "edited": "Editado {when}",
+      "duplicate": "Duplicar",
+      "duplicated": "Fluxo duplicado.",
+      "copyName": "{name} (cópia)",
+      "toggleLabel": "Ligar ou desligar {name}",
+      "toggleError": "Não foi possível alterar o fluxo.",
+      "toastOn": "{name} está ligado",
+      "toastOff": "{name} está desligado",
+      "deleteTitle": "Excluir “{name}”?",
+      "deleteDesc": "As execuções ativas terminam imediatamente. Não é possível desfazer.",
+      "fromTemplate": "Ou comece por um modelo"
     },
     "edit": {
       "notFound": "Fluxo não encontrado.",
@@ -2566,6 +2582,31 @@
       "askEmail": "Obrigado, {name}! Qual é o seu e-mail profissional?",
       "askCompany": "Quase lá — qual é o nome da sua empresa?",
       "handoffNote": "Novo lead — nome={name}, e-mail={email}, empresa={company}."
+    },
+    "order_payment": {
+      "name": "Pedido com pagamento",
+      "description": "Receba um pedido no chat, confirme e envie um link de pagamento Razorpay ou Cashfree. Pagamento na entrega e atendimento humano já incluídos.",
+      "keywords": "pedido,comprar,loja",
+      "askItem": "O que você gostaria de pedir? Diga o item e a quantidade.",
+      "askAddress": "Obrigado! Qual é o endereço de entrega?",
+      "confirmText": "Seu pedido: {item}\nEntregar em: {address}\n\nComo prefere pagar?",
+      "payButton": "Pagar online",
+      "codButton": "Pagar na entrega",
+      "humanButton": "Falar conosco",
+      "linkDescription": "Pedido: {item}",
+      "linkMessage": "Pague com segurança aqui: {link}\nConfirmamos seu pedido assim que for pago.",
+      "codMessage": "Pronto — entregaremos e receberemos o pagamento na chegada. Obrigado!",
+      "humanNote": "O cliente quer falar sobre o pedido."
+    },
+    "site_visit": {
+      "name": "Agendar visita",
+      "description": "Pergunte nome, orçamento e horário preferido, salve as respostas em uma planilha Google e agende a visita no Google Agenda.",
+      "keywords": "visita,imóvel,tour,propriedade",
+      "askName": "Posso agendar uma visita! Qual é o seu nome?",
+      "askBudget": "Prazer, {name}. Qual é o seu orçamento?",
+      "askWhen": "Quando gostaria de visitar? Por exemplo: sábado às 11h.",
+      "eventTitle": "Visita — {name}",
+      "thanks": "Obrigado, {name}! Anotamos sua visita para {time}. Nossa equipe confirmará em breve."
     }
   },
   "LibErrors": {

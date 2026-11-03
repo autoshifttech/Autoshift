@@ -1327,7 +1327,23 @@
       "triggerFirstInbound": "연락처의 첫 수신 메시지에서 트리거됨",
       "triggerManual": "수동 트리거",
       "cloneFailedStatus": "복제 실패: {status}",
-      "connections": "연결"
+      "connections": "연결",
+      "descriptionShort": "버튼으로 진행하는 WhatsApp 대화.",
+      "searchPlaceholder": "플로우 검색",
+      "filterLabel": "플로우 필터",
+      "filterAll": "전체",
+      "noResults": "검색과 일치하는 플로우가 없습니다.",
+      "edited": "{when} 수정됨",
+      "duplicate": "복제",
+      "duplicated": "플로우가 복제되었습니다.",
+      "copyName": "{name} (사본)",
+      "toggleLabel": "{name} 켜기/끄기",
+      "toggleError": "플로우를 변경하지 못했습니다.",
+      "toastOn": "{name} 켜짐",
+      "toastOff": "{name} 꺼짐",
+      "deleteTitle": "“{name}”을(를) 삭제할까요?",
+      "deleteDesc": "진행 중인 실행이 즉시 종료됩니다. 되돌릴 수 없습니다.",
+      "fromTemplate": "또는 템플릿으로 시작"
     },
     "edit": {
       "notFound": "플로우를 찾을 수 없습니다.",
@@ -2566,6 +2582,31 @@
       "askEmail": "감사합니다, {name}님! 업무용 이메일 주소를 알려주세요.",
       "askCompany": "거의 끝났습니다 — 회사 이름이 무엇인가요?",
       "handoffNote": "신규 리드 — 이름={name}, 이메일={email}, 회사={company}."
+    },
+    "order_payment": {
+      "name": "결제가 포함된 주문",
+      "description": "채팅으로 주문을 받고 확인한 뒤 Razorpay 또는 Cashfree 결제 링크를 보냅니다. 착불과 상담원 연결이 포함되어 있습니다.",
+      "keywords": "주문,구매,쇼핑",
+      "askItem": "무엇을 주문하시겠어요? 상품과 수량을 알려 주세요.",
+      "askAddress": "감사합니다! 배송 주소를 알려 주세요.",
+      "confirmText": "주문 내용: {item}\n배송지: {address}\n\n결제 방법을 선택해 주세요.",
+      "payButton": "온라인 결제",
+      "codButton": "착불",
+      "humanButton": "상담 문의",
+      "linkDescription": "주문: {item}",
+      "linkMessage": "여기에서 안전하게 결제하세요: {link}\n결제가 완료되면 바로 주문을 확인해 드립니다.",
+      "codMessage": "완료되었습니다. 도착 시 결제를 받겠습니다. 감사합니다!",
+      "humanNote": "고객이 주문에 대해 상담을 원합니다."
+    },
+    "site_visit": {
+      "name": "방문 예약",
+      "description": "고객의 이름, 예산, 희망 시간을 묻고 답변을 Google 스프레드시트에 저장한 뒤 Google 캘린더에 방문을 예약합니다.",
+      "keywords": "방문,현장,투어,매물",
+      "askName": "방문을 예약해 드릴게요! 성함이 어떻게 되세요?",
+      "askBudget": "반갑습니다, {name}님. 예산은 어느 정도인가요?",
+      "askWhen": "언제 방문하고 싶으신가요? 예: 토요일 오전 11시.",
+      "eventTitle": "방문 — {name}",
+      "thanks": "감사합니다, {name}님! {time} 방문으로 접수했습니다. 곧 팀에서 확인해 드리겠습니다."
     }
   },
   "LibErrors": {

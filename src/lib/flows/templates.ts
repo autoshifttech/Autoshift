@@ -20,6 +20,7 @@
  */
 
 import type {
+  ActionNodeConfig,
   CollectInputNodeConfig,
   ConditionNodeConfig,
   HandoffNodeConfig,
@@ -39,6 +40,7 @@ export type FlowTemplateNodeType =
   | "collect_input"
   | "condition"
   | "set_tag"
+  | "action"
   | "handoff"
   | "end";
 
@@ -53,6 +55,7 @@ export interface FlowTemplateNode {
     | CollectInputNodeConfig
     | ConditionNodeConfig
     | HandoffNodeConfig
+    | ActionNodeConfig
     | Record<string, unknown>;
 }
 
@@ -61,7 +64,7 @@ export interface FlowTemplate {
   name: string;
   description: string;
   /** Used by the gallery to surface a relevant icon. lucide-react name. */
-  icon: "MessageSquare" | "HelpCircle" | "UserPlus";
+  icon: "MessageSquare" | "HelpCircle" | "UserPlus" | "ShoppingBag" | "CalendarCheck";
   trigger_type: "keyword" | "first_inbound_message" | "manual";
   trigger_config: KeywordTriggerConfig | Record<string, unknown>;
   entry_node_id: string;
@@ -297,6 +300,127 @@ const LEAD_CAPTURE: FlowTemplate = {
   ],
 };
 
+
+// ============================================================
+// 4. Order with payment — collect an order, send a payment link
+// ============================================================
+const ORDER_PAYMENT: FlowTemplate = {
+  slug: "order_payment",
+  name: t("order_payment.name"),
+  description: t("order_payment.description"),
+  icon: "ShoppingBag",
+  trigger_type: "keyword",
+  trigger_config: { keywords: keywords("order_payment.keywords"), match_type: "contains" },
+  entry_node_id: "start",
+  nodes: [
+    { node_key: "start", node_type: "start", config: { next_node_key: "ask_item" } },
+    {
+      node_key: "ask_item",
+      node_type: "collect_input",
+      config: { prompt_text: t("order_payment.askItem"), var_key: "item", next_node_key: "ask_address" } as CollectInputNodeConfig,
+    },
+    {
+      node_key: "ask_address",
+      node_type: "collect_input",
+      config: { prompt_text: t("order_payment.askAddress"), var_key: "address", next_node_key: "confirm" } as CollectInputNodeConfig,
+    },
+    {
+      node_key: "confirm",
+      node_type: "send_buttons",
+      config: {
+        text: t("order_payment.confirmText", { item: "{{vars.item}}", address: "{{vars.address}}" }),
+        buttons: [
+          { reply_id: "pay", title: t("order_payment.payButton"), next_node_key: "make_link" },
+          { reply_id: "cod", title: t("order_payment.codButton"), next_node_key: "cod_note" },
+          { reply_id: "human", title: t("order_payment.humanButton"), next_node_key: "human" },
+        ],
+      } as SendButtonsNodeConfig,
+    },
+    {
+      node_key: "make_link",
+      node_type: "action",
+      config: {
+        service: "razorpay_link",
+        connection_id: "",
+        params: { amount: "", description: t("order_payment.linkDescription", { item: "{{vars.item}}" }) },
+        save_as: "payment_link",
+        next_node_key: "send_link",
+      } as ActionNodeConfig,
+    },
+    {
+      node_key: "send_link",
+      node_type: "send_message",
+      config: { text: t("order_payment.linkMessage", { link: "{{vars.payment_link}}" }), next_node_key: "end" } as SendMessageNodeConfig,
+    },
+    {
+      node_key: "cod_note",
+      node_type: "send_message",
+      config: { text: t("order_payment.codMessage"), next_node_key: "end" } as SendMessageNodeConfig,
+    },
+    { node_key: "human", node_type: "handoff", config: { note: t("order_payment.humanNote") } as HandoffNodeConfig },
+    { node_key: "end", node_type: "end", config: {} },
+  ],
+};
+
+// ============================================================
+// 5. Site visit — qualify, log to Sheets, book on Calendar
+// ============================================================
+const SITE_VISIT: FlowTemplate = {
+  slug: "site_visit",
+  name: t("site_visit.name"),
+  description: t("site_visit.description"),
+  icon: "CalendarCheck",
+  trigger_type: "keyword",
+  trigger_config: { keywords: keywords("site_visit.keywords"), match_type: "contains" },
+  entry_node_id: "start",
+  nodes: [
+    { node_key: "start", node_type: "start", config: { next_node_key: "ask_name" } },
+    {
+      node_key: "ask_name",
+      node_type: "collect_input",
+      config: { prompt_text: t("site_visit.askName"), var_key: "name", next_node_key: "ask_budget" } as CollectInputNodeConfig,
+    },
+    {
+      node_key: "ask_budget",
+      node_type: "collect_input",
+      config: { prompt_text: t("site_visit.askBudget", { name: "{{vars.name}}" }), var_key: "budget", next_node_key: "ask_when" } as CollectInputNodeConfig,
+    },
+    {
+      node_key: "ask_when",
+      node_type: "collect_input",
+      config: { prompt_text: t("site_visit.askWhen"), var_key: "visit_time", next_node_key: "log_row" } as CollectInputNodeConfig,
+    },
+    {
+      node_key: "log_row",
+      node_type: "action",
+      config: {
+        service: "google_sheets_append",
+        connection_id: "",
+        params: { spreadsheet: "", sheet: "Leads", values: "{{contact.phone}}\n{{vars.name}}\n{{vars.budget}}\n{{vars.visit_time}}" },
+        save_as: "",
+        next_node_key: "book",
+      } as ActionNodeConfig,
+    },
+    {
+      node_key: "book",
+      node_type: "action",
+      config: {
+        service: "google_calendar_event",
+        connection_id: "",
+        params: { calendar: "", title: t("site_visit.eventTitle", { name: "{{vars.name}}" }), start: "{{vars.visit_time}}", minutes: "30" },
+        save_as: "event_link",
+        next_node_key: "thanks",
+      } as ActionNodeConfig,
+    },
+    {
+      node_key: "thanks",
+      node_type: "send_message",
+      config: { text: t("site_visit.thanks", { name: "{{vars.name}}", time: "{{vars.visit_time}}" }), next_node_key: "end" } as SendMessageNodeConfig,
+    },
+    { node_key: "end", node_type: "end", config: {} },
+  ],
+};
+
 // ============================================================
 // Registry
 // ============================================================
@@ -305,6 +429,8 @@ const TEMPLATES: Record<string, FlowTemplate> = {
   welcome_menu: WELCOME_MENU,
   faq_bot: FAQ_BOT,
   lead_capture: LEAD_CAPTURE,
+  order_payment: ORDER_PAYMENT,
+  site_visit: SITE_VISIT,
 };
 
 export function getFlowTemplate(slug: string): FlowTemplate | null {

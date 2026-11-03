@@ -1327,7 +1327,23 @@
       "triggerFirstInbound": "Se activa con el primer mensaje entrante de un contacto",
       "triggerManual": "Activación manual",
       "cloneFailedStatus": "Error al clonar: {status}",
-      "connections": "Conexiones"
+      "connections": "Conexiones",
+      "descriptionShort": "Conversaciones de WhatsApp con botones.",
+      "searchPlaceholder": "Buscar flujos",
+      "filterLabel": "Filtrar flujos",
+      "filterAll": "Todos",
+      "noResults": "Ningún flujo coincide con tu búsqueda.",
+      "edited": "Editado {when}",
+      "duplicate": "Duplicar",
+      "duplicated": "Flujo duplicado.",
+      "copyName": "{name} (copia)",
+      "toggleLabel": "Activar o desactivar {name}",
+      "toggleError": "No se pudo cambiar el flujo.",
+      "toastOn": "{name} está activado",
+      "toastOff": "{name} está desactivado",
+      "deleteTitle": "¿Eliminar “{name}”?",
+      "deleteDesc": "Las ejecuciones activas terminan de inmediato. No se puede deshacer.",
+      "fromTemplate": "O empieza con una plantilla"
     },
     "edit": {
       "notFound": "Flujo no encontrado.",
@@ -2566,6 +2582,31 @@
       "askEmail": "¡Gracias, {name}! ¿Cuál es tu email de trabajo?",
       "askCompany": "Casi terminamos: ¿cómo se llama tu empresa?",
       "handoffNote": "Nuevo lead: nombre={name}, email={email}, empresa={company}."
+    },
+    "order_payment": {
+      "name": "Pedido con pago",
+      "description": "Toma un pedido en el chat, confírmalo y envía un enlace de pago de Razorpay o Cashfree. Incluye pago contra entrega y paso a una persona.",
+      "keywords": "pedido,comprar,tienda",
+      "askItem": "¿Qué te gustaría pedir? Dinos el artículo y la cantidad.",
+      "askAddress": "¡Gracias! ¿Cuál es la dirección de entrega?",
+      "confirmText": "Tu pedido: {item}\nEntregar en: {address}\n\n¿Cómo quieres pagar?",
+      "payButton": "Pagar en línea",
+      "codButton": "Pago contra entrega",
+      "humanButton": "Hablar con nosotros",
+      "linkDescription": "Pedido: {item}",
+      "linkMessage": "Paga de forma segura aquí: {link}\nConfirmaremos tu pedido en cuanto se pague.",
+      "codMessage": "Listo: entregaremos y cobraremos al llegar. ¡Gracias!",
+      "humanNote": "El cliente quiere hablar sobre su pedido."
+    },
+    "site_visit": {
+      "name": "Reserva de visita",
+      "description": "Pregunta nombre, presupuesto y hora preferida, guarda las respuestas en una hoja de Google y reserva la visita en Google Calendar.",
+      "keywords": "visita,propiedad,tour,inmueble",
+      "askName": "¡Con gusto organizo una visita! ¿Cómo te llamas?",
+      "askBudget": "Encantado, {name}. ¿Cuál es tu presupuesto?",
+      "askWhen": "¿Cuándo te gustaría visitar? Por ejemplo: sábado a las 11.",
+      "eventTitle": "Visita — {name}",
+      "thanks": "¡Gracias, {name}! Anotamos tu visita para {time}. Nuestro equipo la confirmará pronto."
     }
   },
   "LibErrors": {

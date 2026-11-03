@@ -81,7 +81,7 @@ describe("validateFlowForActivation — flow-level", () => {
       [],
     );
     expect(
-      issues.some((i) => i.message.includes("at least one node")),
+      issues.some((i) => i.message.includes("first step")),
     ).toBe(true);
   });
 
@@ -405,7 +405,7 @@ describe("validateFlowForActivation — nodes", () => {
         (i) =>
           i.node_key === "orphan" &&
           i.severity === "warning" &&
-          i.message.includes("unreachable"),
+          i.message.includes("can’t be reached"),
       ),
     ).toBe(true);
   });

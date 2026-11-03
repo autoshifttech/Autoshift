@@ -1327,7 +1327,23 @@
       "triggerFirstInbound": "Triggers on a contact's first-ever inbound message",
       "triggerManual": "Manual trigger",
       "cloneFailedStatus": "Clone failed: {status}",
-      "connections": "Connections"
+      "connections": "Connections",
+      "descriptionShort": "Button-driven WhatsApp conversations.",
+      "searchPlaceholder": "Search flows",
+      "filterLabel": "Filter flows",
+      "filterAll": "All",
+      "noResults": "No flows match your search.",
+      "edited": "Edited {when}",
+      "duplicate": "Duplicate",
+      "duplicated": "Flow duplicated.",
+      "copyName": "{name} (copy)",
+      "toggleLabel": "Turn {name} on or off",
+      "toggleError": "Couldn’t change the flow.",
+      "toastOn": "{name} is on",
+      "toastOff": "{name} is off",
+      "deleteTitle": "Delete “{name}”?",
+      "deleteDesc": "Any active runs end immediately. This can’t be undone.",
+      "fromTemplate": "Or start from a template"
     },
     "edit": {
       "notFound": "Flow not found.",
@@ -2566,6 +2582,31 @@
       "askEmail": "Thanks {name}! What's your work email?",
       "askCompany": "Almost done — what's your company name?",
       "handoffNote": "New lead — name={name}, email={email}, company={company}."
+    },
+    "order_payment": {
+      "name": "Order with payment",
+      "description": "Take an order in chat, confirm it, and send a Razorpay or Cashfree payment link. Cash on delivery and a hand-off to a person are built in.",
+      "keywords": "order,buy,shop",
+      "askItem": "What would you like to order? Tell us the item and quantity.",
+      "askAddress": "Thanks! What’s the delivery address?",
+      "confirmText": "Your order: {item}\nDeliver to: {address}\n\nHow would you like to pay?",
+      "payButton": "Pay online",
+      "codButton": "Cash on delivery",
+      "humanButton": "Talk to us",
+      "linkDescription": "Order: {item}",
+      "linkMessage": "Pay securely here: {link}\nWe’ll confirm your order as soon as it’s paid.",
+      "codMessage": "Done — we’ll deliver and collect payment on arrival. Thank you!",
+      "humanNote": "Customer wants to talk about their order."
+    },
+    "site_visit": {
+      "name": "Site visit booking",
+      "description": "Ask a lead’s name, budget and preferred time, save the answers to a Google Sheet and book the visit on Google Calendar.",
+      "keywords": "visit,site,tour,property",
+      "askName": "Happy to arrange a visit! What’s your name?",
+      "askBudget": "Nice to meet you, {name}. What’s your budget?",
+      "askWhen": "When would you like to visit? For example: Saturday 11am.",
+      "eventTitle": "Site visit — {name}",
+      "thanks": "Thanks {name}! We’ve noted your visit for {time}. Our team will confirm shortly."
     }
   },
   "LibErrors": {
