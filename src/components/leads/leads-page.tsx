@@ -9,7 +9,7 @@ import { Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-re
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useDrips } from "@/lib/drips/model";
 import { cn } from "@/lib/utils";
 import {
@@ -142,11 +142,11 @@ export function LeadsPage() {
       </div>
 
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <div className="relative flex-1">
+        <div className="relative w-full lg:max-w-xs">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input className="pl-9" value={query} placeholder={t("search")} aria-label={t("search")} onChange={(e) => setQuery(e.target.value)} />
         </div>
-        <div className="grid grid-cols-3 gap-2 lg:w-[540px]">
+        <div className="grid grid-cols-3 gap-2 lg:ml-auto lg:w-[540px]">
           <NativeSelect value={status} aria-label={t("colStatus")} onChange={(e) => setStatus(e.target.value as LeadStatus | "all")}>
             <option value="all">{t("allStatuses")}</option>
             {LEAD_STATUSES.map((s) => (
@@ -233,9 +233,9 @@ export function LeadsPage() {
         </table>
       </div>
 
-      <Sheet open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-md">{open && <LeadDetail {...open} settings={settings} />}</SheetContent>
-      </Sheet>
+      <Dialog open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
+        <DialogContent className="max-h-[88vh] gap-5 overflow-y-auto rounded-3xl p-6 sm:max-w-lg">{open && <LeadDetail {...open} settings={settings} />}</DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -248,17 +248,17 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
   const qName = (id: string) => settings.questions.find((q) => q.id === id)?.saveAs ?? id;
   return (
     <>
-      <SheetHeader>
+      <DialogHeader>
         <div className="flex items-center gap-2">
           <TempChip temp={temp} score={score} />
           <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_TONE[lead.status])}>{t(`status_${lead.status}`)}</span>
         </div>
-        <SheetTitle className="text-lg">{lead.name}</SheetTitle>
-        <SheetDescription>
+        <DialogTitle className="text-lg">{lead.name}</DialogTitle>
+        <DialogDescription>
           {lead.phone} · {t(`source_${lead.source}`)}
-        </SheetDescription>
-      </SheetHeader>
-      <div className="space-y-6 px-4 pb-6">
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-6">
         <div className="grid grid-cols-2 gap-3">
           <label className="grid gap-1.5 text-sm">
             <span className="text-xs text-muted-foreground">{t("colStatus")}</span>
