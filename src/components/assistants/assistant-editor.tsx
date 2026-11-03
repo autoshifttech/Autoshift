@@ -135,7 +135,7 @@ export function AssistantEditor({ id }: { id: string }) {
         )}
 
         <div className="space-y-4 xl:sticky xl:top-0 xl:self-start">
-          <TestChat key={a.id + a.greeting} assistant={a} tools={tools} className="h-[560px]" />
+          <TestChat key={a.id + a.greeting} assistant={a} tools={tools} className="h-[420px] sm:h-[560px]" />
           <UsageCard a={a} />
         </div>
       </div>
@@ -438,6 +438,11 @@ function WizardSteps({
 }) {
   const t = useTranslations("Assistants");
   const last = step === WIZARD_STEPS.length - 1;
+  // A new step starts at the top of the page, not wherever the last one ended.
+  const go = (n: number) => {
+    setStep(n);
+    document.getElementById("app-scroll")?.scrollTo({ top: 0 });
+  };
   const current = WIZARD_STEPS[step];
   return (
     <div className="min-w-0 space-y-4 pb-2">
@@ -450,7 +455,7 @@ function WizardSteps({
               <li key={st.id} className={cn("flex min-w-0 items-center gap-2 last:flex-none", active ? "flex-[2]" : "flex-1")}>
                 <button
                   type="button"
-                  onClick={() => setStep(i)}
+                  onClick={() => go(i)}
                   aria-current={active ? "step" : undefined}
                   className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
@@ -479,7 +484,7 @@ function WizardSteps({
       {current.id === "audience" && <AudienceTab a={a} set={set} />}
 
       <div className="sticky bottom-3 z-10 mx-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-border bg-card/95 p-1.5 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)] backdrop-blur">
-        <Button variant="ghost" className="h-10 rounded-full px-4 text-sm" onClick={() => setStep(step - 1)} disabled={step === 0}>
+        <Button variant="ghost" className="h-10 rounded-full px-4 text-sm" onClick={() => go(step - 1)} disabled={step === 0}>
           <ArrowLeft className="size-4" />
           {t("wizardPrevious")}
         </Button>
@@ -492,7 +497,7 @@ function WizardSteps({
             {t("wizardFinish")}
           </Button>
         ) : (
-          <Button className="h-10 rounded-full px-5 text-sm" onClick={() => setStep(step + 1)}>
+          <Button className="h-10 rounded-full px-5 text-sm" onClick={() => go(step + 1)}>
             {t("wizardNext")}
             <ArrowRight className="size-4" />
           </Button>
