@@ -117,7 +117,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
         {/* ---- right: runs · delete · activate · save ---- */}
         {viewToggle && <div className="hidden md:block">{viewToggle}</div>}
 
-        <div className="order-6 ml-auto flex items-center gap-1.5 sm:order-none">
+        <div className="order-6 ml-auto flex items-center gap-0.5 sm:order-none sm:gap-1.5">
           <div className="hidden items-center gap-0.5 sm:flex">
             <Button variant="ghost" size="icon" className="size-9" onClick={undo} disabled={!canUndo} aria-label={tBuilder("history.undo")} title={tBuilder("history.undo")}>
               <Undo2 className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
           >
             <History className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t("runs")}</span>
-            <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+            <span className="ml-0.5 hidden rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground sm:inline">
               {flow.execution_count}
             </span>
           </Button>
