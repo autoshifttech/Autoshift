@@ -76,8 +76,8 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
   const triggerProblem = issues.some((i) => i.scope === "trigger" && i.severity === "error");
 
   return (
-    <div className="flex flex-col gap-1 bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 sm:px-5">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-1 bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1 sm:px-5 sm:pb-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 sm:gap-y-3">
         {/* ---- left: back · icon · name · status · edited ---- */}
         <button
           type="button"
