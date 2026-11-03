@@ -25,9 +25,9 @@ import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
  */
 /** Gives the editor the page height that is left, so its canvas can fill it. */
 function FitHeight({ children }: { children: React.ReactNode }) {
-  const fit = useFitHeight<HTMLDivElement>(520);
+  const { ref, height } = useFitHeight<HTMLDivElement>(520);
   return (
-    <div ref={fit.ref} style={fit.height ? { height: fit.height } : undefined} className="min-h-[520px]">
+    <div ref={ref} style={height ? { height } : undefined} className="min-h-[520px]">
       {children}
     </div>
   );
