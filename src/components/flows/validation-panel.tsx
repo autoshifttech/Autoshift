@@ -17,7 +17,8 @@
  * concept). User can switch to List to address them.
  */
 
-import { CircleAlert, CircleCheck } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, CircleAlert, CircleCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ValidationIssue } from "@/lib/flows/validate";
@@ -26,13 +27,15 @@ import { useFlowEditor } from "./flow-editor-state";
 export function ValidationPanel() {
   const { issues, requestFlash } = useFlowEditor();
   const t = useTranslations("Flows.validation");
+  // Collapsed by default so the list never squeezes the canvas.
+  const [open, setOpen] = useState(false);
 
   if (issues.length === 0) {
     // Slate-950 base + emerald accents so the panel stays readable when
     // sticky-positioned over scrolled-behind node cards (a translucent
     // bg-emerald-500/10 would bleed through ugly).
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-emerald-600/50 bg-background p-3 text-sm font-medium text-emerald-800 dark:text-emerald-300">
+      <div className="flex min-h-11 items-center gap-2 rounded-xl border border-emerald-600/50 bg-background px-3 text-sm font-medium text-emerald-800 dark:text-emerald-300">
         <CircleCheck className="h-4 w-4 shrink-0" />
         {t("noIssues")}
       </div>
@@ -43,23 +46,31 @@ export function ValidationPanel() {
   return (
     <div
       className={cn(
-        "rounded-lg border bg-background p-3",
+        "rounded-xl border bg-background",
         errors.length > 0 ? "border-red-500/40" : "border-amber-500/40",
       )}
     >
-      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-        {errors.length > 0 ? (
-          <CircleAlert className="h-4 w-4 text-red-700 dark:text-red-400" />
-        ) : (
-          <CircleAlert className="h-4 w-4 text-amber-800 dark:text-amber-400" />
-        )}
-        {t("summary", { errorCount: errors.length, warningCount: warnings.length })}
-      </div>
-      <div className="flex flex-col gap-1">
-        {issues.map((i, ix) => (
-          <IssueLine key={ix} issue={i} onJump={requestFlash} t={t} />
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-sm font-medium text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        <CircleAlert
+          className={cn("h-4 w-4 shrink-0", errors.length > 0 ? "text-red-700 dark:text-red-400" : "text-amber-800 dark:text-amber-400")}
+        />
+        <span className="min-w-0 flex-1 truncate">
+          {t("summary", { errorCount: errors.length, warningCount: warnings.length })}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="flex max-h-48 flex-col gap-1 overflow-y-auto border-t border-border px-2 py-2">
+          {issues.map((i, ix) => (
+            <IssueLine key={ix} issue={i} onJump={requestFlash} t={t} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -106,7 +117,7 @@ export function IssueLine({
         type="button"
         onClick={() => onJump(issue.node_key!)}
         className={cn(
-          "flex w-full items-start gap-2 rounded-md px-2 py-1 text-left text-xs transition-colors hover:bg-muted/60",
+          "flex min-h-9 w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           tone,
         )}
         aria-label={t ? t("jumpToNode", { key: issue.node_key! }) : `Jump to node ${issue.node_key}`}

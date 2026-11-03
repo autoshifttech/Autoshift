@@ -707,7 +707,7 @@ const ADD_NODE_TYPES: NodeType[] = [
 
 function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
   const reactFlow = useReactFlow();
-  const { addNode, updateNodePosition } = useFlowEditor();
+  const { addNode, updateNodePosition, state } = useFlowEditor();
 
   const handleAdd = (type: NodeType) => {
     const key = addNode(type);
@@ -726,17 +726,22 @@ function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
     // NODE_WIDTH / NODE_HEIGHT are the dagre layout defaults; offset
     // so the card sits visually centered rather than top-left at the
     // viewport center.
+    // Lay new nodes out in rows of three so a run of additions reads left
+    // to right instead of stacking on the same spot.
+    const n = state.nodes.length;
+    const col = (n % 3) - 1;
+    const row = Math.floor(n / 3) % 4;
     updateNodePosition(
       key,
-      center.x - NODE_WIDTH / 2,
-      center.y - NODE_HEIGHT / 2
+      center.x - NODE_WIDTH / 2 + col * (NODE_WIDTH + 48),
+      center.y - NODE_HEIGHT / 2 + (row - 1) * (NODE_HEIGHT + 48)
     );
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-medium shadow-[0_6px_20px_-8px_rgba(0,0,0,0.5)] transition-colors"
+        className="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none shadow-[0_6px_20px_-8px_rgba(0,0,0,0.5)] transition-colors"
         aria-label={t('addNode')}
       >
         <Plus className="h-4 w-4" />
@@ -775,7 +780,7 @@ function CanvasAddNodeButton({ t }: { t: ReturnType<typeof useTranslations> }) {
                       <span className="text-popover-foreground text-[13px] font-semibold">
                         {t(`nodes.${t_type}.label`)}
                       </span>
-                      <span className="text-muted-foreground text-[11.5px]">
+                      <span className="text-muted-foreground text-xs">
                         {t(`nodes.${t_type}.blurb`)}
                       </span>
                     </span>

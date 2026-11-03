@@ -596,13 +596,13 @@ function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: Retur
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="border-border bg-card text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+        className="border-border bg-card text-foreground hover:bg-muted inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium shadow-[var(--shadow-card)] transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         aria-label={t('addNode')}
       >
         <Plus className="h-3.5 w-3.5" />
         {t('addNode')}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="">
+      <DropdownMenuContent align="end" className="w-72 max-h-[min(70dvh,34rem)] p-1.5">
         {groupNodeTypesByCategory(types).map((group, i) => (
           // A DropdownMenuGroup (base-ui Menu.Group) is REQUIRED here:
           // DropdownMenuLabel is base-ui's Menu.GroupLabel, which throws
@@ -611,15 +611,22 @@ function AddNodeButton({ onAdd, t }: { onAdd: (type: NodeType) => void; t: Retur
           <Fragment key={group.id}>
             {i > 0 && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
                 {t(`categories.${group.id}`)}
               </DropdownMenuLabel>
               {group.types.map((t_type) => {
                 const meta = NODE_META[t_type];
                 return (
-                  <DropdownMenuItem key={t_type} onClick={() => onAdd(t_type)}>
-                    <meta.icon className={cn('h-3.5 w-3.5', meta.color)} />
-                    {t(`nodes.${t_type}.label`)}
+                  <DropdownMenuItem key={t_type} onClick={() => onAdd(t_type)} className="gap-3 py-2">
+                    <NodeIconChip type={t_type} size={28} iconSize={16} className="rounded-md" />
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-popover-foreground text-[13px] font-semibold">
+                        {t(`nodes.${t_type}.label`)}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        {t(`nodes.${t_type}.blurb`)}
+                      </span>
+                    </span>
                   </DropdownMenuItem>
                 );
               })}

@@ -60,7 +60,7 @@ export function EditorHeader() {
   } = useFlowEditor();
 
   return (
-    <div className="flex flex-col gap-1.5 px-6 pt-5">
+    <div className="flex flex-col gap-1.5 px-4 pt-4 sm:px-6 sm:pt-5">
       <div className="flex flex-wrap items-center gap-3">
         {/* ---- left: back · icon · name · status · edited ---- */}
         <button
@@ -68,7 +68,7 @@ export function EditorHeader() {
           onClick={() => router.push("/flows")}
           title={t("backToFlows")}
           aria-label={t("backToFlows")}
-          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -81,7 +81,7 @@ export function EditorHeader() {
           placeholder={t("namePlaceholder")}
           spellCheck={false}
           aria-label={t("namePlaceholder")}
-          className="min-w-[120px] max-w-[340px] rounded-lg border border-transparent bg-transparent px-2 py-1 text-lg font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted focus:border-primary focus:bg-transparent focus:shadow-[0_0_0_3px_var(--primary-soft)]"
+          className="min-h-10 min-w-[9.5rem] max-w-[340px] flex-1 rounded-lg border border-border bg-card px-3 py-1 text-lg font-bold leading-tight tracking-tight text-foreground outline-none transition-colors hover:bg-muted/60 focus:border-primary focus:bg-card focus:shadow-[0_0_0_3px_var(--primary-soft)]"
         />
         <StatusChip status={state.status} />
         {dirty && (
@@ -96,14 +96,16 @@ export function EditorHeader() {
         )}
 
         {/* ---- right: runs · delete · activate · save ---- */}
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+        <div className="flex w-full items-center justify-end gap-1.5 sm:ml-auto sm:w-auto">
           <Button
             variant="ghost"
             size="sm"
+            aria-label={t("runs")}
             onClick={() => router.push(`/flows/${flow.id}/runs`)}
+            className="min-h-10 sm:min-h-0"
           >
             <History className="h-3.5 w-3.5" />
-            {t("runs")}
+            <span className="hidden sm:inline">{t("runs")}</span>
             <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               {flow.execution_count}
             </span>
@@ -111,16 +113,18 @@ export function EditorHeader() {
           <Button
             variant="ghost"
             size="sm"
+            aria-label={t("delete")}
             onClick={() => void deleteFlow()}
-            className="text-red-700 dark:text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            className="min-h-10 text-red-700 hover:bg-red-500/10 hover:text-red-300 sm:min-h-0 dark:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            {t("delete")}
+            <span className="hidden sm:inline">{t("delete")}</span>
           </Button>
           {state.status === "active" ? (
             <Button
               variant="outline"
               size="sm"
+              className="min-h-10 sm:min-h-0"
               onClick={() => void setStatus("draft")}
               disabled={activating}
             >
@@ -135,6 +139,7 @@ export function EditorHeader() {
             <Button
               variant="outline"
               size="sm"
+              className="min-h-10 sm:min-h-0"
               onClick={() => void setStatus("active")}
               disabled={activating || !canActivate}
               title={
@@ -149,7 +154,7 @@ export function EditorHeader() {
               {t("activate")}
             </Button>
           )}
-          <Button onClick={() => void save()} disabled={saving} size="sm">
+          <Button onClick={() => void save()} disabled={saving} size="sm" className="min-h-10 sm:min-h-0">
             {saving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (

@@ -103,7 +103,7 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
             the legend is lg-only), so there's no empty band above the
             stage on small screens. */}
         {!isMobile && (
-          <div className="flex items-center gap-4 px-6 py-3.5">
+          <div className="flex items-center gap-4 px-4 py-3 sm:px-6">
             <div
               role="group"
               aria-label={t("editorView")}
@@ -122,11 +122,11 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
                 label={t("listView")}
               />
             </div>
-            <div className="ml-auto hidden flex-wrap items-center gap-x-3.5 gap-y-1.5 lg:flex">
+            <div className="ml-auto hidden flex-wrap items-center justify-end gap-x-4 gap-y-1.5 2xl:flex">
               {LEGEND_TYPES.map((t_type) => (
                 <span
                   key={t_type}
-                  className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
                 >
                   <span
                     className="h-2.5 w-2.5 rounded-full"
@@ -140,7 +140,7 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
         )}
 
         {/* ---- stage: the active view, owning its own overflow ---- */}
-        <div className="relative mx-6 min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card-2">
+        <div className="relative mx-4 min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-card-2 sm:mx-6">
           {effectiveView === "canvas" ? (
             <FlowCanvas />
           ) : (
@@ -151,7 +151,7 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
         </div>
 
         {/* ---- validation / activate-readiness bar ---- */}
-        <div className="px-6 pb-5 pt-3">
+        <div className="px-4 pb-4 pt-3 sm:px-6">
           <ValidationPanel />
         </div>
       </div>
@@ -198,7 +198,7 @@ function SegButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-medium transition-colors",
+        "inline-flex min-h-9 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         active
           ? "bg-card text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground",
