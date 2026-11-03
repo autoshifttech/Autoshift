@@ -282,12 +282,13 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                   className="flex-1 resize-none rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground placeholder-muted-foreground outline-none focus:border-primary/50"
                 />
                 <Button
-                  size="sm"
-                  className="h-auto bg-primary px-2 hover:bg-primary/90"
+                  size="icon"
+                  aria-label={tSidebar("addNotePlaceholder")}
+                  className="size-10 shrink-0 self-end rounded-full bg-primary hover:bg-primary/90"
                   onClick={handleAddNote}
                   disabled={!newNote.trim() || addingNote}
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="size-4" />
                 </Button>
               </div>
 
