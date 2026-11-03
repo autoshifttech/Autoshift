@@ -159,29 +159,19 @@ export function AiModelsPage() {
               const m = models.find((x) => x.id === id);
               const isDefault = defaultHere === id;
               return (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 pr-1.5">
                   <span className={cn("rounded-full px-1.5 py-0.5 text-[11px] font-bold", m?.enabled ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300" : "bg-foreground/10 text-muted-foreground")}>
                     {m?.enabled ? tr("On") : tr("Off")}
                   </span>
-                  <span
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
                     aria-label={`${tr("Make default")}: ${m?.label}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      makeDefault(id);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        makeDefault(id);
-                      }
-                    }}
-                    className="flex size-6 items-center justify-center rounded-full hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    aria-pressed={isDefault}
+                    onClick={() => makeDefault(id)}
+                    className="flex size-8 items-center justify-center rounded-full hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   >
                     <Star className={cn("size-3.5", isDefault ? "fill-amber-500 text-amber-500" : "text-muted-foreground")} />
-                  </span>
+                  </button>
                 </span>
               );
             }}

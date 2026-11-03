@@ -175,7 +175,7 @@ export function LeadsPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      <div tabIndex={0} className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted-foreground">

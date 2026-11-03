@@ -55,7 +55,7 @@ export function ProviderCards({
   );
 }
 
-/** Wrapping chips for a provider's models. */
+/** Wrapping chips for a provider's models. `chipExtra` renders beside the chip (as its own control). */
 export function ModelChips({
   models,
   value,
@@ -72,21 +72,25 @@ export function ModelChips({
       {models.map((m) => {
         const picked = value === m.id;
         return (
-          <button
+          <span
             key={m.id}
-            type="button"
-            role="radio"
-            aria-checked={picked}
-            onClick={() => onChange(m.id)}
             className={cn(
-              "inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3.5 py-2 text-[13px] font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+              "inline-flex min-h-10 items-center rounded-xl border text-[13px] font-semibold transition-colors focus-within:ring-2 focus-within:ring-ring",
               picked ? "border-primary bg-primary/5 text-foreground" : "border-transparent bg-muted text-foreground hover:bg-muted/70",
               m.on === false && "opacity-55",
             )}
           >
-            {m.label}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={picked}
+              onClick={() => onChange(m.id)}
+              className={cn("inline-flex min-h-10 items-center gap-1.5 rounded-xl py-2 pl-3.5 outline-none", chipExtra ? "pr-1.5" : "pr-3.5")}
+            >
+              {m.label}
+            </button>
             {chipExtra?.(m.id)}
-          </button>
+          </span>
         );
       })}
     </div>

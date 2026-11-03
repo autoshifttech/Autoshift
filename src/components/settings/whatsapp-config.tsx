@@ -790,6 +790,7 @@ export function WhatsAppConfig() {
                 <button
                   type="button"
                   onClick={() => setShowToken(!showToken)}
+                  aria-label={showToken ? t('hideToken') : t('showToken')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -863,6 +864,7 @@ export function WhatsAppConfig() {
               <div className="flex gap-2">
                 <Input
                   readOnly
+                  aria-label={t('webhookUrl')}
                   value={webhookUrl}
                   className="bg-muted border-border text-muted-foreground font-mono text-sm"
                 />
@@ -870,6 +872,7 @@ export function WhatsAppConfig() {
                   variant="outline"
                   size="icon"
                   onClick={handleCopyWebhookUrl}
+                  aria-label={t('copyWebhook')}
                   className="shrink-0 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <Copy className="size-4" />

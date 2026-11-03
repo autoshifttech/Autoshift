@@ -155,7 +155,7 @@ export function InsightsPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <section className="overflow-x-auto rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+        <section tabIndex={0} className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <h2 className="font-semibold text-foreground">{t("assistantsTitle")}</h2>
           <table className="mt-4 w-full min-w-[480px] text-sm">
             <thead>
@@ -180,7 +180,7 @@ export function InsightsPage() {
             </tbody>
           </table>
         </section>
-        <section className="overflow-x-auto rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+        <section tabIndex={0} className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           <h2 className="font-semibold text-foreground">{t("campaignsTitle")}</h2>
           <table className="mt-4 w-full min-w-[520px] text-sm">
             <thead>
@@ -210,7 +210,7 @@ export function InsightsPage() {
         </section>
       </div>
 
-      <section className="overflow-x-auto rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <section tabIndex={0} className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
         <h2 className="font-semibold text-foreground">{t("heatTitle")}</h2>
         <p className="text-sm text-muted-foreground">{t("heatDesc")}</p>
         <div className="mt-4 min-w-[640px]">

@@ -72,7 +72,7 @@ export function RouteCard({ stages }: { stages: FunnelStage[] }) {
   }, "");
   const top = stages[0]?.value || 1;
   return (
-    <div className="mt-2 overflow-x-auto">
+    <div tabIndex={0} className="mt-2 overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t("routeTitle")} className="mx-auto h-auto w-full min-w-[560px] max-w-[880px]">
         <path d={path} fill="none" stroke="var(--border)" strokeWidth="6" strokeLinecap="round" />
         <path d={path} fill="none" stroke="var(--primary)" strokeWidth="6" strokeLinecap="round" strokeDasharray="1 14" pathLength={1} className="route-line" />

@@ -171,7 +171,7 @@ export function Initials({ name, className }: { name: string; className?: string
 export function DataTable({ head, children, empty, className }: { head: ReactNode[]; children: ReactNode; empty?: ReactNode; className?: string }) {
   const tr = useAdminT();
   return (
-    <div className={cn("overflow-x-auto", className)}>
+    <div tabIndex={0} className={cn("overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none", className)}>
       <table className="w-full min-w-[640px] text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-left text-xs font-semibold tracking-wide text-muted-foreground">

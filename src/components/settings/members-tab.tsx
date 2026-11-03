@@ -314,7 +314,7 @@ export function MembersTab() {
                 <PresenceDot status="offline" />
                 {counts.offline} {t('offline')}
               </span>
-              <span className="text-muted-foreground/70">
+              <span className="text-muted-foreground">
                 · {t('memberCount', { count: members.length })}
               </span>
             </div>
@@ -425,6 +425,7 @@ export function MembersTab() {
                         }
                       >
                         <SelectTrigger
+                          aria-label={t('roleFor')}
                           className="w-32 bg-muted border-border text-foreground"
                           disabled={isBusy}
                         >
@@ -459,6 +460,7 @@ export function MembersTab() {
                         variant="outline"
                         size="sm"
                         onClick={() => setRemovingMember(member)}
+                        aria-label={t('removeMember')}
                         disabled={isBusy}
                         className="border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20 hover:border-red-500/60 hover:text-red-200"
                       >
