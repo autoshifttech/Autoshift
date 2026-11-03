@@ -1449,7 +1449,8 @@
       "categories": {
         "messaging": "Mensagens",
         "logic": "Lógica e dados",
-        "flow": "Controle de fluxo"
+        "flow": "Controle de fluxo",
+        "connections": "Conexões"
       },
       "nodes": {
         "start": {
@@ -1491,7 +1492,42 @@
         "end": {
           "label": "Fim",
           "blurb": "Encerra o fluxo"
+        },
+        "action": {
+          "label": "Usar uma conexão",
+          "blurb": "Planilhas, Agenda ou link de pagamento"
         }
+      },
+      "action": {
+        "serviceLabel": "O que esta etapa deve fazer?",
+        "accountLabel": "Conta",
+        "pickAccount": "Escolha uma conta conectada",
+        "openConnections": "Abrir Conexões",
+        "noAccount": {
+          "google": "Nenhuma conta Google conectada ainda.",
+          "razorpay": "Nenhuma conta Razorpay conectada ainda.",
+          "cashfree": "Nenhuma conta Cashfree conectada ainda."
+        },
+        "service": {
+          "google_sheets_append": "Adicionar linha no Google Planilhas",
+          "google_calendar_event": "Criar evento no Google Agenda",
+          "razorpay_link": "Link de pagamento Razorpay",
+          "cashfree_link": "Link de pagamento Cashfree"
+        },
+        "field": {
+          "spreadsheet": "Planilha (link ou ID)",
+          "sheet": "Nome da aba",
+          "values": "Valores da linha",
+          "calendar": "Agenda (ID ou e-mail)",
+          "title": "Título do evento",
+          "start": "Hora de início",
+          "minutes": "Duração (minutos)",
+          "amount": "Valor (₹)",
+          "description": "Para que serve"
+        },
+        "valuesHint": "Um valor por linha; cada linha preenche a próxima coluna.",
+        "saveAs": "Salvar o link como",
+        "saveAsHint": "Use em uma mensagem posterior como"
       }
     },
     "validation": {
@@ -1531,7 +1567,12 @@
       "modeAdd": "Adicionar",
       "modeRemove": "Remover",
       "tagPicked": "{mode} tag {tag}…",
-      "tagNone": "{mode} tag (nenhuma escolhida)"
+      "tagNone": "{mode} tag (nenhuma escolhida)",
+      "action_google_sheets_append": "Adicionar linha no Google Planilhas",
+      "action_google_calendar_event": "Criar evento no Google Agenda",
+      "action_razorpay_link": "Link de pagamento Razorpay",
+      "action_cashfree_link": "Link de pagamento Cashfree",
+      "actionNone": "Escolha um serviço"
     },
     "header": {
       "backToFlows": "Voltar aos fluxos",
@@ -2604,7 +2645,11 @@
       "setTagNeedsTag": "O nó Marcar contato precisa de uma tag para aplicar.",
       "setTagNeedsNext": "O nó Marcar contato precisa apontar para um próximo nó.",
       "setTagMissingNext": "O nó Marcar contato aponta para um nó inexistente: \"{key}\".",
-      "unknownNodeType": "Tipo de nó desconhecido: \"{type}\"."
+      "unknownNodeType": "Tipo de nó desconhecido: \"{type}\".",
+      "actionNeedsService": "Escolha o que esta etapa de conexão deve fazer.",
+      "actionNeedsConnection": "Escolha uma conta conectada para esta etapa. Adicione uma em Conexões.",
+      "actionNeedsNext": "Esta etapa precisa de uma próxima etapa.",
+      "actionMissingNext": "Esta etapa aponta para “{key}”, que não existe."
     },
     "automations": {
       "needsStep": "automações ativas precisam de pelo menos uma etapa",

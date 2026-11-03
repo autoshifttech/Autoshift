@@ -1449,7 +1449,8 @@
       "categories": {
         "messaging": "Messaging",
         "logic": "Logic & data",
-        "flow": "Flow control"
+        "flow": "Flow control",
+        "connections": "Connections"
       },
       "nodes": {
         "start": {
@@ -1491,7 +1492,42 @@
         "end": {
           "label": "End",
           "blurb": "Ends the flow"
+        },
+        "action": {
+          "label": "Use a connection",
+          "blurb": "Sheets, Calendar or a payment link"
         }
+      },
+      "action": {
+        "serviceLabel": "What should this step do?",
+        "accountLabel": "Account",
+        "pickAccount": "Pick a connected account",
+        "openConnections": "Open Connections",
+        "noAccount": {
+          "google": "No Google account connected yet.",
+          "razorpay": "No Razorpay account connected yet.",
+          "cashfree": "No Cashfree account connected yet."
+        },
+        "service": {
+          "google_sheets_append": "Add a row to Google Sheets",
+          "google_calendar_event": "Create a Google Calendar event",
+          "razorpay_link": "Razorpay payment link",
+          "cashfree_link": "Cashfree payment link"
+        },
+        "field": {
+          "spreadsheet": "Spreadsheet (link or ID)",
+          "sheet": "Sheet name",
+          "values": "Row values",
+          "calendar": "Calendar (ID or email)",
+          "title": "Event title",
+          "start": "Start time",
+          "minutes": "Length (minutes)",
+          "amount": "Amount (₹)",
+          "description": "What it’s for"
+        },
+        "valuesHint": "One value per line; each line fills the next column.",
+        "saveAs": "Save the link as",
+        "saveAsHint": "Use it in a later message as"
       }
     },
     "validation": {
@@ -1531,7 +1567,12 @@
       "modeAdd": "Add",
       "modeRemove": "Remove",
       "tagPicked": "{mode} tag {tag}…",
-      "tagNone": "{mode} tag (none picked)"
+      "tagNone": "{mode} tag (none picked)",
+      "action_google_sheets_append": "Add a row to Google Sheets",
+      "action_google_calendar_event": "Create a Google Calendar event",
+      "action_razorpay_link": "Razorpay payment link",
+      "action_cashfree_link": "Cashfree payment link",
+      "actionNone": "Pick a service"
     },
     "header": {
       "backToFlows": "Back to Flows",
@@ -2604,7 +2645,11 @@
       "setTagNeedsTag": "Set-tag needs a tag to apply.",
       "setTagNeedsNext": "Set-tag must point to a next node.",
       "setTagMissingNext": "Set-tag points to non-existent node \"{key}\".",
-      "unknownNodeType": "Unknown node type \"{type}\"."
+      "unknownNodeType": "Unknown node type \"{type}\".",
+      "actionNeedsService": "Pick what this connection step should do.",
+      "actionNeedsConnection": "Pick a connected account for this step. Add one under Connections.",
+      "actionNeedsNext": "This step needs a next step.",
+      "actionMissingNext": "This step points to “{key}”, which doesn’t exist."
     },
     "automations": {
       "needsStep": "active automations need at least one step",

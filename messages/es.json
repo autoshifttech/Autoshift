@@ -1449,7 +1449,8 @@
       "categories": {
         "messaging": "Mensajería",
         "logic": "Lógica y datos",
-        "flow": "Control de flujo"
+        "flow": "Control de flujo",
+        "connections": "Conexiones"
       },
       "nodes": {
         "start": {
@@ -1491,7 +1492,42 @@
         "end": {
           "label": "Fin",
           "blurb": "Termina el flujo"
+        },
+        "action": {
+          "label": "Usar una conexión",
+          "blurb": "Hojas, Calendario o enlace de pago"
         }
+      },
+      "action": {
+        "serviceLabel": "¿Qué debe hacer este paso?",
+        "accountLabel": "Cuenta",
+        "pickAccount": "Elige una cuenta conectada",
+        "openConnections": "Abrir Conexiones",
+        "noAccount": {
+          "google": "Aún no hay una cuenta de Google conectada.",
+          "razorpay": "Aún no hay una cuenta de Razorpay conectada.",
+          "cashfree": "Aún no hay una cuenta de Cashfree conectada."
+        },
+        "service": {
+          "google_sheets_append": "Añadir una fila en Google Sheets",
+          "google_calendar_event": "Crear un evento en Google Calendar",
+          "razorpay_link": "Enlace de pago de Razorpay",
+          "cashfree_link": "Enlace de pago de Cashfree"
+        },
+        "field": {
+          "spreadsheet": "Hoja de cálculo (enlace o ID)",
+          "sheet": "Nombre de la hoja",
+          "values": "Valores de la fila",
+          "calendar": "Calendario (ID o correo)",
+          "title": "Título del evento",
+          "start": "Hora de inicio",
+          "minutes": "Duración (minutos)",
+          "amount": "Importe (₹)",
+          "description": "Para qué es"
+        },
+        "valuesHint": "Un valor por línea; cada línea rellena la siguiente columna.",
+        "saveAs": "Guardar el enlace como",
+        "saveAsHint": "Úsalo en un mensaje posterior como"
       }
     },
     "validation": {
@@ -1531,7 +1567,12 @@
       "modeAdd": "Agregar",
       "modeRemove": "Quitar",
       "tagPicked": "{mode} etiqueta {tag}…",
-      "tagNone": "{mode} etiqueta (ninguna elegida)"
+      "tagNone": "{mode} etiqueta (ninguna elegida)",
+      "action_google_sheets_append": "Añadir una fila en Google Sheets",
+      "action_google_calendar_event": "Crear un evento en Google Calendar",
+      "action_razorpay_link": "Enlace de pago de Razorpay",
+      "action_cashfree_link": "Enlace de pago de Cashfree",
+      "actionNone": "Elige un servicio"
     },
     "header": {
       "backToFlows": "Volver a flujos",
@@ -2604,7 +2645,11 @@
       "setTagNeedsTag": "El nodo Etiquetar contacto necesita una etiqueta para aplicar.",
       "setTagNeedsNext": "El nodo Etiquetar contacto debe apuntar a un nodo siguiente.",
       "setTagMissingNext": "El nodo Etiquetar contacto apunta a un nodo inexistente: \"{key}\".",
-      "unknownNodeType": "Tipo de nodo desconocido: \"{type}\"."
+      "unknownNodeType": "Tipo de nodo desconocido: \"{type}\".",
+      "actionNeedsService": "Elige qué debe hacer este paso de conexión.",
+      "actionNeedsConnection": "Elige una cuenta conectada para este paso. Añade una en Conexiones.",
+      "actionNeedsNext": "Este paso necesita un paso siguiente.",
+      "actionMissingNext": "Este paso apunta a “{key}”, que no existe."
     },
     "automations": {
       "needsStep": "las automatizaciones activas necesitan al menos un paso",

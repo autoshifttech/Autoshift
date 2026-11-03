@@ -256,7 +256,7 @@ export default function FlowsPage() {
             `sm:max-w-sm` baked into its default classes. Without the
             sm: prefix our override applies at base only and the
             sm-scoped 384px wins at every real desktop breakpoint. */}
-        <DialogContent className="sm:max-w-4xl bg-popover text-popover-foreground">
+        <DialogContent className={cn(templates.length > 0 ? "sm:max-w-2xl" : "sm:max-w-md", "bg-popover text-popover-foreground")}>
           <DialogHeader>
             <DialogTitle>{t("createTitle")}</DialogTitle>
             <DialogDescription className="text-muted-foreground">

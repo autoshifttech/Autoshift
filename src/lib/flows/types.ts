@@ -173,6 +173,17 @@ export interface SetTagNodeConfig {
   next_node_key: string;
 }
 
+export interface ActionNodeConfig {
+  service: "google_sheets_append" | "google_calendar_event" | "razorpay_link" | "cashfree_link";
+  /** The connected account (Flows → Connections) this step uses. */
+  connection_id: string;
+  /** Per-service fields; {{vars.x}} placeholders are allowed. */
+  params: Record<string, string>;
+  /** Variable that receives a payment or event link, when the service makes one. */
+  save_as: string;
+  next_node_key: string;
+}
+
 // Terminal nodes carry no config — they just stop the run.
 export type EndNodeConfig = Record<string, never>;
 
@@ -193,6 +204,7 @@ export type FlowNodeConfig =
   | { node_type: "collect_input"; config: CollectInputNodeConfig }
   | { node_type: "condition"; config: ConditionNodeConfig }
   | { node_type: "set_tag"; config: SetTagNodeConfig }
+  | { node_type: "action"; config: ActionNodeConfig }
   | { node_type: "handoff"; config: HandoffNodeConfig }
   | { node_type: "end"; config: EndNodeConfig };
 
@@ -377,6 +389,7 @@ export const AUTO_ADVANCING_NODE_TYPES: ReadonlySet<string> = new Set([
   "send_media",
   "condition",
   "set_tag",
+  "action",
 ]);
 
 export function assertNever(x: never): never {

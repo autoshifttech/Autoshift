@@ -20,6 +20,7 @@ import {
   Flag,
   GitFork,
   Inbox,
+  Link2,
   ListChecks,
   ListPlus,
   MessageCircle,
@@ -49,6 +50,7 @@ export type NodeType =
   | 'collect_input'
   | 'condition'
   | 'set_tag'
+  | 'action'
   | 'handoff'
   | 'end';
 
@@ -79,10 +81,10 @@ export interface BuilderNode {
 // the canvas, so `start` is just the entry point under Flow control.
 // ------------------------------------------------------------
 
-export type NodeCategory = 'messaging' | 'logic' | 'flow';
+export type NodeCategory = 'messaging' | 'logic' | 'connections' | 'flow';
 
 /** The order categories render in the add-step menu. */
-export const NODE_CATEGORIES: NodeCategory[] = ['messaging', 'logic', 'flow'];
+export const NODE_CATEGORIES: NodeCategory[] = ['messaging', 'logic', 'connections', 'flow'];
 
 export const NODE_META: Record<
   NodeType,
@@ -145,6 +147,12 @@ export const NODE_META: Record<
     color: 'text-pink-700 dark:text-pink-400',
     category: 'logic',
   },
+  action: {
+    slugSeed: 'Use a connection',
+    icon: Link2,
+    color: 'text-orange-800 dark:text-orange-400',
+    category: 'connections',
+  },
   handoff: {
     slugSeed: 'Handoff to agent',
     icon: UserPlus,
@@ -195,6 +203,7 @@ const NODE_HUE: Record<NodeType, { l: number; c: number; h: number }> = {
   collect_input: { l: 0.65, c: 0.1, h: 185 }, // teal — capture
   condition: { l: 0.72, c: 0.15, h: 65 }, // amber — a fork in the road
   set_tag: { l: 0.65, c: 0.15, h: 350 }, // pink
+  action: { l: 0.68, c: 0.16, h: 45 }, // orange — talks to another service
   handoff: { l: 0.65, c: 0.17, h: 16 }, // rose — hands off
   end: { l: 0.55, c: 0.01, h: 260 }, // neutral grey — terminal
 };
@@ -409,6 +418,10 @@ export function summarizeNode(
       return tagId
         ? t ? t('tagPicked', { mode, tag: tagId.slice(0, 8) }) : `${mode} tag ${tagId.slice(0, 8)}…`
         : t ? t('tagNone', { mode }) : `${mode} tag (none picked)`;
+    }
+    case 'action': {
+      const service = typeof cfg.service === 'string' ? cfg.service : '';
+      return service ? (t ? t(`action_${service}`) : service) : t ? t('actionNone') : null;
     }
     case 'handoff': {
       const note = typeof cfg.note === 'string' ? cfg.note : '';

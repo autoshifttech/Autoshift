@@ -25,6 +25,7 @@
 
 import { INTERACTIVE_LIMITS } from "@/lib/whatsapp/meta-api";
 import { getT } from "@/lib/i18n/translate";
+import { isActionService } from "./actions";
 import { AUTO_ADVANCING_NODE_TYPES } from "./types";
 
 const t = getT("Validation.flows");
@@ -776,6 +777,50 @@ function validateNode(
       break;
     }
 
+    case "action": {
+      const cfg = node.config as {
+        service?: string;
+        connection_id?: string;
+        next_node_key?: string;
+      };
+      if (!isActionService(cfg.service)) {
+        issues.push({
+          severity: "error",
+          scope: "node",
+          node_key: node.node_key,
+          field: "service",
+          message: t("actionNeedsService"),
+        });
+      }
+      if (!cfg.connection_id) {
+        issues.push({
+          severity: "error",
+          scope: "node",
+          node_key: node.node_key,
+          field: "connection_id",
+          message: t("actionNeedsConnection"),
+        });
+      }
+      if (!cfg.next_node_key) {
+        issues.push({
+          severity: "error",
+          scope: "node",
+          node_key: node.node_key,
+          field: "next_node_key",
+          message: t("actionNeedsNext"),
+        });
+      } else if (!knownKeys.has(cfg.next_node_key)) {
+        issues.push({
+          severity: "error",
+          scope: "node",
+          node_key: node.node_key,
+          field: "next_node_key",
+          message: t("actionMissingNext", { key: cfg.next_node_key }),
+        });
+      }
+      break;
+    }
+
     case "handoff":
     case "end":
       // Terminal nodes have no outgoing edges; nothing to validate
@@ -826,7 +871,8 @@ function outgoingEdges(node: NodeInput): string[] {
     case "send_message":
     case "send_media":
     case "collect_input":
-    case "set_tag": {
+    case "set_tag":
+    case "action": {
       const cfg = node.config as { next_node_key?: string };
       return cfg.next_node_key ? [cfg.next_node_key] : [];
     }

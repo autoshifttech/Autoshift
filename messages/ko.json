@@ -1449,7 +1449,8 @@
       "categories": {
         "messaging": "메시징",
         "logic": "로직 & 데이터",
-        "flow": "플로우 제어"
+        "flow": "플로우 제어",
+        "connections": "연결"
       },
       "nodes": {
         "start": {
@@ -1491,7 +1492,42 @@
         "end": {
           "label": "종료",
           "blurb": "플로우를 종료합니다"
+        },
+        "action": {
+          "label": "연결 사용",
+          "blurb": "시트, 캘린더 또는 결제 링크"
         }
+      },
+      "action": {
+        "serviceLabel": "이 단계에서 할 일",
+        "accountLabel": "계정",
+        "pickAccount": "연결된 계정 선택",
+        "openConnections": "연결 열기",
+        "noAccount": {
+          "google": "아직 연결된 Google 계정이 없습니다.",
+          "razorpay": "아직 연결된 Razorpay 계정이 없습니다.",
+          "cashfree": "아직 연결된 Cashfree 계정이 없습니다."
+        },
+        "service": {
+          "google_sheets_append": "Google 스프레드시트에 행 추가",
+          "google_calendar_event": "Google 캘린더 일정 만들기",
+          "razorpay_link": "Razorpay 결제 링크",
+          "cashfree_link": "Cashfree 결제 링크"
+        },
+        "field": {
+          "spreadsheet": "스프레드시트(링크 또는 ID)",
+          "sheet": "시트 이름",
+          "values": "행 값",
+          "calendar": "캘린더(ID 또는 이메일)",
+          "title": "일정 제목",
+          "start": "시작 시간",
+          "minutes": "길이(분)",
+          "amount": "금액(₹)",
+          "description": "용도"
+        },
+        "valuesHint": "한 줄에 값 하나씩, 각 줄이 다음 열을 채웁니다.",
+        "saveAs": "링크를 다음 이름으로 저장",
+        "saveAsHint": "이후 메시지에서 다음과 같이 사용:"
       }
     },
     "validation": {
@@ -1531,7 +1567,12 @@
       "modeAdd": "추가",
       "modeRemove": "제거",
       "tagPicked": "{tag} 태그 {mode}…",
-      "tagNone": "태그 {mode} (선택된 태그 없음)"
+      "tagNone": "태그 {mode} (선택된 태그 없음)",
+      "action_google_sheets_append": "Google 스프레드시트에 행 추가",
+      "action_google_calendar_event": "Google 캘린더 일정 만들기",
+      "action_razorpay_link": "Razorpay 결제 링크",
+      "action_cashfree_link": "Cashfree 결제 링크",
+      "actionNone": "서비스를 선택하세요"
     },
     "header": {
       "backToFlows": "플로우로 돌아가기",
@@ -2604,7 +2645,11 @@
       "setTagNeedsTag": "연락처 태그 지정에는 적용할 태그가 필요합니다.",
       "setTagNeedsNext": "연락처 태그 지정 노드는 다음 노드를 가리켜야 합니다.",
       "setTagMissingNext": "연락처 태그 지정 노드가 존재하지 않는 노드 \"{key}\"을(를) 가리킵니다.",
-      "unknownNodeType": "알 수 없는 노드 유형 \"{type}\"."
+      "unknownNodeType": "알 수 없는 노드 유형 \"{type}\".",
+      "actionNeedsService": "이 연결 단계에서 할 일을 선택하세요.",
+      "actionNeedsConnection": "이 단계에 사용할 연결된 계정을 선택하세요. 연결에서 추가할 수 있습니다.",
+      "actionNeedsNext": "이 단계에는 다음 단계가 필요합니다.",
+      "actionMissingNext": "이 단계가 존재하지 않는 “{key}”를 가리킵니다."
     },
     "automations": {
       "needsStep": "활성 자동화에는 단계가 하나 이상 필요합니다",

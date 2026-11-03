@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { uploadAccountMedia, MEDIA_MAX_BYTES } from "@/lib/storage/upload-media";
 import { slugify, type BuilderNode } from "../shared";
 import { NextNodeRow, NodeKeySelect, TextRow } from "./fields";
+import { ActionForm, type ActionCfg } from "./action-form";
 
 interface NodeConfigFormProps {
   node: BuilderNode;
@@ -193,6 +194,16 @@ export function NodeConfigForm({
           currentKey={node.node_key}
           onUpdateConfig={onUpdateConfig}
           t={t}
+        />
+      );
+
+    case "action":
+      return (
+        <ActionForm
+          cfg={cfg as ActionCfg}
+          allNodes={allNodes}
+          currentKey={node.node_key}
+          onUpdateConfig={onUpdateConfig}
         />
       );
 

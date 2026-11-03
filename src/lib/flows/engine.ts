@@ -57,6 +57,7 @@ import {
   type SendMediaNodeConfig,
   type SendMessageNodeConfig,
   type SetTagNodeConfig,
+  type ActionNodeConfig,
   type StartNodeConfig,
   type KeywordTriggerConfig,
   AUTO_ADVANCING_NODE_TYPES,
@@ -822,6 +823,19 @@ async function advanceFromNodeKey(
           detail: err instanceof Error ? err.message : String(err),
         });
       }
+      currentKey = cfg.next_node_key;
+      continue;
+    }
+    if (node.node_type === "action") {
+      // The connected-account call (Sheets row, calendar event, payment
+      // link) is made by the backend once it is wired. Until then the
+      // step is recorded and the run moves on, so a flow never stalls here.
+      const cfg = node.config as unknown as ActionNodeConfig;
+      await logEvent(db, run.id, "node_entered", node.node_key, {
+        action: cfg.service,
+        connection_id: cfg.connection_id,
+        executed: false,
+      });
       currentKey = cfg.next_node_key;
       continue;
     }
