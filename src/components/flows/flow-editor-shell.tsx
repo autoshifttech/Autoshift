@@ -32,7 +32,6 @@ import { FlowCanvas } from "./flow-canvas";
 import { FlowEditorProvider } from "./flow-editor-state";
 import { EditorHeader } from "./header";
 import { ValidationPanel } from "./validation-panel";
-import { NODE_META, nodeColors, type NodeType } from "./shared";
 import { cn } from "@/lib/utils";
 import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
 import { useTranslations } from "next-intl";
@@ -48,11 +47,6 @@ const MOBILE_BREAKPOINT = "(max-width: 767px)";
 type View = "canvas" | "list";
 
 const STORAGE_KEY = "autoshift.flowEditor.view";
-
-// Legend covers every node type, derived from NODE_META so a new type
-// can't silently go undocumented. NODE_META's key order already reads
-// the way a flow flows: start → talk → capture → branch → mutate → end.
-const LEGEND_TYPES = Object.keys(NODE_META) as NodeType[];
 
 interface Props {
   initialFlow: FlowRow;
@@ -93,54 +87,34 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
     }
   };
 
+  const viewToggle = !isMobile ? (
+    <div
+      role="group"
+      aria-label={t("editorView")}
+      className="inline-flex gap-0.5 rounded-full border border-border bg-muted p-0.5"
+    >
+      <SegButton
+        active={effectiveView === "canvas"}
+        onClick={() => choose("canvas")}
+        icon={<GitFork className="h-3.5 w-3.5" />}
+        label={t("canvasView")}
+      />
+      <SegButton
+        active={effectiveView === "list"}
+        onClick={() => choose("list")}
+        icon={<List className="h-3.5 w-3.5" />}
+        label={t("listView")}
+      />
+    </div>
+  ) : null;
+
   return (
     <FlowEditorProvider initialFlow={initialFlow} initialNodes={initialNodes}>
-      <div className="flex h-full min-h-0 flex-col">
-        <EditorHeader />
+      <div className="flex h-full min-h-0 flex-col bg-background">
+        <EditorHeader viewToggle={viewToggle} />
 
-        {/* ---- mode row: view toggle + node-type legend ----
-            Omitted entirely on mobile (canvas is unavailable there and
-            the legend is lg-only), so there's no empty band above the
-            stage on small screens. */}
-        {!isMobile && (
-          <div className="flex items-center gap-4 px-4 py-3 sm:px-6">
-            <div
-              role="group"
-              aria-label={t("editorView")}
-              className="inline-flex gap-0.5 rounded-lg border border-border bg-muted p-0.5"
-            >
-              <SegButton
-                active={effectiveView === "canvas"}
-                onClick={() => choose("canvas")}
-                icon={<GitFork className="h-3.5 w-3.5" />}
-                label={t("canvasView")}
-              />
-              <SegButton
-                active={effectiveView === "list"}
-                onClick={() => choose("list")}
-                icon={<List className="h-3.5 w-3.5" />}
-                label={t("listView")}
-              />
-            </div>
-            <div className="ml-auto hidden flex-wrap items-center justify-end gap-x-4 gap-y-1.5 2xl:flex">
-              {LEGEND_TYPES.map((t_type) => (
-                <span
-                  key={t_type}
-                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ background: nodeColors(t_type).solid }}
-                  />
-                  {t(`nodes.${t_type}.label`)}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ---- stage: the active view, owning its own overflow ---- */}
-        <div className="relative mx-4 min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-card-2 sm:mx-6">
+        {/* ---- stage: the active view fills every pixel left, edge to edge ---- */}
+        <div className="relative min-h-0 flex-1 overflow-hidden border-t border-border bg-card-2">
           {effectiveView === "canvas" ? (
             <FlowCanvas />
           ) : (
@@ -148,11 +122,14 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
               <FlowBuilder />
             </div>
           )}
-        </div>
 
-        {/* ---- validation / activate-readiness bar ---- */}
-        <div className="px-4 pb-4 pt-3 sm:px-6">
-          <ValidationPanel />
+          {/* Problems bar floats over the bottom of the stage, so it never
+              takes room from the canvas; its list opens upward. */}
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 mx-auto max-w-2xl md:inset-x-24">
+            <div className="pointer-events-auto">
+              <ValidationPanel />
+            </div>
+          </div>
         </div>
       </div>
     </FlowEditorProvider>

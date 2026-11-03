@@ -43,7 +43,7 @@ import {
   type BuilderState,
 } from "./flow-editor-state";
 
-export function EditorHeader() {
+export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
   const router = useRouter();
   const t = useTranslations("Flows.header");
   const {
@@ -60,7 +60,7 @@ export function EditorHeader() {
   } = useFlowEditor();
 
   return (
-    <div className="flex flex-col gap-1.5 px-4 pt-4 sm:px-6 sm:pt-5">
+    <div className="flex flex-col gap-1 bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 sm:px-5">
       <div className="flex flex-wrap items-center gap-3">
         {/* ---- left: back · icon · name · status · edited ---- */}
         <button
@@ -96,6 +96,8 @@ export function EditorHeader() {
         )}
 
         {/* ---- right: runs · delete · activate · save ---- */}
+        {viewToggle && <div className="hidden md:block">{viewToggle}</div>}
+
         <div className="flex w-full items-center justify-end gap-1.5 sm:ml-auto sm:w-auto">
           <Button
             variant="ghost"

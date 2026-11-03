@@ -46,7 +46,7 @@ export function ValidationPanel() {
   return (
     <div
       className={cn(
-        "rounded-xl border bg-background",
+        "relative rounded-xl border bg-background shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)]",
         errors.length > 0 ? "border-red-500/40" : "border-amber-500/40",
       )}
     >
@@ -65,7 +65,7 @@ export function ValidationPanel() {
         <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="flex max-h-48 flex-col gap-1 overflow-y-auto border-t border-border px-2 py-2">
+        <div className="absolute inset-x-0 bottom-full mb-2 flex max-h-[min(50dvh,18rem)] flex-col gap-1 overflow-y-auto rounded-xl border border-border bg-background px-2 py-2 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)]">
           {issues.map((i, ix) => (
             <IssueLine key={ix} issue={i} onJump={requestFlash} t={t} />
           ))}

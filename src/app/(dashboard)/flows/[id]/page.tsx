@@ -7,7 +7,6 @@ import { toast } from "@/lib/toast";
 
 import { useTranslations } from "next-intl";
 
-import { useFitHeight } from "@/hooks/use-fit-height";
 import { FlowEditorShell } from "@/components/flows/flow-editor-shell";
 import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
 
@@ -23,14 +22,9 @@ import type { FlowRow, FlowNodeRow } from "@/lib/flows/types";
  * 404s on a flow id the caller doesn't own (RLS), which becomes the
  * "Flow not found" state below.
  */
-/** Gives the editor the page height that is left, so its canvas can fill it. */
-function FitHeight({ children }: { children: React.ReactNode }) {
-  const { ref, height } = useFitHeight<HTMLDivElement>(520);
-  return (
-    <div ref={ref} style={height ? { height } : undefined} className="min-h-[520px]">
-      {children}
-    </div>
-  );
+/** The editor takes the whole screen, above the app menu, so the canvas and list have room. */
+function FullScreen({ children }: { children: React.ReactNode }) {
+  return <div className="fixed inset-0 z-[45] bg-background">{children}</div>;
 }
 
 export default function FlowEditorPage() {
@@ -99,8 +93,8 @@ export default function FlowEditorPage() {
   }
 
   return (
-    <FitHeight>
+    <FullScreen>
       <FlowEditorShell initialFlow={flow} initialNodes={nodes} />
-    </FitHeight>
+    </FullScreen>
   );
 }
