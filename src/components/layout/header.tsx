@@ -92,7 +92,7 @@ export function Header() {
                 alt={profile.full_name ?? t("defaultAvatar")}
               />
             ) : null}
-            <AvatarFallback className="rounded-xl bg-gradient-to-br from-[#8b6fd6] to-[#6a4fc2] text-sm font-bold text-white">
+            <AvatarFallback className="rounded-xl bg-[var(--tone-mint)] text-sm font-bold text-primary">
               {initial}
             </AvatarFallback>
           </Avatar>

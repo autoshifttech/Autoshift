@@ -22,7 +22,7 @@ export function CreditsBadge() {
         "hidden h-10 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition-colors sm:inline-flex",
         low
           ? "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
-          : "liquid-glass",
+          : "text-foreground bg-card shadow-[var(--shadow-card)] hover:bg-card-2",
       )}
     >
       <Wallet className={cn("size-3.5", low ? "" : "text-primary")} />

@@ -251,7 +251,7 @@ function PaletteButton({ onOpen }: { onOpen: () => void }) {
       type="button"
       onClick={onOpen}
       aria-label={tr("Search the admin panel")}
-      className="hidden h-10 w-full max-w-sm items-center gap-2 rounded-full liquid-glass pr-2 pl-3.5 text-left text-sm font-semibold transition-[filter] hover:brightness-105 md:inline-flex"
+      className="hidden h-10 w-full max-w-sm items-center gap-2 rounded-full text-foreground bg-card shadow-[var(--shadow-card)] pr-2 pl-3.5 text-left text-sm font-semibold transition-colors hover:bg-card-2 md:inline-flex"
     >
       <Search className="size-4 shrink-0" />
       <span className="min-w-0 flex-1 truncate">{tr("Find a page, business, owner or number…")}</span>
@@ -268,7 +268,7 @@ function AlertsBell() {
   const critical = alerts.filter((a) => a.severity !== "info").length;
   return (
     <Popover>
-      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-full liquid-glass">
+      <PopoverTrigger aria-label={`Alerts (${alerts.length})`} className="relative flex size-10 items-center justify-center rounded-full text-foreground bg-card shadow-[var(--shadow-card)]">
         <Bell className="size-[18px]" />
         {critical > 0 && <span className="absolute top-1 right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-xs font-bold text-white">{critical}</span>}
       </PopoverTrigger>
@@ -303,7 +303,7 @@ function AdminMenu() {
   const router = useRouter();
   return (
     <Popover>
-      <PopoverTrigger className="flex items-center gap-2 rounded-full liquid-glass py-1 pr-3 pl-1" aria-label="Admin account">
+      <PopoverTrigger className="flex items-center gap-2 rounded-full text-foreground bg-card shadow-[var(--shadow-card)] py-1 pr-3 pl-1" aria-label="Admin account">
         <Initials name="Founder Admin" className="size-8" />
         <span className="hidden text-left sm:block">
           <span className="block text-sm leading-tight font-medium text-foreground">{CURRENT_ADMIN.name}</span>
