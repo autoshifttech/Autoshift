@@ -33,8 +33,8 @@ def test_me_returns_account_and_role(client, world):
 
 
 def test_me_shows_platform_role_for_staff_with_a_workspace(client, world):
-    world.store["profiles"].append({"id": world.users["staff_super"], "account_id": world.acct_a, "account_role": "owner"})
-    world.store["profiles"].remove(next(p for p in world.store["profiles"] if p["id"] == world.users["staff_super"] and "account_id" not in p))
+    world.store["profiles"].append({"id": "p-extra", "user_id": world.users["staff_super"], "account_id": world.acct_a, "account_role": "owner"})
+    world.store["profiles"].remove(next(p for p in world.store["profiles"] if p["user_id"] == world.users["staff_super"] and "account_id" not in p))
     assert client.get("/v1/me", headers=world.headers("staff_super")).json()["platform_admin"] == "super_admin"
 
 

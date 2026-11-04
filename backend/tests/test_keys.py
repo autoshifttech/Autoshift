@@ -39,7 +39,7 @@ def test_a_read_only_key_cannot_change_anything(client, world):
 
 def test_a_key_is_limited_to_its_owners_current_role(client, world):
     key = _mint(client, world, scope="write")["key"]
-    next(p for p in world.rows("profiles") if p["id"] == world.users["admin_a"])["account_role"] = "viewer"  # demoted
+    next(p for p in world.rows("profiles") if p["user_id"] == world.users["admin_a"])["account_role"] = "viewer"  # demoted
     assert client.post("/v1/assistants", json={"name": "Nope"}, headers=_bearer(key)).status_code == 403
 
 

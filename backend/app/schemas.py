@@ -155,3 +155,35 @@ class ReplyTest(BaseModel):
             if turn.get("role") not in ("user", "assistant") or not isinstance(turn.get("content"), str) or len(turn["content"]) > 2000:
                 raise ValueError("Each turn needs a role (user or assistant) and text")
         return [{"role": t["role"], "content": t["content"]} for t in v]
+
+
+class Person(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", max_length=200)
+
+
+class BusinessCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    industry: str = Field("", max_length=60)
+    city: str = Field("", max_length=60)
+    owner: Person
+    plan_id: str = "starter"
+
+
+class BusinessPatch(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=120)
+    industry: str | None = Field(None, max_length=60)
+    city: str | None = Field(None, max_length=60)
+
+
+class Suspend(BaseModel):
+    suspended: bool
+    reason: str = Field("", max_length=300)
+
+
+class MemberAdd(Person):
+    role: Literal["admin", "agent", "viewer"]
+
+
+class MemberPatch(BaseModel):
+    role: Literal["owner", "admin", "agent", "viewer"]

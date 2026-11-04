@@ -13,7 +13,7 @@ os.environ.setdefault("MCP_ALLOWED_HOSTS", "testserver,localhost:*")
 
 from app.config import Settings, get_settings
 from app.db import DbError
-from app.deps import get_llm, AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
+from app.deps import get_auth_admin, get_llm, AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
 from app.razorpay import RazorpayError
 from app.main import create_app
 
@@ -166,6 +166,17 @@ class FakeLlm:
         return LlmResult(self.answer, 10, 5)
 
 
+class FakeAuthAdmin:
+    def __init__(self, world):
+        self.world = world
+        self.invited: list[str] = []
+
+    async def invite(self, email, name):
+        self.invited.append(email)
+        existing = next((u for n, u in self.world.users.items() if f"{n}@example.com" == email), None)
+        return existing or self.world.add_user(email.split("@")[0], None, None, bare=True)
+
+
 class World:
     """Two businesses, people with each role, and platform staff, on one fake database."""
 
@@ -184,6 +195,8 @@ class World:
             ("admin_b", self.acct_b, "admin"),
         ]:
             self.add_user(name, acct, role)
+        for aid, nm in ((self.acct_a, "Business A"), (self.acct_b, "Business B")):
+            self.store.setdefault("accounts", []).append({"id": aid, "name": nm, "status": "active", "industry": "", "city": "", "created_at": "2026-01-01T00:00:00Z", "owner_user_id": None})
         self.add_user("loner", None, None)
         for name, role in [("staff_super", "super_admin"), ("staff_finance", "finance"), ("staff_support", "support")]:
             uid = self.add_user(name, None, None)
@@ -203,10 +216,12 @@ class World:
             {"vendor": "anthropic", "model_id": "claude-sonnet-5-5", "label": "Claude Sonnet 5.5", "tier": "balanced", "enabled": True, "is_custom": False, "is_default": False},
         ]
 
-    def add_user(self, name: str, account: str | None, role: str | None) -> str:
+    def add_user(self, name: str, account: str | None, role: str | None, bare: bool = False) -> str:
         uid = str(uuid.uuid4())
         self.users[name] = uid
-        profile: dict[str, Any] = {"id": uid}
+        if bare:  # a brand-new login: no profile row yet
+            return uid
+        profile: dict[str, Any] = {"id": str(uuid.uuid4()), "user_id": uid}
         if account:
             profile.update(account_id=account, account_role=role)
         self.store.setdefault("profiles", []).append(profile)
@@ -239,12 +254,17 @@ def rzp() -> FakeRazorpay:
 
 
 @pytest.fixture
+def auth_admin(world) -> FakeAuthAdmin:
+    return FakeAuthAdmin(world)
+
+
+@pytest.fixture
 def llm() -> FakeLlm:
     return FakeLlm()
 
 
 @pytest.fixture
-def client(world: World, settings: Settings, rzp: FakeRazorpay, llm: FakeLlm):
+def client(world: World, settings: Settings, rzp: FakeRazorpay, llm: FakeLlm, auth_admin: FakeAuthAdmin):
     async def fake_user_db(ctx: Annotated[AccountCtx, Depends(get_account)]):
         return FakeDb(world.store, tenant=ctx.account_id, fail_on=world.fail_on)
 
@@ -254,5 +274,6 @@ def client(world: World, settings: Settings, rzp: FakeRazorpay, llm: FakeLlm):
     app.dependency_overrides[get_user_db] = fake_user_db
     app.dependency_overrides[get_razorpay] = lambda: rzp
     app.dependency_overrides[get_llm] = lambda: llm
+    app.dependency_overrides[get_auth_admin] = lambda: auth_admin
     with TestClient(app) as c:
         yield c

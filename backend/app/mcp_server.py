@@ -201,6 +201,23 @@ def build_mcp(get_app) -> MCPServer:
         return await call("PATCH", f"/v1/platform/ai-providers/{vendor}/models/{model_id}", json_body=body)
 
     @mcp.tool()
+    async def platform_businesses_list() -> list:
+        """Platform key: every business with plan, status, team size and wallet."""
+        return await call("GET", "/v1/platform/businesses")
+
+    @mcp.tool()
+    async def platform_business_get(account_id: str) -> dict:
+        """Platform key: one business with its team."""
+        return await call("GET", f"/v1/platform/businesses/{account_id}")
+
+    @mcp.tool()
+    async def platform_business_suspend(account_id: str, suspended: bool, reason: str = "", confirm: bool = False) -> dict:
+        """Platform key (support): suspend a business (locks out its users and API keys, keeps data) or reactivate it. Needs confirm=true."""
+        if not confirm:
+            return preview(f"{'suspend' if suspended else 'reactivate'} this business", account_id=account_id, reason=reason)
+        return await call("POST", f"/v1/platform/businesses/{account_id}/suspend", json_body={"suspended": suspended, "reason": reason})
+
+    @mcp.tool()
     async def platform_audit(limit: int = 50) -> list:
         """Platform key: the audit log, newest first."""
         return await call("GET", "/v1/platform/audit", params={"limit": limit})

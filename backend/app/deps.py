@@ -9,6 +9,7 @@ from fastapi import Depends, Header, HTTPException, Request
 
 from .config import Settings, get_settings
 from .db import Db, service_db, user_db
+from .auth_admin import AuthAdmin, SupabaseAuthAdmin
 from .llm import HttpLlm, Llm
 from .razorpay import RazorpayClient
 from .security import KEY_PREFIX, AuthError, TokenUser, hash_key, verify_token
@@ -18,6 +19,10 @@ ROLE_ORDER = {"viewer": 0, "agent": 1, "admin": 2, "owner": 3}
 
 def get_service_db(settings: Annotated[Settings, Depends(get_settings)]) -> Db:
     return service_db(settings)
+
+
+def get_auth_admin(settings: Annotated[Settings, Depends(get_settings)]) -> AuthAdmin:
+    return SupabaseAuthAdmin(settings)
 
 
 def get_llm() -> Llm:
@@ -82,11 +87,14 @@ async def get_account(
     """The caller's account and role, read from their profile (trusted lookup)."""
     if user.key_id and user.key_kind != "account":
         raise HTTPException(403, "This API key is for platform use, not a workspace")
-    rows = await sdb.select("profiles", {"id": user.id}, limit=1)
+    rows = await sdb.select("profiles", {"user_id": user.id}, limit=1)
     if not rows or not rows[0].get("account_id") or not rows[0].get("account_role"):
         raise HTTPException(403, "This login has no workspace")
     if user.key_id and str(rows[0]["account_id"]) != user.key_account_id:
         raise HTTPException(403, "This API key no longer matches its workspace")
+    acct = await sdb.select("accounts", {"id": str(rows[0]["account_id"])}, limit=1)
+    if acct and acct[0].get("status") == "suspended":
+        raise HTTPException(403, "This business is suspended. Contact AutoShift support.")
     return AccountCtx(user=user, account_id=str(rows[0]["account_id"]), role=str(rows[0]["account_role"]))
 
 
