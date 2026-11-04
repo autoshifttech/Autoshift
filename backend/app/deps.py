@@ -7,6 +7,7 @@ from fastapi import Depends, Header, HTTPException
 
 from .config import Settings, get_settings
 from .db import Db, service_db, user_db
+from .razorpay import RazorpayClient
 from .security import AuthError, TokenUser, verify_token
 
 ROLE_ORDER = {"viewer": 0, "agent": 1, "admin": 2, "owner": 3}
@@ -14,6 +15,10 @@ ROLE_ORDER = {"viewer": 0, "agent": 1, "admin": 2, "owner": 3}
 
 def get_service_db(settings: Annotated[Settings, Depends(get_settings)]) -> Db:
     return service_db(settings)
+
+
+def get_razorpay(settings: Annotated[Settings, Depends(get_settings)]) -> RazorpayClient:
+    return RazorpayClient(settings)
 
 
 def get_token_user(
@@ -91,6 +96,7 @@ def require_platform_role(*allowed: str):
     return check
 
 
+Rzp = Annotated[RazorpayClient, Depends(get_razorpay)]
 Member = Annotated[AccountCtx, Depends(get_account)]
 AdminMember = Annotated[AccountCtx, Depends(require_role("admin"))]
 UserDb = Annotated[Db, Depends(get_user_db)]

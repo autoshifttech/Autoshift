@@ -101,3 +101,35 @@ class ModelCreate(BaseModel):
     model_id: str = Field(min_length=1, max_length=120)
     label: str = Field("", max_length=120)
     tier: Tier = "balanced"
+
+
+class TopupCreate(BaseModel):
+    amount_inr: int = Field(gt=0)
+
+
+class PaymentVerify(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class SubscriptionCheckout(BaseModel):
+    plan_id: Literal["starter", "growth", "pro"]
+    cycle: Literal["monthly", "yearly"] = "monthly"
+
+
+class SubscriptionVerify(BaseModel):
+    razorpay_payment_id: str
+    razorpay_subscription_id: str
+    razorpay_signature: str
+
+
+class WalletAdjust(BaseModel):
+    amount_paise: int
+    reason: str = Field(min_length=3, max_length=200)
+    idempotency_key: str = Field(min_length=8, max_length=80)
+
+
+class RefundRequest(BaseModel):
+    amount_paise: int | None = Field(None, gt=0)
+    reason: str = Field(min_length=3, max_length=200)

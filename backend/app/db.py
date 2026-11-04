@@ -28,6 +28,7 @@ class Db(Protocol):
     async def update(self, table: str, filters: dict[str, str], patch: Row) -> list[Row]: ...
     async def delete(self, table: str, filters: dict[str, str]) -> list[Row]: ...
     async def upsert(self, table: str, row: Row, on_conflict: str) -> Row: ...
+    async def rpc(self, name: str, params: Row) -> Any: ...
 
 
 class SupabaseDb:
@@ -70,6 +71,10 @@ class SupabaseDb:
     async def upsert(self, table, row, on_conflict):
         data = await self._send("POST", table, params={"on_conflict": on_conflict}, json=row, prefer="resolution=merge-duplicates,return=representation")
         return data[0]
+
+
+    async def rpc(self, name, params):
+        return await self._send("POST", f"rpc/{name}", json=params)
 
 
 def service_db(settings: Settings) -> SupabaseDb:

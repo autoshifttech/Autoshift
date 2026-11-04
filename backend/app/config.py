@@ -21,6 +21,17 @@ class Settings(BaseSettings):
     # 64 hex characters (32 bytes). Encrypts provider and connection secrets.
     encryption_key: str = ""
 
+    # The platform's Razorpay account (test keys until you go live).
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
+    # The secret you set on the webhook in the Razorpay dashboard.
+    razorpay_webhook_secret: str = ""
+
+    # Wallet top-up limits, in rupees. GST is added on top of the credit amount.
+    topup_min_inr: int = 500
+    topup_max_inr: int = 100000
+    gst_rate: float = 0.18
+
     # Browser origins allowed to call the API, comma separated.
     cors_origins: str = "http://localhost:3000"
 

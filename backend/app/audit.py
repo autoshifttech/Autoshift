@@ -10,7 +10,7 @@ async def record(
     *,
     scope: str,
     action: str,
-    actor_id: str,
+    actor_id: str | None,
     target: str = "",
     account_id: str | None = None,
     details: dict[str, Any] | None = None,

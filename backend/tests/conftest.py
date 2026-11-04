@@ -9,11 +9,24 @@ from fastapi import Depends
 from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
-from app.deps import AccountCtx, get_account, get_service_db, get_user_db
+from app.db import DbError
+from app.deps import AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
+from app.razorpay import RazorpayError
 from app.main import app
 
 JWT_SECRET = "test-jwt-secret-test-jwt-secret-1234"
 ENC_KEY = "11" * 32
+RZP_SECRET = "rzp-key-secret-for-tests"
+RZP_WEBHOOK_SECRET = "rzp-webhook-secret-for-tests"
+
+
+# Column defaults the real database applies on insert.
+DEFAULTS = {
+    "payment_orders": {"status": "created", "razorpay_payment_id": None, "paid_at": None},
+    "razorpay_events": {"status": "processing", "error": None},
+    "subscriptions": {"cancel_at_period_end": False, "razorpay_subscription_id": None, "current_period_end": None},
+    "assistants": {"enabled": False},
+}
 
 
 class FakeDb:
@@ -41,13 +54,13 @@ class FakeDb:
         rows = [dict(r) for r in self._visible(table) if self._match(r, filters)]
         if order:
             col, _, direction = order.partition(".")
-            rows.sort(key=lambda r: str(r.get(col)), reverse=direction == "desc")
+            rows.sort(key=lambda r: (isinstance(r.get(col), str), r.get(col)), reverse=direction == "desc")
         return rows[:limit] if limit else rows
 
     async def insert(self, table, row):
         if table in self.fail_on:
             raise RuntimeError(f"{table} is down")
-        new = {"id": str(uuid.uuid4()), "created_at": f"2026-01-01T00:00:{next(self._ids):06d}Z", **row}
+        new = {"id": str(uuid.uuid4()), "created_at": f"2026-01-01T00:00:{next(self._ids):06d}Z", **DEFAULTS.get(table, {}), **row}
         self.store.setdefault(table, []).append(new)
         return dict(new)
 
@@ -67,6 +80,72 @@ class FakeDb:
 
     async def upsert(self, table, row, on_conflict):
         return await self.insert(table, row)
+
+    async def rpc(self, name, params):
+        if name == "next_invoice_number":
+            n = len(self.store.get("invoices", [])) + 1
+            return f"INV-2026-{n:06d}"
+        if name != "wallet_apply":
+            raise NotImplementedError(name)
+        acct, amount, key = params["p_account"], params["p_amount"], params["p_idem_key"]
+        balances = self.store.setdefault("wallet_balances", [])
+        row = next((b for b in balances if b["account_id"] == acct), None)
+        if row is None:
+            row = {"account_id": acct, "balance_paise": 0}
+            balances.append(row)
+        ledger = self.store.setdefault("wallet_ledger", [])
+        if any(entry["idem_key"] == key for entry in ledger):
+            return {"applied": False, "balance_paise": row["balance_paise"]}
+        if row["balance_paise"] + amount < 0:
+            raise DbError(400, '{"message":"insufficient_funds"}')
+        row["balance_paise"] += amount
+        ledger.append({"id": len(ledger) + 1, "account_id": acct, "kind": params["p_kind"], "amount_paise": amount, "balance_after": row["balance_paise"], "ref": params["p_ref"], "idem_key": key, "created_by": params.get("p_created_by")})
+        return {"applied": True, "balance_paise": row["balance_paise"]}
+
+
+class FakeRazorpay:
+    key_id = "rzp_test_FAKEKEY123"
+
+    def __init__(self):
+        self.orders: list[dict] = []
+        self.plans: list[dict] = []
+        self.subscriptions: list[dict] = []
+        self.cancelled: list[tuple[str, bool]] = []
+        self.refunds: list[dict] = []
+        self.fail = False
+
+    def _check(self):
+        if self.fail:
+            raise RazorpayError(500, "down")
+
+    async def create_order(self, amount_paise, receipt, notes):
+        self._check()
+        order = {"id": f"order_{len(self.orders) + 1}", "amount": amount_paise, "notes": notes}
+        self.orders.append(order)
+        return order
+
+    async def create_plan(self, period, amount_paise, name):
+        self._check()
+        plan = {"id": f"plan_{len(self.plans) + 1}", "period": period, "amount": amount_paise}
+        self.plans.append(plan)
+        return plan
+
+    async def create_subscription(self, plan_id, total_count, notes, start_at=None):
+        self._check()
+        sub = {"id": f"sub_{len(self.subscriptions) + 1}", "plan_id": plan_id, "total_count": total_count, "start_at": start_at}
+        self.subscriptions.append(sub)
+        return sub
+
+    async def cancel_subscription(self, subscription_id, at_cycle_end):
+        self._check()
+        self.cancelled.append((subscription_id, at_cycle_end))
+        return {"id": subscription_id}
+
+    async def refund(self, payment_id, amount_paise, notes):
+        self._check()
+        out = {"id": f"rfnd_{len(self.refunds) + 1}", "payment_id": payment_id, "amount": amount_paise, "status": "pending"}
+        self.refunds.append(out)
+        return out
 
 
 class World:
@@ -91,6 +170,11 @@ class World:
         for name, role in [("staff_super", "super_admin"), ("staff_finance", "finance"), ("staff_support", "support")]:
             uid = self.add_user(name, None, None)
             self.store.setdefault("platform_admins", []).append({"user_id": uid, "role": role})
+        self.store["plans"] = [
+            {"id": "starter", "name": "Starter", "monthly_paise": 99900, "seats": 2, "contacts": 1000, "ai_replies": 1000, "popular": False, "active": True, "razorpay_plan_monthly": None, "razorpay_plan_yearly": None},
+            {"id": "growth", "name": "Growth", "monthly_paise": 249900, "seats": 5, "contacts": 10000, "ai_replies": 5000, "popular": True, "active": True, "razorpay_plan_monthly": None, "razorpay_plan_yearly": None},
+            {"id": "pro", "name": "Pro", "monthly_paise": 599900, "seats": 15, "contacts": None, "ai_replies": 20000, "popular": False, "active": True, "razorpay_plan_monthly": None, "razorpay_plan_yearly": None},
+        ]
         self.store["platform_ai_providers"] = [
             {"vendor": v, "enabled": False, "key_ciphertext": None, "key_tail": None, "saved_at": None}
             for v in ("openai", "google", "anthropic", "deepseek", "deepinfra")
@@ -118,7 +202,7 @@ class World:
         return {"Authorization": f"Bearer {self.token(name, **kw)}"}
 
     def rows(self, table: str) -> list[dict]:
-        return self.store.get(table, [])
+        return self.store.setdefault(table, [])
 
 
 @pytest.fixture
@@ -128,17 +212,23 @@ def world() -> World:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(supabase_url="https://x.supabase.co", supabase_jwt_secret=JWT_SECRET, encryption_key=ENC_KEY)
+    return Settings(supabase_url="https://x.supabase.co", supabase_jwt_secret=JWT_SECRET, encryption_key=ENC_KEY, razorpay_key_id="rzp_test_FAKEKEY123", razorpay_key_secret=RZP_SECRET, razorpay_webhook_secret=RZP_WEBHOOK_SECRET)
 
 
 @pytest.fixture
-def client(world: World, settings: Settings):
+def rzp() -> FakeRazorpay:
+    return FakeRazorpay()
+
+
+@pytest.fixture
+def client(world: World, settings: Settings, rzp: FakeRazorpay):
     async def fake_user_db(ctx: Annotated[AccountCtx, Depends(get_account)]):
         return FakeDb(world.store, tenant=ctx.account_id, fail_on=world.fail_on)
 
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_service_db] = lambda: world.service
     app.dependency_overrides[get_user_db] = fake_user_db
+    app.dependency_overrides[get_razorpay] = lambda: rzp
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()

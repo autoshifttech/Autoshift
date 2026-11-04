@@ -53,3 +53,30 @@ Apply `supabase/migrations/061_backend_foundation.sql` to your Supabase project 
 Razorpay wallet and plans, the WhatsApp core, the AI runner and queue, the MCP server
 (user keys and admin keys), then the n8n nodes. Razorpay is the only payment provider;
 the `flow_connections` table accepts `google` and `razorpay` only.
+
+## Wallet and plans (Razorpay)
+
+Migration `062_wallet_and_plans.sql`. Money is integer paise everywhere.
+
+- **Ledger.** `wallet_ledger` is append-only (a trigger blocks edits and deletes).
+  `wallet_apply()` is the only way money moves: it locks the balance, refuses to
+  go below zero, and ignores a repeated `idem_key`, so retries never double-credit
+  or double-charge.
+- **Top-up.** `POST /v1/wallet/topups` creates a Razorpay order for credits plus 18% GST
+  (the server decides the amount). Credits are added after the payment is confirmed,
+  either by `POST /v1/wallet/topups/verify` (signature checked) or by the
+  `order.paid` webhook. Both paths are safe together.
+- **Webhooks.** `POST /v1/webhooks/razorpay` checks the signature over the raw body,
+  records each event id, ignores repeats, and answers 500 on failure so Razorpay retries.
+  Handled: `order.paid`, `subscription.activated|charged|halted|pending|cancelled|completed`, `refund.processed`.
+- **Plans.** `GET /v1/plans`; a new workspace starts a 14-day trial. `POST /v1/subscription/checkout`
+  creates the Razorpay plan/subscription (first charge waits until the trial ends),
+  `/verify` checks the signature, `/cancel` stops renewal at the end of the paid period.
+- **Invoices.** One GST invoice per payment, numbered `INV-YYYY-000001`.
+- **Staff.** Finance can adjust a wallet (idempotent, audited) and refund a top-up; credits
+  are taken back when Razorpay confirms the refund.
+- **Charging.** `app/wallet.py::charge()` bills messages and AI replies at the rate card; the
+  WhatsApp and AI runner phases call it.
+
+Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET`, and point the
+Razorpay webhook at `/v1/webhooks/razorpay`.

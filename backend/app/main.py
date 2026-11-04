@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .routers import ai_models, assistants, connections, me, platform
+from .routers import ai_models, assistants, connections, me, plans, platform, platform_money, wallet, webhooks
 
 app = FastAPI(title="AutoShift API", version="0.1.0")
 
@@ -20,5 +20,5 @@ def health():
     return {"status": "ok"}
 
 
-for r in (me.router, assistants.router, connections.router, ai_models.router, platform.router):
+for r in (me.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, wallet.router, plans.router, webhooks.router):
     app.include_router(r)
