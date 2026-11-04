@@ -1,8 +1,15 @@
 from fastapi import APIRouter, HTTPException
 
 from .. import audit
-from ..deps import AdminMember, Member, ServiceDb, UserDb
-from ..schemas import AssistantCreate, AssistantPatch
+from dataclasses import asdict
+from typing import Annotated
+
+from fastapi import Depends
+
+from .. import ai_runner
+from ..config import Settings, get_settings
+from ..deps import AdminMember, Member, ServiceDb, UserDb, get_llm
+from ..schemas import AssistantCreate, AssistantPatch, ReplyTest
 
 router = APIRouter(prefix="/v1/assistants", tags=["assistants"])
 
@@ -53,3 +60,12 @@ async def delete_assistant(assistant_id: str, ctx: AdminMember, db: UserDb, sdb:
     existing = await _get(db, ctx, assistant_id)
     await db.delete("assistants", {"id": assistant_id, "account_id": ctx.account_id})
     await audit.record(sdb, scope="account", action="assistant.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=assistant_id, details={"name": existing["name"]})
+
+
+@router.post("/{assistant_id}/test-reply")
+async def test_reply(assistant_id: str, body: ReplyTest, ctx: AdminMember, db: UserDb, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)], llm: Annotated[object, Depends(get_llm)]):
+    """Preview a reply. Uses the real model and costs one AI reply from the wallet."""
+    assistant = await _get(db, ctx, assistant_id)
+    out = await ai_runner.reply(sdb, llm, settings, assistant, body.history, body.message, ref=f"test:{ctx.account_id}:{body.idempotency_key}", live=False)
+    await audit.record(sdb, scope="account", action="assistant.test_reply", actor_id=ctx.user.id, account_id=ctx.account_id, target=assistant_id, details={"status": out.status})
+    return asdict(out)

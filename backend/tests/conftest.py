@@ -13,7 +13,7 @@ os.environ.setdefault("MCP_ALLOWED_HOSTS", "testserver,localhost:*")
 
 from app.config import Settings, get_settings
 from app.db import DbError
-from app.deps import AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
+from app.deps import get_llm, AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
 from app.razorpay import RazorpayError
 from app.main import create_app
 
@@ -151,6 +151,21 @@ class FakeRazorpay:
         return out
 
 
+class FakeLlm:
+    def __init__(self):
+        self.calls: list[dict] = []
+        self.answer = "We open at 9am."
+        self.fail = False
+
+    async def complete(self, vendor, api_key, model, system, messages):
+        from app.llm import LlmError, LlmResult
+
+        if self.fail:
+            raise LlmError("down")
+        self.calls.append({"vendor": vendor, "api_key": api_key, "model": model, "system": system, "messages": messages})
+        return LlmResult(self.answer, 10, 5)
+
+
 class World:
     """Two businesses, people with each role, and platform staff, on one fake database."""
 
@@ -224,7 +239,12 @@ def rzp() -> FakeRazorpay:
 
 
 @pytest.fixture
-def client(world: World, settings: Settings, rzp: FakeRazorpay):
+def llm() -> FakeLlm:
+    return FakeLlm()
+
+
+@pytest.fixture
+def client(world: World, settings: Settings, rzp: FakeRazorpay, llm: FakeLlm):
     async def fake_user_db(ctx: Annotated[AccountCtx, Depends(get_account)]):
         return FakeDb(world.store, tenant=ctx.account_id, fail_on=world.fail_on)
 
@@ -233,5 +253,6 @@ def client(world: World, settings: Settings, rzp: FakeRazorpay):
     app.dependency_overrides[get_service_db] = lambda: world.service
     app.dependency_overrides[get_user_db] = fake_user_db
     app.dependency_overrides[get_razorpay] = lambda: rzp
+    app.dependency_overrides[get_llm] = lambda: llm
     with TestClient(app) as c:
         yield c

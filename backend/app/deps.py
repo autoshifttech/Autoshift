@@ -9,6 +9,7 @@ from fastapi import Depends, Header, HTTPException, Request
 
 from .config import Settings, get_settings
 from .db import Db, service_db, user_db
+from .llm import HttpLlm, Llm
 from .razorpay import RazorpayClient
 from .security import KEY_PREFIX, AuthError, TokenUser, hash_key, verify_token
 
@@ -17,6 +18,10 @@ ROLE_ORDER = {"viewer": 0, "agent": 1, "admin": 2, "owner": 3}
 
 def get_service_db(settings: Annotated[Settings, Depends(get_settings)]) -> Db:
     return service_db(settings)
+
+
+def get_llm() -> Llm:
+    return HttpLlm()
 
 
 def get_razorpay(settings: Annotated[Settings, Depends(get_settings)]) -> RazorpayClient:

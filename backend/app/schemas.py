@@ -139,3 +139,19 @@ class KeyCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     scope: Literal["read", "write"] = "read"
     expires_in_days: int | None = Field(90, ge=1, le=365)
+
+
+class ReplyTest(BaseModel):
+    """Try an assistant on a sample message. This is a real AI call and is charged."""
+
+    message: str = Field(min_length=1, max_length=2000)
+    history: list[dict] = Field(default_factory=list, max_length=30)
+    idempotency_key: str = Field(min_length=8, max_length=80)
+
+    @field_validator("history")
+    @classmethod
+    def _shape(cls, v: list[dict]) -> list[dict]:
+        for turn in v:
+            if turn.get("role") not in ("user", "assistant") or not isinstance(turn.get("content"), str) or len(turn["content"]) > 2000:
+                raise ValueError("Each turn needs a role (user or assistant) and text")
+        return [{"role": t["role"], "content": t["content"]} for t in v]

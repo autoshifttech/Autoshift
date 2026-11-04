@@ -123,6 +123,14 @@ def build_mcp(get_app) -> MCPServer:
         return await call("DELETE", f"/v1/assistants/{assistant_id}")
 
     @mcp.tool()
+    async def assistants_test_reply(assistant_id: str, message: str, idempotency_key: str, confirm: bool = False) -> dict:
+        """Try an assistant on a sample message. Uses the real AI and costs one AI reply from the wallet, so it needs confirm=true.
+        Reuse the same idempotency_key to retry without paying twice."""
+        if not confirm:
+            return preview("run a real AI reply and charge one AI reply to the wallet", assistant_id=assistant_id)
+        return await call("POST", f"/v1/assistants/{assistant_id}/test-reply", json_body={"message": message, "idempotency_key": idempotency_key})
+
+    @mcp.tool()
     async def connections_list() -> list:
         """List connected accounts (Google, Razorpay). Secrets are never shown."""
         return await call("GET", "/v1/connections")
