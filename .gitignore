@@ -45,3 +45,8 @@ next-env.d.ts
 
 # supabase
 supabase/.temp/
+
+# backend (FastAPI)
+/backend/.venv/
+__pycache__/
+.pytest_cache/
