@@ -127,10 +127,11 @@ export function initialAdminState(): AdminState {
     createdBusinesses: [],
     deletedBusinesses: [],
     teams: {},
-    tickets: TICKETS,
-    announcements: ANNOUNCEMENTS,
-    team: ADMIN_TEAM,
-    audit: AUDIT,
+    // With a backend these come from the server (see admin-data-sync.ts).
+    tickets: backendUrl() ? [] : TICKETS,
+    announcements: backendUrl() ? [] : ANNOUNCEMENTS,
+    team: backendUrl() ? [] : ADMIN_TEAM,
+    audit: backendUrl() ? [] : AUDIT,
     alerts: {
       channels: { panel: true, email: true, whatsapp: false },
       destinations: { email: 'founder@autoshift.app', whatsapp: '' },
@@ -144,7 +145,7 @@ export function initialAdminState(): AdminState {
   }
 }
 
-export const adminStore = createStore(initialAdminState, 'autoshift.admin.v2')
+export const adminStore = createStore(initialAdminState, backendUrl() ? undefined : 'autoshift.admin.v2')
 const SERVER = initialAdminState()
 export const useAdmin = () => useStore(adminStore, SERVER)
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from .. import audit
 from ..deps import Member, PlatformAdmin, ServiceDb, get_platform_admin, require_platform_role
-from ..schemas import AnnouncementIn, StaffReply, TicketCreate, TicketPatch, TicketReply
+from ..schemas import AnnouncementIn, AnnouncementPatch, StaffReply, TicketCreate, TicketPatch, TicketReply
 
 from typing import Annotated
 from fastapi import Depends
@@ -144,3 +144,16 @@ async def unpublish(announcement_id: str, admin: SupportStaff, sdb: ServiceDb):
         raise HTTPException(404, "Announcement not found")
     await sdb.delete("announcements", {"id": announcement_id})
     await audit.record(sdb, scope="platform", action="announcement.delete", actor_id=admin.user.id, target=announcement_id)
+
+
+@router.patch("/v1/platform/announcements/{announcement_id}")
+async def edit_announcement(announcement_id: str, body: AnnouncementPatch, admin: SupportStaff, sdb: ServiceDb):
+    """Edit, publish (draft=false) or move back to drafts (draft=true)."""
+    if not await sdb.select("announcements", {"id": announcement_id}, limit=1):
+        raise HTTPException(404, "Announcement not found")
+    patch = body.model_dump(exclude_unset=True, exclude_none=True)
+    if not patch:
+        raise HTTPException(422, "Nothing to change")
+    rows = await sdb.update("announcements", {"id": announcement_id}, patch)
+    await audit.record(sdb, scope="platform", action="announcement.update", actor_id=admin.user.id, target=announcement_id, details={"fields": sorted(patch)})
+    return rows[0]

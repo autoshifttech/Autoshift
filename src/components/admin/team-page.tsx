@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ROLE_LABEL, type AdminRole, type AdminUser } from "@/lib/admin/data";
 import { relTime } from "@/lib/admin/format";
 import { CURRENT_ADMIN, act, useAdmin } from "@/lib/admin/store";
+import { connected, inviteAdmin, removeAdmin, setAdminRole } from "@/lib/admin/admin-data-sync";
 import { DataTable, Initials, PageHeader, Panel, Pill, td } from "./admin-ui";
 
 const PERMISSIONS: { label: string; roles: AdminRole[] }[] = [
@@ -38,7 +39,15 @@ export function TeamPage() {
   const taken = team.some((m) => m.email.toLowerCase() === email.trim().toLowerCase());
   const validEmail = /^\S+@\S+\.\S+$/.test(email.trim());
 
-  const update = (m: AdminUser, patch: Partial<AdminUser>, action: string, details: string) => act(action, m.email, details, (s) => ({ team: s.team.map((x) => (x.id === m.id ? { ...x, ...patch } : x)) }));
+  const update = (m: AdminUser, patch: Partial<AdminUser>, action: string, details: string) => {
+    if (connected()) {
+      // On the server, "disable" removes the person from the admin team (their platform keys stop too).
+      if (patch.role) return void setAdminRole(m.id, patch.role);
+      if (patch.status === "disabled") return void removeAdmin(m.id).then((done) => done && toast.success(`${m.name} removed from the admin team`));
+      return;
+    }
+    act(action, m.email, details, (s) => ({ team: s.team.map((x) => (x.id === m.id ? { ...x, ...patch } : x)) }));
+  };
 
   return (
     <>
@@ -174,6 +183,16 @@ export function TeamPage() {
             <Button
               disabled={!name.trim() || !validEmail || taken}
               onClick={() => {
+                if (connected()) {
+                  void inviteAdmin(name.trim(), email.trim().toLowerCase(), role).then((done) => {
+                    if (!done) return;
+                    toast.success(`${email.trim()} added to the admin team`);
+                    setName("");
+                    setEmail("");
+                    setInviting(false);
+                  });
+                  return;
+                }
                 const m: AdminUser = { id: `adm_${Date.now()}`, name: name.trim(), email: email.trim().toLowerCase(), role, status: "invited", twoFactor: false, lastActiveAt: null };
                 act("Invited admin", m.email, `Role: ${ROLE_LABEL[role]}`, (s) => ({ team: [...s.team, m] }));
                 toast.success(`Invite sent to ${m.email}`);

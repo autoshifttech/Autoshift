@@ -223,6 +223,7 @@ export function startAdminSync() {
       accessStore.set('ok')
       loadAdminBusinesses().catch(fail)
       loadAdminPayments().catch(() => {})
+      import('./admin-data-sync').then((m) => m.loadStaffData()).catch(() => {})
     },
     () => {
       started = false

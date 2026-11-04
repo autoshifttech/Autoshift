@@ -4167,7 +4167,8 @@
     "send": "보내기",
     "reopen": "다시 열고 보내기",
     "replySent": "답장을 보냈습니다.",
-    "teamFallback": "AutoShift 팀"
+    "teamFallback": "AutoShift 팀",
+    "replyFailed": "보내지 못했습니다. 다시 시도하세요."
   },
   "OwnerAlerts": {
     "title": "이메일 및 WhatsApp 알림",

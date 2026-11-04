@@ -18,6 +18,7 @@ import { DEMO_BUSINESS_ID, type Ticket } from "@/lib/admin/data";
 // Requests go to the platform team's Support inbox (/admin/support). Until
 // the backend exists both sides share this browser's store.
 import { CURRENT_ADMIN, addTicketMessage, createTicket, useAdmin } from "@/lib/admin/store";
+import { businessReply, connected, loadMyTickets, openTicket } from "@/lib/admin/admin-data-sync";
 
 const CATEGORIES: Ticket["category"][] = ["WhatsApp connection", "Billing", "Templates", "AI assistant", "Bug", "Other"];
 const CATEGORY_KEY: Record<Ticket["category"], string> = { "WhatsApp connection": "whatsapp", Billing: "billing", Templates: "templates", "AI assistant": "ai", Bug: "bug", Other: "other" };
@@ -81,6 +82,15 @@ function Thread({ ticket, onBack }: { ticket: Ticket; onBack: () => void }) {
         onSubmit={(e) => {
           e.preventDefault();
           if (!text.trim()) return;
+          if (connected()) {
+            const reply = text.trim();
+            businessReply(DEMO_BUSINESS_ID, ticket.id, reply).then(
+              () => toast.success(t("replySent")),
+              (err) => toast.error(err instanceof Error ? err.message : t("replyFailed")),
+            );
+            setText("");
+            return;
+          }
           addTicketMessage(ticket.id, { from: "business", author: profile?.full_name || t("you"), text: text.trim(), at: new Date().toISOString() }, "open");
           setText("");
           toast.success(t("replySent"));
@@ -104,6 +114,10 @@ export function SupportPage() {
   const params = useSearchParams();
   const { profile } = useAuth();
   const { tickets } = useAdmin();
+  // Connected: load this business's own tickets from the server.
+  useEffect(() => {
+    if (connected()) void loadMyTickets(DEMO_BUSINESS_ID).catch(() => {});
+  }, []);
   const mine = tickets.filter((x) => x.businessId === DEMO_BUSINESS_ID).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(params.get("new") === "1");
@@ -214,6 +228,18 @@ export function SupportPage() {
             <Button
               disabled={!form.category || !form.subject.trim() || form.message.trim().length < 10}
               onClick={() => {
+                if (connected()) {
+                  openTicket(DEMO_BUSINESS_ID, { category: form.category as Ticket["category"], subject: form.subject.trim(), message: form.message.trim(), priority: form.priority }).then(
+                    (id) => {
+                      setCreating(false);
+                      setForm({ category: "", subject: "", message: "", priority: "normal" });
+                      setOpenId(id);
+                      toast.success(t("created", { id }));
+                    },
+                    (err) => toast.error(err instanceof Error ? err.message : t("replyFailed")),
+                  );
+                  return;
+                }
                 const id = createTicket({ businessId: DEMO_BUSINESS_ID, category: form.category as Ticket["category"], subject: form.subject.trim(), message: form.message.trim(), priority: form.priority, author: profile?.full_name || t("you") });
                 setCreating(false);
                 setForm({ category: "", subject: "", message: "", priority: "normal" });

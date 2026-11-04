@@ -307,3 +307,12 @@ class AdminIn(BaseModel):
 
 class AdminRolePatch(BaseModel):
     role: Literal["super_admin", "support", "finance", "read_only"]
+
+
+class AnnouncementPatch(BaseModel):
+    title: str | None = Field(None, min_length=1, max_length=120)
+    body: str | None = Field(None, max_length=2000)
+    kind: Literal["news", "maintenance", "banner"] | None = None
+    audience: Literal["all", "trial", "paying", "starter", "growth", "pro"] | None = None
+    draft: bool | None = None
+    publish_at: str | None = None

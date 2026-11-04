@@ -12,6 +12,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ADMIN_NOW, type Announcement } from "@/lib/admin/data";
+import { connected, deleteAnnouncement, saveAnnouncement, setAnnouncementDraft } from "@/lib/admin/admin-data-sync";
 import { dateTime, num } from "@/lib/admin/format";
 import { act, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { EmptyState, PageHeader, Panel, Pill, Segmented } from "./admin-ui";
@@ -75,6 +76,14 @@ export function AnnouncementsPage() {
     const status: Announcement["status"] = draft.when === "draft" ? "draft" : draft.when === "later" ? "scheduled" : "published";
     const at = draft.when === "later" ? new Date(draft.date).toISOString() : new Date().toISOString();
     const item: Announcement = { id: draft.id ?? `an_${Date.now()}`, title: draft.title.trim(), body: draft.body.trim(), kind: draft.kind, audience: draft.audience, status, at, views: announcements.find((a) => a.id === draft.id)?.views ?? 0 };
+    if (connected()) {
+      void saveAnnouncement({ id: draft.id, title: item.title, body: item.body, kind: item.kind, audience: item.audience, status, at }).then((done) => {
+        if (!done) return;
+        toast.success(status === "published" ? `Sent to ${reach(item.audience)} businesses` : status === "scheduled" ? "Scheduled" : "Draft saved");
+        setDraft(null);
+      });
+      return;
+    }
     const verb = status === "published" ? "Published announcement" : status === "scheduled" ? "Scheduled announcement" : "Saved draft announcement";
     act(verb, item.title, `${KIND_META[item.kind].label} · ${AUDIENCE_LABEL[item.audience]}`, (s) => ({ announcements: draft.id ? s.announcements.map((a) => (a.id === draft.id ? item : a)) : [item, ...s.announcements] }));
     toast.success(status === "published" ? `Sent to ${reach(item.audience)} businesses` : status === "scheduled" ? "Scheduled" : "Draft saved");
@@ -134,7 +143,7 @@ export function AnnouncementsPage() {
                     Edit
                   </Button>
                   {a.status === "published" ? (
-                    <Button size="sm" variant="ghost" onClick={() => act("Unpublished announcement", a.title, "Moved back to drafts", (s) => ({ announcements: s.announcements.map((x) => (x.id === a.id ? { ...x, status: "draft" as const } : x)) }))}>
+                    <Button size="sm" variant="ghost" onClick={() => (connected() ? void setAnnouncementDraft(a.id, true) : act("Unpublished announcement", a.title, "Moved back to drafts", (s) => ({ announcements: s.announcements.map((x) => (x.id === a.id ? { ...x, status: "draft" as const } : x)) })))}>
                       Unpublish
                     </Button>
                   ) : (
@@ -142,6 +151,7 @@ export function AnnouncementsPage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
+                        if (connected()) return void setAnnouncementDraft(a.id, false).then((done) => done && toast.success(`Sent to ${reach(a.audience)} businesses`));
                         act("Published announcement", a.title, `${K.label} · ${AUDIENCE_LABEL[a.audience]}`, (s) => ({ announcements: s.announcements.map((x) => (x.id === a.id ? { ...x, status: "published" as const, at: new Date().toISOString() } : x)) }));
                         toast.success(`Sent to ${reach(a.audience)} businesses`);
                       }}
@@ -253,7 +263,10 @@ export function AnnouncementsPage() {
             <Button
               variant="destructive"
               onClick={() => {
-                if (deleting) act("Deleted announcement", deleting.title, "", (s) => ({ announcements: s.announcements.filter((a) => a.id !== deleting.id) }));
+                if (deleting) {
+                  if (connected()) void deleteAnnouncement(deleting.id);
+                  else act("Deleted announcement", deleting.title, "", (s) => ({ announcements: s.announcements.filter((a) => a.id !== deleting.id) }));
+                }
                 setDeleting(null);
               }}
             >

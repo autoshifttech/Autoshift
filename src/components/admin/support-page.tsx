@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { connected, patchTicket, staffReply } from "@/lib/admin/admin-data-sync";
 import { businessById, type Ticket, type TicketPriority, type TicketStatus } from "@/lib/admin/data";
 import { dateTime, relTime } from "@/lib/admin/format";
 import { CURRENT_ADMIN, addTicketMessage, act, updateTicket, useAdmin } from "@/lib/admin/store";
@@ -60,6 +61,14 @@ function Conversation({ t, team, onBack }: { t: Ticket; team: string[]; onBack: 
 
   const send = (close: boolean) => {
     if (!text.trim()) return;
+    if (connected()) {
+      void staffReply(t.id, text.trim(), { note: mode === "note", close }).then((done) => {
+        if (!done) return;
+        setText("");
+        toast.success(mode === "note" ? "Note added" : close ? "Reply sent and ticket closed" : "Reply sent");
+      });
+      return;
+    }
     addTicketMessage(t.id, { from: mode === "note" ? "note" : "admin", author: CURRENT_ADMIN.name, text: text.trim(), at: new Date().toISOString() }, close ? "closed" : mode === "reply" ? "pending" : undefined);
     act(mode === "note" ? "Added ticket note" : close ? "Replied and closed ticket" : "Replied to ticket", t.id, text.trim().slice(0, 80));
     if (!t.assignee) updateTicket(t.id, { assignee: CURRENT_ADMIN.name });
@@ -87,21 +96,21 @@ function Conversation({ t, team, onBack }: { t: Ticket; team: string[]; onBack: 
           </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <NativeSelect size="sm" aria-label="Status" value={t.status} onChange={(e) => updateTicket(t.id, { status: e.target.value as TicketStatus }, { action: "Changed ticket status", details: TICKET_STATUS_META[e.target.value as TicketStatus].label })}>
+          <NativeSelect size="sm" aria-label="Status" value={t.status} onChange={(e) => (connected() ? void patchTicket(t.id, { status: e.target.value as TicketStatus }) : updateTicket(t.id, { status: e.target.value as TicketStatus }, { action: "Changed ticket status", details: TICKET_STATUS_META[e.target.value as TicketStatus].label }))}>
             {(Object.keys(TICKET_STATUS_META) as TicketStatus[]).map((s) => (
               <option key={s} value={s}>
                 {TICKET_STATUS_META[s].label}
               </option>
             ))}
           </NativeSelect>
-          <NativeSelect size="sm" aria-label="Priority" value={t.priority} onChange={(e) => updateTicket(t.id, { priority: e.target.value as TicketPriority }, { action: "Changed ticket priority", details: e.target.value })}>
+          <NativeSelect size="sm" aria-label="Priority" value={t.priority} onChange={(e) => (connected() ? void patchTicket(t.id, { priority: e.target.value as TicketPriority }) : updateTicket(t.id, { priority: e.target.value as TicketPriority }, { action: "Changed ticket priority", details: e.target.value }))}>
             {(Object.keys(PRIORITY_META) as TicketPriority[]).map((p) => (
               <option key={p} value={p}>
                 {PRIORITY_META[p].label}
               </option>
             ))}
           </NativeSelect>
-          <NativeSelect size="sm" aria-label="Assignee" value={t.assignee ?? ""} onChange={(e) => updateTicket(t.id, { assignee: e.target.value || null }, { action: "Assigned ticket", details: e.target.value || "Unassigned" })}>
+          <NativeSelect size="sm" aria-label="Assignee" value={t.assignee ?? ""} onChange={(e) => (connected() ? void patchTicket(t.id, { assignee: e.target.value || null }) : updateTicket(t.id, { assignee: e.target.value || null }, { action: "Assigned ticket", details: e.target.value || "Unassigned" }))}>
             <option value="">Unassigned</option>
             {team.map((n) => (
               <option key={n} value={n}>
@@ -154,7 +163,7 @@ function Conversation({ t, team, onBack }: { t: Ticket; team: string[]; onBack: 
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          placeholder={mode === "note" ? "Only your admin team sees this…" : `Reply to ${b?.owner.name ?? "the business"}. They get it on WhatsApp and email.`}
+          placeholder={mode === "note" ? "Only your admin team sees this…" : connected() ? `Reply to ${b?.owner.name ?? "the business"}. They see it in Help & support.` : `Reply to ${b?.owner.name ?? "the business"}. They get it on WhatsApp and email.`}
           aria-label={mode === "note" ? "Internal note" : "Reply"}
           className={cn(mode === "note" && "border-amber-500/40 bg-[var(--tone-butter)]")}
           onKeyDown={(e) => {

@@ -62,3 +62,12 @@ def test_admin_team_rules(client, world, auth_admin):
     assert client.delete(f"/v1/platform/admins/{sup}", headers=H(world, "staff_super")).status_code == 400  # not yourself
     assert client.delete(f"/v1/platform/admins/{uid}", headers=H(world, "staff_super")).status_code == 204
     assert client.get("/v1/platform/businesses", headers={"Authorization": f"Bearer {world.token('deepa')}"}).status_code == 403  # access gone
+
+
+def test_announcements_can_be_edited_unpublished_and_republished(client, world):
+    a = client.post("/v1/platform/announcements", json={"title": "Hi"}, headers=H(world, "staff_support")).json()
+    assert client.patch(f"/v1/platform/announcements/{a['id']}", json={"draft": True}, headers=H(world, "staff_support")).json()["draft"] is True
+    assert client.get("/v1/announcements", headers=H(world, "viewer_a")).json() == []
+    client.patch(f"/v1/platform/announcements/{a['id']}", json={"draft": False, "title": "Hello"}, headers=H(world, "staff_support"))
+    assert [x["title"] for x in client.get("/v1/announcements", headers=H(world, "viewer_a")).json()] == ["Hello"]
+    assert client.delete(f"/v1/platform/announcements/{a['id']}", headers=H(world, "staff_finance")).status_code == 403

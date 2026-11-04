@@ -4167,7 +4167,8 @@
     "send": "Send",
     "reopen": "Reopen and send",
     "replySent": "Reply sent.",
-    "teamFallback": "AutoShift team"
+    "teamFallback": "AutoShift team",
+    "replyFailed": "Could not send. Try again."
   },
   "OwnerAlerts": {
     "title": "Email & WhatsApp alerts",
