@@ -9,6 +9,9 @@ key's owner can do in the app (read-only keys cannot change anything).
 | Wallet | Get balance, Get ledger |
 | Plan | Get many |
 | Subscription | Get |
+| Usage | Get (seats, contacts, AI replies against the plan) |
+| Team | Get many |
+| Support request | Get many, Open |
 
 ## Install
 
@@ -29,7 +32,9 @@ Create an API key in AutoShift, then in n8n add an **AutoShift API** credential 
 
 ## AutoShift Trigger
 
-Starts a workflow when something happens: wallet topped up, wallet refunded, subscription updated.
+Starts a workflow when something happens: a WhatsApp message arrives or changes status, a conversation starts,
+a lead is created, a chat is handed to a person, the wallet is topped up, runs low or is refunded, or the subscription changes.
+WhatsApp events reach the backend from the web app (set AUTOSHIFT_API_URL and AUTOSHIFT_INTERNAL_SECRET there).
 Activating the workflow registers the webhook with AutoShift for you; deactivating removes it. Every
 delivery is signed (HMAC-SHA256 over `timestamp.body`) and the trigger rejects bad signatures and anything older
 than five minutes. The API key must have **read and change** access. `workflows/wallet-topped-up.json` is an example.
@@ -38,4 +43,4 @@ AutoShift retries a failed delivery after 1, 5, 30 minutes, 2 and 6 hours, then 
 
 ## Not included yet
 
-Events for new WhatsApp messages and contacts, and nodes to send WhatsApp messages: those features still run in the Next app, not the backend.
+A node to send WhatsApp messages: sending runs in the web app, whose public API (/api/v1, with its own API keys) can be called from n8n's HTTP Request node.

@@ -86,3 +86,20 @@ def test_platform_wallet_adjust_requires_confirm(client, world):
     # retrying with the same key never credits twice
     err, _ = call_tool(client, key, "platform_wallet_adjust", account_id=world.acct_a, amount_paise=5000, reason="goodwill", idempotency_key="adjust-0001", confirm=True)
     assert not err and world.rows("wallet_balances")[0]["balance_paise"] == 5000
+
+
+def test_new_tools_are_listed_and_admin_grants_are_not(client, world):
+    key = _mint(client, world)["key"]
+    names = {t["name"] for t in rpc(client, key, "tools/list").json()["result"]["tools"]}
+    assert {"team_list", "team_invite", "tools_list", "support_open", "usage_get", "platform_business_close", "platform_tickets"} <= names
+    assert not any("admin_add" in n or n == "platform_admin_add" for n in names)  # an AI can't grant staff access
+
+
+def test_team_invite_and_business_close_need_confirmation(client, world):
+    key = _mint(client, world, scope="write")["key"]
+    err, text = call_tool(client, key, "team_invite", role="agent")
+    assert not err and "confirmation_required" in text and world.rows("account_invitations") == []
+    err, text = call_tool(client, key, "team_invite", role="agent", confirm=True)
+    assert not err and "/join/" in text
+    err, text = call_tool(client, key, "support_open", subject="Help", message="Need help please")
+    assert not err and "T-1041" in text

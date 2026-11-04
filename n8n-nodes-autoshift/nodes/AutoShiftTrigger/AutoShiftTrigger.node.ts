@@ -45,7 +45,13 @@ export class AutoShiftTrigger implements INodeType {
 				required: true,
 				default: ['wallet.topped_up'],
 				options: [
+					{ name: 'Message Received', value: 'message.received' },
+					{ name: 'Message Status Updated', value: 'message.status_updated' },
+					{ name: 'Conversation Started', value: 'conversation.created' },
+					{ name: 'Lead Created', value: 'lead.created' },
+					{ name: 'Handed Off to a Person', value: 'conversation.handoff' },
 					{ name: 'Wallet Topped Up', value: 'wallet.topped_up' },
+					{ name: 'Wallet Running Low', value: 'wallet.low' },
 					{ name: 'Wallet Refunded', value: 'wallet.refunded' },
 					{ name: 'Subscription Updated', value: 'subscription.updated' },
 					{ name: 'Test Ping', value: 'test.ping' },

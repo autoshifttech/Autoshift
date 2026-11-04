@@ -145,6 +145,67 @@ def build_mcp(get_app) -> MCPServer:
         """Recent deliveries for a webhook, with status and errors."""
         return await call("GET", f"/v1/hooks/{hook_id}/deliveries")
 
+    # ------------------------------------------------- team, tools, usage, support
+    @mcp.tool()
+    async def usage_get() -> dict:
+        """Seats, contacts and this month's AI replies, against the plan's limits."""
+        return await call("GET", "/v1/usage")
+
+    @mcp.tool()
+    async def team_list() -> list:
+        """Everyone on the workspace and their role."""
+        return await call("GET", "/v1/team")
+
+    @mcp.tool()
+    async def team_set_role(user_id: str, role: str) -> dict:
+        """Change a teammate's role to admin, agent or viewer (admin role needed; not the owner, not yourself)."""
+        return await call("PATCH", f"/v1/team/{user_id}", json_body={"role": role})
+
+    @mcp.tool()
+    async def team_remove(user_id: str, confirm: bool = False) -> dict:
+        """Remove a teammate (they keep their login with an empty workspace). Needs confirm=true."""
+        if not confirm:
+            return preview("remove this person from the workspace", user_id=user_id)
+        return await call("DELETE", f"/v1/team/{user_id}")
+
+    @mcp.tool()
+    async def team_invite(role: str, label: str = "", confirm: bool = False) -> dict:
+        """Create a one-time join link for a new teammate (admin, agent or viewer). Needs confirm=true.
+        Anyone with the link can join, so share it only with that person."""
+        if not confirm:
+            return preview(f"create a join link with the {role} role", note="Anyone holding the link can join the workspace.")
+        return await call("POST", "/v1/team/invitations", json_body={"role": role, "label": label})
+
+    @mcp.tool()
+    async def tools_list() -> list:
+        """The tools assistants can use: built-in ones and the workspace's webhook tools."""
+        return await call("GET", "/v1/tools")
+
+    @mcp.tool()
+    async def tools_set_enabled(key: str, enabled: bool) -> dict:
+        """Switch a tool on or off for every assistant."""
+        return await call("PATCH", f"/v1/tools/{key}", json_body={"enabled": enabled})
+
+    @mcp.tool()
+    async def support_list() -> list:
+        """The workspace's support requests to AutoShift, with replies."""
+        return await call("GET", "/v1/support/tickets")
+
+    @mcp.tool()
+    async def support_open(subject: str, message: str, category: str = "Other", priority: str = "normal") -> dict:
+        """Open a support request with AutoShift. Category: WhatsApp connection, Billing, Templates, AI assistant, Bug or Other."""
+        return await call("POST", "/v1/support/tickets", json_body={"subject": subject, "message": message, "category": category, "priority": priority})
+
+    @mcp.tool()
+    async def support_reply(ticket_number: int, text: str) -> dict:
+        """Add a reply to one of the workspace's support requests."""
+        return await call("POST", f"/v1/support/tickets/{ticket_number}/messages", json_body={"text": text})
+
+    @mcp.tool()
+    async def announcements_list() -> list:
+        """News and notices from AutoShift meant for this workspace."""
+        return await call("GET", "/v1/announcements")
+
     @mcp.tool()
     async def connections_list() -> list:
         """List connected accounts (Google, Razorpay). Secrets are never shown."""
@@ -231,6 +292,47 @@ def build_mcp(get_app) -> MCPServer:
         if not confirm:
             return preview(f"{'suspend' if suspended else 'reactivate'} this business", account_id=account_id, reason=reason)
         return await call("POST", f"/v1/platform/businesses/{account_id}/suspend", json_body={"suspended": suspended, "reason": reason})
+
+    @mcp.tool()
+    async def platform_overview() -> dict:
+        """Platform key: businesses, trials, paying subscriptions, revenue and wallet float."""
+        return await call("GET", "/v1/platform/overview")
+
+    @mcp.tool()
+    async def platform_payments(limit: int = 50) -> list:
+        """Platform key: recent top-ups and subscription charges with invoice numbers."""
+        return await call("GET", "/v1/platform/payment-feed", params={"limit": limit})
+
+    @mcp.tool()
+    async def platform_tickets(status: str | None = None) -> list:
+        """Platform key: support requests from every business (status: open, pending or closed)."""
+        return await call("GET", "/v1/platform/tickets", params={"status": status} if status else None)
+
+    @mcp.tool()
+    async def platform_ticket_reply(ticket_number: int, text: str, note: bool = False, close: bool = False) -> dict:
+        """Platform key (support): reply to a business (they see it), or add a staff-only note with note=true."""
+        return await call("POST", f"/v1/platform/tickets/{ticket_number}/messages", json_body={"text": text, "note": note, "close": close})
+
+    @mcp.tool()
+    async def platform_announce(title: str, body: str, audience: str = "all", kind: str = "news", confirm: bool = False) -> dict:
+        """Platform key (support): publish an announcement to businesses now (audience: all, trial, paying, starter, growth, pro). Needs confirm=true."""
+        if not confirm:
+            return preview("publish this announcement to businesses now", title=title, audience=audience)
+        return await call("POST", "/v1/platform/announcements", json_body={"title": title, "body": body, "audience": audience, "kind": kind})
+
+    @mcp.tool()
+    async def platform_admins() -> list:
+        """Platform key: the AutoShift admin team. (Adding admins is done in the admin panel, never by an AI.)"""
+        return await call("GET", "/v1/platform/admins")
+
+    @mcp.tool()
+    async def platform_business_close(account_id: str, business_name: str, confirm: bool = False) -> dict:
+        """Platform key (super admin): close a business now. Cancels billing, deletes its customers, chats and
+        settings, keeps invoices and the wallet ledger. Can't be undone. Needs confirm=true and the exact business name."""
+        if not confirm:
+            b = await call("GET", f"/v1/platform/businesses/{account_id}")
+            return preview("close this business and delete its data (money records are kept)", business=b["name"], wallet_paise=b["wallet_paise"])
+        return await call("POST", f"/v1/platform/businesses/{account_id}/close", json_body={"confirm_name": business_name})
 
     @mcp.tool()
     async def platform_audit(limit: int = 50) -> list:
