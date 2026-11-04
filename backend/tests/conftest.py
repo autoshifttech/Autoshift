@@ -30,6 +30,7 @@ DEFAULTS = {
     "razorpay_events": {"status": "processing", "error": None},
     "subscriptions": {"cancel_at_period_end": False, "razorpay_subscription_id": None, "current_period_end": None},
     "assistants": {"enabled": False},
+    "announcements": {"draft": False, "views": 0},
 }
 
 
@@ -64,7 +65,12 @@ class FakeDb:
     async def insert(self, table, row):
         if table in self.fail_on:
             raise RuntimeError(f"{table} is down")
-        new = {"id": str(uuid.uuid4()), "created_at": f"2026-01-01T00:00:{next(self._ids):06d}Z", **DEFAULTS.get(table, {}), **row}
+        n = next(self._ids)
+        # Tables with an identity column get increasing numbers, as in Postgres.
+        ident = {"id": n} if table in ("support_messages", "business_notes", "audit_log") else {"id": str(uuid.uuid4())}
+        if table == "support_tickets":
+            ident["number"] = 1041 + len(self.store.get("support_tickets", []))
+        new = {**ident, "created_at": f"2026-01-01T00:00:{n:06d}Z", **DEFAULTS.get(table, {}), **row}
         self.store.setdefault(table, []).append(new)
         return dict(new)
 

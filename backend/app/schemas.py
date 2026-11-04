@@ -262,3 +262,48 @@ class ToolPatch(BaseModel):
     description: str | None = Field(None, min_length=1, max_length=500)
     enabled: bool | None = None
     webhook: ToolWebhook | None = None
+
+
+TicketCategory = Literal["WhatsApp connection", "Billing", "Templates", "AI assistant", "Bug", "Other"]
+TicketPriority = Literal["low", "normal", "high", "urgent"]
+
+
+class TicketCreate(BaseModel):
+    subject: str = Field(min_length=1, max_length=160)
+    category: TicketCategory = "Other"
+    priority: TicketPriority = "normal"
+    message: str = Field(min_length=1, max_length=5000)
+
+
+class TicketReply(BaseModel):
+    text: str = Field(min_length=1, max_length=5000)
+
+
+class StaffReply(TicketReply):
+    note: bool = False  # staff-only, never shown to the business
+    close: bool = False
+
+
+class TicketPatch(BaseModel):
+    status: Literal["open", "pending", "closed"] | None = None
+    priority: TicketPriority | None = None
+    assignee: str | None = Field(None, max_length=120)
+
+
+class AnnouncementIn(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+    body: str = Field("", max_length=2000)
+    kind: Literal["news", "maintenance", "banner"] = "news"
+    audience: Literal["all", "trial", "paying", "starter", "growth", "pro"] = "all"
+    draft: bool = False
+    publish_at: str | None = None
+
+
+class AdminIn(BaseModel):
+    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$", max_length=200)
+    name: str = Field(min_length=1, max_length=120)
+    role: Literal["super_admin", "support", "finance", "read_only"]
+
+
+class AdminRolePatch(BaseModel):
+    role: Literal["super_admin", "support", "finance", "read_only"]

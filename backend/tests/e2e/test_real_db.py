@@ -183,3 +183,27 @@ def test_team_invite_redeem_role_and_remove_on_the_real_database(env):
     acct, role = sql("SELECT account_id::text, account_role::text FROM profiles WHERE user_id = %s", joiner["id"])[0]
     assert acct != owner["account_id"] and role == "owner"
     assert env.client.get("/v1/me", headers=joiner["h"]).json()["account_id"] == acct  # their login still works
+
+
+def test_support_tickets_notes_and_announcements_on_the_real_database(env):
+    staff, u = env.staff("super_admin"), env.user("helpme")
+    t = env.client.post("/v1/support/tickets", json={"subject": "Can't connect", "category": "WhatsApp connection", "message": "Help"}, headers=u["h"])
+    assert t.status_code == 201, t.text
+    n = t.json()["number"]
+    env.client.post(f"/v1/platform/tickets/{n}/messages", json={"text": "secret staff note", "note": True}, headers=staff["h"])
+    env.client.post(f"/v1/platform/tickets/{n}/messages", json={"text": "Try again now"}, headers=staff["h"])
+    mine = env.client.get("/v1/support/tickets", headers=u["h"]).json()[0]
+    assert [m["from"] for m in mine["messages"]] == ["business", "admin"] and mine["status"] == "pending"
+    # even reading the table directly with their own login, the database hides staff notes
+    import os
+
+    import psycopg
+
+    with psycopg.connect(os.environ["E2E_PG_DSN"], autocommit=True) as c:
+        c.execute("SET ROLE authenticated")
+        c.execute("SELECT set_config('request.jwt.claim.sub', %s, false)", (u["id"],))
+        texts = [r[0] for r in c.execute("SELECT text FROM support_messages WHERE ticket = %s", (n,)).fetchall()]
+    assert "secret staff note" not in texts and "Try again now" in texts
+    made = env.client.post("/v1/platform/announcements", json={"title": f"Hello {n}", "audience": "trial"}, headers=staff["h"])
+    assert made.status_code == 201
+    assert f"Hello {n}" in [a["title"] for a in env.client.get("/v1/announcements", headers=u["h"]).json()]
