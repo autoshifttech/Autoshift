@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     # Wallet top-up limits, in rupees. GST is added on top of the credit amount.
     topup_min_inr: int = 500
     topup_max_inr: int = 100000
+    # State code of the seller (first two digits of its GSTIN): decides CGST+SGST versus IGST.
+    seller_state_code: str = "29"
     gst_rate: float = 0.18
 
     # Browser origins allowed to call the API, comma separated.

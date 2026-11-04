@@ -13,13 +13,13 @@ import { UpgradeDialog } from "@/components/billing/upgrade-dialog";
 import { DetailsSummary, GstDetailsForm } from "@/components/billing/gst-details";
 import { GstInvoiceDialog, type InvoiceRow } from "@/components/billing/gst-invoice-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { billingDetailsStore, billingErrors, useBillingDetails, type BillingDetails } from "@/lib/billing/gst";
+import { billingErrors, useBillingDetails, type BillingDetails } from "@/lib/billing/gst";
+import { cancelSubscription, saveBillingDetails, useInvoices, useUsage } from "@/lib/billing/backend-sync";
+import { backendUrl } from "@/lib/backend/client";
 import { cn } from "@/lib/utils";
 import {
   PLANS,
   PLAN_IDS,
-  SAMPLE_INVOICES,
-  SAMPLE_USAGE,
   formatInr,
   planPrice,
   subscriptionStore,
@@ -33,6 +33,8 @@ import {
 export function BillingPanel() {
   const t = useTranslations("Billing");
   const sub = useSubscription();
+  const usage = useUsage();
+  const invoices = useInvoices();
   const plan = PLANS[sub.plan];
   const [cycle, setCycle] = useState<BillingCycle>(sub.cycle);
   const [checkout, setCheckout] = useState<PlanId | null>(null);
@@ -46,9 +48,9 @@ export function BillingPanel() {
   const hasDetails = Object.keys(billingErrors(details)).length === 0;
 
   const meters = [
-    { key: "seats", used: SAMPLE_USAGE.seats, max: plan.seats },
-    { key: "contacts", used: SAMPLE_USAGE.contacts, max: plan.contacts },
-    { key: "aiReplies", used: SAMPLE_USAGE.aiReplies, max: plan.aiReplies },
+    { key: "seats", used: usage.seats, max: plan.seats },
+    { key: "contacts", used: usage.contacts, max: plan.contacts },
+    { key: "aiReplies", used: usage.aiReplies, max: plan.aiReplies },
   ] as const;
 
   const actionLabel = (id: PlanId) => {
@@ -122,6 +124,13 @@ export function BillingPanel() {
             <Button
               variant="outline"
               onClick={() => {
+                if (backendUrl()) {
+                  cancelSubscription().then(
+                    () => toast.success(t("cancelledToast")),
+                    (e) => toast.error(e instanceof Error ? e.message : t("cancelFailed")),
+                  );
+                  return;
+                }
                 subscriptionStore.set((s) => ({ ...s, status: "cancelled" }));
                 toast.success(t("cancelledToast"));
               }}
@@ -169,14 +178,15 @@ export function BillingPanel() {
       <section>
         <h3 className="mb-3 text-base font-semibold text-foreground">{t("invoices")}</h3>
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          {SAMPLE_INVOICES.map((inv, i) => (
+          {invoices.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">{t("noInvoices")}</p>}
+          {invoices.map((inv, i) => (
             <div key={inv.id} className={cn("flex items-center gap-3 px-4 py-3 text-sm", i > 0 && "border-t border-border")}>
               <Receipt className="size-4 shrink-0 text-muted-foreground" />
               <span className="min-w-0 flex-1 truncate font-medium text-foreground">{inv.id}</span>
               <span className="hidden text-muted-foreground sm:inline">{new Date(inv.date).toLocaleDateString()}</span>
               <span className="text-foreground">{formatInr(inv.amount)}</span>
               <span className="rounded-full bg-[var(--tone-mint)] px-2 py-0.5 text-xs text-primary">{t("paid")}</span>
-              <Button variant="ghost" size="icon-sm" aria-label={t("downloadInvoice")} onClick={() => setInvoice({ id: inv.id, date: inv.date, amount: inv.amount, item: tg("planItem", { plan: inv.amount >= 2499 ? t("plan_growth") : t("plan_starter") }) })}>
+              <Button variant="ghost" size="icon-sm" aria-label={t("downloadInvoice")} onClick={() => setInvoice({ id: inv.id, date: inv.date, amount: inv.amount, item: inv.item || tg("planItem", { plan: inv.amount >= 2499 ? t("plan_growth") : t("plan_starter") }) })}>
                 <Download className="size-4" />
               </Button>
             </div>
@@ -191,6 +201,12 @@ export function BillingPanel() {
           plan={checkout}
           cycle={cycle}
           onPaid={() => {
+            if (backendUrl()) {
+              // The server already holds the new plan (loaded after verification).
+              setCheckout(null);
+              toast.success(t("paidToast", { plan: t(`plan_${checkout}`) }));
+              return;
+            }
             const renews = new Date();
             if (cycle === "monthly") renews.setMonth(renews.getMonth() + 1);
             else renews.setFullYear(renews.getFullYear() + 1);
@@ -216,10 +232,14 @@ export function BillingPanel() {
               onClick={() => {
                 if (!editDetails) return;
                 if (Object.keys(billingErrors(editDetails)).length) return setTriedSave(true);
-                billingDetailsStore.set(editDetails);
-                setEditDetails(null);
-                setTriedSave(false);
-                toast.success(tg("saved"));
+                saveBillingDetails(editDetails).then(
+                  () => {
+                    setEditDetails(null);
+                    setTriedSave(false);
+                    toast.success(tg("saved"));
+                  },
+                  (e) => toast.error(e instanceof Error ? e.message : tg("saveFailed")),
+                );
               }}
             >
               {tg("save")}

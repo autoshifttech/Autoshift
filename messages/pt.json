@@ -3316,7 +3316,10 @@
     "trialBanner": "{days, plural, =0 {Seu teste grátis termina hoje.} one {Falta # dia no seu teste grátis.} other {Faltam # dias no seu teste grátis.}}",
     "choosePlanShort": "Escolher um plano",
     "trialShort": "{days, plural, =0 {Termina hoje} one {# dia restante} other {# dias restantes}}",
-    "finishSetup": "Concluir configuração"
+    "finishSetup": "Concluir configuração",
+    "noInvoices": "Nenhuma fatura ainda. A primeira aparece após o primeiro pagamento.",
+    "cancelFailed": "Não foi possível cancelar. Tente de novo.",
+    "payFailed": "O pagamento não foi concluído. Você não foi cobrado."
   },
   "Leads": {
     "enabledTitle": "Captura de leads ativada",
@@ -4273,7 +4276,8 @@
     "reverseCharge": "Imposto não devido por reverse charge. Fatura gerada por computador.",
     "close": "Fechar",
     "print": "Imprimir ou salvar PDF",
-    "invoiceTotal": "Total"
+    "invoiceTotal": "Total",
+    "saveFailed": "Não foi possível salvar os dados da fatura. Confira e tente de novo."
   },
   "FlowConnections": {
     "title": "Conexões",

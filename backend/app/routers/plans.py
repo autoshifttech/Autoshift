@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from .. import audit
 from ..config import Settings, get_settings
 from ..deps import AdminMember, Member, Rzp, ServiceDb
-from ..money import yearly_paise
+from ..money import gst_on, yearly_paise
 from ..razorpay import RazorpayError, verify_subscription_signature
 from ..schemas import SubscriptionCheckout, SubscriptionVerify
 
@@ -40,8 +40,9 @@ async def get_subscription(ctx: Member, sdb: ServiceDb):
 
 
 @router.post("/subscription/checkout", status_code=201)
-async def checkout(body: SubscriptionCheckout, ctx: AdminMember, sdb: ServiceDb, rzp: Rzp):
-    """Create the Razorpay subscription. While on trial the first charge waits until the trial ends."""
+async def checkout(body: SubscriptionCheckout, ctx: AdminMember, sdb: ServiceDb, rzp: Rzp, settings: Cfg):
+    """Create the Razorpay subscription. While on trial the first charge waits until the trial ends.
+    The customer is charged the plan price plus GST, as the checkout screen says."""
     sub = await _subscription(sdb, ctx.account_id)
     if sub["status"] == "active" and sub.get("razorpay_subscription_id") and not sub["cancel_at_period_end"]:
         raise HTTPException(409, "You already have an active subscription. Cancel it before choosing another plan.")
@@ -49,10 +50,13 @@ async def checkout(body: SubscriptionCheckout, ctx: AdminMember, sdb: ServiceDb,
     if not plans:
         raise HTTPException(404, "Plan not found")
     plan = plans[0]
+    base = _price(plan, body.cycle)
+    gst = gst_on(base, settings.gst_rate)
+    total = base + gst
     column = f"razorpay_plan_{body.cycle}"
     try:
         if not plan.get(column):
-            created = await rzp.create_plan("yearly" if body.cycle == "yearly" else "monthly", _price(plan, body.cycle), f"AutoShift {plan['name']} ({body.cycle})")
+            created = await rzp.create_plan("yearly" if body.cycle == "yearly" else "monthly", total, f"AutoShift {plan['name']} ({body.cycle}, incl. GST)")
             await sdb.update("plans", {"id": plan["id"]}, {column: created["id"]})
             plan[column] = created["id"]
         start_at = None
@@ -63,7 +67,7 @@ async def checkout(body: SubscriptionCheckout, ctx: AdminMember, sdb: ServiceDb,
     except RazorpayError as exc:
         raise HTTPException(502, "Razorpay could not create the subscription") from exc
     await sdb.update("subscriptions", {"account_id": ctx.account_id}, {"plan_id": plan["id"], "cycle": body.cycle, "razorpay_subscription_id": remote["id"], "cancel_at_period_end": False})
-    return {"razorpay_subscription_id": remote["id"], "key_id": rzp.key_id, "plan_id": plan["id"], "cycle": body.cycle, "amount_paise": _price(plan, body.cycle), "starts_after_trial": start_at is not None}
+    return {"razorpay_subscription_id": remote["id"], "key_id": rzp.key_id, "plan_id": plan["id"], "cycle": body.cycle, "base_paise": base, "gst_paise": gst, "amount_paise": total, "starts_after_trial": start_at is not None}
 
 
 @router.post("/subscription/verify")

@@ -203,3 +203,14 @@ class HookCreate(BaseModel):
         if bad:
             raise ValueError(f"Unknown event: {bad[0]}")
         return v
+
+
+class BillingDetails(BaseModel):
+    legal_name: str = Field("", max_length=160)
+    has_gstin: bool = False
+    gstin: str = Field("", max_length=15)
+    state_code: str = Field("", max_length=2)
+    address: str = Field("", max_length=300)
+    city: str = Field("", max_length=80)
+    pincode: str = Field("", max_length=6)
+    email: str = Field("", max_length=200)

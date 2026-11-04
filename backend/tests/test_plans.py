@@ -22,8 +22,8 @@ def test_a_new_workspace_starts_a_14_day_trial(client, world):
 def test_checkout_creates_the_razorpay_plan_once_and_delays_the_charge_to_trial_end(client, world, rzp):
     h = world.headers("admin_a")
     out = client.post("/v1/subscription/checkout", json={"plan_id": "pro", "cycle": "yearly"}, headers=h).json()
-    assert out["amount_paise"] == 5999000 and out["starts_after_trial"] is True and out["key_id"].startswith("rzp_test_")
-    assert rzp.plans[0]["amount"] == 5999000 and rzp.plans[0]["period"] == "yearly"
+    assert out["base_paise"] == 5999000 and out["gst_paise"] == 1079820 and out["amount_paise"] == 7078820 and out["starts_after_trial"] is True and out["key_id"].startswith("rzp_test_")
+    assert rzp.plans[0]["amount"] == 7078820 and rzp.plans[0]["period"] == "yearly"
     assert rzp.subscriptions[0]["start_at"] is not None and rzp.subscriptions[0]["total_count"] == 10
     # A second checkout for the same plan reuses the Razorpay plan.
     client.post("/v1/subscription/checkout", json={"plan_id": "pro", "cycle": "yearly"}, headers=h)
@@ -66,3 +66,18 @@ def test_cancel_runs_to_the_end_of_the_paid_period(client, world, rzp):
 def test_businesses_have_separate_subscriptions(client, world):
     client.post("/v1/subscription/checkout", json={"plan_id": "pro"}, headers=world.headers("admin_a"))
     assert client.get("/v1/subscription", headers=world.headers("admin_b")).json()["plan_id"] == "growth"
+
+
+def test_what_is_charged_matches_the_invoice_and_the_screen(client, world, rzp):
+    """Plan price + 18% GST is charged, and the invoice splits that same total back into price and GST."""
+    from .helpers import webhook
+
+    res = client.post("/v1/subscription/checkout", json={"plan_id": "growth", "cycle": "monthly"}, headers=world.headers("admin_a"))
+    out = res.json()
+    assert (out["base_paise"], out["gst_paise"], out["amount_paise"]) == (249900, 44982, 294882)  # the screen says ₹2,948.82
+    assert rzp.plans[0]["amount"] == 294882
+    sub_id = out["razorpay_subscription_id"]
+    payload = {"subscription": {"entity": {"id": sub_id}}, "payment": {"entity": {"id": "pay_s1", "amount": 294882}}}
+    assert webhook(client, "subscription.charged", payload, event_id="evt_s1").json()["status"] == "processed"
+    inv = world.rows("invoices")[0]
+    assert (inv["base_paise"], inv["gst_paise"], inv["total_paise"]) == (249900, 44982, 294882)

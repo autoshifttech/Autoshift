@@ -85,6 +85,12 @@ class FakeDb:
     async def upsert(self, table, row, on_conflict):
         return await self.insert(table, row)
 
+    async def count(self, table, filters=None, *, since=None):
+        rows = [r for r in self._visible(table) if self._match(r, filters)]
+        if since:
+            rows = [r for r in rows if str(r.get(since[0]) or "") >= since[1]]
+        return len(rows)
+
     async def rpc(self, name, params):
         if name == "next_invoice_number":
             n = len(self.store.get("invoices", [])) + 1
@@ -103,7 +109,7 @@ class FakeDb:
         if row["balance_paise"] + amount < 0:
             raise DbError(400, '{"message":"insufficient_funds"}')
         row["balance_paise"] += amount
-        ledger.append({"id": len(ledger) + 1, "account_id": acct, "kind": params["p_kind"], "amount_paise": amount, "balance_after": row["balance_paise"], "ref": params["p_ref"], "idem_key": key, "created_by": params.get("p_created_by")})
+        ledger.append({"id": len(ledger) + 1, "account_id": acct, "kind": params["p_kind"], "amount_paise": amount, "balance_after": row["balance_paise"], "ref": params["p_ref"], "idem_key": key, "created_by": params.get("p_created_by"), "created_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()})
         return {"applied": True, "balance_paise": row["balance_paise"]}
 
 

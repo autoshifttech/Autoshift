@@ -1,6 +1,7 @@
 /** Razorpay Checkout for wallet top-ups. The server creates the order and decides the amount. */
 import { backend } from '@/lib/backend/client'
 import { loadWallet } from './backend-sync'
+import { loadRazorpay } from '@/lib/razorpay'
 
 interface Order {
   razorpay_order_id: string
@@ -15,36 +16,12 @@ interface CheckoutResponse {
   razorpay_signature: string
 }
 
-interface RazorpayInstance {
-  open(): void
-  on(event: string, cb: (r: { error?: { description?: string } }) => void): void
-}
-declare global {
-  interface Window {
-    Razorpay?: new (opts: Record<string, unknown>) => RazorpayInstance
-  }
-}
-
-const SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
-
-function loadScript(): Promise<void> {
-  if (window.Razorpay) return Promise.resolve()
-  return new Promise((resolve, reject) => {
-    const el = document.createElement('script')
-    el.src = SCRIPT
-    el.onload = () => resolve()
-    el.onerror = () => reject(new Error('Could not load the payment window. Check your connection.'))
-    document.head.appendChild(el)
-  })
-}
-
 export type PayResult = { status: 'paid'; balancePaise: number } | { status: 'cancelled' }
 
 /** Opens Razorpay, then asks the server to verify the signature and credit the wallet. */
 export async function payTopUp(amountInr: number, prefill: { name?: string; email?: string } = {}): Promise<PayResult> {
   const order = await backend<Order>('/v1/wallet/topups', { method: 'POST', body: { amount_inr: amountInr } })
-  await loadScript()
-  const Razorpay = window.Razorpay!
+  const Razorpay = await loadRazorpay()
   const paid = await new Promise<CheckoutResponse | null>((resolve, reject) => {
     const rzp = new Razorpay({
       key: order.key_id,

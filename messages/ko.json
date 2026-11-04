@@ -3316,7 +3316,10 @@
     "trialBanner": "{days, plural, =0 {무료 체험이 오늘 끝납니다.} other {무료 체험이 #일 남았습니다.}}",
     "choosePlanShort": "요금제 선택",
     "trialShort": "{days, plural, =0 {오늘 종료} other {#일 남음}}",
-    "finishSetup": "설정 마저 하기"
+    "finishSetup": "설정 마저 하기",
+    "noInvoices": "아직 청구서가 없습니다. 첫 결제 후 첫 청구서가 표시됩니다.",
+    "cancelFailed": "취소하지 못했습니다. 다시 시도하세요.",
+    "payFailed": "결제가 완료되지 않았습니다. 요금이 청구되지 않았습니다."
   },
   "Leads": {
     "enabledTitle": "리드 수집 사용 중",
@@ -4273,7 +4276,8 @@
     "reverseCharge": "역발행 과세 대상이 아닙니다. 컴퓨터로 생성된 청구서입니다.",
     "close": "닫기",
     "print": "인쇄 또는 PDF 저장",
-    "invoiceTotal": "합계"
+    "invoiceTotal": "합계",
+    "saveFailed": "청구서 정보를 저장하지 못했습니다. 확인 후 다시 시도하세요."
   },
   "FlowConnections": {
     "title": "연결",

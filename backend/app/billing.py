@@ -23,9 +23,11 @@ async def ensure_invoice(sdb: Db, *, account_id: str, kind: str, description: st
     else:
         gst = total_paise - base_paise
     number = await sdb.rpc("next_invoice_number", {})
+    details = await sdb.select("billing_details", {"account_id": account_id}, limit=1)
+    buyer = {k: details[0][k] for k in ("legal_name", "has_gstin", "gstin", "state_code", "address", "city", "pincode", "email")} if details else {}
     return await sdb.insert(
         "invoices",
-        {"account_id": account_id, "number": number, "kind": kind, "description": description, "base_paise": base_paise, "gst_paise": gst, "total_paise": total_paise, "razorpay_payment_id": payment_id},
+        {"account_id": account_id, "number": number, "kind": kind, "description": description, "base_paise": base_paise, "gst_paise": gst, "total_paise": total_paise, "razorpay_payment_id": payment_id, "buyer": buyer},
     )
 
 

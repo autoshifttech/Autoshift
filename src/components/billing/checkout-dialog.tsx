@@ -9,7 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { cn } from "@/lib/utils";
 import { PLANS, planPrice, type BillingCycle, type PlanId } from "@/lib/billing/plans";
 import { formatMoney } from "@/lib/wallet/model";
-import { billingDetailsStore, billingErrors, taxSplit, useBillingDetails } from "@/lib/billing/gst";
+import { billingErrors, taxSplit, useBillingDetails } from "@/lib/billing/gst";
+import { payForPlan, saveBillingDetails } from "@/lib/billing/backend-sync";
+import { backendUrl } from "@/lib/backend/client";
+import { toast } from "@/lib/toast";
 import { LEGAL } from "@/lib/legal";
 import { useSetup } from "@/lib/workspace/setup";
 import { DetailsSummary, GstDetailsForm, TaxLines } from "./gst-details";
@@ -60,8 +63,22 @@ export function CheckoutDialog({
       setEditing(true);
       return;
     }
-    billingDetailsStore.set(details);
     setPaying(true);
+    if (backendUrl()) {
+      // Save the invoice details (the server checks the GSTIN), then open Razorpay for the subscription.
+      saveBillingDetails(details)
+        .then(() => payForPlan(plan, cycle, { email: details.email || undefined, name: details.legalName }))
+        .then((result) => {
+          setPaying(false);
+          if (result === "paid") onPaid();
+        })
+        .catch((e) => {
+          setPaying(false);
+          toast.error(e instanceof Error ? e.message : t("payFailed"));
+        });
+      return;
+    }
+    saveBillingDetails(details).catch(() => {});
     window.setTimeout(() => {
       setPaying(false);
       setPaid(true);
@@ -94,6 +111,7 @@ export function CheckoutDialog({
           {editing ? <GstDetailsForm value={details} onChange={setDetails} showErrors={tried} /> : <DetailsSummary d={details} />}
         </section>
 
+        {!backendUrl() && (
         <fieldset>
           <legend className="text-sm font-medium text-foreground">{t("payWith")}</legend>
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -114,6 +132,7 @@ export function CheckoutDialog({
             ))}
           </div>
         </fieldset>
+        )}
 
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Lock className="size-3.5" />

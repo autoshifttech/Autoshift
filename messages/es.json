@@ -3316,7 +3316,10 @@
     "trialBanner": "{days, plural, =0 {Tu prueba gratis termina hoy.} one {Te queda # día de prueba gratis.} other {Te quedan # días de prueba gratis.}}",
     "choosePlanShort": "Elegir un plan",
     "trialShort": "{days, plural, =0 {Termina hoy} one {# día restante} other {# días restantes}}",
-    "finishSetup": "Terminar configuración"
+    "finishSetup": "Terminar configuración",
+    "noInvoices": "Aún no hay facturas. La primera aparece tras tu primer pago.",
+    "cancelFailed": "No se pudo cancelar. Inténtalo de nuevo.",
+    "payFailed": "El pago no se completó. No se te ha cobrado."
   },
   "Leads": {
     "enabledTitle": "La captación de leads está activada",
@@ -4273,7 +4276,8 @@
     "reverseCharge": "No aplica inversión del sujeto pasivo. Factura generada por ordenador.",
     "close": "Cerrar",
     "print": "Imprimir o guardar PDF",
-    "invoiceTotal": "Total"
+    "invoiceTotal": "Total",
+    "saveFailed": "No se pudieron guardar los datos de la factura. Revísalos e inténtalo de nuevo."
   },
   "FlowConnections": {
     "title": "Conexiones",

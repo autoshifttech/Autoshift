@@ -29,6 +29,7 @@ class Db(Protocol):
     async def delete(self, table: str, filters: dict[str, str]) -> list[Row]: ...
     async def upsert(self, table: str, row: Row, on_conflict: str) -> Row: ...
     async def rpc(self, name: str, params: Row) -> Any: ...
+    async def count(self, table: str, filters: dict[str, str] | None = None, *, since: tuple[str, str] | None = None) -> int: ...
 
 
 class SupabaseDb:
@@ -75,6 +76,18 @@ class SupabaseDb:
 
     async def rpc(self, name, params):
         return await self._send("POST", f"rpc/{name}", json=params)
+
+    async def count(self, table, filters=None, *, since=None):
+        """How many rows match, counted by the database (never downloads the rows)."""
+        params = self._eq(filters)
+        if since:
+            params[since[0]] = f"gte.{since[1]}"
+        params["select"] = "id" if table not in ("wallet_balances", "subscriptions", "billing_details") else "account_id"
+        headers = {**self._headers, "Prefer": "count=exact", "Range": "0-0"}
+        res = await self._client.request("GET", f"{self._base}/{table}", params=params, headers=headers)
+        if res.status_code >= 400:
+            raise DbError(res.status_code, res.text[:300])
+        return int(res.headers["content-range"].rsplit("/", 1)[1])
 
 
 def service_db(settings: Settings) -> SupabaseDb:

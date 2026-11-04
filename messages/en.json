@@ -3316,7 +3316,10 @@
     "trialBanner": "{days, plural, =0 {Your free trial ends today.} one {# day left in your free trial.} other {# days left in your free trial.}}",
     "choosePlanShort": "Choose a plan",
     "trialShort": "{days, plural, =0 {Ends today} one {# day left} other {# days left}}",
-    "finishSetup": "Finish setup"
+    "finishSetup": "Finish setup",
+    "noInvoices": "No invoices yet. Your first one appears after your first payment.",
+    "cancelFailed": "Could not cancel. Try again.",
+    "payFailed": "The payment did not go through. You have not been charged."
   },
   "Leads": {
     "enabledTitle": "Lead capture is on",
@@ -4273,7 +4276,8 @@
     "reverseCharge": "Tax is not payable on reverse charge. This is a computer-generated invoice.",
     "close": "Close",
     "print": "Print or save PDF",
-    "invoiceTotal": "Total"
+    "invoiceTotal": "Total",
+    "saveFailed": "Could not save the invoice details. Check them and try again."
   },
   "FlowConnections": {
     "title": "Connections",

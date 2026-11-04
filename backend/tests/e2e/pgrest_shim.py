@@ -56,14 +56,24 @@ def make_app(dsn: str, service_key: str, jwt_secret: str) -> Starlette:
         table = sql.Identifier(name)
         params = dict(request.query_params)
         order, limit, on_conflict = params.pop("order", None), params.pop("limit", None), params.pop("on_conflict", None)
+        params.pop("select", None)
         where, args = [], []
         for col, val in params.items():
-            assert IDENT.match(col) and val.startswith("eq.")
-            where.append(sql.SQL("t.{}::text = %s").format(sql.Identifier(col)))
-            args.append(val[3:])
+            assert IDENT.match(col)
+            if val.startswith("gte."):
+                where.append(sql.SQL("t.{} >= %s::timestamptz").format(sql.Identifier(col)))
+                args.append(val[4:])
+            else:
+                assert val.startswith("eq.")
+                where.append(sql.SQL("t.{}::text = %s").format(sql.Identifier(col)))
+                args.append(val[3:])
         w = sql.SQL(" WHERE ") + sql.SQL(" AND ").join(where) if where else sql.SQL("")
         m = request.method
 
+        if m == "GET" and "count=exact" in request.headers.get("prefer", ""):
+            await cur.execute(sql.SQL("SELECT count(*) FROM {} t").format(table) + w, args)
+            n = (await cur.fetchone())[0]
+            return JSONResponse([], 206, headers={"Content-Range": f"0-0/{n}"})
         if m == "GET":
             q = sql.SQL("SELECT to_jsonb(t) FROM {} t").format(table) + w
             if order:

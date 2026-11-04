@@ -12,7 +12,7 @@ from typing import Literal
 from .db import Db
 from .llm import Llm, LlmError
 from .security import decrypt
-from . import wallet
+from . import usage, wallet
 
 HUMAN_WORDS = re.compile(r"\b(human|agent|person|representative|manager|someone real|talk to (a )?(person|human))\b", re.I)
 UNSURE_MARKER = "[HANDOFF]"
@@ -25,7 +25,7 @@ TONES = {
 
 @dataclass(frozen=True)
 class Reply:
-    status: Literal["reply", "handoff", "no_model", "no_funds", "failed", "off"]
+    status: Literal["reply", "handoff", "no_model", "no_funds", "failed", "off", "plan_limit"]
     text: str = ""
     reason: str = ""
     balance_paise: int | None = None
@@ -81,6 +81,9 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     vendor, model_id, ciphertext = picked
 
     account_id = assistant["account_id"]
+    allowed = (await usage.plan_for(sdb, account_id)).get("ai_replies")
+    if allowed is not None and await usage.ai_replies_this_month(sdb, account_id) >= allowed:
+        return Reply("plan_limit", reason="This month's AI replies on your plan are used up")
     have = await wallet.balance(sdb, account_id)
     if have < wallet.RATES_PAISE["charge_ai"]:
         return Reply("no_funds", reason="The wallet is empty", balance_paise=have)

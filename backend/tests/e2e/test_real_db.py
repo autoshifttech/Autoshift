@@ -121,3 +121,26 @@ def test_webhook_subscription_and_signed_delivery_on_real_tables(env, monkeypatc
     rows = sql("SELECT status, event, payload FROM webhook_deliveries WHERE account_id = %s", u["account_id"])
     assert len(rows) == 1 and rows[0][0] == "pending" and rows[0][1] == "wallet.topped_up"
     assert json.loads(json.dumps(rows[0][2]))["data"]["amount_paise"] == 50000
+
+
+def test_billing_details_usage_and_invoice_snapshot_on_the_real_database(env):
+    from app.gst import check_char
+
+    u = env.user("bill")
+    first14 = "29ABCDE1234F1Z"
+    body = {"legal_name": "Real Buyer LLP", "has_gstin": True, "gstin": first14 + check_char(first14), "state_code": "29", "address": "1 MG Road", "city": "Bengaluru", "pincode": "560001", "email": "a@b.in"}
+    assert env.client.put("/v1/billing-details", json=body, headers=u["h"]).status_code == 200
+    assert env.client.get("/v1/billing-details", headers=u["h"]).json()["legal_name"] == "Real Buyer LLP"
+    bad = env.client.put("/v1/billing-details", json={**body, "gstin": "29ABCDE1234F1ZX"}, headers=u["h"])
+    assert bad.status_code == 422
+
+    order = env.client.post("/v1/wallet/topups", json={"amount_inr": 1000}, headers=u["h"]).json()["razorpay_order_id"]
+    pay = {"razorpay_order_id": order, "razorpay_payment_id": f"pay_{order}", "razorpay_signature": payment_signature(order, f"pay_{order}")}
+    assert env.client.post("/v1/wallet/topups/verify", json=pay, headers=u["h"]).status_code == 200
+    inv = env.client.get("/v1/invoices", headers=u["h"]).json()[0]
+    assert inv["buyer"]["gstin"] == body["gstin"] and inv["cgst_paise"] == 9000 and inv["sgst_paise"] == 9000 and inv["igst_paise"] == 0  # same state as the seller
+
+    sql("INSERT INTO contacts (account_id, user_id, phone, name) VALUES (%s, %s, '+911', 'A'), (%s, %s, '+912', 'B')", u["account_id"], u["id"], u["account_id"], u["id"])
+    usage = env.client.get("/v1/usage", headers=u["h"]).json()
+    assert usage["contacts"]["used"] == 2 and usage["seats"]["used"] == 1 and usage["ai_replies"]["used"] == 0
+    assert usage["seats"]["limit"] == 5  # the trial plan (growth)
