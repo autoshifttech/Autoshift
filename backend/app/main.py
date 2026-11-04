@@ -15,13 +15,23 @@ def create_app() -> FastAPI:
         from . import events
         from .db import service_db
 
+        from . import closing
+        from .razorpay import RazorpayClient
+
         settings = get_settings()
         sdb = service_db(settings)
+        tick = 0
         while True:
             try:
                 await events.deliver_pending(sdb, settings)
             except Exception:  # noqa: BLE001 - keep the loop alive
                 logging.getLogger("autoshift").exception("webhook delivery pass failed")
+            if tick % 120 == 0:  # about once an hour: close businesses whose grace period has ended
+                try:
+                    await closing.close_due(sdb, RazorpayClient(settings))
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("closing pass failed")
+            tick += 1
             await asyncio.sleep(30)
 
     @asynccontextmanager

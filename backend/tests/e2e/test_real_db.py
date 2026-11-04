@@ -229,3 +229,29 @@ def test_internal_charge_and_events_on_the_real_database(env):
         assert env.client.post("/v1/internal/charge", json=body, headers=u["h"]).status_code == 401  # a user's login can't use it
     finally:
         env.client.app.dependency_overrides[get_settings] = lambda: base
+
+
+def test_closing_a_business_on_the_real_database_keeps_money_and_removes_customer_data(env):
+    owner, mate = env.user("closer"), env.user("mate")
+    acct = owner["account_id"]
+    # a teammate, money history, customers with a chat, an assistant
+    sql("UPDATE profiles SET account_id = %s, account_role = 'agent' WHERE user_id = %s", acct, mate["id"])
+    sql("DELETE FROM accounts WHERE id = %s", mate["account_id"])
+    sql("SELECT wallet_apply(%s, 2500, 'topup', 'pay_close', %s)", acct, f"close-{acct}")
+    contact = sql("INSERT INTO contacts (account_id, user_id, phone, name) VALUES (%s, %s, '+919999', 'Ravi') RETURNING id", acct, owner["id"])[0][0]
+    conv = sql("INSERT INTO conversations (account_id, user_id, contact_id) VALUES (%s, %s, %s) RETURNING id", acct, owner["id"], contact)[0][0]
+    msg = sql("INSERT INTO messages (conversation_id, sender_type, content_text) VALUES (%s, 'customer', 'hi') RETURNING id", conv)[0][0]
+    env.client.post("/v1/assistants", json={"name": "Bot"}, headers=owner["h"])
+    name = sql("SELECT name FROM accounts WHERE id = %s", acct)[0][0]
+
+    r = env.client.post("/v1/account/close", json={"confirm_name": name}, headers=owner["h"])
+    assert r.status_code == 200, r.text
+    assert r.json()["wallet_left_paise"] == 2500 and r.json()["members_moved"] == 1
+    for table in ("contacts", "conversations", "assistants"):
+        assert sql(f"SELECT count(*) FROM {table} WHERE account_id = %s", acct)[0][0] == 0, table
+    assert sql("SELECT count(*) FROM messages WHERE id = %s", msg)[0][0] == 0  # gone with its conversation
+    assert sql("SELECT count(*) FROM wallet_ledger WHERE account_id = %s", acct)[0][0] == 1
+    assert sql("SELECT status, name FROM accounts WHERE id = %s", acct)[0] == ("closed", "Closed business")
+    mate_acct = sql("SELECT account_id::text FROM profiles WHERE user_id = %s", mate["id"])[0][0]
+    assert mate_acct != acct and env.client.get("/v1/me", headers=mate["h"]).json()["account_id"] == mate_acct
+    assert env.client.get("/v1/assistants", headers=owner["h"]).status_code == 403

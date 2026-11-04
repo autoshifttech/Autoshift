@@ -98,6 +98,16 @@ class FakeDb:
         return len(rows)
 
     async def rpc(self, name, params):
+        if name == "close_account_data":
+            keep = {"accounts", "profiles", "wallet_ledger", "wallet_balances", "invoices", "payment_orders", "subscriptions", "audit_log", "razorpay_events"}
+            n = 0
+            for table, rows in self.store.items():
+                if table in keep:
+                    continue
+                before = len(rows)
+                self.store[table] = [r for r in rows if r.get("account_id") != params["p_account"]]
+                n += before - len(self.store[table])
+            return {"deleted_rows": n, "passes": 1}
         if name == "next_invoice_number":
             n = len(self.store.get("invoices", [])) + 1
             return f"INV-2026-{n:06d}"

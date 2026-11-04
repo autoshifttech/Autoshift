@@ -8,6 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from .. import audit, wallet
 from ..auth_admin import AuthAdmin, AuthAdminError
 from ..deps import PlatformAdmin, ServiceDb, get_auth_admin, get_platform_admin, require_platform_role
+from .. import closing
+from ..deps import Rzp
+from ..schemas import CloseBusiness
 from ..schemas import BusinessCreate, BusinessPatch, MemberAdd, MemberPatch, NoteCreate, SubscriptionChange, Suspend
 
 router = APIRouter(prefix="/v1/platform/businesses", tags=["businesses"])
@@ -186,7 +189,7 @@ async def delete_business(account_id: str, admin: SuperOnly, sdb: ServiceDb):
     # so a business that ever handled money can be blocked but not deleted.
     for table in ("wallet_ledger", "invoices", "payment_orders"):
         if await sdb.count(table, {"account_id": account_id}):
-            raise HTTPException(409, "This business has payment history, which must be kept. Block it instead.")
+            raise HTTPException(409, "This business has payment history, which must be kept. Close it instead.")
     await sdb.delete("accounts", {"id": account_id})
     await audit.record(sdb, scope="platform", action="business.delete", actor_id=admin.user.id, account_id=None, target=account_id, details={"name": acct["name"]})
 
@@ -301,3 +304,9 @@ async def add_note(account_id: str, body: NoteCreate, admin: Manager, sdb: Servi
     await sdb.insert("business_notes", {"account_id": account_id, "author_id": admin.user.id, "author_name": who[0].get("full_name") or admin.user.email or "Staff", "text": body.text.strip()})
     await audit.record(sdb, scope="platform", action="business.note", actor_id=admin.user.id, account_id=account_id, target=account_id, details={})
     return await _notes(sdb, account_id)
+
+
+@router.post("/{account_id}/close")
+async def close(account_id: str, body: CloseBusiness, admin: SuperOnly, sdb: ServiceDb, rzp: Rzp):
+    """For a business with payment history: cancel billing, delete its data, keep invoices and the ledger."""
+    return await closing.close_business(sdb, rzp, account_id, confirm_name=body.confirm_name, actor_id=admin.user.id, scope="platform")

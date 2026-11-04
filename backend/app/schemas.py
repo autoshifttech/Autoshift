@@ -347,3 +347,13 @@ class InternalEvent(BaseModel):
     account_id: str
     type: str
     data: dict = Field(default_factory=dict)
+
+
+class CloseBusiness(BaseModel):
+    """Typing the business's name confirms it: closing can't be undone."""
+
+    confirm_name: str = Field(min_length=1, max_length=120)
+
+
+class CloseRequest(CloseBusiness):
+    reason: str = Field("", max_length=60)

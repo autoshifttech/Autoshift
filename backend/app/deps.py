@@ -95,6 +95,8 @@ async def get_account(
     acct = await sdb.select("accounts", {"id": str(rows[0]["account_id"])}, limit=1)
     if acct and acct[0].get("status") == "suspended":
         raise HTTPException(403, "This business is suspended. Contact AutoShift support.")
+    if acct and acct[0].get("status") == "closed":
+        raise HTTPException(403, "This business was closed.")
     return AccountCtx(user=user, account_id=str(rows[0]["account_id"]), role=str(rows[0]["account_role"]))
 
 

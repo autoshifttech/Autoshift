@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useAuth } from "@/hooks/use-auth";
-import { GRACE_DAYS, cancelDeletion, exportLocalData, scheduleDeletion, useDeletion } from "@/lib/account/deletion";
+import { GRACE_DAYS, exportLocalData, loadDeletion, requestDeletion, useDeletion, withdrawDeletion } from "@/lib/account/deletion";
 import { consentStore, isValidPhone, phoneKey } from "@/lib/consent/model";
 import { SettingsPanelHead } from "./settings-panel-head";
 
@@ -23,7 +23,12 @@ export function DataPrivacyPanel() {
   const locale = useLocale();
   const { account } = useAuth();
   const deletion = useDeletion();
-  const workspace = account?.name ?? "My workspace";
+  // Connected: the name the server checks, and any deletion already scheduled there.
+  const [serverName, setServerName] = useState<string | null>(null);
+  useEffect(() => {
+    void loadDeletion().then(setServerName, () => {});
+  }, []);
+  const workspace = serverName ?? account?.name ?? "My workspace";
   const [customer, setCustomer] = useState("");
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
@@ -51,8 +56,10 @@ export function DataPrivacyPanel() {
           <Button
             variant="outline"
             onClick={() => {
-              cancelDeletion();
-              toast.success(t("cancelled"));
+              withdrawDeletion().then(
+                () => toast.success(t("cancelled")),
+                (e) => toast.error(e instanceof Error ? e.message : t("cancelDeletion")),
+              );
             }}
           >
             {t("cancelDeletion")}
@@ -174,10 +181,14 @@ export function DataPrivacyPanel() {
               variant="destructive"
               disabled={typed.trim() !== workspace || !reason}
               onClick={() => {
-                scheduleDeletion(reason);
-                setOpen(false);
-                setTyped("");
-                toast.success(t("scheduled"));
+                requestDeletion(reason, typed.trim()).then(
+                  () => {
+                    setOpen(false);
+                    setTyped("");
+                    toast.success(t("scheduled"));
+                  },
+                  (e) => toast.error(e instanceof Error ? e.message : t("deleteButton")),
+                );
               }}
             >
               {t("deleteButton")}
