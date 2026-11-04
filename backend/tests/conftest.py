@@ -1,4 +1,5 @@
 import itertools
+import os
 import time
 import uuid
 from typing import Annotated, Any
@@ -8,11 +9,13 @@ import pytest
 from fastapi import Depends
 from fastapi.testclient import TestClient
 
+os.environ.setdefault("MCP_ALLOWED_HOSTS", "testserver,localhost:*")
+
 from app.config import Settings, get_settings
 from app.db import DbError
 from app.deps import AccountCtx, get_account, get_razorpay, get_service_db, get_user_db
 from app.razorpay import RazorpayError
-from app.main import app
+from app.main import create_app
 
 JWT_SECRET = "test-jwt-secret-test-jwt-secret-1234"
 ENC_KEY = "11" * 32
@@ -225,10 +228,10 @@ def client(world: World, settings: Settings, rzp: FakeRazorpay):
     async def fake_user_db(ctx: Annotated[AccountCtx, Depends(get_account)]):
         return FakeDb(world.store, tenant=ctx.account_id, fail_on=world.fail_on)
 
+    app = create_app()
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_service_db] = lambda: world.service
     app.dependency_overrides[get_user_db] = fake_user_db
     app.dependency_overrides[get_razorpay] = lambda: rzp
     with TestClient(app) as c:
         yield c
-    app.dependency_overrides.clear()

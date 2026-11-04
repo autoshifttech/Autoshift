@@ -34,6 +34,12 @@ class Settings(BaseSettings):
 
     # Browser origins allowed to call the API, comma separated.
     cors_origins: str = "http://localhost:3000"
+    # Hosts the MCP endpoint answers to (DNS-rebinding protection). Add your API domain in production.
+    mcp_allowed_hosts: str = "localhost:*,127.0.0.1:*"
+
+    @property
+    def mcp_hosts(self) -> list[str]:
+        return [h.strip() for h in self.mcp_allowed_hosts.split(",") if h.strip()]
 
     @property
     def cors_list(self) -> list[str]:

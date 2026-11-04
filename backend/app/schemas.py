@@ -133,3 +133,9 @@ class WalletAdjust(BaseModel):
 class RefundRequest(BaseModel):
     amount_paise: int | None = Field(None, gt=0)
     reason: str = Field(min_length=3, max_length=200)
+
+
+class KeyCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    scope: Literal["read", "write"] = "read"
+    expires_in_days: int | None = Field(90, ge=1, le=365)

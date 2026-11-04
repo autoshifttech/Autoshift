@@ -45,10 +45,9 @@ def test_businesses_cannot_see_or_touch_each_others_assistants(client, world):
 def test_account_filter_holds_even_if_row_level_security_were_off(client, world, monkeypatch):
     """The router filters by account itself, so isolation never rests on one layer."""
     from app.deps import get_user_db
-    from app.main import app
     from .conftest import FakeDb
 
-    app.dependency_overrides[get_user_db] = lambda: FakeDb(world.store, tenant=None)  # no RLS simulation
+    client.app.dependency_overrides[get_user_db] = lambda: FakeDb(world.store, tenant=None)  # no RLS simulation
     mine = client.post("/v1/assistants", json={"name": "A's bot"}, headers=world.headers("admin_a")).json()
     hb = world.headers("admin_b")
     assert client.get("/v1/assistants", headers=hb).json() == []

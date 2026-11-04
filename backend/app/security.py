@@ -20,6 +20,11 @@ class TokenUser:
     id: str
     email: str | None
     token: str
+    # Set when the caller used an API key instead of a login token.
+    key_id: str | None = None
+    key_kind: str | None = None      # 'account' | 'platform'
+    key_scope: str | None = None     # 'read' | 'write'
+    key_account_id: str | None = None
 
 
 @lru_cache
@@ -55,6 +60,22 @@ def verify_token(token: str, settings: Settings) -> TokenUser:
     if not sub:
         raise AuthError("Token has no user")
     return TokenUser(id=str(sub), email=claims.get("email"), token=token)
+
+
+# ----------------------------------------------------------------- API keys
+KEY_PREFIX = "asmcp_"
+
+
+def new_api_key() -> tuple[str, str, str]:
+    """(plaintext, sha256 hash, display prefix). The plaintext is shown once and never stored."""
+    plaintext = KEY_PREFIX + base64.urlsafe_b64encode(os.urandom(32)).decode().rstrip("=")
+    return plaintext, hash_key(plaintext), plaintext[: len(KEY_PREFIX) + 6]
+
+
+def hash_key(plaintext: str) -> str:
+    import hashlib
+
+    return hashlib.sha256(plaintext.encode()).hexdigest()
 
 
 # ------------------------------------------------------------- secret box
