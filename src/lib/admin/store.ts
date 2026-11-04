@@ -265,6 +265,8 @@ export function saveTeam(b: Business, team: BusinessMember[], action: string, de
 
 export function usePayments(): Payment[] {
   const { refunded } = useAdmin()
+  const remote = useAdminBackend()
+  if (backendUrl()) return remote.payments
   return PAYMENTS.map((p) => (refunded.includes(p.id) ? { ...p, status: 'refunded' as const } : p))
 }
 

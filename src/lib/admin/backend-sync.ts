@@ -7,7 +7,7 @@ import { createStore, useStore } from '@/lib/workspace/store'
 import { backend, backendUrl } from '@/lib/backend/client'
 import { toast } from '@/lib/toast'
 import type { PlanId } from '@/lib/billing/plans'
-import type { Business, BusinessStatus } from './data'
+import type { Business, BusinessStatus, Payment } from './data'
 import type { BusinessMember, BusinessOverride, MemberRole } from './store'
 
 export interface BusinessRow {
@@ -75,11 +75,12 @@ export function toBusiness(r: BusinessRow): Business {
 
 interface AdminBackendState {
   loaded: boolean
+  payments: Payment[]
   businesses: Business[]
   teams: Record<string, BusinessMember[]>
   notes: Record<string, { text: string; author: string; at: string }[]>
 }
-const empty = (): AdminBackendState => ({ loaded: false, businesses: [], teams: {}, notes: {} })
+const empty = (): AdminBackendState => ({ loaded: false, payments: [], businesses: [], teams: {}, notes: {} })
 export const adminBackendStore = createStore<AdminBackendState>(empty)
 const SERVER = empty()
 export const useAdminBackend = () => useStore(adminBackendStore, SERVER)
@@ -87,6 +88,47 @@ export const useAdminBackend = () => useStore(adminBackendStore, SERVER)
 export async function loadAdminBusinesses(): Promise<void> {
   const rows = await backend<BusinessRow[]>('/v1/platform/businesses')
   adminBackendStore.set((s) => ({ ...s, loaded: true, businesses: rows.map(toBusiness) }))
+}
+
+export interface FeedRow {
+  id: string
+  payment_id: string | null
+  account_id: string
+  kind: 'topup' | 'subscription'
+  base_paise: number
+  gst_paise: number
+  status: Payment['status']
+  at: string
+  invoice: string | null
+}
+
+export const toPayment = (r: FeedRow): Payment => ({
+  id: r.id,
+  razorpayId: r.payment_id ?? '',
+  businessId: r.account_id,
+  kind: r.kind,
+  amount: r.base_paise / 100,
+  gst: r.gst_paise / 100,
+  method: 'card', // Razorpay holds the method; it isn't copied here yet
+  status: r.status,
+  at: r.at,
+  invoice: r.invoice,
+})
+
+export async function loadAdminPayments(): Promise<void> {
+  const rows = await backend<FeedRow[]>('/v1/platform/payment-feed')
+  adminBackendStore.set((s) => ({ ...s, payments: rows.map(toPayment) }))
+}
+
+/** Refund a wallet top-up through Razorpay; the credits come back out when Razorpay confirms. */
+export async function remoteRefund(p: Payment, reason: string): Promise<boolean> {
+  try {
+    await backend(`/v1/platform/payments/${p.razorpayId}/refund`, { method: 'POST', body: { reason } })
+    return true
+  } catch (e) {
+    fail(e)
+    return false
+  }
 }
 
 export async function loadAdminBusiness(id: string): Promise<void> {
@@ -180,6 +222,7 @@ export function startAdminSync() {
       if (!me.platform_admin) return accessStore.set('denied')
       accessStore.set('ok')
       loadAdminBusinesses().catch(fail)
+      loadAdminPayments().catch(() => {})
     },
     () => {
       started = false

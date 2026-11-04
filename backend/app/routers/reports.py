@@ -74,3 +74,19 @@ async def overview(_: AnyStaff, sdb: ServiceDb):
         "topups_30d_count": len(paid),
         "failed_webhooks": len(await sdb.select("razorpay_events", {"status": "failed"})),
     }
+
+
+@router.get("/payment-feed")
+async def payment_feed(_: AnyStaff, sdb: ServiceDb, limit: int = Query(200, ge=1, le=500)):
+    """Everything customers paid, newest first: wallet top-ups and subscription charges, with invoice numbers."""
+    names = {a["id"]: a["name"] for a in await sdb.select("accounts")}
+    invoices = await sdb.select("invoices", order="issued_at.desc", limit=1000)
+    by_payment = {i["razorpay_payment_id"]: i for i in invoices}
+    feed = []
+    for o in await sdb.select("payment_orders", order="created_at.desc", limit=limit):
+        inv = by_payment.get(o.get("razorpay_payment_id"))
+        feed.append({"id": o["id"], "payment_id": o.get("razorpay_payment_id"), "account_id": o["account_id"], "business": names.get(o["account_id"], ""), "kind": "topup", "base_paise": o["base_paise"], "gst_paise": o["gst_paise"], "status": {"paid": "captured", "failed": "failed"}.get(o["status"], "pending"), "at": o.get("paid_at") or o["created_at"], "invoice": inv["number"] if inv else None})
+    for i in invoices:
+        if i["kind"] == "subscription":
+            feed.append({"id": i["id"], "payment_id": i["razorpay_payment_id"], "account_id": i["account_id"], "business": names.get(i["account_id"], ""), "kind": "subscription", "base_paise": i["base_paise"], "gst_paise": i["gst_paise"], "status": "captured", "at": i["issued_at"], "invoice": i["number"]})
+    return sorted(feed, key=lambda f: str(f["at"]), reverse=True)[:limit]

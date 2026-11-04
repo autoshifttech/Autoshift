@@ -43,3 +43,16 @@ async def test_overview_numbers(client, world):
 def test_reports_are_staff_only(client, world):
     for path in ("payments", "invoices", "usage", "overview"):
         assert client.get(f"/v1/platform/{path}", headers=world.headers("owner_a")).status_code == 403
+
+
+def test_payment_feed_combines_topups_and_subscription_charges_with_invoices(client, world):
+    world.rows("payment_orders").append({"id": "o1", "account_id": world.acct_a, "status": "paid", "razorpay_payment_id": "pay_1", "base_paise": 100000, "gst_paise": 18000, "created_at": "2026-02-01T00:00:00Z", "paid_at": "2026-02-01T00:00:00Z"})
+    world.rows("payment_orders").append({"id": "o2", "account_id": world.acct_b, "status": "failed", "razorpay_payment_id": None, "base_paise": 500, "gst_paise": 90, "created_at": "2026-02-03T00:00:00Z"})
+    world.rows("invoices").extend([
+        {"id": "i1", "account_id": world.acct_a, "number": "INV-1", "kind": "topup", "razorpay_payment_id": "pay_1", "base_paise": 100000, "gst_paise": 18000, "issued_at": "2026-02-01T00:00:00Z"},
+        {"id": "i2", "account_id": world.acct_b, "number": "INV-2", "kind": "subscription", "razorpay_payment_id": "pay_s", "base_paise": 249900, "gst_paise": 44982, "issued_at": "2026-02-02T00:00:00Z"},
+    ])
+    feed = client.get("/v1/platform/payment-feed", headers=H(world)).json()
+    assert [(f["kind"], f["status"], f["invoice"]) for f in feed] == [("topup", "failed", None), ("subscription", "captured", "INV-2"), ("topup", "captured", "INV-1")]
+    assert feed[1]["business"] == "Business B" and feed[1]["gst_paise"] == 44982
+    assert client.get("/v1/platform/payment-feed", headers=world.headers("owner_a")).status_code == 403

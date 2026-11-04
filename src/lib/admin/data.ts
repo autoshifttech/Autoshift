@@ -5,6 +5,7 @@
  * numbers, until the admin panel reads Supabase, Meta and Razorpay.
  */
 import { PLANS, type BillingCycle, type PlanId } from '@/lib/billing/plans'
+import { adminBackendStore } from './backend-sync'
 
 /**
  * "Today" for the admin screens. The sample data uses a fixed day so its relative dates stay stable;
@@ -239,7 +240,9 @@ function makeBusinesses(): Business[] {
 export const BUSINESSES: Business[] = makeBusinesses()
 /** The workspace the business app's demo signs in to (Olive & Thread). */
 export const DEMO_BUSINESS_ID = 'biz_004'
-export const businessById = (id: string) => BUSINESSES.find((b) => b.id === id)
+/** A business by id: from the server when connected to the backend, otherwise the sample list. */
+export const businessById = (id: string): Business | undefined =>
+  process.env.NEXT_PUBLIC_API_URL ? adminBackendStore.get().businesses.find((b) => b.id === id) : BUSINESSES.find((b) => b.id === id)
 
 /* ---------------------------------------------------------------- money */
 

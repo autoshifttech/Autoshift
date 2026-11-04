@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { loadAdminPayments, remoteRefund } from "@/lib/admin/backend-sync";
+import { backendUrl } from "@/lib/backend/client";
 import { ADMIN_NOW, businessById, type Payment, type PaymentKind, type PaymentStatus } from "@/lib/admin/data";
 import { date, dateTime, downloadCsv, inr, inrShort, num } from "@/lib/admin/format";
 import { act, useBusinesses, usePayments } from "@/lib/admin/store";
@@ -275,6 +277,17 @@ function RefundDialog({ payment, onClose }: { payment: Payment | null; onClose: 
                 variant="destructive"
                 disabled={!reason}
                 onClick={() => {
+                  if (backendUrl()) {
+                    // Razorpay does the refund; the wallet credits are taken back when it confirms.
+                    void remoteRefund(payment, reason).then((done) => {
+                      if (!done) return;
+                      toast.success("Refund started");
+                      setReason("");
+                      onClose();
+                      void loadAdminPayments().catch(() => {});
+                    });
+                    return;
+                  }
                   act("Refunded payment", b?.name ?? "", `${inr(payment.amount + payment.gst, 2)} · ${reason}`, (s) => ({ refunded: [...s.refunded, payment.id] }));
                   toast.success("Refund started");
                   setReason("");
