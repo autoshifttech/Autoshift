@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";
 import {
@@ -37,7 +37,9 @@ import { setDemoCookie } from "@/lib/demo/cookie";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
 import { ADMIN_NOW, INDUSTRY_LABEL, UNIT_ECONOMICS, usageRevenue, type Business, type Usage } from "@/lib/admin/data";
 import { date, dateTime, daysBetween, inr, num, relTime } from "@/lib/admin/format";
-import { CURRENT_ADMIN, act, applyOverride, deleteBusiness, findBusiness, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
+import { CURRENT_ADMIN, act, applyOverride, deleteBusiness, findBusiness, notesOf, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
+import { loadAdminBusiness, useAdminBackend } from "@/lib/admin/backend-sync";
+import { backendUrl } from "@/lib/backend/client";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { BusinessFormDialog } from "./business-form-dialog";
@@ -65,14 +67,21 @@ function copy(text: string) {
 
 export function BusinessDetail({ id }: { id: string }) {
   const state = useAdmin();
+  const remote = useAdminBackend();
   const payments = usePayments();
   const base = findBusiness(state, id);
+  // Connected to the backend: load this business's team, notes and counts when it opens.
+  useEffect(() => {
+    if (backendUrl()) void loadAdminBusiness(id).catch(() => {});
+  }, [id]);
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [note, setNote] = useState("");
+
+  if (!base && backendUrl() && !remote.loaded) return <p role="status" className="text-sm text-muted-foreground">Loading…</p>;
 
   if (!base) {
     return (
@@ -89,7 +98,7 @@ export function BusinessDetail({ id }: { id: string }) {
 
   const merged = applyOverride(base, state.overrides[id]);
   const b: Business = { ...merged, team: state.teams[id]?.length ?? merged.team };
-  const notes = state.overrides[id]?.notes ?? [];
+  const notes = notesOf(state, id, remote);
   const money = usageRevenue(b.usage);
   const mine = payments.filter((p) => p.businessId === id);
   const activity = state.audit.filter((a) => a.target === b.name);
@@ -387,9 +396,11 @@ export function BusinessDetail({ id }: { id: string }) {
         confirmLabel="Delete business"
         cancelLabel="Cancel"
         onConfirm={() => {
-          deleteBusiness(b);
-          toast.success(`${b.name} deleted`);
-          router.push("/admin/businesses");
+          deleteBusiness(b).then((done) => {
+            if (!done) return; // the server said no and has already told the admin why
+            toast.success(`${b.name} deleted`);
+            router.push("/admin/businesses");
+          });
         }}
       />
     </>
@@ -416,7 +427,7 @@ function ActionDialogs({ kind, business: b, onClose }: { kind: DialogKind; busin
           <>
             <DialogHeader>
               <DialogTitle>Extend trial</DialogTitle>
-              <DialogDescription>Give {b.name} more time to try AutoShift. They get an email about it.</DialogDescription>
+              <DialogDescription>Give {b.name} more time to try AutoShift.</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               <Label htmlFor="trial-days">Add days</Label>
@@ -449,7 +460,7 @@ function ActionDialogs({ kind, business: b, onClose }: { kind: DialogKind; busin
           <>
             <DialogHeader>
               <DialogTitle>Change plan</DialogTitle>
-              <DialogDescription>Takes effect now. Razorpay charges or credits the difference on the next bill.</DialogDescription>
+              <DialogDescription>Takes effect now. Only for businesses that have not set up payment yet.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-2">
               {(["starter", "growth", "pro"] as const).map((p) => (

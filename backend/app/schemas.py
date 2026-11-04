@@ -214,3 +214,14 @@ class BillingDetails(BaseModel):
     city: str = Field("", max_length=80)
     pincode: str = Field("", max_length=6)
     email: str = Field("", max_length=200)
+
+
+class SubscriptionChange(BaseModel):
+    """Platform staff change a business's plan or extend its trial."""
+
+    plan_id: Literal["starter", "growth", "pro"] | None = None
+    extend_trial_days: int | None = Field(None, ge=1, le=90)
+
+
+class NoteCreate(BaseModel):
+    text: str = Field(min_length=1, max_length=500)

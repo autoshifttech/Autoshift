@@ -144,3 +144,23 @@ def test_billing_details_usage_and_invoice_snapshot_on_the_real_database(env):
     usage = env.client.get("/v1/usage", headers=u["h"]).json()
     assert usage["contacts"]["used"] == 2 and usage["seats"]["used"] == 1 and usage["ai_replies"]["used"] == 0
     assert usage["seats"]["limit"] == 5  # the trial plan (growth)
+
+
+def test_platform_business_list_plan_change_and_notes_on_the_real_database(env):
+    staff = env.staff()
+    email = f"owner-{staff['id'][:6]}@list.test"
+    made = env.client.post("/v1/platform/businesses", json={"name": "List Shop", "industry": "retail", "city": "Pune", "owner": {"name": "Lata", "email": email}, "plan_id": "starter"}, headers=staff["h"])
+    assert made.status_code == 201, made.text
+    bid = made.json()["id"]
+    listed = {b["id"]: b for b in env.client.get("/v1/platform/businesses", headers=staff["h"]).json()}
+    assert listed[bid]["owner"]["email"] == email and listed[bid]["plan_id"] == "starter" and listed[bid]["subscription_status"] == "trialing"
+
+    changed = env.client.post(f"/v1/platform/businesses/{bid}/subscription", json={"plan_id": "pro", "extend_trial_days": 10}, headers=staff["h"])
+    assert changed.status_code == 200 and changed.json()["plan_id"] == "pro"
+    days = sql("SELECT extract(day from trial_ends_at - now()) FROM subscriptions WHERE account_id = %s", bid)[0][0]
+    assert days >= 23  # 14-day trial + 10 more
+
+    notes = env.client.post(f"/v1/platform/businesses/{bid}/notes", json={"text": "Wants a demo on Friday"}, headers=staff["h"]).json()
+    assert notes[0]["text"] == "Wants a demo on Friday"
+    detail = env.client.get(f"/v1/platform/businesses/{bid}", headers=staff["h"]).json()
+    assert detail["notes"][0]["author"] and detail["contacts"] == 0 and len(detail["team"]) == 1

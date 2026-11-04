@@ -6,6 +6,8 @@
  */
 import { useStore, createStore } from '@/lib/workspace/store'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
+import { backendUrl } from '@/lib/backend/client'
+import { adminBackendStore, remoteDeleteBusiness, remoteSaveTeam, remoteUpdateBusiness, useAdminBackend } from './backend-sync'
 import {
   ADMIN_NOW,
   ADMIN_TEAM,
@@ -176,6 +178,8 @@ export function applyOverride(b: Business, o: BusinessOverride | undefined): Bus
 
 export function useBusinesses(): Business[] {
   const { overrides, createdBusinesses, deletedBusinesses, teams } = useAdmin()
+  const remote = useAdminBackend()
+  if (backendUrl()) return remote.businesses
   return [...BUSINESSES, ...createdBusinesses]
     .filter((b) => !deletedBusinesses.includes(b.id))
     .map((b) => ({ ...applyOverride(b, overrides[b.id]), team: teams[b.id]?.length ?? b.team }))
@@ -183,6 +187,7 @@ export function useBusinesses(): Business[] {
 
 /** A business by id, including ones an admin added; undefined once deleted. */
 export function findBusiness(state: AdminState, id: string): Business | undefined {
+  if (backendUrl()) return adminBackendStore.get().businesses.find((b) => b.id === id)
   if (state.deletedBusinesses.includes(id)) return undefined
   return [...BUSINESSES, ...state.createdBusinesses].find((b) => b.id === id)
 }
@@ -224,15 +229,18 @@ export function createBusiness(input: BusinessInput): string {
 }
 
 /** Removes a business and its team from the platform. */
-export function deleteBusiness(b: Business) {
+export function deleteBusiness(b: Business): Promise<boolean> {
+  if (backendUrl()) return remoteDeleteBusiness(b)
   act('Deleted business', b.name, `Owner ${b.owner.email}`, (s) => ({
     deletedBusinesses: [...s.deletedBusinesses, b.id],
     createdBusinesses: s.createdBusinesses.filter((x) => x.id !== b.id),
   }))
+  return Promise.resolve(true)
 }
 
 /** The people on a business, with the admin's changes applied. */
 export function teamOf(state: AdminState, b: Business): BusinessMember[] {
+  if (backendUrl()) return adminBackendStore.get().teams[b.id] ?? []
   const saved = state.teams[b.id]
   if (saved) return saved
   const added = new Date(b.createdAt).toISOString()
@@ -251,6 +259,7 @@ export function newMember(name: string, email: string, role: MemberRole): Busine
 }
 
 export function saveTeam(b: Business, team: BusinessMember[], action: string, details: string) {
+  if (backendUrl()) return void remoteSaveTeam(b, team)
   act(action, b.name, details, (s) => ({ teams: { ...s.teams, [b.id]: team } }))
 }
 
@@ -260,6 +269,7 @@ export function usePayments(): Payment[] {
 }
 
 export function updateBusiness(b: Business, action: string, details: string, patch: (o: BusinessOverride) => BusinessOverride) {
+  if (backendUrl()) return void remoteUpdateBusiness(b, patch({}), details)
   act(action, b.name, details, (s) => ({ overrides: { ...s.overrides, [b.id]: patch(s.overrides[b.id] ?? {}) } }))
 }
 
@@ -286,4 +296,9 @@ export function createTicket(input: { businessId: string; subject: string; categ
     tickets: [{ id, businessId: input.businessId, subject: input.subject, category: input.category, status: 'open', priority: input.priority, assignee: null, createdAt: at, messages: [{ from: 'business', author: input.author, text: input.message, at }] }, ...s.tickets],
   }))
   return id
+}
+
+/** Admin's private notes on a business: from the server when connected. */
+export function notesOf(state: AdminState, id: string, remote: ReturnType<typeof useAdminBackend>) {
+  return backendUrl() ? (remote.notes[id] ?? []) : (state.overrides[id]?.notes ?? [])
 }

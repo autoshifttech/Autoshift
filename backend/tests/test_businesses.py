@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def H(world, who):
     return world.headers(who)
 
@@ -100,3 +102,53 @@ def test_plan_seat_limit_is_enforced(client, world):
     world.rows("subscriptions").append({"account_id": world.acct_a, "plan_id": "starter"})  # 2 seats, 4 people already
     r = client.post(f"/v1/platform/businesses/{world.acct_a}/team", json={"name": "X", "email": "x@a.in", "role": "agent"}, headers=H(world, "staff_super"))
     assert r.status_code == 409
+
+
+async def test_list_shows_owner_plan_mrr_and_30_day_usage(client, world):
+    from app import wallet
+
+    world.rows("subscriptions").append({"account_id": world.acct_a, "plan_id": "growth", "cycle": "yearly", "status": "active", "trial_ends_at": "2026-01-01T00:00:00+00:00"})
+    await wallet.apply(world.service, world.acct_a, 100000, "topup", "t", "seed-usage")
+    await wallet.charge(world.service, world.acct_a, "charge_marketing", 10, "m", "usage-m")
+    await wallet.charge(world.service, world.acct_a, "charge_ai", 4, "a", "usage-a")
+    a = next(b for b in client.get("/v1/platform/businesses", headers=H(world, "staff_finance")).json() if b["id"] == world.acct_a)
+    assert a["owner"] == {"name": "owner_a", "email": "owner_a@example.com"}
+    assert a["plan_id"] == "growth" and a["cycle"] == "yearly" and a["mrr_paise"] == round(249900 * 10 / 12)
+    assert a["wallet_paise"] == 100000 - 990 - 100 and a["usage_30d"] == {"marketing": 10, "ai": 4}
+
+
+def test_staff_change_plan_and_extend_trial(client, world):
+    trial_end = "2026-12-01T00:00:00+00:00"
+    world.rows("subscriptions").append({"account_id": world.acct_b, "plan_id": "starter", "cycle": "monthly", "status": "trialing", "trial_ends_at": trial_end})
+    r = client.post(f"/v1/platform/businesses/{world.acct_b}/subscription", json={"plan_id": "pro", "extend_trial_days": 7}, headers=H(world, "staff_support"))
+    assert r.status_code == 200 and r.json()["plan_id"] == "pro"
+    ends = datetime.fromisoformat(world.rows("subscriptions")[0]["trial_ends_at"])
+    assert ends > datetime.fromisoformat(trial_end)
+    assert client.post(f"/v1/platform/businesses/{world.acct_b}/subscription", json={}, headers=H(world, "staff_support")).status_code == 422
+    assert client.post(f"/v1/platform/businesses/{world.acct_b}/subscription", json={"plan_id": "pro"}, headers=H(world, "staff_finance")).status_code == 403
+    assert any(a["action"] == "business.subscription" for a in world.rows("audit_log"))
+
+
+def test_staff_notes_are_private_to_staff(client, world):
+    r = client.post(f"/v1/platform/businesses/{world.acct_a}/notes", json={"text": "Called, wants a demo"}, headers=H(world, "staff_support"))
+    assert r.status_code == 201 and r.json()[0]["text"] == "Called, wants a demo"
+    assert client.get(f"/v1/platform/businesses/{world.acct_a}", headers=H(world, "staff_finance")).json()["notes"][0]["text"] == "Called, wants a demo"
+    assert client.get(f"/v1/platform/businesses/{world.acct_a}/notes", headers=H(world, "owner_a")).status_code == 403
+    assert client.post(f"/v1/platform/businesses/{world.acct_a}/notes", json={"text": ""}, headers=H(world, "staff_support")).status_code == 422
+
+
+def test_plan_and_trial_cannot_be_changed_once_razorpay_holds_the_subscription(client, world):
+    world.rows("subscriptions").append({"account_id": world.acct_b, "plan_id": "starter", "cycle": "monthly", "status": "trialing", "trial_ends_at": "2026-12-01T00:00:00+00:00", "razorpay_subscription_id": "sub_1"})
+    for body in ({"plan_id": "pro"}, {"extend_trial_days": 7}):
+        r = client.post(f"/v1/platform/businesses/{world.acct_b}/subscription", json=body, headers=H(world, "staff_super"))
+        assert r.status_code == 409 and "Razorpay" in r.json()["detail"]
+    assert world.rows("subscriptions")[0]["plan_id"] == "starter"
+
+
+async def test_a_business_with_payment_history_is_blocked_not_deleted(client, world):
+    from app import wallet
+
+    await wallet.apply(world.service, world.acct_b, 500, "topup", "t", "keep-history")
+    r = client.delete(f"/v1/platform/businesses/{world.acct_b}", headers=H(world, "staff_super"))
+    assert r.status_code == 409 and "payment history" in r.json()["detail"]
+    assert any(a["id"] == world.acct_b for a in world.rows("accounts"))

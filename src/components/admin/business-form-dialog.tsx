@@ -12,6 +12,8 @@ import { PLANS, PLAN_IDS, type PlanId } from "@/lib/billing/plans";
 import { INDUSTRY_LABEL, type Business } from "@/lib/admin/data";
 import { createBusiness, updateBusiness } from "@/lib/admin/store";
 import { useAdminT } from "@/lib/admin/strings";
+import { remoteCreateBusiness } from "@/lib/admin/backend-sync";
+import { backendUrl } from "@/lib/backend/client";
 
 const EMAIL = /^\S+@\S+\.\S+$/;
 
@@ -57,6 +59,18 @@ export function BusinessFormDialog({ open, onOpenChange, business, onCreated }: 
       updateBusiness(business, "Edited business", `${business.name} → ${name.trim()} · owner ${owner.email}`, (o) => ({ ...o, name: name.trim(), industry, city: city.trim(), owner }));
       toast.success(tr("Business updated"));
     } else {
+      if (backendUrl()) {
+        // The server invites the owner by email and starts their trial; it answers with the new id.
+        remoteCreateBusiness({ name: name.trim(), industry, city: city.trim(), owner: { name: owner.name, email: owner.email }, plan }).then(
+          (id) => {
+            toast.success(tr("Business created"));
+            onCreated?.(id);
+          },
+          (e) => toast.error(e instanceof Error ? e.message : tr("Could not create the business")),
+        );
+        onOpenChange(false);
+        return;
+      }
       const id = createBusiness({ name: name.trim(), industry, city: city.trim(), owner, plan });
       toast.success(tr("Business created"));
       onCreated?.(id);

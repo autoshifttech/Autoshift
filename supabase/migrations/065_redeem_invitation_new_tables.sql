@@ -100,6 +100,7 @@ BEGIN
     UNION ALL SELECT 1 FROM assistants WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM flow_connections WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM mcp_keys WHERE account_id = v_old_account_id
+    UNION ALL SELECT 1 FROM business_notes WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM billing_details WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM webhook_subscriptions WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM webhook_deliveries WHERE account_id = v_old_account_id

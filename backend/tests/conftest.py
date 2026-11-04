@@ -236,7 +236,7 @@ class World:
             self.store.setdefault("accounts", []).append({"id": personal, "name": name, "status": "active", "industry": "", "city": "", "created_at": "2026-01-01T00:00:00Z", "owner_user_id": uid})
             self.store.setdefault("profiles", []).append({"id": str(uuid.uuid4()), "user_id": uid, "full_name": name, "email": f"{name}@example.com", "account_id": personal, "account_role": "owner"})
             return uid
-        profile: dict[str, Any] = {"id": str(uuid.uuid4()), "user_id": uid}
+        profile: dict[str, Any] = {"id": str(uuid.uuid4()), "user_id": uid, "full_name": name, "email": f"{name}@example.com"}
         if account:
             profile.update(account_id=account, account_role=role)
         self.store.setdefault("profiles", []).append(profile)

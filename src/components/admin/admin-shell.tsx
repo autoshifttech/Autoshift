@@ -1,7 +1,7 @@
 "use client";
 
 import { adminTranslate, useAdminT } from "@/lib/admin/strings";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { setAdminCookie } from "@/lib/admin/session";
 import { buildAlerts } from "@/lib/admin/alerts";
+import { startAdminSync, useAdminAccess } from "@/lib/admin/backend-sync";
 import { ROLE_LABEL } from "@/lib/admin/data";
 import { CURRENT_ADMIN, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { relTime } from "@/lib/admin/format";
@@ -338,6 +339,19 @@ function AdminMenu() {
 export function AdminShell({ children }: { children: ReactNode }) {
   const locale = useLocale();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const access = useAdminAccess();
+  useEffect(() => startAdminSync(), []);
+  // Connected to the backend: only people the server lists as platform staff see anything here.
+  if (access === "checking") return <p role="status" className="p-8 text-sm text-muted-foreground">Checking your access…</p>;
+  if (access === "denied") {
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <h1 className="text-lg font-semibold text-foreground">No admin access</h1>
+        <p className="mt-2 text-sm text-muted-foreground">This account isn&apos;t on the AutoShift admin team. Ask a super admin to add you.</p>
+        <Link href="/dashboard" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">Back to your workspace</Link>
+      </div>
+    );
+  }
   return (
     <div className="app-canvas admin-canvas flex h-dvh overflow-hidden bg-background">
       <SkipLink label={adminTranslate(locale, "Skip to content")} />

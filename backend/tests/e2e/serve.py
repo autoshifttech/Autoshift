@@ -21,10 +21,10 @@ import uvicorn
 
 from app import db as app_db
 from app.config import Settings, get_settings
-from app.deps import get_llm, get_razorpay
+from app.deps import get_auth_admin, get_llm, get_razorpay
 
 from ..conftest import ENC_KEY, JWT_SECRET, RZP_SECRET, RZP_WEBHOOK_SECRET, FakeLlm
-from .conftest import E2ERazorpay, SERVICE_KEY
+from .conftest import E2ERazorpay, RealAuthAdmin, SERVICE_KEY
 from .pgrest_shim import make_app
 
 DSN = os.environ["E2E_PG_DSN"]
@@ -50,6 +50,7 @@ def main() -> None:
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_razorpay] = lambda: E2ERazorpay()
     app.dependency_overrides[get_llm] = lambda: FakeLlm()
+    app.dependency_overrides[get_auth_admin] = lambda: RealAuthAdmin()
     uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("E2E_PORT", "8099")), log_level="warning")
 
 

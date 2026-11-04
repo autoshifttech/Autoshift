@@ -6,8 +6,11 @@
  */
 import { PLANS, type BillingCycle, type PlanId } from '@/lib/billing/plans'
 
-/** "Today" for the sample data, so relative dates stay stable. */
-export const ADMIN_NOW = Date.UTC(2026, 9, 25, 10, 30)
+/**
+ * "Today" for the admin screens. The sample data uses a fixed day so its relative dates stay stable;
+ * connected to the backend, real data is measured from the real clock.
+ */
+export const ADMIN_NOW = process.env.NEXT_PUBLIC_API_URL ? Date.now() : Date.UTC(2026, 9, 25, 10, 30)
 const DAY = 864e5
 export const daysAgo = (d: number) => new Date(ADMIN_NOW - d * DAY).toISOString()
 
