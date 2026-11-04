@@ -164,3 +164,22 @@ def test_platform_business_list_plan_change_and_notes_on_the_real_database(env):
     assert notes[0]["text"] == "Wants a demo on Friday"
     detail = env.client.get(f"/v1/platform/businesses/{bid}", headers=staff["h"]).json()
     assert detail["notes"][0]["author"] and detail["contacts"] == 0 and len(detail["team"]) == 1
+
+
+def test_team_invite_redeem_role_and_remove_on_the_real_database(env):
+    owner, joiner = env.user("teamowner"), env.user("joiner")
+    res = env.client.post("/v1/team/invitations", json={"role": "agent"}, headers=owner["h"])
+    assert res.status_code == 201, res.text
+    token = res.json()["url"].rsplit("/join/", 1)[1]
+    # the app's own redeem function accepts a link made by the backend
+    with __import__("psycopg").connect(__import__("os").environ["E2E_PG_DSN"], autocommit=True) as c:
+        c.execute("SET ROLE authenticated")
+        c.execute("SELECT set_config('request.jwt.claim.sub', %s, false)", (joiner["id"],))
+        c.execute("SELECT redeem_invitation(encode(sha256(%s::bytea), 'hex'))", (token,))
+    team = {m["user_id"]: m["role"] for m in env.client.get("/v1/team", headers=owner["h"]).json()}
+    assert team.get(joiner["id"]) == "agent"
+    assert env.client.patch(f"/v1/team/{joiner['id']}", json={"role": "viewer"}, headers=owner["h"]).json()["role"] == "viewer"
+    assert env.client.delete(f"/v1/team/{joiner['id']}", headers=owner["h"]).status_code == 204
+    acct, role = sql("SELECT account_id::text, account_role::text FROM profiles WHERE user_id = %s", joiner["id"])[0]
+    assert acct != owner["account_id"] and role == "owner"
+    assert env.client.get("/v1/me", headers=joiner["h"]).json()["account_id"] == acct  # their login still works

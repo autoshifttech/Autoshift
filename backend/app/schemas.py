@@ -225,3 +225,13 @@ class SubscriptionChange(BaseModel):
 
 class NoteCreate(BaseModel):
     text: str = Field(min_length=1, max_length=500)
+
+
+class TeamRole(BaseModel):
+    role: Literal["owner", "admin", "agent", "viewer"]
+
+
+class InviteCreate(BaseModel):
+    role: Literal["admin", "agent", "viewer"]
+    expires_in_days: int = Field(7, ge=1, le=365)
+    label: str = Field("", max_length=80)
