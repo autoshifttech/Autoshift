@@ -174,7 +174,12 @@ class FakeAuthAdmin:
     async def invite(self, email, name):
         self.invited.append(email)
         existing = next((u for n, u in self.world.users.items() if f"{n}@example.com" == email), None)
-        return existing or self.world.add_user(email.split("@")[0], None, None, bare=True)
+        existing = existing or next((p["user_id"] for p in self.world.rows("profiles") if p.get("email") == email), None)
+        if existing:
+            return existing
+        uid = self.world.add_user(email.split("@")[0], None, None, bare=True)
+        next(p for p in self.world.rows("profiles") if p["user_id"] == uid)["email"] = email
+        return uid
 
 
 class World:
@@ -219,7 +224,10 @@ class World:
     def add_user(self, name: str, account: str | None, role: str | None, bare: bool = False) -> str:
         uid = str(uuid.uuid4())
         self.users[name] = uid
-        if bare:  # a brand-new login: no profile row yet
+        if bare:  # a brand-new login: Supabase's trigger gives it a profile and an empty personal account of its own
+            personal = str(uuid.uuid4())
+            self.store.setdefault("accounts", []).append({"id": personal, "name": name, "status": "active", "industry": "", "city": "", "created_at": "2026-01-01T00:00:00Z", "owner_user_id": uid})
+            self.store.setdefault("profiles", []).append({"id": str(uuid.uuid4()), "user_id": uid, "full_name": name, "email": f"{name}@example.com", "account_id": personal, "account_role": "owner"})
             return uid
         profile: dict[str, Any] = {"id": str(uuid.uuid4()), "user_id": uid}
         if account:

@@ -17,6 +17,24 @@ def test_staff_can_create_a_business_with_owner_and_trial(client, world, auth_ad
     assert any(a["action"] == "business.create" for a in world.rows("audit_log"))
 
 
+def test_the_logins_automatic_empty_account_is_reused_not_duplicated(client, world):
+    before = len(world.rows("accounts"))
+    b = _create(client, world).json()
+    # the invited login arrived with its own personal account; it became this business
+    assert len(world.rows("accounts")) == before + 1
+    assert [a["name"] for a in world.rows("accounts") if a["id"] == b["id"]] == ["Shop"]
+
+
+def test_a_login_whose_personal_account_already_has_data_is_refused(client, world):
+    # new@shop.in signed up earlier and has already built something
+    uid = world.add_user("new", None, None, bare=True)
+    prof = next(p for p in world.rows("profiles") if p["user_id"] == uid)
+    prof["email"] = "new@shop.in"
+    world.rows("assistants").append({"id": "x", "account_id": prof["account_id"], "name": "Mine"})
+    res = _create(client, world)
+    assert res.status_code == 409 and len(world.rows("assistants")) == 1
+
+
 def test_creating_for_someone_already_in_a_business_is_refused(client, world):
     res = _create(client, world, email="owner_a@example.com")
     assert res.status_code == 409 and len(world.rows("accounts")) == 2
@@ -66,6 +84,9 @@ def test_team_add_role_remove_and_last_owner_protection(client, world):
     r = client.post(base, json={"name": "Raj", "email": "raj@b.in", "role": "agent"}, headers=H(world, "staff_support"))
     assert r.status_code == 201, r.text
     uid = r.json()["user_id"]
+    # the new member's automatic personal account is gone; they are on this team only
+    assert [p["account_id"] for p in world.rows("profiles") if p["user_id"] == uid] == [world.acct_b]
+    assert sum(1 for a in world.rows("accounts") if a["owner_user_id"] == uid) == 0
     assert client.patch(f"{base}/{uid}", json={"role": "admin"}, headers=H(world, "staff_support")).json()["role"] == "admin"
     assert client.delete(f"{base}/{uid}", headers=H(world, "staff_support")).status_code == 204
     # admin_b is the only person; make them owner then try to demote/remove the sole owner

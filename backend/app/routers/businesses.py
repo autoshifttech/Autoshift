@@ -45,6 +45,26 @@ async def _summary(sdb, acct: dict) -> dict:
     }
 
 
+# Tables that show an account has real data. A login's automatic, untouched personal
+# account has none of them and can be replaced; anything else must never be deleted.
+USED_TABLES = ("subscriptions", "wallet_balances", "assistants", "contacts", "flows", "whatsapp_config")
+
+
+async def _untouched_personal_account(sdb, profile: dict | None) -> str | None:
+    """The account Supabase created for a brand-new login, if it is still empty.
+    Returns None when the person has no account. Raises 409 when they belong to a real business."""
+    if not profile or not profile.get("account_id"):
+        return None
+    acct_id = str(profile["account_id"])
+    others = [m for m in await sdb.select("profiles", {"account_id": acct_id}) if str(m["user_id"]) != str(profile["user_id"])]
+    if others or profile.get("account_role") != "owner":
+        raise HTTPException(409, "That person already belongs to a business")
+    for table in USED_TABLES:
+        if await sdb.select(table, {"account_id": acct_id}, limit=1):
+            raise HTTPException(409, "That person already belongs to a business")
+    return acct_id
+
+
 @router.get("")
 async def list_businesses(_: AnyStaff, sdb: ServiceDb):
     return [await _summary(sdb, a) for a in await sdb.select("accounts", order="created_at.desc", limit=500)]
@@ -66,16 +86,20 @@ async def create_business(body: BusinessCreate, admin: Manager, sdb: ServiceDb, 
         owner_id = await auth.invite(body.owner.email, body.owner.name)
     except AuthAdminError as exc:
         raise HTTPException(502, str(exc)) from exc
-    profile = (await sdb.select("profiles", {"user_id": owner_id}, limit=1)) or [None]
-    profile = profile[0]
-    if profile and profile.get("account_id"):
-        raise HTTPException(409, "That person already belongs to a business")
-    acct = await sdb.insert("accounts", {"name": body.name, "industry": body.industry, "city": body.city, "owner_user_id": owner_id})
-    patch = {"account_id": acct["id"], "account_role": "owner"}
-    if profile:
-        await sdb.update("profiles", {"user_id": owner_id}, patch)
+    found = await sdb.select("profiles", {"user_id": owner_id}, limit=1)
+    profile = found[0] if found else None
+    personal = await _untouched_personal_account(sdb, profile)
+    fields = {"name": body.name, "industry": body.industry, "city": body.city}
+    if personal:  # reuse the empty account the login came with
+        rows = await sdb.update("accounts", {"id": personal}, fields)
+        acct = rows[0]
     else:
-        await sdb.insert("profiles", {"user_id": owner_id, "full_name": body.owner.name, "email": body.owner.email, **patch})
+        acct = await sdb.insert("accounts", {**fields, "owner_user_id": owner_id})
+        patch = {"account_id": acct["id"], "account_role": "owner"}
+        if profile:
+            await sdb.update("profiles", {"user_id": owner_id}, patch)
+        else:
+            await sdb.insert("profiles", {"user_id": owner_id, "full_name": body.owner.name, "email": body.owner.email, **patch})
     ends = datetime.now(timezone.utc) + timedelta(days=TRIAL_DAYS)
     await sdb.insert("subscriptions", {"account_id": acct["id"], "plan_id": body.plan_id, "cycle": "monthly", "status": "trialing", "trial_ends_at": ends.isoformat()})
     await audit.record(sdb, scope="platform", action="business.create", actor_id=admin.user.id, account_id=acct["id"], target=acct["id"], details={"name": body.name, "owner": body.owner.email, "plan": body.plan_id})
@@ -134,14 +158,16 @@ async def add_member(account_id: str, body: MemberAdd, admin: Manager, sdb: Serv
         user_id = await auth.invite(body.email, body.name)
     except AuthAdminError as exc:
         raise HTTPException(502, str(exc)) from exc
-    existing = await sdb.select("profiles", {"user_id": user_id}, limit=1)
-    if existing and existing[0].get("account_id"):
-        raise HTTPException(409, "That person already belongs to a business")
+    found = await sdb.select("profiles", {"user_id": user_id}, limit=1)
+    existing = found[0] if found else None
+    personal = await _untouched_personal_account(sdb, existing)
     patch = {"account_id": account_id, "account_role": body.role}
     if existing:
         await sdb.update("profiles", {"user_id": user_id}, patch)
     else:
         await sdb.insert("profiles", {"user_id": user_id, "full_name": body.name, "email": body.email, **patch})
+    if personal:  # their automatic empty account is no longer needed
+        await sdb.delete("accounts", {"id": personal})
     await audit.record(sdb, scope="platform", action="business.member_add", actor_id=admin.user.id, account_id=account_id, target=user_id, details={"email": body.email, "role": body.role})
     return {"user_id": user_id, "email": body.email, "role": body.role}
 
