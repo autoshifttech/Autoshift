@@ -52,7 +52,7 @@ function cspReportOnly(frameAncestors: string) {
     // Nonce-based CSP is a later project.
     // googletagmanager: optional analytics on the public site
     // (public/site/index.html).
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://checkout.razorpay.com https://connect.facebook.net",
     // Tailwind + inline style attributes on lots of components.
     // Google Fonts stylesheet used by the public site.
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -64,12 +64,13 @@ function cspReportOnly(frameAncestors: string) {
     // and Supabase public-bucket audio/video the inbox renders.
     "media-src 'self' blob: https://*.supabase.co",
     "font-src 'self' data: https://fonts.gstatic.com",
-    // Supabase REST + realtime (WSS). All Meta API calls happen
-    // server-side, so graph.facebook.com does not belong here.
+    // Supabase REST + realtime (WSS). Meta's Graph API is called from the server only; the browser
+    // talks to *.facebook.com just for the WhatsApp sign-up popup (Facebook's JavaScript SDK).
     // Formspree receives the public site's contact form.
-    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com https://*.razorpay.com${backend}`,
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com https://*.razorpay.com https://*.facebook.com${backend}`,
     // Razorpay Checkout opens in a frame.
-    "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+    // Razorpay Checkout and Meta's WhatsApp sign-up popup open in frames.
+    "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.facebook.com https://web.facebook.com",
     `frame-ancestors ${frameAncestors}`,
     "base-uri 'self'",
     "form-action 'self'",

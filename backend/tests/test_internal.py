@@ -8,7 +8,8 @@ SECRET = "internal-shared-secret-123"
 
 
 @pytest.fixture
-def internal(client, settings):
+def internal(client, settings, world):
+    world.rows("platform_settings").append({"key": "meta_fees_billed_to", "value": "autoshift"})  # Solution Partner mode
     s = settings.model_copy(update={"internal_secret": SECRET})
     client.app.dependency_overrides[get_settings] = lambda: s
     return {"X-AutoShift-Internal": SECRET}
@@ -87,3 +88,23 @@ def test_events_from_the_web_app_reach_webhooks(client, world, internal):
     r = client.post("/v1/internal/events", json={"account_id": world.acct_a, "type": "message.received", "data": {"from": "+91"}}, headers=internal)
     assert r.status_code == 202 and r.json() == {"queued": 1}
     assert client.post("/v1/internal/events", json={"account_id": world.acct_a, "type": "nope"}, headers=internal).status_code == 422
+
+
+async def test_by_default_meta_bills_the_business_and_the_wallet_charges_only_ai(client, world, settings):
+    s = settings.model_copy(update={"internal_secret": SECRET})
+    client.app.dependency_overrides[get_settings] = lambda: s
+    h = {"X-AutoShift-Internal": SECRET}
+    await wallet.apply(world.service, world.acct_a, 1000, "topup", "t", "fund-default")
+    r = charge(client, h, world.acct_a, "marketing", "wamid.default1")
+    assert r.json() == {"charged_paise": 0, "balance_paise": 1000, "applied": False, "billed_by": "meta"}
+    assert client.post("/v1/internal/can-send", json={"account_id": world.acct_a, "category": "marketing", "units": 1000}, headers=h).json()["ok"] is True
+    ai = charge(client, h, world.acct_a, "ai", "wamid.default2")
+    assert ai.json()["charged_paise"] == 25  # AI replies are still charged
+
+
+def test_only_super_admins_flip_the_meta_fees_switch(client, world):
+    assert client.get("/v1/platform/settings", headers=world.headers("staff_finance")).json() == {"meta_fees_billed_to": "business"}
+    assert client.put("/v1/platform/settings/meta-fees", json={"billed_to": "autoshift"}, headers=world.headers("staff_finance")).status_code == 403
+    assert client.put("/v1/platform/settings/meta-fees", json={"billed_to": "autoshift"}, headers=world.headers("staff_super")).json() == {"meta_fees_billed_to": "autoshift"}
+    assert client.get("/v1/platform/settings", headers=world.headers("staff_support")).json()["meta_fees_billed_to"] == "autoshift"
+    assert any(a["action"] == "settings.meta_fees" for a in world.rows("audit_log"))

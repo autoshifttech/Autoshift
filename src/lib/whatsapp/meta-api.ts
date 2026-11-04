@@ -14,7 +14,8 @@ import { getT } from '@/lib/i18n/translate'
 
 const ti = getT('Validation.interactive')
 
-const META_API_VERSION = 'v21.0'
+// Meta retires each Graph API version about two years after release; set META_GRAPH_VERSION to move up.
+const META_API_VERSION = process.env.META_GRAPH_VERSION?.trim() || 'v21.0'
 const META_API_BASE = `https://graph.facebook.com/${META_API_VERSION}`
 
 export interface MetaSendResult {
@@ -1259,4 +1260,23 @@ export async function downloadMedia(
     response.headers.get('content-type') || 'application/octet-stream'
   const buffer = Buffer.from(await response.arrayBuffer())
   return { buffer, contentType }
+}
+
+
+/**
+ * Embedded Signup: swap the one-time code from Meta's popup for the business's access token.
+ * Runs on the server only (it needs the app secret). With the JavaScript SDK flow no redirect_uri is sent.
+ */
+export async function exchangeEmbeddedSignupCode(args: { code: string; appId: string; appSecret: string }): Promise<string> {
+  const url = new URL(`${META_API_BASE}/oauth/access_token`)
+  url.searchParams.set('client_id', args.appId)
+  url.searchParams.set('client_secret', args.appSecret)
+  url.searchParams.set('code', args.code)
+  const response = await fetch(url, { method: 'GET' })
+  if (!response.ok) {
+    await throwMetaError(response, `Meta API error: ${response.status}`)
+  }
+  const data = (await response.json()) as { access_token?: string }
+  if (!data.access_token) throw new Error('Meta did not return an access token')
+  return data.access_token
 }

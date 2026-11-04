@@ -3239,7 +3239,8 @@
     "outcome_error": "Error",
     "settingsTitle": "Connect WhatsApp",
     "settingsDesc": "The quickest way to link your business number. Meta handles login and verification.",
-    "manualHint": "Already have a WhatsApp Business API app? You can enter its credentials manually below."
+    "manualHint": "Already have a WhatsApp Business API app? You can enter its credentials manually below.",
+    "registerLater": "Connected. The number still needs registering with Meta; open Settings → WhatsApp to finish."
   },
   "Billing": {
     "title": "Plan & billing",

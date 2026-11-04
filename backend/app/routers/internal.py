@@ -10,7 +10,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, events, wallet
+from .. import ai_runner, audit, events, platform_settings, wallet
 from ..config import Settings, get_settings
 from ..deps import ServiceDb, get_llm
 from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent
@@ -41,6 +41,8 @@ async def can_send(body: InternalCanSend, _: Internal, sdb: ServiceDb):
     """Before a send: is the business active and is there money for it?"""
     acct = await _account(sdb, body.account_id)
     need = wallet.RATES_PAISE[f"charge_{body.category}"] * body.units
+    if body.category in platform_settings.MESSAGE_CATEGORIES and not await platform_settings.wallet_pays_meta_fees(sdb):
+        need = 0  # Meta bills the business directly for messages
     have = await wallet.balance(sdb, body.account_id)
     if acct.get("status") == "suspended":
         return {"ok": False, "reason": "suspended", "balance_paise": have, "needed_paise": need}
@@ -51,6 +53,9 @@ async def can_send(body: InternalCanSend, _: Internal, sdb: ServiceDb):
 async def charge(body: InternalCharge, _: Internal, sdb: ServiceDb):
     """Charge a message Meta billed (or an AI reply). Safe to repeat: one charge per idempotency key."""
     await _account(sdb, body.account_id)
+    if body.category in platform_settings.MESSAGE_CATEGORIES and not await platform_settings.wallet_pays_meta_fees(sdb):
+        # Meta bills the business's own card for messages; charging the wallet too would bill them twice.
+        return {"charged_paise": 0, "balance_paise": await wallet.balance(sdb, body.account_id), "applied": False, "billed_by": "meta"}
     try:
         done = await wallet.charge(sdb, body.account_id, f"charge_{body.category}", body.units, body.ref, body.idempotency_key)
     except wallet.InsufficientFunds:

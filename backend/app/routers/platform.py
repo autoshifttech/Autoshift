@@ -83,3 +83,24 @@ async def remove_admin(user_id: str, me: Super, sdb: ServiceDb):
         if not k.get("revoked_at"):
             await sdb.update("mcp_keys", {"id": k["id"]}, {"revoked_at": datetime.now(timezone.utc).isoformat()})
     await audit.record(sdb, scope="platform", action="admin.remove", actor_id=me.user.id, target=user_id)
+
+
+# -------------------------------------------------------- platform settings
+from .. import platform_settings  # noqa: E402
+from ..schemas import MetaFeesSetting  # noqa: E402
+
+
+@router.get("/settings")
+async def settings_view(_: Annotated[PlatformAdmin, Depends(get_platform_admin)], sdb: ServiceDb):
+    return {"meta_fees_billed_to": await platform_settings.get(sdb, "meta_fees_billed_to")}
+
+
+@router.put("/settings/meta-fees")
+async def set_meta_fees(body: MetaFeesSetting, me: Super, sdb: ServiceDb):
+    """Who Meta bills for WhatsApp messages: each business ("business") or AutoShift's credit line ("autoshift")."""
+    if await sdb.select("platform_settings", {"key": "meta_fees_billed_to"}, limit=1):
+        await sdb.update("platform_settings", {"key": "meta_fees_billed_to"}, {"value": body.billed_to, "updated_by": me.user.id})
+    else:
+        await sdb.insert("platform_settings", {"key": "meta_fees_billed_to", "value": body.billed_to, "updated_by": me.user.id})
+    await audit.record(sdb, scope="platform", action="settings.meta_fees", actor_id=me.user.id, target="meta_fees_billed_to", details={"billed_to": body.billed_to})
+    return {"meta_fees_billed_to": body.billed_to}

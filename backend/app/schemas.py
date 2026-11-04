@@ -357,3 +357,7 @@ class CloseBusiness(BaseModel):
 
 class CloseRequest(CloseBusiness):
     reason: str = Field("", max_length=60)
+
+
+class MetaFeesSetting(BaseModel):
+    billed_to: Literal["business", "autoshift"]

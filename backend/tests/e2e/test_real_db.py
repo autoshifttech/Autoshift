@@ -218,6 +218,12 @@ def test_internal_charge_and_events_on_the_real_database(env):
     try:
         h = {"X-AutoShift-Internal": "e2e-internal-secret"}
         u = env.user("internal")
+        # default: Meta bills the business, so the wallet is not charged for messages
+        sql("UPDATE platform_settings SET value = '\"business\"' WHERE key = 'meta_fees_billed_to'")
+        free = env.client.post("/v1/internal/charge", json={"account_id": u["account_id"], "category": "marketing", "ref": "wamid.free", "idempotency_key": "msg:wamid.free"}, headers=h).json()
+        assert free["billed_by"] == "meta" and free["charged_paise"] == 0
+        # Solution Partner mode: the wallet recovers the fee
+        sql("UPDATE platform_settings SET value = '\"autoshift\"' WHERE key = 'meta_fees_billed_to'")
         sql("SELECT wallet_apply(%s, 1000, 'topup', 'seed', %s)", u["account_id"], f"seed-int-{u['id']}")
         body = {"account_id": u["account_id"], "category": "marketing", "units": 1, "ref": f"wamid.{u['id']}", "idempotency_key": f"msg:wamid.{u['id']}"}
         r1 = env.client.post("/v1/internal/charge", json=body, headers=h).json()
@@ -228,6 +234,7 @@ def test_internal_charge_and_events_on_the_real_database(env):
         assert hook.status_code == 202
         assert env.client.post("/v1/internal/charge", json=body, headers=u["h"]).status_code == 401  # a user's login can't use it
     finally:
+        sql("UPDATE platform_settings SET value = '\"business\"' WHERE key = 'meta_fees_billed_to'")
         env.client.app.dependency_overrides[get_settings] = lambda: base
 
 

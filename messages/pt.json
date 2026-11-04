@@ -3239,7 +3239,8 @@
     "outcome_error": "Erro",
     "settingsTitle": "Conectar WhatsApp",
     "settingsDesc": "O jeito mais rápido de vincular seu número comercial. A Meta cuida do login e da verificação.",
-    "manualHint": "Já tem um app da API do WhatsApp Business? Você pode inserir as credenciais manualmente abaixo."
+    "manualHint": "Já tem um app da API do WhatsApp Business? Você pode inserir as credenciais manualmente abaixo.",
+    "registerLater": "Conectado. O número ainda precisa ser registrado na Meta; abra Configurações → WhatsApp para concluir."
   },
   "Billing": {
     "title": "Plano e cobrança",

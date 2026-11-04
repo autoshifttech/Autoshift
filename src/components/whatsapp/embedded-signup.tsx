@@ -21,12 +21,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { sampleConnectedNumber, type ConnectedNumber } from "@/lib/workspace/setup";
+import { embeddedSignupConfig, finishOnServer, openEmbeddedSignup } from "@/lib/whatsapp/fb-embedded-signup";
+import { isDemoMode } from "@/lib/supabase/client";
 
 /**
- * Meta WhatsApp Embedded Signup, front end only. The real flow opens
- * Meta's popup (FB.login with the Embedded Signup config id), receives a
- * code plus WABA / phone-number ids, and the backend exchanges them. Here
- * the popup is simulated; "Preview outcome" lets reviewers see every state.
+ * Meta WhatsApp Embedded Signup. With NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_ES_CONFIG_ID set
+ * (and outside demo mode) it opens Meta's real popup and the server finishes the connection.
+ * Otherwise the popup is simulated and "Preview outcome" lets reviewers see every state.
  */
 export type SignupPhase = "idle" | "connecting" | "success" | "cancelled" | "error";
 type Outcome = "success" | "cancelled" | "error";
@@ -53,7 +54,38 @@ export function EmbeddedSignup({
 
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
 
+  const live = embeddedSignupConfig() !== null && !isDemoMode();
+  const [problem, setProblem] = useState<string | null>(null);
+
+  const startLive = async () => {
+    const cfg = embeddedSignupConfig();
+    if (!cfg) return;
+    setPhase("connecting");
+    setProblem(null);
+    setProgress(1);
+    try {
+      const popup = await openEmbeddedSignup(cfg);
+      if (popup.status === "cancelled") return setPhase("cancelled");
+      if (popup.status === "error") {
+        setProblem(popup.message);
+        return setPhase("error");
+      }
+      setProgress(3);
+      const done = await finishOnServer(popup);
+      const n: ConnectedNumber = { displayPhoneNumber: done.displayPhoneNumber, verifiedName: done.verifiedName || displayName, quality: "GREEN", wabaId: popup.wabaId, phoneNumberId: popup.phoneNumberId };
+      setProgress(4);
+      setNumber(n);
+      onConnected?.(n);
+      setPhase("success");
+      if (!done.registered) toast.error(t("registerLater"));
+    } catch (e) {
+      setProblem(e instanceof Error ? e.message : null);
+      setPhase("error");
+    }
+  };
+
   const start = () => {
+    if (live) return void startLive();
     setPhase("connecting");
     setProgress(0);
     POPUP_STEPS.forEach((_, i) => {
@@ -90,13 +122,13 @@ export function EmbeddedSignup({
           tone="error"
           icon={AlertTriangle}
           title={t("errorTitle")}
-          desc={t("errorDesc")}
+          desc={problem ?? t("errorDesc")}
           tips={[t("errorTip1"), t("errorTip2"), t("errorTip3")]}
           onRetry={start}
         />
       )}
 
-      {phase !== "connecting" && phase !== "success" && (
+      {!live && phase !== "connecting" && phase !== "success" && (
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-dashed border-border pt-4 text-xs text-muted-foreground">
           <span>{t("previewOutcome")}</span>
           {(["success", "cancelled", "error"] as const).map((o) => (

@@ -335,6 +335,11 @@ def build_mcp(get_app) -> MCPServer:
         return await call("POST", f"/v1/platform/businesses/{account_id}/close", json_body={"confirm_name": business_name})
 
     @mcp.tool()
+    async def platform_settings() -> dict:
+        """Platform key: platform switches, e.g. who Meta bills for WhatsApp messages."""
+        return await call("GET", "/v1/platform/settings")
+
+    @mcp.tool()
     async def platform_audit(limit: int = 50) -> list:
         """Platform key: the audit log, newest first."""
         return await call("GET", "/v1/platform/audit", params={"limit": limit})

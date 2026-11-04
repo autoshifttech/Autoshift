@@ -7,6 +7,17 @@ import { useLocale } from "next-intl";
  * new screen never breaks.
  */
 const T: Record<string, [string, string, string]> = {
+  // WhatsApp message fees switch
+  "WhatsApp message fees": ["Taxas de mensagens do WhatsApp", "Tarifas de mensajes de WhatsApp", "WhatsApp 메시지 요금"],
+  "Who Meta bills for the messages businesses send.": ["Quem a Meta cobra pelas mensagens que as empresas enviam.", "A quién factura Meta los mensajes que envían los negocios.", "비즈니스가 보내는 메시지 요금을 Meta가 누구에게 청구하는지 정합니다."],
+  "Who Meta bills for WhatsApp messages": ["Quem a Meta cobra pelas mensagens do WhatsApp", "A quién factura Meta los mensajes de WhatsApp", "WhatsApp 메시지 요금 청구 대상"],
+  "Each business pays Meta": ["Cada empresa paga a Meta", "Cada negocio paga a Meta", "각 비즈니스가 Meta에 직접 지불"],
+  "Tech Provider. Businesses add their own card in WhatsApp Manager. The wallet charges only for AI replies, so nobody pays twice.": ["Tech Provider. As empresas adicionam o próprio cartão no WhatsApp Manager. A carteira cobra só as respostas de IA, então ninguém paga duas vezes.", "Tech Provider. Los negocios añaden su propia tarjeta en WhatsApp Manager. El monedero solo cobra las respuestas de IA, así nadie paga dos veces.", "Tech Provider. 비즈니스가 WhatsApp Manager에 직접 카드를 등록합니다. 지갑은 AI 답변만 차감하므로 이중 결제가 없습니다."],
+  "AutoShift pays Meta (credit line)": ["A AutoShift paga a Meta (linha de crédito)", "AutoShift paga a Meta (línea de crédito)", "AutoShift가 Meta에 지불 (신용 한도)"],
+  "Solution Partner. Meta bills AutoShift; the wallet recovers each message fee at your rate card. Switch on only after Meta approves your credit line.": ["Solution Partner. A Meta cobra a AutoShift; a carteira recupera cada taxa pela sua tabela. Ative só depois que a Meta aprovar sua linha de crédito.", "Solution Partner. Meta factura a AutoShift; el monedero recupera cada tarifa según tu tabla. Actívalo solo cuando Meta apruebe tu línea de crédito.", "Solution Partner. Meta가 AutoShift에 청구하고, 지갑이 요율표에 따라 메시지 요금을 회수합니다. Meta가 신용 한도를 승인한 뒤에만 켜세요."],
+  "The wallet now charges for WhatsApp messages": ["A carteira agora cobra as mensagens do WhatsApp", "El monedero ahora cobra los mensajes de WhatsApp", "이제 지갑에서 WhatsApp 메시지 요금을 차감합니다"],
+  "The wallet no longer charges for WhatsApp messages": ["A carteira não cobra mais as mensagens do WhatsApp", "El monedero ya no cobra los mensajes de WhatsApp", "이제 지갑에서 WhatsApp 메시지 요금을 차감하지 않습니다"],
+  "Could not change it": ["Não foi possível alterar", "No se pudo cambiar", "변경하지 못했습니다"],
   // Navigation
   Platform: ["Plataforma", "Plataforma", "플랫폼"],
   Money: ["Dinheiro", "Dinero", "금융"],

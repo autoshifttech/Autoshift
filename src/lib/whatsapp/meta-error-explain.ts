@@ -16,6 +16,7 @@
 
 /** Which call of the connect flow failed. */
 export type MetaConnectStep =
+  | 'exchange_code'
   | 'verify_number'
   | 'waba_phone_numbers'
   | 'register'
@@ -68,6 +69,7 @@ export interface MetaErrorContext {
 }
 
 const STEP_LABEL: Record<MetaConnectStep, string> = {
+  exchange_code: 'finishing the Facebook sign-in (exchanging the code)',
   verify_number: 'reading the phone number',
   waba_phone_numbers: 'listing the phone numbers under the WhatsApp Business Account',
   register: 'registering the phone number',

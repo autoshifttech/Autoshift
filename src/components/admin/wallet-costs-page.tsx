@@ -9,6 +9,7 @@ import { MONTHS, UNIT_ECONOMICS, usageRevenue, type Usage } from "@/lib/admin/da
 import { inr, inrCompact, inrShort, num, pct } from "@/lib/admin/format";
 import { useAdmin, useBusinesses } from "@/lib/admin/store";
 import { DataTable, Initials, Kpi, Meter, PageHeader, Panel, StatusPill, td } from "./admin-ui";
+import { MetaFeesSwitch } from "./meta-fees-switch";
 
 export function WalletCostsPage() {
   const businesses = useBusinesses();
@@ -41,6 +42,7 @@ export function WalletCostsPage() {
   return (
     <>
       <PageHeader title="Wallet & costs" description="Money businesses load into their wallets, what you pay Meta and the AI provider for it, and the margin you keep." />
+      <MetaFeesSwitch />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Kpi icon={HandCoins} label="Top-ups collected" value={inrShort(topups30)} hint="this month" />

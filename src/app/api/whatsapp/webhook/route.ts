@@ -162,6 +162,13 @@ export async function GET(request: Request) {
       )
     }
 
+    // One platform-wide token (set in Meta's App Dashboard → WhatsApp → Configuration) covers every
+    // business connected through Embedded Signup.
+    const platformToken = process.env.META_WEBHOOK_VERIFY_TOKEN?.trim()
+    if (platformToken && verifyTokenMatches(platformToken, verifyToken)) {
+      return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain' } })
+    }
+
     // Fetch all whatsapp configs to check verify tokens
     const { data: configs, error: configError } = await supabaseAdmin()
       .from('whatsapp_config')
