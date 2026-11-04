@@ -43,6 +43,8 @@ const SECURITY_HEADERS = [
 
 /** Report-only CSP; `frameAncestors` says who may put the page in a frame. */
 function cspReportOnly(frameAncestors: string) {
+  // The AutoShift backend (FastAPI), when the app is connected to one.
+  const backend = process.env.NEXT_PUBLIC_API_URL ? ` ${new URL(process.env.NEXT_PUBLIC_API_URL).origin}` : "";
   return [
     "default-src 'self'",
     // Next.js needs 'unsafe-inline' for its inline hydration script
@@ -65,7 +67,7 @@ function cspReportOnly(frameAncestors: string) {
     // Supabase REST + realtime (WSS). All Meta API calls happen
     // server-side, so graph.facebook.com does not belong here.
     // Formspree receives the public site's contact form.
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com",
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://formspree.io https://www.google-analytics.com${backend}`,
     `frame-ancestors ${frameAncestors}`,
     "base-uri 'self'",
     "form-action 'self'",

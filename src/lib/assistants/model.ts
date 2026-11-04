@@ -179,8 +179,20 @@ export const assistantsStore = createStore<AssistantsState>(sampleState, 'autosh
 const SERVER_STATE = sampleState()
 export const useAssistants = () => useStore(assistantsStore, SERVER_STATE)
 
+/** When the backend gives a new assistant its real id, the id used until then keeps working. */
+const idAliases = new Map<string, string>()
+export function registerAssistantAlias(localId: string, realId: string) {
+  idAliases.set(localId, realId)
+}
+export function resolveAssistantId(id: string): string {
+  let out = id
+  for (let hops = 0; idAliases.has(out) && hops < 5; hops++) out = idAliases.get(out)!
+  return out
+}
+
 export function updateAssistant(id: string, patch: Partial<Assistant>) {
-  assistantsStore.set((s) => ({ ...s, assistants: s.assistants.map((a) => (a.id === id ? { ...a, ...patch } : a)) }))
+  const target = resolveAssistantId(id)
+  assistantsStore.set((s) => ({ ...s, assistants: s.assistants.map((a) => (a.id === target ? { ...a, ...patch } : a)) }))
 }
 
 export function updateTool(id: string, patch: Partial<Tool>) {

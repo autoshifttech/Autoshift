@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Hand, MessageSquare, Plus, Target, Wrench } from "lucide-react";
 
@@ -10,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
 import { assistantsStore, newAssistant, updateAssistant, useAssistants } from "@/lib/assistants/model";
+import { startAssistantsSync, useAssistantsSyncStatus } from "@/lib/assistants/backend-sync";
 import { toast } from "@/lib/toast";
 import { AssistantAvatar } from "./assistant-ui";
 
@@ -21,6 +23,8 @@ export function AssistantsList() {
   const locale = useLocale();
   const router = useRouter();
   const { assistants, tools } = useAssistants();
+  const syncStatus = useAssistantsSyncStatus();
+  useEffect(() => startAssistantsSync(), []);
 
   // "New assistant" goes straight to the editor with a blank assistant.
   const create = () => {
@@ -48,7 +52,8 @@ export function AssistantsList() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {syncStatus === "loading" && <p role="status" className="text-sm text-muted-foreground">{t("loadingList")}</p>}
+      <div className={cn("grid gap-4 md:grid-cols-2 xl:grid-cols-3", syncStatus === "loading" && "hidden")}>
         {assistants.map((a) => {
           const activeTools = a.toolIds.filter((id) => tools.some((x) => x.id === id && x.enabled)).length;
           return (

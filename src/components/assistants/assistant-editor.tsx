@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
-import { assistantsStore, updateAssistant, useAssistants, type Assistant, type Audience, type Tone } from "@/lib/assistants/model";
+import { assistantsStore, resolveAssistantId, updateAssistant, useAssistants, type Assistant, type Audience, type Tone } from "@/lib/assistants/model";
+import { startAssistantsSync, useAssistantsSyncStatus } from "@/lib/assistants/backend-sync";
 import { AiKnowledgeCard } from "@/components/settings/ai-knowledge";
 import { useAuth } from "@/hooks/use-auth";
 import { canEditSettings } from "@/lib/auth/roles";
@@ -33,7 +34,16 @@ export function AssistantEditor({ id }: { id: string }) {
   const router = useRouter();
   const wizard = useSearchParams().get("new") === "1";
   const [step, setStep] = useState(0);
-  const a = assistants.find((x) => x.id === id);
+  const syncStatus = useAssistantsSyncStatus();
+  const realId = resolveAssistantId(id);
+  const a = assistants.find((x) => x.id === realId);
+  useEffect(() => startAssistantsSync(), []);
+  // A new assistant gets its real id from the server; follow it so the page keeps working.
+  useEffect(() => {
+    if (realId !== id) router.replace(`/agents/${realId}${wizard ? "?new=1" : ""}`);
+  }, [realId, id, router, wizard]);
+
+  if (!a && syncStatus === "loading") return <p role="status" className="text-sm text-muted-foreground">{t("loadingList")}</p>;
 
   if (!a) {
     return (

@@ -3623,7 +3623,8 @@
     "wizardNext": "Next",
     "wizardFinish": "Finish",
     "wizardSkip": "Skip setup",
-    "wizardDone": "{name} is ready. You can keep editing any time."
+    "wizardDone": "{name} is ready. You can keep editing any time.",
+    "loadingList": "Loading your assistants…"
   },
   "AiTools": {
     "title": "AI tools",

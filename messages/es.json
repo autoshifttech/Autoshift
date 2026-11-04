@@ -3623,7 +3623,8 @@
     "wizardNext": "Siguiente",
     "wizardFinish": "Finalizar",
     "wizardSkip": "Omitir configuración",
-    "wizardDone": "{name} está listo. Puedes seguir editando cuando quieras."
+    "wizardDone": "{name} está listo. Puedes seguir editando cuando quieras.",
+    "loadingList": "Cargando tus asistentes…"
   },
   "AiTools": {
     "title": "Herramientas de IA",

@@ -3623,7 +3623,8 @@
     "wizardNext": "다음",
     "wizardFinish": "완료",
     "wizardSkip": "설정 건너뛰기",
-    "wizardDone": "{name}이(가) 준비되었습니다. 언제든 계속 편집할 수 있습니다."
+    "wizardDone": "{name}이(가) 준비되었습니다. 언제든 계속 편집할 수 있습니다.",
+    "loadingList": "어시스턴트를 불러오는 중…"
   },
   "AiTools": {
     "title": "AI 도구",

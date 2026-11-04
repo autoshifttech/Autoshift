@@ -1,4 +1,4 @@
--- 065_redeem_invitation_new_tables.sql
+-- 065_redeem_invitation_new_tables.sql   (also covers the webhook tables from 066, applied after it)
 --
 -- redeem_invitation deletes the caller's old (empty) account when they join
 -- another one. Accounts now also hold assistants, connections, API keys and
@@ -100,6 +100,8 @@ BEGIN
     UNION ALL SELECT 1 FROM assistants WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM flow_connections WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM mcp_keys WHERE account_id = v_old_account_id
+    UNION ALL SELECT 1 FROM webhook_subscriptions WHERE account_id = v_old_account_id
+    UNION ALL SELECT 1 FROM webhook_deliveries WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM wallet_balances WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM wallet_ledger WHERE account_id = v_old_account_id
     UNION ALL SELECT 1 FROM payment_orders WHERE account_id = v_old_account_id
