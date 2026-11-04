@@ -73,6 +73,12 @@ import {
   PresenceDot,
 } from '@/components/presence/presence-dot';
 import { InviteMemberDialog } from './invite-member-dialog';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { PLANS } from '@/lib/billing/plans';
+import { useSubscription } from '@/lib/billing/plans';
+import { cn } from '@/lib/utils';
 import { SettingsPanelHead } from './settings-panel-head';
 import { ROLE_META } from './role-meta';
 
@@ -130,6 +136,9 @@ export function MembersTab() {
   const { user, canManageMembers } = useAuth();
   const { getPresence, getRow, now } = usePresence();
 
+  const sub = useSubscription();
+  const seatLimit = PLANS[sub.plan].seats;
+  const [query, setQuery] = useState('');
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,13 +296,72 @@ export function MembersTab() {
         description={t('description')}
         action={
           <RequireRole min="admin">
-            <Button onClick={() => setInviteOpen(true)}>
+            <Button onClick={() => setInviteOpen(true)} disabled={seatLimit !== null && members.length >= seatLimit}>
               <Plus className="size-4" />
               {t('inviteMember')}
             </Button>
           </RequireRole>
         }
       />
+
+      {/* Seats on the plan, and what each role can do. */}
+      <div className="grid items-start gap-4 md:grid-cols-2">
+        <Card>
+          <CardContent className="space-y-3 p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-sm font-semibold text-foreground">{t('seatsTitle')}</p>
+              <p className="text-sm tabular-nums text-muted-foreground">
+                {seatLimit === null ? t('seatsUnlimited', { used: members.length }) : t('seatsUsed', { used: members.length, total: seatLimit })}
+              </p>
+            </div>
+            {seatLimit !== null && (
+              <div
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={seatLimit}
+                aria-valuenow={Math.min(members.length, seatLimit)}
+                aria-label={t('seatsTitle')}
+                className="h-2 overflow-hidden rounded-full bg-muted"
+              >
+                <div
+                  className={cn('h-full rounded-full', members.length >= seatLimit ? 'bg-amber-500' : 'bg-primary')}
+                  style={{ width: `${Math.min(100, (members.length / seatLimit) * 100)}%` }}
+                />
+              </div>
+            )}
+            {seatLimit !== null && members.length >= seatLimit ? (
+              <p className="text-xs text-muted-foreground">
+                {t('seatsFull')}{' '}
+                <Link href="/settings?tab=billing" className="font-medium text-primary hover:underline">
+                  {t('seatsUpgrade')}
+                </Link>
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t('seatsHint')}</p>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-2.5 p-5">
+            <p className="text-sm font-semibold text-foreground">{t('rolesGuideTitle')}</p>
+            <ul className="space-y-2">
+              {(['owner', 'admin', 'agent', 'viewer'] as const).map((r) => {
+                const meta = ROLE_META[r];
+                const Icon = meta.icon;
+                return (
+                  <li key={r} className="flex items-start gap-2.5 text-xs">
+                    <span className={cn('mt-0.5 inline-flex w-[5.25rem] shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 font-medium', meta.className)}>
+                      <Icon className="size-3" aria-hidden />
+                      {tRoles(r)}
+                    </span>
+                    <span className="text-muted-foreground">{t(`roleCan_${r}`)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Live presence summary across the roster. Updates without a
           full refresh as heartbeats and the local re-derive tick land. */}
@@ -321,11 +389,23 @@ export function MembersTab() {
           );
         })()}
 
+      {members.length >= 4 && (
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} className="h-10 pl-9" />
+        </div>
+      )}
+
       {/* Roster */}
       <Card>
         <CardContent className="p-0">
+          {members.filter((m) => !query.trim() || `${m.full_name ?? ''} ${m.email ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())).length === 0 && (
+            <p className="p-8 text-center text-sm text-muted-foreground">{t('noMatches')}</p>
+          )}
           <ul className="divide-y divide-border">
-            {members.map((member) => {
+            {members
+              .filter((m) => !query.trim() || `${m.full_name ?? ''} ${m.email ?? ''}`.toLowerCase().includes(query.trim().toLowerCase()))
+              .map((member) => {
               const roleMeta = ROLE_META[member.role];
               const RoleIcon = roleMeta.icon;
               const isSelf = member.user_id === user?.id;

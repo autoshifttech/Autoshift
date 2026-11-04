@@ -22,6 +22,8 @@ import {
   Tags,
   UsersRound,
   Wallet,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,12 +35,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { setDemoCookie } from "@/lib/demo/cookie";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
-import { ADMIN_NOW, INDUSTRY_LABEL, UNIT_ECONOMICS, businessById, usageRevenue, type Business, type Usage } from "@/lib/admin/data";
+import { ADMIN_NOW, INDUSTRY_LABEL, UNIT_ECONOMICS, usageRevenue, type Business, type Usage } from "@/lib/admin/data";
 import { date, dateTime, daysBetween, inr, num, relTime } from "@/lib/admin/format";
-import { CURRENT_ADMIN, act, applyOverride, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
+import { CURRENT_ADMIN, act, applyOverride, deleteBusiness, findBusiness, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
+import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { BusinessFormDialog } from "./business-form-dialog";
+import { BusinessTeam } from "./business-team";
 import { DataTable, EmptyState, Initials, Kpi, NUMBER_META, Panel, Pill, QualityPill, Segmented, StatusPill, td } from "./admin-ui";
 
-type Tab = "overview" | "usage" | "payments" | "notes" | "activity";
+type Tab = "overview" | "team" | "usage" | "payments" | "notes" | "activity";
 type DialogKind = "trial" | "plan" | "credits" | "block" | null;
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -60,7 +66,10 @@ function copy(text: string) {
 export function BusinessDetail({ id }: { id: string }) {
   const state = useAdmin();
   const payments = usePayments();
-  const base = businessById(id);
+  const base = findBusiness(state, id);
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [note, setNote] = useState("");
@@ -78,7 +87,8 @@ export function BusinessDetail({ id }: { id: string }) {
     );
   }
 
-  const b: Business = applyOverride(base, state.overrides[id]);
+  const merged = applyOverride(base, state.overrides[id]);
+  const b: Business = { ...merged, team: state.teams[id]?.length ?? merged.team };
   const notes = state.overrides[id]?.notes ?? [];
   const money = usageRevenue(b.usage);
   const mine = payments.filter((p) => p.businessId === id);
@@ -122,6 +132,10 @@ export function BusinessDetail({ id }: { id: string }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={() => setEditing(true)}>
+            <Pencil className="size-4" />
+            Edit
+          </Button>
           <Button variant="outline" className="gap-1.5" onClick={viewAs}>
             <Eye className="size-4" />
             View as business
@@ -158,6 +172,10 @@ export function BusinessDetail({ id }: { id: string }) {
               Block
             </Button>
           )}
+          <Button variant="outline" className="gap-1.5 text-rose-700 dark:text-rose-400 hover:text-rose-600" onClick={() => setDeleting(true)}>
+            <Trash2 className="size-4" />
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -176,6 +194,7 @@ export function BusinessDetail({ id }: { id: string }) {
           onChange={setTab}
           options={[
             { value: "overview", label: "Overview" },
+            { value: "team", label: `Team · ${b.team}` },
             { value: "usage", label: "Usage & costs" },
             { value: "payments", label: `Payments · ${mine.length}` },
             { value: "notes", label: `Notes · ${notes.length}` },
@@ -260,6 +279,8 @@ export function BusinessDetail({ id }: { id: string }) {
           </Panel>
         </div>
       )}
+
+      {tab === "team" && <BusinessTeam business={b} />}
 
       {tab === "usage" && (
         <Panel title="Last 30 days" description="What they were charged from their wallet, what it cost you, and your margin." bodyClassName="px-0 pb-0">
@@ -357,6 +378,20 @@ export function BusinessDetail({ id }: { id: string }) {
       )}
 
       <ActionDialogs kind={dialog} business={b} onClose={() => setDialog(null)} />
+      {editing && <BusinessFormDialog open onOpenChange={setEditing} business={b} />}
+      <ConfirmDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        title={`Delete ${b.name}?`}
+        description="The business, its owner account and its team are removed from the platform. This can't be undone."
+        confirmLabel="Delete business"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          deleteBusiness(b);
+          toast.success(`${b.name} deleted`);
+          router.push("/admin/businesses");
+        }}
+      />
     </>
   );
 }

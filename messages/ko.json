@@ -1725,7 +1725,20 @@
       "removing": "제거 중...",
       "removeBtn": "멤버 제거",
       "removeMember": "멤버 삭제",
-      "roleFor": "역할"
+      "roleFor": "역할",
+      "seatsTitle": "좌석",
+      "seatsUsed": "{total}개 중 {used}개 사용",
+      "seatsUnlimited": "{used}개 사용 · 무제한",
+      "seatsHint": "팀원 한 명당 좌석 하나를 사용합니다.",
+      "seatsFull": "모든 좌석이 사용 중입니다.",
+      "seatsUpgrade": "요금제 업그레이드",
+      "rolesGuideTitle": "역할별 권한",
+      "roleCan_owner": "결제와 워크스페이스 삭제를 포함한 모든 권한.",
+      "roleCan_admin": "팀, 설정, 모든 기능 관리.",
+      "roleCan_agent": "채팅, 브로드캐스트, 플로우, 어시스턴트 사용. 설정 불가.",
+      "roleCan_viewer": "모두 볼 수 있지만 변경은 불가.",
+      "searchPlaceholder": "팀원 검색",
+      "noMatches": "검색과 일치하는 팀원이 없습니다."
     },
     "invite": {
       "inviteCreated": "초대가 생성되었습니다",

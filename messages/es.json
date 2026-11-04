@@ -1725,7 +1725,20 @@
       "removing": "Quitando...",
       "removeBtn": "Quitar miembro",
       "removeMember": "Eliminar miembro",
-      "roleFor": "Rol"
+      "roleFor": "Rol",
+      "seatsTitle": "Puestos",
+      "seatsUsed": "{used} de {total} en uso",
+      "seatsUnlimited": "{used} en uso · ilimitado",
+      "seatsHint": "Cada persona del equipo usa un puesto.",
+      "seatsFull": "Todos los puestos están en uso.",
+      "seatsUpgrade": "Mejora tu plan",
+      "rolesGuideTitle": "Qué puede hacer cada rol",
+      "roleCan_owner": "Todo, incluida la facturación y eliminar el espacio de trabajo.",
+      "roleCan_admin": "Gestionar el equipo, los ajustes y todas las funciones.",
+      "roleCan_agent": "Usar chats, difusiones, flujos y asistentes. Sin ajustes.",
+      "roleCan_viewer": "Ver todo, no cambiar nada.",
+      "searchPlaceholder": "Buscar miembros del equipo",
+      "noMatches": "Nadie coincide con tu búsqueda."
     },
     "invite": {
       "inviteCreated": "Invitación creada",

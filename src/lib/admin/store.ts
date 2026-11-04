@@ -55,7 +55,23 @@ export interface BusinessOverride {
   plan?: PlanId
   trialEndsAt?: string
   walletAdjust?: number
+  /** Profile edits made by an admin. */
+  name?: string
+  industry?: string
+  city?: string
+  owner?: { name: string; email: string; phone: string }
   notes?: { text: string; author: string; at: string }[]
+}
+
+export type MemberRole = 'owner' | 'admin' | 'agent' | 'viewer'
+
+/** A person with a login on a business account. */
+export interface BusinessMember {
+  id: string
+  name: string
+  email: string
+  role: MemberRole
+  addedAt: string
 }
 
 export interface AlertSettings {
@@ -75,6 +91,12 @@ export interface AdminState {
   coupons: Coupon[]
   overrides: Record<string, BusinessOverride>
   refunded: string[]
+  /** Businesses an admin added. */
+  createdBusinesses: Business[]
+  /** Ids of businesses an admin deleted. */
+  deletedBusinesses: string[]
+  /** Team lists an admin has changed, by business id. */
+  teams: Record<string, BusinessMember[]>
   tickets: Ticket[]
   announcements: Announcement[]
   team: AdminUser[]
@@ -100,6 +122,9 @@ export function initialAdminState(): AdminState {
     ],
     overrides: {},
     refunded: [],
+    createdBusinesses: [],
+    deletedBusinesses: [],
+    teams: {},
     tickets: TICKETS,
     announcements: ANNOUNCEMENTS,
     team: ADMIN_TEAM,
@@ -138,6 +163,10 @@ export function applyOverride(b: Business, o: BusinessOverride | undefined): Bus
   if (!o) return b
   return {
     ...b,
+    name: o.name ?? b.name,
+    industry: o.industry ?? b.industry,
+    city: o.city ?? b.city,
+    owner: o.owner ?? b.owner,
     status: o.status ?? b.status,
     plan: o.plan ?? b.plan,
     trialEndsAt: o.trialEndsAt ?? b.trialEndsAt,
@@ -146,8 +175,83 @@ export function applyOverride(b: Business, o: BusinessOverride | undefined): Bus
 }
 
 export function useBusinesses(): Business[] {
-  const { overrides } = useAdmin()
-  return BUSINESSES.map((b) => applyOverride(b, overrides[b.id]))
+  const { overrides, createdBusinesses, deletedBusinesses, teams } = useAdmin()
+  return [...BUSINESSES, ...createdBusinesses]
+    .filter((b) => !deletedBusinesses.includes(b.id))
+    .map((b) => ({ ...applyOverride(b, overrides[b.id]), team: teams[b.id]?.length ?? b.team }))
+}
+
+/** A business by id, including ones an admin added; undefined once deleted. */
+export function findBusiness(state: AdminState, id: string): Business | undefined {
+  if (state.deletedBusinesses.includes(id)) return undefined
+  return [...BUSINESSES, ...state.createdBusinesses].find((b) => b.id === id)
+}
+
+export interface BusinessInput {
+  name: string
+  industry: string
+  city: string
+  owner: { name: string; email: string; phone: string }
+  plan: PlanId
+}
+
+/** Adds a business on a 14-day trial with an empty workspace; returns its id. */
+export function createBusiness(input: BusinessInput): string {
+  const id = `biz_${Date.now().toString(36)}`
+  const now = new Date().toISOString()
+  const business: Business = {
+    id,
+    ...input,
+    cycle: 'monthly',
+    status: 'trial',
+    createdAt: now,
+    trialEndsAt: new Date(Date.now() + 14 * 864e5).toISOString(),
+    renewsAt: null,
+    mrr: 0,
+    wallet: 0,
+    team: 1,
+    contacts: 0,
+    whatsapp: { status: 'not_connected', number: '', displayName: '', quality: 'green', tier: '250', templatesApproved: 0, templatesRejected: 0, connectedAt: null },
+    usage: { marketing: 0, utility: 0, authentication: 0, service: 0, ai: 0 },
+    lastActiveAt: now,
+    flags: [],
+  }
+  act('Created business', input.name, `Owner ${input.owner.email} · ${input.plan} plan`, (s) => ({
+    createdBusinesses: [...s.createdBusinesses, business],
+    teams: { ...s.teams, [id]: [{ id: `m_${id}`, name: input.owner.name, email: input.owner.email, role: 'owner', addedAt: now }] },
+  }))
+  return id
+}
+
+/** Removes a business and its team from the platform. */
+export function deleteBusiness(b: Business) {
+  act('Deleted business', b.name, `Owner ${b.owner.email}`, (s) => ({
+    deletedBusinesses: [...s.deletedBusinesses, b.id],
+    createdBusinesses: s.createdBusinesses.filter((x) => x.id !== b.id),
+  }))
+}
+
+/** The people on a business, with the admin's changes applied. */
+export function teamOf(state: AdminState, b: Business): BusinessMember[] {
+  const saved = state.teams[b.id]
+  if (saved) return saved
+  const added = new Date(b.createdAt).toISOString()
+  const first = ['Kavya', 'Rohan', 'Ananya', 'Vikram', 'Sneha', 'Rahul', 'Meera', 'Karthik']
+  const list: BusinessMember[] = [{ id: `m_${b.id}_0`, name: b.owner.name, email: b.owner.email, role: 'owner', addedAt: added }]
+  for (let i = 1; i < b.team; i++) {
+    const n = first[(b.id.length + i * 3) % first.length]
+    list.push({ id: `m_${b.id}_${i}`, name: n, email: `${n.toLowerCase()}@${b.owner.email.split('@')[1] ?? 'example.com'}`, role: i === 1 ? 'admin' : 'agent', addedAt: added })
+  }
+  return list
+}
+
+/** A new person for a business team. */
+export function newMember(name: string, email: string, role: MemberRole): BusinessMember {
+  return { id: `m_${Date.now().toString(36)}`, name, email, role, addedAt: new Date().toISOString() }
+}
+
+export function saveTeam(b: Business, team: BusinessMember[], action: string, details: string) {
+  act(action, b.name, details, (s) => ({ teams: { ...s.teams, [b.id]: team } }))
 }
 
 export function usePayments(): Payment[] {

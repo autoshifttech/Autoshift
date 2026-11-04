@@ -1725,7 +1725,20 @@
       "removing": "Removendo...",
       "removeBtn": "Remover membro",
       "removeMember": "Remover membro",
-      "roleFor": "Função"
+      "roleFor": "Função",
+      "seatsTitle": "Lugares",
+      "seatsUsed": "{used} de {total} em uso",
+      "seatsUnlimited": "{used} em uso · ilimitado",
+      "seatsHint": "Cada pessoa da equipe usa um lugar.",
+      "seatsFull": "Todos os lugares estão em uso.",
+      "seatsUpgrade": "Mude de plano",
+      "rolesGuideTitle": "O que cada função pode fazer",
+      "roleCan_owner": "Tudo, incluindo cobrança e excluir o espaço de trabalho.",
+      "roleCan_admin": "Gerenciar a equipe, as configurações e todos os recursos.",
+      "roleCan_agent": "Usar conversas, transmissões, fluxos e assistentes. Sem configurações.",
+      "roleCan_viewer": "Ver tudo, não alterar nada.",
+      "searchPlaceholder": "Buscar membros da equipe",
+      "noMatches": "Ninguém corresponde à busca."
     },
     "invite": {
       "inviteCreated": "Convite criado",

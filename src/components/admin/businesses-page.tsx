@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2, Download, Flag, Search } from "lucide-react";
+import { Building2, Download, Flag, Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { INDUSTRY_LABEL, type BusinessStatus, type NumberStatus } from "@/lib/admin/data";
 import { date, downloadCsv, inr, num, relTime } from "@/lib/admin/format";
 import { useBusinesses } from "@/lib/admin/store";
+import { BusinessFormDialog } from "./business-form-dialog";
 import { DataTable, EmptyState, Initials, NUMBER_META, PageHeader, Panel, Pill, QUALITY_META, STATUS_META, StatusPill, Segmented, td } from "./admin-ui";
 
 type StatusFilter = BusinessStatus | "all";
@@ -37,6 +38,7 @@ export function BusinessesPage() {
   const [industry, setIndustry] = useState("all");
   const [sort, setSort] = useState<Sort>("newest");
   const [flagged, setFlagged] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const setStatus = (s: StatusFilter) => {
     const next = new URLSearchParams(params.toString());
@@ -91,10 +93,16 @@ export function BusinessesPage() {
         title="Businesses"
         description="Every workspace on AutoShift: plan, WhatsApp connection, wallet and activity."
         actions={
+          <>
+          <Button className="gap-1.5" onClick={() => setCreating(true)}>
+            <Plus className="size-4" />
+            Add business
+          </Button>
           <Button variant="outline" className="gap-1.5" onClick={exportCsv}>
             <Download className="size-4" />
             Export CSV
           </Button>
+          </>
         }
       />
 
@@ -202,6 +210,7 @@ export function BusinessesPage() {
           Showing {rows.length} of {businesses.length} businesses
         </p>
       </Panel>
+      {creating && <BusinessFormDialog open onOpenChange={setCreating} onCreated={(id) => router.push(`/admin/businesses/${id}`)} />}
     </>
   );
 }

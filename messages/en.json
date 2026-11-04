@@ -1725,7 +1725,20 @@
       "removing": "Removing...",
       "removeBtn": "Remove member",
       "removeMember": "Remove member",
-      "roleFor": "Role"
+      "roleFor": "Role",
+      "seatsTitle": "Seats",
+      "seatsUsed": "{used} of {total} used",
+      "seatsUnlimited": "{used} used · unlimited",
+      "seatsHint": "Each person on your team uses one seat.",
+      "seatsFull": "All seats are used.",
+      "seatsUpgrade": "Upgrade your plan",
+      "rolesGuideTitle": "What each role can do",
+      "roleCan_owner": "Everything, including billing and deleting the workspace.",
+      "roleCan_admin": "Manage the team, settings and every feature.",
+      "roleCan_agent": "Use chats, broadcasts, flows and assistants. No settings.",
+      "roleCan_viewer": "See everything, change nothing.",
+      "searchPlaceholder": "Search team members",
+      "noMatches": "No one matches your search."
     },
     "invite": {
       "inviteCreated": "Invite created",
