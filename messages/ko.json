@@ -3494,7 +3494,11 @@
     "topUpDone": "지갑에 {amount}이(가) 추가되었습니다.",
     "badgeLabel": "지갑 잔액 {amount}",
     "lowShort": "잔액 부족 · {amount}",
-    "lowBanner": "지갑 잔액이 부족합니다({amount}). 잔액이 0이 되면 AI 답변과 캠페인이 멈춥니다."
+    "lowBanner": "지갑 잔액이 부족합니다({amount}). 잔액이 0이 되면 AI 답변과 캠페인이 멈춥니다.",
+    "txAdjustment": "크레딧 조정",
+    "txPaymentRefunded": "결제 환불됨",
+    "txEarlier": "이전 내역",
+    "topUpFailed": "결제가 완료되지 않았습니다. 요금이 청구되지 않았습니다."
   },
   "Summary": {
     "walletBalance": "지갑 잔액",

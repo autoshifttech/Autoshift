@@ -11,6 +11,7 @@ import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
+import { BackendSync } from "@/components/backend-sync";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { BrowserNotificationsListener } from "@/components/notifications/browser-notifications-listener";
 import { SkipLink } from "@/components/layout/skip-link";
@@ -53,6 +54,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       {/* Reports this tab's online/away presence once we know a user is
           signed in. Headless — renders nothing. */}
       <SkipLink label={tSide("skipToContent")} />
+      <BackendSync />
       <PresenceHeartbeat />
       {/* Desktop alerts for new customer messages (opt-in via Settings →
           Your profile). Headless — renders nothing. */}

@@ -3494,7 +3494,11 @@
     "topUpDone": "{amount} added to your wallet.",
     "badgeLabel": "Wallet balance {amount}",
     "lowShort": "Low balance · {amount}",
-    "lowBanner": "Wallet balance is low ({amount}). AI replies and campaigns pause at zero."
+    "lowBanner": "Wallet balance is low ({amount}). AI replies and campaigns pause at zero.",
+    "txAdjustment": "Credit adjustment",
+    "txPaymentRefunded": "Payment refunded",
+    "txEarlier": "Earlier activity",
+    "topUpFailed": "The payment did not go through. You have not been charged."
   },
   "Summary": {
     "walletBalance": "Wallet balance",

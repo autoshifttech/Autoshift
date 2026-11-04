@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { backendUrl } from "@/lib/backend/client";
+import { payTopUp } from "@/lib/wallet/checkout";
 import { MIN_TOPUP, TOPUP_PRESETS, formatMoney, topUp, withGst } from "@/lib/wallet/model";
 
 type Method = "upi" | "card" | "netbanking";
@@ -29,8 +31,28 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
     { id: "netbanking" as const, icon: Landmark, label: t("methodNetbanking") },
   ];
 
+  const connected = backendUrl() !== null;
+
+  // Connected to the backend: Razorpay Checkout opens (it offers UPI, cards and net banking itself),
+  // and the server verifies the payment before any credit is added.
+  const payForReal = async () => {
+    setPaying(true);
+    try {
+      const result = await payTopUp(value);
+      if (result.status === "paid") {
+        onOpenChange(false);
+        toast.success(t("topUpDone", { amount: formatMoney(value) }));
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("topUpFailed"));
+    } finally {
+      setPaying(false);
+    }
+  };
+
   const pay = () => {
     if (tooLow) return;
+    if (connected) return void payForReal();
     setPaying(true);
     window.setTimeout(() => {
       topUp(value, method);
@@ -96,6 +118,7 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           </div>
         </div>
 
+        {!connected && (
         <fieldset>
           <legend className="text-sm font-medium text-foreground">{t("payWith")}</legend>
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -116,6 +139,7 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
             ))}
           </div>
         </fieldset>
+        )}
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Lock className="size-3.5" />
           {t("razorpayNote")}

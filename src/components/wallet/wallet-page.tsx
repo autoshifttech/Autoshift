@@ -40,6 +40,7 @@ import { TopUpDialog } from "./top-up-dialog";
 export const KIND_ICON: Record<Transaction["kind"], typeof Bot> = {
   topup: ArrowDownLeft,
   refund: RefreshCw,
+  adjustment: RefreshCw,
   marketing: Megaphone,
   utility: Wrench,
   authentication: KeyRound,
@@ -351,6 +352,8 @@ export function WalletPage() {
                   <span className="block truncate font-medium text-foreground">
                     {tx.kind === "topup"
                       ? t(tx.method === "auto" ? "txAutoTopUp" : "txTopUp")
+                      : tx.kind === "adjustment"
+                        ? t(tx.note === "refund" ? "txPaymentRefunded" : tx.note === "earlier" ? "txEarlier" : "txAdjustment")
                       : tx.kind === "refund"
                         ? t("txRefund", { count: tx.units })
                         : tx.kind === "ai"

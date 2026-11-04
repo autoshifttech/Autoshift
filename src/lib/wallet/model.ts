@@ -4,10 +4,11 @@
  * Razorpay and Meta's pricing; kept in the browser for now.
  */
 import { createStore, useStore } from '@/lib/workspace/store'
+import { backendUrl } from '@/lib/backend/client'
 
 export const CHARGE_KINDS = ['marketing', 'utility', 'authentication', 'service', 'ai'] as const
 export type ChargeKind = (typeof CHARGE_KINDS)[number]
-export type TxKind = 'topup' | 'refund' | ChargeKind
+export type TxKind = 'topup' | 'refund' | 'adjustment' | ChargeKind
 
 /** Price per unit in INR: one message for Meta categories, one reply for AI. Sample values. */
 export interface Rate {
@@ -57,7 +58,7 @@ export function spendByKind(txs: Transaction[], days = 30, now = Date.now()): Re
   const since = now - days * 864e5
   const out = Object.fromEntries(CHARGE_KINDS.map((k) => [k, { amount: 0, units: 0 }])) as Record<ChargeKind, { amount: number; units: number }>
   for (const t of txs) {
-    if (t.kind === 'topup' || t.kind === 'refund' || t.status !== 'completed' || new Date(t.at).getTime() < since) continue
+    if (t.kind === 'topup' || t.kind === 'refund' || t.kind === 'adjustment' || t.status !== 'completed' || new Date(t.at).getTime() < since) continue
     const k = t.kind as ChargeKind
     out[k].amount += -t.amount
     out[k].units += t.units
@@ -120,7 +121,8 @@ export function sampleTransactions(now = Date.now()): Transaction[] {
 }
 
 function initialWallet(): WalletState {
-  return { transactions: sampleTransactions(), autoRecharge: { enabled: true, below: 300, amount: 1000 }, lowBalanceAlert: 500 }
+  // With a backend, the real ledger replaces the sample data as soon as it loads.
+  return { transactions: backendUrl() ? [] : sampleTransactions(), autoRecharge: { enabled: true, below: 300, amount: 1000 }, lowBalanceAlert: 500 }
 }
 
 export const walletStore = createStore<WalletState>(initialWallet, 'autoshift.wallet')
