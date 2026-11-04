@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,14 +7,32 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .mcp_server import mount_mcp
-from .routers import ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks
+from .routers import hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks
 
 
 def create_app() -> FastAPI:
+    async def webhook_loop():
+        from . import events
+        from .db import service_db
+
+        settings = get_settings()
+        sdb = service_db(settings)
+        while True:
+            try:
+                await events.deliver_pending(sdb, settings)
+            except Exception:  # noqa: BLE001 - keep the loop alive
+                logging.getLogger("autoshift").exception("webhook delivery pass failed")
+            await asyncio.sleep(30)
+
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        async with mcp.session_manager.run():
-            yield
+        worker = asyncio.create_task(webhook_loop()) if get_settings().webhook_worker else None
+        try:
+            async with mcp.session_manager.run():
+                yield
+        finally:
+            if worker:
+                worker.cancel()
 
     app = FastAPI(title="AutoShift API", version="0.2.0", lifespan=lifespan)
     app.add_middleware(
@@ -27,7 +47,7 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
-    for r in (me.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router):
+    for r in (me.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router):
         app.include_router(r)
 
     mcp = mount_mcp(app)

@@ -131,6 +131,21 @@ def build_mcp(get_app) -> MCPServer:
         return await call("POST", f"/v1/assistants/{assistant_id}/test-reply", json_body={"message": message, "idempotency_key": idempotency_key})
 
     @mcp.tool()
+    async def hooks_list() -> list:
+        """Outgoing webhooks (where AutoShift sends events). Secrets are never shown."""
+        return await call("GET", "/v1/hooks")
+
+    @mcp.tool()
+    async def hooks_ping(hook_id: str) -> dict:
+        """Send a test event to a webhook now and report what the receiver answered."""
+        return await call("POST", f"/v1/hooks/{hook_id}/ping")
+
+    @mcp.tool()
+    async def hooks_deliveries(hook_id: str) -> list:
+        """Recent deliveries for a webhook, with status and errors."""
+        return await call("GET", f"/v1/hooks/{hook_id}/deliveries")
+
+    @mcp.tool()
     async def connections_list() -> list:
         """List connected accounts (Google, Razorpay). Secrets are never shown."""
         return await call("GET", "/v1/connections")

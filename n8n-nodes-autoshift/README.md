@@ -27,8 +27,15 @@ Create an API key in AutoShift, then in n8n add an **AutoShift API** credential 
 - `try-an-assistant.json`: send one test message to an assistant.
 - `weekly-plan-check.json`: every Monday, flag a workspace still on its trial.
 
+## AutoShift Trigger
+
+Starts a workflow when something happens: wallet topped up, wallet refunded, subscription updated.
+Activating the workflow registers the webhook with AutoShift for you; deactivating removes it. Every
+delivery is signed (HMAC-SHA256 over `timestamp.body`) and the trigger rejects bad signatures and anything older
+than five minutes. The API key must have **read and change** access. `workflows/wallet-topped-up.json` is an example.
+
+AutoShift retries a failed delivery after 1, 5, 30 minutes, 2 and 6 hours, then gives up. Webhook URLs must be public `https` addresses.
+
 ## Not included yet
 
-There is no AutoShift trigger node: AutoShift does not send events out yet (new message, payment received).
-Until it does, start workflows from n8n's own Schedule or Webhook nodes. Sending WhatsApp messages and
-contacts need the WhatsApp endpoints in the backend, which are still handled by the Next app.
+Events for new WhatsApp messages and contacts, and nodes to send WhatsApp messages: those features still run in the Next app, not the backend.

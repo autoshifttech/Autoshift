@@ -10,6 +10,7 @@ from fastapi import Depends
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("MCP_ALLOWED_HOSTS", "testserver,localhost:*")
+os.environ.setdefault("WEBHOOK_WORKER", "false")
 
 from app.config import Settings, get_settings
 from app.db import DbError

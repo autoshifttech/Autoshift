@@ -187,3 +187,19 @@ class MemberAdd(Person):
 
 class MemberPatch(BaseModel):
     role: Literal["owner", "admin", "agent", "viewer"]
+
+
+class HookCreate(BaseModel):
+    url: str = Field(max_length=500)
+    events: list[str] = Field(default_factory=lambda: ["*"], min_length=1, max_length=10)
+    label: str = Field("", max_length=80)
+
+    @field_validator("events")
+    @classmethod
+    def _known(cls, v: list[str]) -> list[str]:
+        from .events import EVENT_TYPES
+
+        bad = [e for e in v if e != "*" and e not in EVENT_TYPES]
+        if bad:
+            raise ValueError(f"Unknown event: {bad[0]}")
+        return v

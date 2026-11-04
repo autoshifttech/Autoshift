@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     # Browser origins allowed to call the API, comma separated.
     cors_origins: str = "http://localhost:3000"
     # Hosts the MCP endpoint answers to (DNS-rebinding protection). Add your API domain in production.
+    # Retry queued webhook deliveries in the background (turn off for one-off scripts and tests).
+    webhook_worker: bool = True
     mcp_allowed_hosts: str = "localhost:*,127.0.0.1:*"
 
     @property

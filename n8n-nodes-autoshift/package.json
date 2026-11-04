@@ -9,7 +9,7 @@
     "whatsapp"
   ],
   "scripts": {
-    "build": "tsc && cp nodes/AutoShift/autoshift.svg dist/nodes/AutoShift/",
+    "build": "tsc && cp nodes/AutoShift/autoshift.svg dist/nodes/AutoShift/ && mkdir -p dist/nodes/AutoShiftTrigger && cp nodes/AutoShift/autoshift.svg dist/nodes/AutoShiftTrigger/",
     "typecheck": "tsc --noEmit"
   },
   "files": [
@@ -21,7 +21,8 @@
       "dist/credentials/AutoShiftApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/AutoShift/AutoShift.node.js"
+      "dist/nodes/AutoShift/AutoShift.node.js",
+      "dist/nodes/AutoShiftTrigger/AutoShiftTrigger.node.js"
     ]
   },
   "devDependencies": {

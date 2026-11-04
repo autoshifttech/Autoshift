@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from . import wallet
+from . import events, wallet
 from .config import Settings
 from .db import Db
 from .money import split_inclusive
@@ -44,6 +44,8 @@ async def credit_topup(sdb: Db, settings: Settings, order: dict[str, Any], payme
         payment_id=payment_id,
         settings=settings,
     )
+    if result.applied:  # a repeat of the same payment sends nothing again
+        await events.emit(sdb, order["account_id"], "wallet.topped_up", {"amount_paise": order["base_paise"], "total_paid_paise": order["total_paise"], "balance_paise": result.balance_paise, "payment_id": payment_id})
     return result.balance_paise
 
 
@@ -53,7 +55,9 @@ async def debit_refund(sdb: Db, order: dict[str, Any], refund_id: str, refunded_
     available = await wallet.balance(sdb, order["account_id"])
     take = min(owed, available)
     if take > 0:
-        await wallet.apply(sdb, order["account_id"], -take, "refund", refund_id, f"refund:{refund_id}")
+        done = await wallet.apply(sdb, order["account_id"], -take, "refund", refund_id, f"refund:{refund_id}")
+        if done.applied:
+            await events.emit(sdb, order["account_id"], "wallet.refunded", {"amount_paise": take, "balance_paise": done.balance_paise, "refund_id": refund_id})
     return {"owed_paise": owed, "taken_paise": take, "shortfall_paise": owed - take}
 
 
@@ -65,4 +69,5 @@ async def sync_subscription(sdb: Db, subscription_id: str, entity: dict[str, Any
     if entity.get("current_end"):
         patch["current_period_end"] = _iso(entity["current_end"])
     await sdb.update("subscriptions", {"razorpay_subscription_id": subscription_id}, patch)
+    await events.emit(sdb, rows[0]["account_id"], "subscription.updated", {"plan_id": rows[0]["plan_id"], "status": status})
     return rows[0]

@@ -1,0 +1,54 @@
+{
+  "name": "AutoShift: wallet topped up",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "AutoShift Trigger",
+      "type": "n8n-nodes-autoshift.autoShiftTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "events": [
+          "wallet.topped_up"
+        ]
+      },
+      "credentials": {
+        "autoShiftApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "AutoShift API"
+        }
+      },
+      "webhookId": "autoshift-wallet-topped-up"
+    },
+    {
+      "id": "2",
+      "name": "Notify your team here",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "AutoShift Trigger": {
+      "main": [
+        [
+          {
+            "node": "Notify your team here",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
