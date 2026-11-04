@@ -1,11 +1,11 @@
 import type { ConnectionKind } from "@/lib/flows/connections";
 
 /**
- * The "Use a connection" step: one step type, four services. Each service
+ * The "Use a connection" step: one step type, three services. Each service
  * needs one connected account of the right kind and a few fields. Fields can
  * hold {{vars.name}} placeholders filled in from earlier answers.
  */
-export type ActionService = "google_sheets_append" | "google_calendar_event" | "razorpay_link" | "cashfree_link";
+export type ActionService = "google_sheets_append" | "google_calendar_event" | "razorpay_link";
 
 export interface ActionField {
   key: string;
@@ -37,14 +37,6 @@ export const ACTION_SERVICES: Record<ActionService, { kind: ConnectionKind; fiel
   },
   razorpay_link: {
     kind: "razorpay",
-    savesLink: true,
-    fields: [
-      { key: "amount", placeholder: "1500" },
-      { key: "description", placeholder: "" },
-    ],
-  },
-  cashfree_link: {
-    kind: "cashfree",
     savesLink: true,
     fields: [
       { key: "amount", placeholder: "1500" },

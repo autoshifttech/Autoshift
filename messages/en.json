@@ -1524,14 +1524,12 @@
         "openConnections": "Open Connections",
         "noAccount": {
           "google": "No Google account connected yet.",
-          "razorpay": "No Razorpay account connected yet.",
-          "cashfree": "No Cashfree account connected yet."
+          "razorpay": "No Razorpay account connected yet."
         },
         "service": {
           "google_sheets_append": "Add a row to Google Sheets",
           "google_calendar_event": "Create a Google Calendar event",
-          "razorpay_link": "Razorpay payment link",
-          "cashfree_link": "Cashfree payment link"
+          "razorpay_link": "Razorpay payment link"
         },
         "field": {
           "spreadsheet": "Spreadsheet (link or ID)",
@@ -1599,8 +1597,7 @@
           "service": {
             "google_sheets_append": "add a row to Google Sheets",
             "google_calendar_event": "create a Google Calendar event",
-            "razorpay_link": "Razorpay payment link",
-            "cashfree_link": "Cashfree payment link"
+            "razorpay_link": "Razorpay payment link"
           }
         }
       },
@@ -1648,7 +1645,6 @@
       "action_google_sheets_append": "Add a row to Google Sheets",
       "action_google_calendar_event": "Create a Google Calendar event",
       "action_razorpay_link": "Razorpay payment link",
-      "action_cashfree_link": "Cashfree payment link",
       "actionNone": "Pick a service"
     },
     "header": {
@@ -2641,7 +2637,7 @@
     },
     "order_payment": {
       "name": "Order with payment",
-      "description": "Take an order in chat, confirm it, and send a Razorpay or Cashfree payment link. Cash on delivery and a hand-off to a person are built in.",
+      "description": "Take an order in chat, confirm it, and send a Razorpay payment link. Cash on delivery and a hand-off to a person are built in.",
       "keywords": "order,buy,shop",
       "askItem": "What would you like to order? Tell us the item and quantity.",
       "askAddress": "Thanks! What’s the delivery address?",
@@ -2666,7 +2662,7 @@
     },
     "payment_confirmed": {
       "name": "Payment confirmed",
-      "description": "Sends a thank-you the moment a Razorpay or Cashfree payment link is paid. Add steps to tag the customer or tell your team.",
+      "description": "Sends a thank-you the moment a Razorpay payment link is paid. Add steps to tag the customer or tell your team.",
       "message": "Payment received — thank you! Your order is confirmed."
     }
   },
@@ -4283,13 +4279,13 @@
     "title": "Connections",
     "breadcrumb": "Breadcrumb",
     "bannerTitle": "Accounts your flows can use",
-    "bannerDesc": "Google for Sheets and Calendar, Razorpay or Cashfree for payment links. Connect once; every flow in the workspace can use it, and it keeps working when people leave. You can connect more than one of each.",
+    "bannerDesc": "Google for Sheets and Calendar, Razorpay for payment links. Connect once; every flow in the workspace can use it, and it keeps working when people leave. You can connect more than one of each.",
     "connectGoogle": "Connect Google",
     "addAnother": "Add another",
     "googleServiceAccount": "Google service account",
     "googleSoon": "Google sign-in goes live with the backend. For now, add a service account from “Add another”.",
     "emptyTitle": "No connections yet",
-    "emptyDesc": "Connect a Google account, or add Razorpay / Cashfree keys from “Add another”, then use them in any flow.",
+    "emptyDesc": "Connect a Google account, or add Razorpay keys from “Add another”, then use them in any flow.",
     "googleTitle": "Add a Google service account",
     "googleStep1": "In Google Cloud, create a <b>service account</b> and download its <code>JSON</code> key.",
     "googleStep2": "Enable the <b>Google Sheets API</b> and <b>Google Calendar API</b> for that project (Drive API too, to pick sheets from a list).",
@@ -4316,9 +4312,6 @@
     "secretError": "Enter the secret (at least 8 characters).",
     "securityNote": "Keys are verified with {provider} first, then encrypted at rest. They are never shown again.",
     "verifyAndAdd": "Verify and add",
-    "cashfreeTitle": "Add Cashfree",
-    "cashfreeIntro": "Cashfree dashboard → <b>Developers</b> → <b>API Keys</b>. Use the keys from the environment you pick below.",
-    "cashfreeNamePh": "e.g. Cashfree — main store",
     "environment": "Environment",
     "production": "Production",
     "sandbox": "Sandbox",
@@ -4334,7 +4327,6 @@
     "removed": "Connection removed",
     "kindGoogle": "Google service account",
     "kindRazorpay": "Razorpay",
-    "kindCashfree": "Cashfree",
     "connected": "Connected",
     "addedOn": "Added {date}",
     "remove": "Remove {name}",

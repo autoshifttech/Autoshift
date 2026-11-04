@@ -174,7 +174,7 @@ export interface SetTagNodeConfig {
 }
 
 export interface ActionNodeConfig {
-  service: "google_sheets_append" | "google_calendar_event" | "razorpay_link" | "cashfree_link";
+  service: "google_sheets_append" | "google_calendar_event" | "razorpay_link";
   /** The connected account (Flows → Connections) this step uses. */
   connection_id: string;
   /** Per-service fields; {{vars.x}} placeholders are allowed. */

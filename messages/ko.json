@@ -1524,14 +1524,12 @@
         "openConnections": "연결 열기",
         "noAccount": {
           "google": "아직 연결된 Google 계정이 없습니다.",
-          "razorpay": "아직 연결된 Razorpay 계정이 없습니다.",
-          "cashfree": "아직 연결된 Cashfree 계정이 없습니다."
+          "razorpay": "아직 연결된 Razorpay 계정이 없습니다."
         },
         "service": {
           "google_sheets_append": "Google 스프레드시트에 행 추가",
           "google_calendar_event": "Google 캘린더 일정 만들기",
-          "razorpay_link": "Razorpay 결제 링크",
-          "cashfree_link": "Cashfree 결제 링크"
+          "razorpay_link": "Razorpay 결제 링크"
         },
         "field": {
           "spreadsheet": "스프레드시트(링크 또는 ID)",
@@ -1599,8 +1597,7 @@
           "service": {
             "google_sheets_append": "Google 스프레드시트에 행 추가",
             "google_calendar_event": "Google 캘린더 일정 만들기",
-            "razorpay_link": "Razorpay 결제 링크",
-            "cashfree_link": "Cashfree 결제 링크"
+            "razorpay_link": "Razorpay 결제 링크"
           }
         }
       },
@@ -1648,7 +1645,6 @@
       "action_google_sheets_append": "Google 스프레드시트에 행 추가",
       "action_google_calendar_event": "Google 캘린더 일정 만들기",
       "action_razorpay_link": "Razorpay 결제 링크",
-      "action_cashfree_link": "Cashfree 결제 링크",
       "actionNone": "서비스를 선택하세요"
     },
     "header": {
@@ -2641,7 +2637,7 @@
     },
     "order_payment": {
       "name": "결제가 포함된 주문",
-      "description": "채팅으로 주문을 받고 확인한 뒤 Razorpay 또는 Cashfree 결제 링크를 보냅니다. 착불과 상담원 연결이 포함되어 있습니다.",
+      "description": "채팅으로 주문을 받고 확인한 뒤 Razorpay 결제 링크를 보냅니다. 착불과 상담원 연결이 포함되어 있습니다.",
       "keywords": "주문,구매,쇼핑",
       "askItem": "무엇을 주문하시겠어요? 상품과 수량을 알려 주세요.",
       "askAddress": "감사합니다! 배송 주소를 알려 주세요.",
@@ -2666,7 +2662,7 @@
     },
     "payment_confirmed": {
       "name": "결제 확인",
-      "description": "Razorpay 또는 Cashfree 결제 링크가 결제되는 즉시 감사 메시지를 보냅니다. 고객 태그 지정이나 팀 알림 단계를 추가할 수 있습니다.",
+      "description": "Razorpay 결제 링크가 결제되는 즉시 감사 메시지를 보냅니다. 고객 태그 지정이나 팀 알림 단계를 추가할 수 있습니다.",
       "message": "결제가 완료되었습니다. 감사합니다! 주문이 확정되었습니다."
     }
   },
@@ -4283,13 +4279,13 @@
     "title": "연결",
     "breadcrumb": "이동 경로",
     "bannerTitle": "플로우에서 사용할 수 있는 계정",
-    "bannerDesc": "스프레드시트와 캘린더용 Google, 결제 링크용 Razorpay 또는 Cashfree. 한 번 연결하면 워크스페이스의 모든 플로우에서 사용할 수 있고, 담당자가 떠나도 계속 작동합니다. 각각 둘 이상 연결할 수 있습니다.",
+    "bannerDesc": "스프레드시트와 캘린더용 Google, 결제 링크용 Razorpay. 한 번 연결하면 워크스페이스의 모든 플로우에서 사용할 수 있고, 담당자가 떠나도 계속 작동합니다. 각각 둘 이상 연결할 수 있습니다.",
     "connectGoogle": "Google 연결",
     "addAnother": "다른 계정 추가",
     "googleServiceAccount": "Google 서비스 계정",
     "googleSoon": "Google 로그인은 백엔드와 함께 열립니다. 지금은 “다른 계정 추가”에서 서비스 계정을 추가하세요.",
     "emptyTitle": "아직 연결이 없습니다",
-    "emptyDesc": "Google 계정을 연결하거나 “다른 계정 추가”에서 Razorpay / Cashfree 키를 추가한 뒤 모든 플로우에서 사용하세요.",
+    "emptyDesc": "Google 계정을 연결하거나 “다른 계정 추가”에서 Razorpay 키를 추가한 뒤 모든 플로우에서 사용하세요.",
     "googleTitle": "Google 서비스 계정 추가",
     "googleStep1": "Google Cloud에서 <b>서비스 계정</b>을 만들고 <code>JSON</code> 키를 다운로드하세요.",
     "googleStep2": "해당 프로젝트에서 <b>Google Sheets API</b>와 <b>Google Calendar API</b>를 사용 설정하세요 (목록에서 시트를 고르려면 Drive API도).",
@@ -4316,9 +4312,6 @@
     "secretError": "시크릿을 입력하세요 (8자 이상).",
     "securityNote": "키는 먼저 {provider}에서 확인한 뒤 암호화하여 저장합니다. 다시 표시되지 않습니다.",
     "verifyAndAdd": "확인 후 추가",
-    "cashfreeTitle": "Cashfree 추가",
-    "cashfreeIntro": "Cashfree 대시보드 → <b>Developers</b> → <b>API Keys</b>. 아래에서 고른 환경의 키를 사용하세요.",
-    "cashfreeNamePh": "예: Cashfree — 메인 스토어",
     "environment": "환경",
     "production": "프로덕션",
     "sandbox": "샌드박스",
@@ -4334,7 +4327,6 @@
     "removed": "연결이 삭제되었습니다",
     "kindGoogle": "Google 서비스 계정",
     "kindRazorpay": "Razorpay",
-    "kindCashfree": "Cashfree",
     "connected": "연결됨",
     "addedOn": "{date} 추가",
     "remove": "{name} 삭제",

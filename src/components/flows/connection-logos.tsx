@@ -20,17 +20,6 @@ export function RazorpayLogo({ className = "size-5" }: { className?: string }) {
   );
 }
 
-export function CashfreeLogo({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path fill="#2BB673" d="M4 4h16v4.5H8.8V20H4z" />
-      <path fill="#F5A623" d="M11 11h9v4.2h-4.8V20H11z" />
-    </svg>
-  );
-}
-
 export function ConnectionLogo({ kind, className }: { kind: ConnectionKind; className?: string }) {
-  if (kind === "google") return <GoogleLogo className={className} />;
-  if (kind === "razorpay") return <RazorpayLogo className={className} />;
-  return <CashfreeLogo className={className} />;
+  return kind === "google" ? <GoogleLogo className={className} /> : <RazorpayLogo className={className} />;
 }

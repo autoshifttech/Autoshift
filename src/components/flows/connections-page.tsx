@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
@@ -16,8 +16,9 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addConnection, maskKey, parseServiceAccount, removeConnection, useConnections, type ConnectionKind, type FlowConnection } from "@/lib/flows/connections";
-import { CashfreeLogo, ConnectionLogo, GoogleLogo, RazorpayLogo } from "./connection-logos";
+import { addConnection, createConnection, deleteConnection, loadConnections, maskKey, parseServiceAccount, useConnections, type ConnectionKind, type FlowConnection } from "@/lib/flows/connections";
+import { backendUrl } from "@/lib/backend/client";
+import { ConnectionLogo, GoogleLogo, RazorpayLogo } from "./connection-logos";
 
 type T = ReturnType<typeof useTranslations>;
 
@@ -75,6 +76,18 @@ function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: 
   const submit = () => {
     const r = parseServiceAccount(json.trim());
     if ("error" in r) return setError(t(r.error === "invalid" ? "googleInvalidJson" : "googleNotServiceAccount"));
+    if (backendUrl()) {
+      // The key goes to the server once and is stored there encrypted; the browser keeps nothing.
+      createConnection({ kind: "google", name: name.trim() || r.email, serviceAccountJson: json.trim() }).then(
+        () => {
+          toast.success(t("added"));
+          reset();
+          onOpenChange(false);
+        },
+        (e) => setError(e instanceof Error ? e.message : t("googleInvalidJson")),
+      );
+      return;
+    }
     addConnection({ kind: "google", name: name.trim() || r.email, detail: r.email });
     toast.success(t("added"));
     reset();
@@ -131,6 +144,17 @@ function RazorpayDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
   const submit = () => {
     setTried(true);
     if (!idOk || !secretOk) return;
+    if (backendUrl()) {
+      createConnection({ kind: "razorpay", name: name.trim() || `Razorpay — ${keyId.includes("_live_") ? t("live") : t("test")}`, keyId, keySecret: secret, webhookSecret: webhook }).then(
+        () => {
+          toast.success(t("added"));
+          reset();
+          onOpenChange(false);
+        },
+        (e) => toast.error(e instanceof Error ? e.message : t("cancel")),
+      );
+      return;
+    }
     run(() => {
       addConnection({ kind: "razorpay", name: name.trim() || `Razorpay — ${keyId.includes("_live_") ? t("live") : t("test")}`, detail: maskKey(keyId), mode: keyId.includes("_live_") ? "live" : "test" });
       reset();
@@ -169,62 +193,7 @@ function RazorpayDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
   );
 }
 
-function CashfreeDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
-  const [name, setName] = useState("");
-  const [env, setEnv] = useState("production");
-  const [clientId, setClientId] = useState("");
-  const [secret, setSecret] = useState("");
-  const [tried, setTried] = useState(false);
-  const { busy, run } = useVerify(t);
-
-  const idOk = clientId.trim().length >= 6;
-  const secretOk = secret.trim().length >= 8;
-  const reset = () => { setName(""); setEnv("production"); setClientId(""); setSecret(""); setTried(false); };
-  const submit = () => {
-    setTried(true);
-    if (!idOk || !secretOk) return;
-    run(() => {
-      addConnection({ kind: "cashfree", name: name.trim() || `Cashfree — ${t(env)}`, detail: maskKey(clientId), mode: env });
-      reset();
-      onOpenChange(false);
-    });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><CashfreeLogo className="size-5" /> {t("cashfreeTitle")}</DialogTitle>
-          <DialogDescription>{t.rich("cashfreeIntro", { b: bold })}</DialogDescription>
-        </DialogHeader>
-        <Field id="cf-name" label={t("nameOptional")}>
-          <Input id="cf-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("cashfreeNamePh")} />
-        </Field>
-        <Field id="cf-env" label={t("environment")}>
-          <NativeSelect id="cf-env" value={env} onChange={(e) => setEnv(e.target.value)}>
-            <option value="production">{t("production")}</option>
-            <option value="sandbox">{t("sandbox")}</option>
-          </NativeSelect>
-        </Field>
-        <Field id="cf-id" label={t("clientId")} required error={tried && !idOk ? t("clientIdError") : undefined}>
-          <Input id="cf-id" value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder={t("clientIdPh")} autoComplete="off" aria-invalid={tried && !idOk} />
-        </Field>
-        <Field id="cf-secret" label={t("clientSecret")} required error={tried && !secretOk ? t("secretError") : undefined}>
-          <SecretInput id="cf-secret" value={secret} onChange={setSecret} placeholder={t("secret")} invalid={tried && !secretOk} t={t} />
-        </Field>
-        <SecurityNote>{t("securityNote", { provider: "Cashfree" })}</SecurityNote>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t("cancel")}</Button>
-          <Button onClick={submit} disabled={busy || !clientId.trim() || !secret.trim()}>
-            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("verifyAndAdd")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay", cashfree: "kindCashfree" };
+const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay" };
 
 function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemove: () => void; t: T; locale: string }) {
   return (
@@ -253,6 +222,9 @@ export function ConnectionsPage() {
   const tNav = useTranslations("Header");
   const locale = useLocale();
   const connections = useConnections();
+  useEffect(() => {
+    void loadConnections().catch(() => {});
+  }, []);
   const [dialog, setDialog] = useState<ConnectionKind | null>(null);
   const [removing, setRemoving] = useState<FlowConnection | null>(null);
 
@@ -273,7 +245,6 @@ export function ConnectionsPage() {
           <span className="flex shrink-0 items-center gap-2 rounded-2xl bg-background px-3 py-3 shadow-[var(--shadow-card)]">
             <GoogleLogo className="size-6" />
             <RazorpayLogo className="size-6" />
-            <CashfreeLogo className="size-6" />
           </span>
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-foreground">{t("bannerTitle")}</h2>
@@ -291,7 +262,6 @@ export function ConnectionsPage() {
             <DropdownMenuContent align="end" className="min-w-56">
               <DropdownMenuItem onClick={() => setDialog("google")}><Table2 className="size-4" /> {t("googleServiceAccount")}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDialog("razorpay")}><RazorpayLogo className="size-4" /> Razorpay</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDialog("cashfree")}><CashfreeLogo className="size-4" /> Cashfree</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -309,7 +279,6 @@ export function ConnectionsPage() {
 
       <GoogleDialog open={dialog === "google"} onOpenChange={closeDialog} t={t} />
       <RazorpayDialog open={dialog === "razorpay"} onOpenChange={closeDialog} t={t} />
-      <CashfreeDialog open={dialog === "cashfree"} onOpenChange={closeDialog} t={t} />
 
       <ConfirmDialog
         open={removing !== null}
@@ -318,7 +287,15 @@ export function ConnectionsPage() {
         description={t("removeDesc")}
         confirmLabel={t("removeConfirm")}
         cancelLabel={t("cancel")}
-        onConfirm={() => { if (removing) { removeConnection(removing.id); toast.success(t("removed")); } setRemoving(null); }}
+        onConfirm={() => {
+          if (removing) {
+            deleteConnection(removing.id).then(
+              () => toast.success(t("removed")),
+              (e) => toast.error(e instanceof Error ? e.message : t("removeConfirm")),
+            );
+          }
+          setRemoving(null);
+        }}
       />
     </div>
   );

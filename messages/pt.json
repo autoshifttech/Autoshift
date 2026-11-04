@@ -1524,14 +1524,12 @@
         "openConnections": "Abrir Conexões",
         "noAccount": {
           "google": "Nenhuma conta Google conectada ainda.",
-          "razorpay": "Nenhuma conta Razorpay conectada ainda.",
-          "cashfree": "Nenhuma conta Cashfree conectada ainda."
+          "razorpay": "Nenhuma conta Razorpay conectada ainda."
         },
         "service": {
           "google_sheets_append": "Adicionar linha no Google Planilhas",
           "google_calendar_event": "Criar evento no Google Agenda",
-          "razorpay_link": "Link de pagamento Razorpay",
-          "cashfree_link": "Link de pagamento Cashfree"
+          "razorpay_link": "Link de pagamento Razorpay"
         },
         "field": {
           "spreadsheet": "Planilha (link ou ID)",
@@ -1599,8 +1597,7 @@
           "service": {
             "google_sheets_append": "adicionar linha no Google Planilhas",
             "google_calendar_event": "criar evento no Google Agenda",
-            "razorpay_link": "link de pagamento Razorpay",
-            "cashfree_link": "link de pagamento Cashfree"
+            "razorpay_link": "link de pagamento Razorpay"
           }
         }
       },
@@ -1648,7 +1645,6 @@
       "action_google_sheets_append": "Adicionar linha no Google Planilhas",
       "action_google_calendar_event": "Criar evento no Google Agenda",
       "action_razorpay_link": "Link de pagamento Razorpay",
-      "action_cashfree_link": "Link de pagamento Cashfree",
       "actionNone": "Escolha um serviço"
     },
     "header": {
@@ -2641,7 +2637,7 @@
     },
     "order_payment": {
       "name": "Pedido com pagamento",
-      "description": "Receba um pedido no chat, confirme e envie um link de pagamento Razorpay ou Cashfree. Pagamento na entrega e atendimento humano já incluídos.",
+      "description": "Receba um pedido no chat, confirme e envie um link de pagamento Razorpay. Pagamento na entrega e atendimento humano já incluídos.",
       "keywords": "pedido,comprar,loja",
       "askItem": "O que você gostaria de pedir? Diga o item e a quantidade.",
       "askAddress": "Obrigado! Qual é o endereço de entrega?",
@@ -2666,7 +2662,7 @@
     },
     "payment_confirmed": {
       "name": "Pagamento confirmado",
-      "description": "Envia um agradecimento assim que um link de pagamento Razorpay ou Cashfree é pago. Adicione etapas para etiquetar o cliente ou avisar sua equipe.",
+      "description": "Envia um agradecimento assim que um link de pagamento Razorpay é pago. Adicione etapas para etiquetar o cliente ou avisar sua equipe.",
       "message": "Pagamento recebido — obrigado! Seu pedido está confirmado."
     }
   },
@@ -4283,13 +4279,13 @@
     "title": "Conexões",
     "breadcrumb": "Caminho de navegação",
     "bannerTitle": "Contas que seus fluxos podem usar",
-    "bannerDesc": "Google para Planilhas e Agenda, Razorpay ou Cashfree para links de pagamento. Conecte uma vez; todos os fluxos do espaço de trabalho podem usar, e continua funcionando quando alguém sai. Você pode conectar mais de uma de cada.",
+    "bannerDesc": "Google para Planilhas e Agenda, Razorpay para links de pagamento. Conecte uma vez; todos os fluxos do espaço de trabalho podem usar, e continua funcionando quando alguém sai. Você pode conectar mais de uma de cada.",
     "connectGoogle": "Conectar Google",
     "addAnother": "Adicionar outra",
     "googleServiceAccount": "Conta de serviço do Google",
     "googleSoon": "O login com Google entra no ar com o backend. Por enquanto, adicione uma conta de serviço em “Adicionar outra”.",
     "emptyTitle": "Nenhuma conexão ainda",
-    "emptyDesc": "Conecte uma conta Google ou adicione chaves do Razorpay / Cashfree em “Adicionar outra” e use-as em qualquer fluxo.",
+    "emptyDesc": "Conecte uma conta Google ou adicione chaves do Razorpay em “Adicionar outra” e use-as em qualquer fluxo.",
     "googleTitle": "Adicionar conta de serviço do Google",
     "googleStep1": "No Google Cloud, crie uma <b>conta de serviço</b> e baixe a chave <code>JSON</code>.",
     "googleStep2": "Ative a <b>Google Sheets API</b> e a <b>Google Calendar API</b> nesse projeto (e a Drive API, para escolher planilhas em uma lista).",
@@ -4316,9 +4312,6 @@
     "secretError": "Informe o segredo (mínimo 8 caracteres).",
     "securityNote": "As chaves são verificadas primeiro com o {provider} e depois criptografadas. Nunca são exibidas novamente.",
     "verifyAndAdd": "Verificar e adicionar",
-    "cashfreeTitle": "Adicionar Cashfree",
-    "cashfreeIntro": "Painel Cashfree → <b>Developers</b> → <b>API Keys</b>. Use as chaves do ambiente escolhido abaixo.",
-    "cashfreeNamePh": "ex.: Cashfree — loja principal",
     "environment": "Ambiente",
     "production": "Produção",
     "sandbox": "Sandbox",
@@ -4334,7 +4327,6 @@
     "removed": "Conexão removida",
     "kindGoogle": "Conta de serviço do Google",
     "kindRazorpay": "Razorpay",
-    "kindCashfree": "Cashfree",
     "connected": "Conectada",
     "addedOn": "Adicionada em {date}",
     "remove": "Remover {name}",
