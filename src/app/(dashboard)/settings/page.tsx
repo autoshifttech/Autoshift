@@ -15,6 +15,7 @@ import { AppearancePanel } from '@/components/settings/appearance-panel';
 import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
 import { MembersTab } from '@/components/settings/members-tab';
 import { BillingPanel } from '@/components/billing/billing-panel';
+import { ApiKeysPanel } from '@/components/settings/api-keys-panel';
 import { DataPrivacyPanel } from '@/components/settings/data-privacy-panel';
 import { OwnerAlertsPanel } from '@/components/settings/owner-alerts-panel';
 import { WhatsAppConnectCard } from '@/components/whatsapp/connect-card';
@@ -70,6 +71,7 @@ function SettingsPageInner() {
     wallet: <WalletPage />,
     'opt-ins': <ConsentPage />,
     files: <FilesPage />,
+    api: <ApiKeysPanel />,
     support: <SupportPage />,
     privacy: <DataPrivacyPanel />,
   };

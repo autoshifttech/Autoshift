@@ -1,6 +1,7 @@
 import {
   BellRing,
   FolderOpen,
+  KeyRound,
   FileLock2,
   CreditCard,
   LifeBuoy,
@@ -33,6 +34,7 @@ export const SETTINGS_SECTIONS = [
   'wallet',
   'opt-ins',
   'files',
+  'api',
   'support',
   'privacy',
 ] as const;
@@ -60,6 +62,7 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   wallet: { id: 'wallet', label: 'Wallet', icon: Wallet, group: 'workspace' },
   'opt-ins': { id: 'opt-ins', label: 'Opt-ins & blocklist', icon: ShieldCheck, group: 'workspace' },
   files: { id: 'files', label: 'Files', icon: FolderOpen, group: 'workspace' },
+  api: { id: 'api', label: 'API keys', icon: KeyRound, group: 'workspace' },
   support: { id: 'support', label: 'Help & support', icon: LifeBuoy, group: 'workspace' },
   privacy: { id: 'privacy', label: 'Data & privacy', icon: FileLock2, group: 'workspace' },
 };

@@ -14,6 +14,8 @@ const tablesWithoutDomainData = new Set([
   "account_invitations",
   "member_presence",
   "pending_message_statuses",
+  // ON DELETE SET NULL: deleting an account keeps its audit rows, so nothing is lost.
+  "audit_log",
 ]);
 
 function accountScopedTables(): Set<string> {
