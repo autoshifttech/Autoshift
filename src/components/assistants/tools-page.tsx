@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { FlaskConical, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -15,12 +15,14 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { TOOL_CATEGORIES, assistantsStore, updateTool, useAssistants, type Tool, type ToolParam } from "@/lib/assistants/model";
 import { AssistantAvatar, toolIcon } from "./assistant-ui";
+import { startAssistantsSync } from "@/lib/assistants/backend-sync";
 
 /** AI → Tools: what assistants can do in a chat, plus custom webhook tools (e.g. n8n). */
 export function ToolsPage() {
   const t = useTranslations("AiTools");
   const locale = useLocale();
   const { tools, assistants } = useAssistants();
+  useEffect(() => startAssistantsSync(), []);
   const [editing, setEditing] = useState<Tool | "new" | null>(null);
 
   return (

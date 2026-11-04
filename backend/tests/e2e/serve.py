@@ -45,6 +45,20 @@ def main() -> None:
     app_db.SupabaseDb.__init__ = lambda self, s, b, a, client=None: original(self, s, b, a, client or httpx.AsyncClient(transport=httpx.ASGITransport(app=shim)))
     settings = Settings(supabase_url="https://x.supabase.co", supabase_service_role_key=SERVICE_KEY, supabase_anon_key="anon", supabase_jwt_secret=JWT_SECRET, encryption_key=ENC_KEY, razorpay_key_id="rzp_test_FAKEKEY123", razorpay_key_secret=RZP_SECRET, razorpay_webhook_secret=RZP_WEBHOOK_SECRET, cors_origins=ORIGIN)
     from app.main import create_app
+    from app import events
+
+    # This sandbox has no outside DNS. Names resolve to a public address (as they would in production);
+    # real IP addresses resolve to themselves, so private ones are still refused.
+    import ipaddress
+
+    def resolve(host, port, **kw):
+        try:
+            ip = str(ipaddress.ip_address(host))
+        except ValueError:
+            ip = "10.0.0.1" if host.endswith(".internal") else "93.184.216.34"
+        return [(2, 1, 6, "", (ip, port))]
+
+    events.socket.getaddrinfo = resolve
 
     app = create_app()
     app.dependency_overrides[get_settings] = lambda: settings

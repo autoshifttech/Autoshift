@@ -92,3 +92,42 @@ describe('assistants backend sync', () => {
     expect(fromRow({ ...row('x', 'X'), role: 'weird' }).role).toBe('custom')
   })
 })
+
+import { createToolsSync, type ToolRow, type ToolsApi } from './backend-sync'
+
+describe('tools backend sync', () => {
+  function toolsApi(initial: ToolRow[]) {
+    const rows = new Map(initial.map((r) => [r.key, r]))
+    const calls: string[] = []
+    let n = 0
+    const api: ToolsApi = {
+      async list() { return [...rows.values()] },
+      async create(b) { const r: ToolRow = { key: `custom_${++n}`, builtin: false, category: 'custom', name: b.name, description: b.description, enabled: b.enabled, webhook: b.webhook ?? null, calls: 0 }; rows.set(r.key, r); calls.push(`create:${b.name}`); return r },
+      async patch(k, b) { rows.set(k, { ...rows.get(k)!, ...b } as ToolRow); calls.push(`patch:${k}:${Object.keys(b).join(',')}`); return rows.get(k)! },
+      async remove(k) { rows.delete(k); calls.push(`remove:${k}`) },
+    }
+    return { api, rows, calls }
+  }
+  const builtin: ToolRow = { key: 'handoff', builtin: true, category: 'team', name: 'Hand off', description: 'd', enabled: true, webhook: null, calls: 0 }
+
+  it('a new tool gets its server key, and assistants using it follow', async () => {
+    const store = emptyStore([{ ...newAssistant('custom', 'a1'), toolIds: [] }])
+    const { api, calls } = toolsApi([builtin])
+    await createToolsSync(store, api).start()
+    store.set((s) => ({
+      tools: [...s.tools, { id: 'tool-local', builtin: false, category: 'custom', name: 'Orders', description: 'x', enabled: true, calls: 0, webhook: { url: 'https://n8n.example.com/x', method: 'POST', params: [] } }],
+      assistants: s.assistants.map((a) => ({ ...a, toolIds: ['tool-local'] })),
+    }))
+    await vi.waitFor(() => expect(store.get().tools.map((t) => t.id)).toEqual(['handoff', 'custom_1']))
+    expect(store.get().assistants[0].toolIds).toEqual(['custom_1'])
+    expect(calls).toEqual(['create:Orders'])
+  })
+
+  it('switching a built-in off sends only that, and built-ins are never deleted from the server', async () => {
+    const store = emptyStore()
+    const { api, calls } = toolsApi([builtin])
+    await createToolsSync(store, api).start()
+    store.set((s) => ({ ...s, tools: s.tools.map((t) => ({ ...t, enabled: false })) }))
+    await vi.waitFor(() => expect(calls).toEqual(['patch:handoff:enabled']))
+  })
+})

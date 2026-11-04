@@ -235,3 +235,30 @@ class InviteCreate(BaseModel):
     role: Literal["admin", "agent", "viewer"]
     expires_in_days: int = Field(7, ge=1, le=365)
     label: str = Field("", max_length=80)
+
+
+class ToolParam(BaseModel):
+    name: str = Field(pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,40}$")
+    type: Literal["string", "number", "boolean"] = "string"
+    required: bool = True
+    description: str = Field("", max_length=200)
+
+
+class ToolWebhook(BaseModel):
+    url: str = Field(max_length=500)
+    method: Literal["GET", "POST"] = "POST"
+    params: list[ToolParam] = Field(default_factory=list, max_length=10)
+
+
+class ToolCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    description: str = Field(min_length=1, max_length=500)
+    enabled: bool = True
+    webhook: ToolWebhook
+
+
+class ToolPatch(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=80)
+    description: str | None = Field(None, min_length=1, max_length=500)
+    enabled: bool | None = None
+    webhook: ToolWebhook | None = None
