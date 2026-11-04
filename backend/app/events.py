@@ -27,7 +27,11 @@ from .security import decrypt
 
 log = logging.getLogger("autoshift.events")
 
-EVENT_TYPES = ("wallet.topped_up", "wallet.refunded", "subscription.updated", "test.ping")
+EVENT_TYPES = (
+    "wallet.topped_up", "wallet.refunded", "wallet.low", "subscription.updated", "test.ping",
+    # forwarded by the web app, which runs WhatsApp
+    "message.received", "message.status_updated", "conversation.created", "lead.created", "conversation.handoff",
+)
 BACKOFF_MINUTES = [1, 5, 30, 120, 360]  # after attempts 1..5; the 6th failure is final
 MAX_ATTEMPTS = 6
 

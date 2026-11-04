@@ -26,6 +26,7 @@ import { decrypt } from '@/lib/whatsapp/encryption';
 import { buildSignatureHeader } from '@/lib/webhooks/sign';
 import { isDeliverableUrl } from '@/lib/webhooks/ssrf';
 import type { WebhookEvent } from '@/lib/webhooks/events';
+import { forwardEvent, internalConfigured } from '@/lib/backend/internal';
 
 /** Per-endpoint HTTP timeout. Kept short — this runs in `after()`. */
 export const DELIVERY_TIMEOUT_MS = 5000;
@@ -49,6 +50,8 @@ export async function dispatchWebhookEvent(
   event: WebhookEvent,
   data: unknown
 ): Promise<void> {
+  // The backend's own webhooks and the n8n trigger get the same events (best-effort, never throws).
+  if (internalConfigured()) await forwardEvent(accountId, event, data);
   try {
     const { data: rows, error } = await db
       .from('webhook_endpoints')

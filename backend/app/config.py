@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     # Wallet top-up limits, in rupees. GST is added on top of the credit amount.
     topup_min_inr: int = 500
     topup_max_inr: int = 100000
+    # Shared secret the web app uses for /v1/internal (wallet charges, AI replies, events). Empty = off.
+    internal_secret: str = ""
     # Public address of the web app, for invite links (…/join/<token>).
     site_url: str = "http://localhost:3000"
     # State code of the seller (first two digits of its GSTIN): decides CGST+SGST versus IGST.

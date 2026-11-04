@@ -316,3 +316,34 @@ class AnnouncementPatch(BaseModel):
     audience: Literal["all", "trial", "paying", "starter", "growth", "pro"] | None = None
     draft: bool | None = None
     publish_at: str | None = None
+
+
+MessageCategory = Literal["marketing", "utility", "authentication", "service", "ai"]
+
+
+class InternalCharge(BaseModel):
+    account_id: str
+    category: MessageCategory
+    units: int = Field(1, ge=1, le=100000)
+    ref: str = Field(min_length=1, max_length=200)
+    idempotency_key: str = Field(min_length=8, max_length=200)
+
+
+class InternalCanSend(BaseModel):
+    account_id: str
+    category: MessageCategory
+    units: int = Field(1, ge=1, le=100000)
+
+
+class InternalAiReply(BaseModel):
+    account_id: str
+    assistant_id: str
+    message: str = Field(min_length=1, max_length=4000)
+    history: list[dict] = Field(default_factory=list, max_length=40)
+    ref: str = Field(min_length=8, max_length=200)
+
+
+class InternalEvent(BaseModel):
+    account_id: str
+    type: str
+    data: dict = Field(default_factory=dict)

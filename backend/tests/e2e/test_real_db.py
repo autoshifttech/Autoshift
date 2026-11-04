@@ -207,3 +207,25 @@ def test_support_tickets_notes_and_announcements_on_the_real_database(env):
     made = env.client.post("/v1/platform/announcements", json={"title": f"Hello {n}", "audience": "trial"}, headers=staff["h"])
     assert made.status_code == 201
     assert f"Hello {n}" in [a["title"] for a in env.client.get("/v1/announcements", headers=u["h"]).json()]
+
+
+def test_internal_charge_and_events_on_the_real_database(env):
+    from app.config import get_settings
+
+    base = env.client.app.dependency_overrides[get_settings]()
+    s = base.model_copy(update={"internal_secret": "e2e-internal-secret"})
+    env.client.app.dependency_overrides[get_settings] = lambda: s
+    try:
+        h = {"X-AutoShift-Internal": "e2e-internal-secret"}
+        u = env.user("internal")
+        sql("SELECT wallet_apply(%s, 1000, 'topup', 'seed', %s)", u["account_id"], f"seed-int-{u['id']}")
+        body = {"account_id": u["account_id"], "category": "marketing", "units": 1, "ref": f"wamid.{u['id']}", "idempotency_key": f"msg:wamid.{u['id']}"}
+        r1 = env.client.post("/v1/internal/charge", json=body, headers=h).json()
+        r2 = env.client.post("/v1/internal/charge", json=body, headers=h).json()
+        assert r1["balance_paise"] == 901 and r2["applied"] is False and r2["balance_paise"] == 901
+        assert sql("SELECT count(*) FROM wallet_ledger WHERE account_id = %s AND kind = 'charge_marketing'", u["account_id"])[0][0] == 1
+        hook = env.client.post("/v1/internal/events", json={"account_id": u["account_id"], "type": "message.received", "data": {"text": "hi"}}, headers=h)
+        assert hook.status_code == 202
+        assert env.client.post("/v1/internal/charge", json=body, headers=u["h"]).status_code == 401  # a user's login can't use it
+    finally:
+        env.client.app.dependency_overrides[get_settings] = lambda: base

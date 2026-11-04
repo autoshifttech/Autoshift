@@ -23,6 +23,7 @@ import { resumeAwaitingReply, runAutomationsForTrigger } from '@/lib/automations
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
 import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
+import { billableCategory, chargeBilledMessage, internalConfigured } from '@/lib/backend/internal'
 import {
   applyBroadcastRecipientStatus,
   flagBroadcastReply,
@@ -131,6 +132,8 @@ interface WhatsAppWebhookEntry {
         status: string
         timestamp: string
         recipient_id: string
+        /** Meta's billing for this message: whether it is charged, and in which category. */
+        pricing?: { billable?: boolean; category?: string; pricing_model?: string }
         /**
          * Only present when `status === 'failed'`. Meta's reason for the
          * failure — `code` is a stable numeric error code (e.g. 131049),
@@ -417,9 +420,15 @@ async function handleStatusUpdate(
     timestamp: string
     recipient_id: string
     errors?: MetaStatusError[]
+    pricing?: { billable?: boolean; category?: string }
   },
   accountId: string | null
 ) {
+  // Charge the business's wallet for what Meta bills. Meta reports pricing on "sent" and again on
+  // "delivered"; the backend charges once per message id, so repeats are harmless.
+  const category = billableCategory(status.pricing)
+  if (accountId && category && internalConfigured()) await chargeBilledMessage(accountId, status.id, category)
+
   // Meta's reason for a failed send (#535). Only read on `failed`; a
   // later non-failed status for the same wamid leaves the error
   // columns alone rather than clearing them, so the reason survives.
