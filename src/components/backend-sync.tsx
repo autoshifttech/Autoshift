@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 
+import { startAvailableModelsSync } from '@/lib/admin/ai-models-sync'
 import { startBillingSync } from '@/lib/billing/backend-sync'
 import { startWalletSync } from '@/lib/wallet/backend-sync'
 
@@ -10,6 +11,7 @@ export function BackendSync() {
   useEffect(() => {
     startWalletSync()
     startBillingSync()
+    startAvailableModelsSync()
   }, [])
   return null
 }

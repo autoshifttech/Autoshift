@@ -1,4 +1,5 @@
 import { createStore, useStore } from '@/lib/workspace/store'
+import { backendUrl } from '@/lib/backend/client'
 import { CATALOG, VENDORS, type CatalogModel, type ModelTierKey, type VendorId } from '@/lib/ai/catalog'
 
 /**
@@ -28,14 +29,16 @@ export interface AiModelsState {
 }
 
 function initialAiModels(): AiModelsState {
+  // With a backend nothing is on until the server says so (an admin must save a key first).
+  const live = backendUrl() !== null
   const providers = Object.fromEntries(
-    VENDORS.map((v) => [v.id, { enabled: v.id === 'openai' || v.id === 'google' || v.id === 'anthropic', keyTail: null, savedAt: null }]),
+    VENDORS.map((v) => [v.id, { enabled: !live && (v.id === 'openai' || v.id === 'google' || v.id === 'anthropic'), keyTail: null, savedAt: null }]),
   ) as Record<VendorId, ProviderState>
-  const models = Object.fromEntries(VENDORS.map((v) => [v.id, CATALOG[v.id].map((m) => ({ ...m, enabled: true }))])) as Record<VendorId, ModelState[]>
+  const models = Object.fromEntries(VENDORS.map((v) => [v.id, live ? [] : CATALOG[v.id].map((m) => ({ ...m, enabled: true }))])) as Record<VendorId, ModelState[]>
   return { providers, models, defaultChoice: { vendor: 'openai', model: 'gpt-5.4-mini' } }
 }
 
-export const aiModelsStore = createStore<AiModelsState>(initialAiModels, 'autoshift.admin.ai-models.v2')
+export const aiModelsStore = createStore<AiModelsState>(initialAiModels, backendUrl() ? undefined : 'autoshift.admin.ai-models.v2')
 
 const SERVER = initialAiModels()
 export const useAiModels = () => useStore(aiModelsStore, SERVER)

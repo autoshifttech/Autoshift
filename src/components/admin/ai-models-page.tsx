@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 import { Eye, EyeOff, KeyRound, Plus, ShieldCheck, Star } from "lucide-react";
 
@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { act } from "@/lib/admin/store";
 import { aiModelsStore, useAiModels } from "@/lib/admin/ai-models";
 import { useAdminT } from "@/lib/admin/strings";
+import { addModel, loadAdminAiModels, makeModelDefault, saveProviderKey, setModelEnabled, setProviderEnabled } from "@/lib/admin/ai-models-sync";
+import { backendUrl } from "@/lib/backend/client";
 import { VENDORS, vendorLabel, type ModelTierKey, type VendorId } from "@/lib/ai/catalog";
 import { ModelChips, ProviderCards, TipBox } from "@/components/ai/model-picker";
 import { PageHeader, Panel } from "./admin-ui";
@@ -45,8 +47,16 @@ export function AiModelsPage() {
     aiModelsStore.set((s) => ({ ...s, providers: { ...s.providers, [vendor]: { ...s.providers[vendor], ...patch } } }));
   const setModels = (next: typeof models) => aiModelsStore.set((s) => ({ ...s, models: { ...s.models, [vendor]: next } }));
 
+  useEffect(() => {
+    if (backendUrl()) void loadAdminAiModels().catch(() => {});
+  }, []);
+
+  // Connected: the server does the change (encrypts the key, records it) and the page reloads from it.
+  const live = backendUrl() !== null;
+
   const toggleProvider = (on: boolean) => {
     if (on && !ready) return toast.error(tr("Save an API key first"));
+    if (live) return void setProviderEnabled(vendor, on).then((ok) => ok && toast.success(`${vendorLabel(vendor)} ${on ? tr("is on for businesses") : tr("is off")}`));
     setProvider({ enabled: on });
     act(on ? "Turned AI provider on" : "Turned AI provider off", vendorLabel(vendor), "");
     toast.success(`${vendorLabel(vendor)} ${on ? tr("is on for businesses") : tr("is off")}`);
@@ -54,6 +64,14 @@ export function AiModelsPage() {
 
   const saveKey = () => {
     if (key.trim().length < 8) return toast.error(tr("Paste the API key"));
+    if (live) {
+      void saveProviderKey(vendor, key).then((ok) => {
+        if (!ok) return;
+        setKey("");
+        toast.success(`${vendorLabel(vendor)} ${tr("saved")}`);
+      });
+      return;
+    }
     setProvider({ keyTail: key.trim().slice(-4), savedAt: new Date().toISOString() });
     act("Saved AI provider key", vendorLabel(vendor), `ending ${key.trim().slice(-4)}`);
     setKey("");
@@ -64,12 +82,14 @@ export function AiModelsPage() {
     const m = models.find((x) => x.id === id);
     if (!m) return;
     if (m.enabled && defaultHere === id) return toast.error(tr("Pick another default first"));
+    if (live) return void setModelEnabled(vendor, id, !m.enabled).then(() => setFocus(id));
     setModels(models.map((x) => (x.id === id ? { ...x, enabled: !x.enabled } : x)));
     setFocus(id);
     act(m.enabled ? "Turned AI model off" : "Turned AI model on", `${vendorLabel(vendor)} · ${m.label}`, "");
   };
 
   const makeDefault = (id: string) => {
+    if (live) return void makeModelDefault(vendor, id).then((ok) => ok && toast.success(`${models.find((x) => x.id === id)?.label} ${tr("is now the default")}`));
     aiModelsStore.set((s) => ({
       ...s,
       defaultChoice: { vendor, model: id },
@@ -83,6 +103,7 @@ export function AiModelsPage() {
     const id = custom.trim();
     if (!id) return;
     if (models.some((m) => m.id === id)) return toast.error(tr("That model is already listed"));
+    if (live) return void addModel(vendor, id).then((ok) => ok && setCustom(""));
     setModels([...models, { id, label: id, tier: "balanced", enabled: true, custom: true }]);
     act("Added AI model", vendorLabel(vendor), id);
     setCustom("");
