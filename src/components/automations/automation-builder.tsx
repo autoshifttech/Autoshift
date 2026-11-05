@@ -1287,8 +1287,9 @@ function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
         >
           <Plus className="h-4 w-4" />
         </DropdownMenuTrigger>
+        {/* Centred under the + so the menu opens straight below it. */}
         <DropdownMenuContent
-          align="start"
+          align="center"
           className="max-h-80 min-w-56 overflow-y-auto"
         >
           {ADDABLE_STEPS.map((tp) => {
