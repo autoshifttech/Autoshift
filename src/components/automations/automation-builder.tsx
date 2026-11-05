@@ -780,7 +780,8 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
       {/* Canvas */}
       <div className="relative flex-1 overflow-y-auto">
         <div className="absolute inset-0 bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-0 px-4 py-10">
+        {/* Phones: extra room at the end so the last + clears the floating bottom bar and help button. */}
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-0 px-4 pt-10 pb-44 lg:pb-10">
           <ResourcesProvider>
             <TriggerCard
               type={state.trigger_type}
