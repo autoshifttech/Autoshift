@@ -351,12 +351,13 @@ export default function ContactsPage() {
             {totalCount > 0 ? t('subtitle', { count: totalCount }) : t('subtitleZero')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Phones: Add contact gets its own full-width row first; the other two share the next row. */}
+        <div className="flex flex-wrap items-center gap-2">
           {canEditSettings && (
             <Button
               variant="outline"
               onClick={() => setCustomFieldsOpen(true)}
-              className="border-border text-muted-foreground hover:bg-muted"
+              className="flex-1 border-border text-muted-foreground hover:bg-muted sm:flex-none"
             >
               <SlidersHorizontal className="size-4" />
               {t('customFieldsBtn')}
@@ -367,7 +368,8 @@ export default function ContactsPage() {
             canAct={canEdit}
             gateReason={tGate('reasons.addOrImportContacts')}
             onClick={() => setImportOpen(true)}
-            className="border-border text-muted-foreground hover:bg-muted"
+            wrapperClassName="flex-1 sm:flex-none"
+            className="w-full border-border text-muted-foreground hover:bg-muted"
           >
             <Upload className="size-4" />
             {t('importBtn')}
@@ -376,7 +378,8 @@ export default function ContactsPage() {
             canAct={canEdit}
             gateReason={tGate('reasons.addOrImportContacts')}
             onClick={openAddForm}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            wrapperClassName="order-first w-full sm:order-none sm:w-auto"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Plus className="size-4" />
             {t('addContactBtn')}
