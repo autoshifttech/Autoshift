@@ -386,7 +386,9 @@ export default function FlowsPage() {
             `sm:max-w-sm` baked into its default classes. Without the
             sm: prefix our override applies at base only and the
             sm-scoped 384px wins at every real desktop breakpoint. */}
-        <DialogContent className={cn(templates.length > 0 ? "sm:max-w-2xl" : "sm:max-w-md", "bg-popover text-popover-foreground")}>
+        {/* Capped to the screen with the middle scrolling, so on phones every template, the name box
+            and the buttons stay reachable. */}
+        <DialogContent className={cn(templates.length > 0 ? "sm:max-w-2xl" : "sm:max-w-md", "flex max-h-[min(88dvh,48rem)] flex-col bg-popover text-popover-foreground")}>
           <DialogHeader>
             <DialogTitle>{t("createTitle")}</DialogTitle>
             <DialogDescription className="text-muted-foreground">
@@ -394,52 +396,54 @@ export default function FlowsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {templates.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("startTemplate")}
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {templates.map((template) => {
-                  const Icon = TEMPLATE_ICONS[template.icon] ?? FileText;
-                  return (
-                    <button
-                      key={template.slug}
-                      type="button"
-                      onClick={() => handleUseTemplate(template.slug)}
-                      disabled={creating}
-                      className="flex flex-col gap-2.5 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted disabled:opacity-50"
-                    >
-                      <Icon className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-semibold text-popover-foreground">
-                        {template.name}
-                      </span>
-                      <span className="text-xs leading-relaxed text-muted-foreground">
-                        {template.description}
-                      </span>
-                      <span className="mt-auto border-t border-border pt-2 text-xs text-muted-foreground">
-                        {t("nodeCount", { count: template.node_count })}
-                      </span>
-                    </button>
-                  );
-                })}
+          <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-1">
+            {templates.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t("startTemplate")}
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {templates.map((template) => {
+                    const Icon = TEMPLATE_ICONS[template.icon] ?? FileText;
+                    return (
+                      <button
+                        key={template.slug}
+                        type="button"
+                        onClick={() => handleUseTemplate(template.slug)}
+                        disabled={creating}
+                        className="flex flex-col gap-2.5 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted disabled:opacity-50"
+                      >
+                        <Icon className="h-5 w-5 text-primary" />
+                        <span className="text-sm font-semibold text-popover-foreground">
+                          {template.name}
+                        </span>
+                        <span className="text-xs leading-relaxed text-muted-foreground">
+                          {template.description}
+                        </span>
+                        <span className="mt-auto border-t border-border pt-2 text-xs text-muted-foreground">
+                          {t("nodeCount", { count: template.node_count })}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="space-y-2 border-t border-border pt-4">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {t("startBlank")}
-            </p>
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder={t("placeholderName")}
-              className="bg-muted"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreate();
-              }}
-            />
+            <div className="space-y-2 border-t border-border pt-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {t("startBlank")}
+              </p>
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder={t("placeholderName")}
+                className="bg-muted"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreate();
+                }}
+              />
+            </div>
           </div>
 
           <DialogFooter>
