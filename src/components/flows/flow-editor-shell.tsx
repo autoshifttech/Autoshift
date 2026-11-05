@@ -128,7 +128,8 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
 
           {/* Problems bar floats over the bottom of the stage, so it never
               takes room from the canvas; its list opens upward. */}
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 mx-auto max-w-2xl md:inset-x-24">
+          {/* z-30: above the floating Add node button (z-20), so an opened list of problems is never covered. */}
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-30 mx-auto max-w-2xl md:inset-x-24">
             <div className="pointer-events-auto">
               <ValidationPanel />
             </div>
