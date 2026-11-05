@@ -38,17 +38,18 @@ function AgentsPageInner() {
       </p>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="mt-6">
-        <TabsList variant="plain" className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <TabsTrigger value="assistants">
+        {/* Phones: a 2×2 grid so all four tabs show (a single row ran off the screen). */}
+        <TabsList variant="plain" className="grid w-full grid-cols-2 gap-1 max-sm:h-auto! sm:inline-flex sm:w-fit">
+          <TabsTrigger value="assistants" className="max-sm:h-11 max-sm:whitespace-normal max-sm:text-center max-sm:leading-tight">
             <Users className="mr-1.5 h-4 w-4" /> {t('tabAssistants')}
           </TabsTrigger>
-          <TabsTrigger value="leads">
+          <TabsTrigger value="leads" className="max-sm:h-11 max-sm:whitespace-normal max-sm:text-center max-sm:leading-tight">
             <Target className="mr-1.5 h-4 w-4" /> {t('tabLeads')}
           </TabsTrigger>
-          <TabsTrigger value="presets">
+          <TabsTrigger value="presets" className="max-sm:h-11 max-sm:whitespace-normal max-sm:text-center max-sm:leading-tight">
             <Wand2 className="mr-1.5 h-4 w-4" /> {t('tabPresets')}
           </TabsTrigger>
-          <TabsTrigger value="playground">
+          <TabsTrigger value="playground" className="max-sm:h-11 max-sm:whitespace-normal max-sm:text-center max-sm:leading-tight">
             <Sparkles className="mr-1.5 h-4 w-4" /> {t('tabPlayground')}
           </TabsTrigger>
         </TabsList>
