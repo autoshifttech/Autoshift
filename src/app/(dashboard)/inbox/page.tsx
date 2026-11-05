@@ -565,6 +565,17 @@ function InboxPageInner() {
   // before, unchanged.
   const hasActiveConv = !!activeConversation;
 
+  // On phones an open chat takes the whole screen: the shell's bottom bar hides
+  // (CSS on html[data-chat-open]) and comes back with the thread's back button.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (hasActiveConv) root.dataset.chatOpen = "";
+    else delete root.dataset.chatOpen;
+    return () => {
+      delete root.dataset.chatOpen;
+    };
+  }, [hasActiveConv]);
+
   // The inbox fills exactly what is left of the scrolling page below the top bar and any
   // account notice, so its panels scroll inside themselves instead of running off the screen.
   const rootRef = useRef<HTMLDivElement>(null);
@@ -588,7 +599,8 @@ function InboxPageInner() {
       ro.disconnect();
       window.removeEventListener("resize", fit);
     };
-  }, []);
+    // Refit when a chat opens or closes: the space under the inbox changes on phones.
+  }, [hasActiveConv]);
 
   return (
     <div

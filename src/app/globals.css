@@ -860,3 +860,13 @@ html[data-solid] .lgn-glass {
   backdrop-filter: none !important;
   background: var(--card);
 }
+
+/* Phones and tablets: an open Inbox chat hides the floating bottom bar and takes its room. */
+@media (width < 64rem) {
+  html[data-chat-open] [data-mobile-nav] {
+    display: none;
+  }
+  html[data-chat-open] #main-content {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
