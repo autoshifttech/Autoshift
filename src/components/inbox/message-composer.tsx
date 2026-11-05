@@ -787,9 +787,9 @@ export function MessageComposer({
 
       {/* Hint sits outside the flex row so its height doesn't push
           `items-end` buttons below the textarea. Indented to line up
-          under the textarea left edge. */}
+          under the textarea left edge. Phones and tablets skip it: the chat is full screen there. */}
       {!draft && !recording && (
-        <p className="mt-1 pl-1 text-xs text-muted-foreground sm:pl-[5.5rem]">
+        <p className="mt-1 hidden pl-1 text-xs text-muted-foreground sm:pl-[5.5rem] lg:block">
           {t("draftHint")}
         </p>
       )}
