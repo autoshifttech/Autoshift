@@ -869,4 +869,19 @@ html[data-solid] .lgn-glass {
   html[data-chat-open] #main-content {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
+  /* Full screen like a messaging app: the chat covers the title bar, banners and card frame. */
+  html[data-chat-open] [data-chat-panel] {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  html[data-chat-open] body {
+    overflow: hidden;
+  }
 }

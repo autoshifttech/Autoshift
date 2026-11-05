@@ -650,6 +650,7 @@ function InboxPageInner() {
             its share and pushes the contact-sidebar panel off-screen
             on the right. Issue #165. */}
         <div
+          data-chat-panel
           className={cn(
             "flex h-full min-w-0 flex-1 lg:flex", "overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-card)]",
             hasActiveConv ? "flex" : "hidden lg:flex",

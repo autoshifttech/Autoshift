@@ -57,6 +57,8 @@ const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#FAF8F4",
   colorScheme: "light dark",
+  // The on-screen keyboard shrinks the page instead of covering it, so a chat's typing box stays visible.
+  interactiveWidget: "resizes-content",
 };
 
 // Inline boot script — runs before React hydrates so the user's
