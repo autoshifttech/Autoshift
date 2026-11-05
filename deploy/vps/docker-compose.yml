@@ -1,0 +1,48 @@
+# AutoShift backend + n8n on one server, behind Caddy (HTTPS).
+#   cd deploy/vps && cp .env.example .env && nano .env && docker compose up -d --build
+services:
+  api:
+    build: ../../backend
+    env_file: .env
+    restart: unless-stopped
+
+  n8n:
+    build:
+      context: ../..
+      dockerfile: deploy/vps/n8n.Dockerfile
+    restart: unless-stopped
+    environment:
+      N8N_HOST: ${N8N_DOMAIN}
+      N8N_PROTOCOL: https
+      N8N_PORT: "5678"
+      WEBHOOK_URL: https://${N8N_DOMAIN}/
+      N8N_PROXY_HOPS: "1"
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: ${TIMEZONE:-Asia/Kolkata}
+      TZ: ${TIMEZONE:-Asia/Kolkata}
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      N8N_DOMAIN: ${N8N_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - n8n
+
+volumes:
+  n8n_data:
+  caddy_data:
+  caddy_config:
