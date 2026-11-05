@@ -14,8 +14,11 @@ export function HelpButton() {
   const t = useTranslations("Help");
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   // On phones the inbox composer sits where the button would float.
-  const hideOnPhone = usePathname().startsWith("/inbox");
+  const hideOnPhone = pathname.startsWith("/inbox");
+  // The flow editor has its own floating Add node button in that corner.
+  const hidden = /^\/flows\/[^/]+/.test(pathname) && pathname !== "/flows/connections";
 
   useEffect(() => {
     if (!open) return;
@@ -37,6 +40,7 @@ export function HelpButton() {
     { href: "/wallet", icon: Wallet, label: t("guideWallet") },
   ];
 
+  if (hidden) return null;
   return (
     <div ref={panel} className={cn("no-print fixed right-4 bottom-24 z-40 flex-col items-end gap-3 sm:right-6 lg:bottom-6 lg:flex", hideOnPhone ? "hidden" : "flex")}>
       {open && (

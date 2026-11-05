@@ -160,7 +160,8 @@ export function FlowBuilder() {
   }, [flashKey]);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 pt-6 pb-28 sm:px-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 pt-6 pb-40 sm:px-6">
+      <AddNodeButton onAdd={addNode} hasStart={state.nodes.some((n) => n.node_type === 'start')} />
       <TriggerPanel
         state={state}
         setState={setState}
@@ -171,12 +172,9 @@ export function FlowBuilder() {
       <EntryPicker state={state} setState={setState} t={t} />
 
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-foreground text-sm font-semibold">
-            {t('nodesTitle', { count: state.nodes.length })}
-          </h2>
-          <AddNodeButton onAdd={addNode} hasStart={state.nodes.some((n) => n.node_type === 'start')} />
-        </div>
+        <h2 className="text-foreground text-sm font-semibold">
+          {t('nodesTitle', { count: state.nodes.length })}
+        </h2>
 
         {state.nodes.length === 0 ? (
           <div className="border-border bg-card/50 text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
@@ -623,6 +621,11 @@ function NodeConfigWithAdvanced({
 // Add-node menu
 // ============================================================
 
+/** Floats bottom-right above the problems bar, so adding a step never needs a scroll back up. */
 function AddNodeButton({ onAdd, hasStart }: { onAdd: (type: NodeType) => void; hasStart: boolean }) {
-  return <AddNodeMenu onAdd={onAdd} hasStart={hasStart} variant="outline" side="bottom" align="end" />;
+  return (
+    <div className="fixed right-4 bottom-20 z-20 sm:right-6">
+      <AddNodeMenu onAdd={onAdd} hasStart={hasStart} variant="primary" side="top" align="end" className="min-h-12 px-5" />
+    </div>
+  );
 }

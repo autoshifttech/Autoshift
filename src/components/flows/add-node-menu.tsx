@@ -59,7 +59,7 @@ export function AddNodeMenu({
   /** Whether the flow already has a Start step. */
   hasStart: boolean;
   variant?: keyof typeof TRIGGER_STYLES;
-  side?: "bottom" | "right";
+  side?: "bottom" | "right" | "top";
   align?: "start" | "end";
   className?: string;
 }) {
