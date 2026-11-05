@@ -11,6 +11,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { NativeSelect } from '@/components/ui/native-select';
 import { toast } from '@/lib/toast';
 import { backend, backendUrl } from '@/lib/backend/client';
+import { ApiKeysSettings } from './api-keys-settings';
 import { SettingsPanelHead } from './settings-panel-head';
 
 interface ApiKey {
@@ -50,14 +51,8 @@ export function ApiKeysPanel() {
     if (connected) void load();
   }, [connected, load]);
 
-  if (!connected) {
-    return (
-      <div>
-        <SettingsPanelHead title={t('title')} description={t('desc')} />
-        <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">{t('notConnected')}</p>
-      </div>
-    );
-  }
+  // Without the backend, the website's own public API (/api/v1) still serves n8n, Zapier and scripts.
+  if (!connected) return <ApiKeysSettings />;
 
   const create = async () => {
     if (!name.trim()) return toast.error(t('nameRequired'));
