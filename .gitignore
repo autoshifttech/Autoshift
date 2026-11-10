@@ -50,3 +50,7 @@ supabase/.temp/
 /backend/.venv/
 __pycache__/
 .pytest_cache/
+
+# Launch-video asset captures (scripts/video)
+/video-assets/
+/video-assets.zip

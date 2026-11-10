@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shifty Mascot Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ---------- AutoShift tokens (light) ---------- */
+  :root {
+    --bg: #FAF8F4; --card: #FFFDF9; --card-2: #F3EFE7; --text: #1B2420; --muted: #55615B;
+    --border: #E5DFD3; --primary: #1E4C41; --primary-fg: #FAF8F4; --focus: #2F7A64;
+    --shadow: 0 1px 2px rgb(30 40 35 / .06), 0 8px 24px -12px rgb(30 40 35 / .18);
+    /* Shifty */
+    --s-top: #2F6E5C; --s-bottom: #1E4C41; --s-line: #0F2E26; --s-shine: rgb(255 255 255 / .28);
+    --s-tuft: #7CC9B0; --s-eye: #FFFDF8; --s-pupil: #13221D; --s-cheek: #F08C74;
+    --s-mouth: #2A1712; --s-tongue: #F08C74; --s-foot: #163C33; --s-ground: rgb(20 40 30 / .14);
+    --s-bubble: #FFFDF8; --s-dot: #1E4C41; --s-z: #2F6E5C; --s-drop: #6FB6D9;
+    --c1: #F08C74; --c2: #7CC9B0; --c3: #F2C14E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111614; --card: #19201D; --card-2: #212A26; --text: #EEF2EF; --muted: #A9B5AF;
+      --border: #2C3632; --primary: #3F8F76; --primary-fg: #0E1412; --focus: #7CC9B0;
+      --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
+      --s-top: #56AD91; --s-bottom: #3A8670; --s-line: #0B1F1A; --s-foot: #2C6857; --s-ground: rgb(0 0 0 / .45);
+      --s-bubble: #F4F1EA; --s-dot: #1E4C41; --s-z: #7CC9B0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111614; --card: #19201D; --card-2: #212A26; --text: #EEF2EF; --muted: #A9B5AF;
+    --border: #2C3632; --primary: #3F8F76; --primary-fg: #0E1412; --focus: #7CC9B0;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
+    --s-top: #56AD91; --s-bottom: #3A8670; --s-line: #0B1F1A; --s-foot: #2C6857; --s-ground: rgb(0 0 0 / .45);
+    --s-bubble: #F4F1EA; --s-dot: #1E4C41; --s-z: #7CC9B0;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.5; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 0 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 20px; margin: 40px 0 4px; letter-spacing: -.01em; }
+  p.lead { color: var(--muted); margin: 0 0 20px; max-width: 62ch; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 15px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); }
+
+  /* controls */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+  .chip:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  select.chip { padding-right: 12px; }
+  .switch { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; font-size: 15px; cursor: pointer; }
+  .switch input[type=checkbox] { width: 44px; height: 26px; appearance: none; border-radius: 999px; background: var(--border); position: relative; cursor: pointer; margin: 0; transition: background .2s; }
+  .switch input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgb(0 0 0 / .25); }
+  .switch input[type=checkbox]:checked { background: var(--primary); }
+  .switch input[type=checkbox]:checked::after { transform: translateX(18px); }
+
+  /* hero */
+  .hero { display: grid; gap: 20px; padding: 20px; grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 760px) { .hero { grid-template-columns: 320px 1fr; padding: 32px; } }
+  .stage { display: grid; place-items: center; min-height: 280px; border-radius: 20px; overflow: hidden;
+    background: radial-gradient(circle, var(--border) 1px, transparent 1px) 0 0 / 16px 16px, var(--card-2); }
+  .moods { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+  .range { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
+  .range input { width: min(260px, 55vw); accent-color: var(--primary); height: 44px; }
+  .moodnote { color: var(--muted); font-size: 15px; margin: 0; min-height: 3em; }
+  .tip { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .mood-card { padding: 18px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+  .mood-card b { font-size: 15px; }
+  .mood-card span { color: var(--muted); font-size: 14px; }
+  .ctx { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .phone { padding: 14px; border-radius: 28px; }
+  .screen { border-radius: 18px; background: var(--bg); border: 1px solid var(--border); padding: 16px; min-height: 290px; display: flex; flex-direction: column; }
+  .ctx-label { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 2px 4px 10px; }
+  .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
+  .center h3 { margin: 4px 0 0; font-size: 17px; }
+  .center p { margin: 0; color: var(--muted); font-size: 14px; max-width: 30ch; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0;
+    background: var(--primary); color: var(--primary-fg); font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 10px; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .bubble { max-width: 80%; padding: 8px 12px; border-radius: 16px; font-size: 14px; margin: 4px 0; }
+  .bubble.in { background: var(--card-2); align-self: flex-start; border-bottom-left-radius: 6px; }
+  .typing { display: flex; align-items: center; gap: 6px; align-self: flex-end; margin-top: 6px; color: var(--muted); font-size: 13px; }
+  .composer { margin-top: auto; display: flex; gap: 8px; align-items: center; padding-top: 12px; }
+  .composer .field { flex: 1; min-height: 44px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; color: var(--muted); font-size: 14px; }
+  .toast { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 8px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); text-align: left; }
+  .toast b { display: block; font-size: 15px; }
+  .toast span { color: var(--muted); font-size: 13px; }
+  .sizes { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 24px; padding: 20px; }
+  .sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+  ul.notes { margin: 0; padding: 20px 20px 20px 40px; }
+  ul.notes li { margin: 6px 0; }
+  ul.notes code { font-size: 13px; background: var(--card-2); padding: 1px 6px; border-radius: 6px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 14px; }
+  html[data-mascot="off"] .shifty-slot { display: none !important; }
+
+  /* =========================================================
+     Shifty (vector cartoon)
+     ========================================================= */
+  .shifty { display: block; overflow: visible; }
+  .shifty * { transform-box: view-box; }
+  .shifty .body { stroke: var(--s-line); stroke-width: 4; stroke-linejoin: round; }
+  .shifty .shine { fill: var(--s-shine); }
+  .shifty .tuft { fill: none; stroke: var(--s-tuft); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+  .shifty .arm, .shifty .foot { fill: var(--s-foot); stroke: var(--s-line); stroke-width: 4; }
+  .shifty .ground { fill: var(--s-ground); }
+  .shifty .white { fill: var(--s-eye); stroke: var(--s-line); stroke-width: 3.5; }
+  .shifty .pupil { fill: var(--s-pupil); }
+  .shifty .glint { fill: #fff; }
+  .shifty .cheek { fill: var(--s-cheek); opacity: .75; }
+  .shifty .mouth { fill: var(--s-mouth); stroke: var(--s-line); stroke-width: 3; stroke-linejoin: round; }
+  .shifty .tongue { fill: var(--s-tongue); }
+  .shifty .line { fill: none; stroke: var(--s-line); stroke-width: 5; stroke-linecap: round; }
+  .shifty .brow { fill: none; stroke: var(--s-line); stroke-width: 5; stroke-linecap: round; }
+  .shifty .thought { fill: var(--s-bubble); stroke: var(--s-line); stroke-width: 3.5; }
+  .shifty .tdot { fill: var(--s-dot); }
+  .shifty .zz { fill: var(--s-z); font: 800 30px "Plus Jakarta Sans", system-ui, sans-serif; }
+  .shifty .drop { fill: var(--s-drop); stroke: var(--s-line); stroke-width: 3; }
+  .shifty .cf1 { fill: var(--c1); } .shifty .cf2 { fill: var(--c2); } .shifty .cf3 { fill: var(--c3); }
+
+  /* pivots (view-box coordinates) */
+  .shifty .squash { transform-origin: 100px 168px; }
+  .shifty .tilt   { transform-origin: 100px 150px; }
+  .shifty .eye-l  { transform-origin: 78px 92px; }
+  .shifty .eye-r  { transform-origin: 122px 92px; }
+  .shifty .arm-l  { transform-origin: 48px 106px; }
+  .shifty .arm-r  { transform-origin: 152px 106px; }
+  .shifty .ground { transform-origin: 100px 182px; }
+
+  /* idle: breathe, blink, a friendly wave now and then */
+  .m-idle .squash { animation: breathe 3.2s ease-in-out infinite; }
+  .m-idle .eye, .m-thinking .eye { animation: blink 4.6s ease-in-out infinite; }
+  .m-idle .arm-r { animation: wave 6s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.025, .975); } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.08); } }
+  @keyframes wave {
+    0%, 62%, 100% { transform: rotate(0); }
+    68% { transform: rotate(-150deg); } 73% { transform: rotate(-115deg); } 78% { transform: rotate(-150deg); }
+    83% { transform: rotate(-115deg); } 88% { transform: rotate(-150deg); } 94% { transform: rotate(0); }
+  }
+
+  /* thinking: head tilts, thought dots bounce */
+  .m-thinking .tilt { animation: ponder 3s ease-in-out infinite alternate; }
+  .m-thinking .arm-l { transform: rotate(115deg); }
+  .m-thinking .tdot { animation: bounce 1.2s ease-in-out infinite; }
+  .m-thinking .tdot.d2 { animation-delay: .15s; } .m-thinking .tdot.d3 { animation-delay: .3s; }
+  .m-thinking .thought-small { animation: pop-in 3s ease-in-out infinite alternate; transform-origin: 154px 52px; }
+  @keyframes ponder { from { transform: rotate(-5deg); } to { transform: rotate(3deg); } }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+  @keyframes pop-in { from { transform: scale(.9); } to { transform: scale(1.05); } }
+
+  /* happy: squash-and-stretch jump, arms up, confetti */
+  .m-happy .jump { animation: jump 1s cubic-bezier(.3,.7,.4,1) infinite; }
+  .m-happy .squash { animation: stretch 1s ease-in-out infinite; }
+  .m-happy .ground { animation: ground 1s cubic-bezier(.3,.7,.4,1) infinite; }
+  .m-happy .arm-r { animation: cheer-r .5s ease-in-out infinite alternate; }
+  .m-happy .arm-l { animation: cheer-l .5s ease-in-out infinite alternate; }
+  .m-happy .cf { animation: confetti 1s ease-out infinite; opacity: 0; }
+  .m-happy .cf:nth-child(2n) { animation-delay: .12s; } .m-happy .cf:nth-child(3n) { animation-delay: .24s; }
+  @keyframes jump { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-34px); } }
+  @keyframes stretch { 0%, 100% { transform: scale(1.1, .88); } 18% { transform: scale(.94, 1.08); } 45% { transform: scale(1, 1); } 80% { transform: scale(.97, 1.04); } }
+  @keyframes ground { 0%, 100% { transform: scale(1); opacity: 1; } 45% { transform: scale(.55); opacity: .5; } }
+  @keyframes cheer-r { from { transform: rotate(-150deg); } to { transform: rotate(-115deg); } }
+  @keyframes cheer-l { from { transform: rotate(150deg); } to { transform: rotate(115deg); } }
+  @keyframes confetti { 0% { transform: translate(0, 0) scale(.2) rotate(0); opacity: 0; } 20% { opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(200deg); opacity: 0; } }
+  .shifty.once .jump, .shifty.once .squash, .shifty.once .ground, .shifty.once .cf, .shifty.once .arm-l, .shifty.once .arm-r { animation-iteration-count: 2; }
+
+  /* sleeping: slow breathing, floating Zz */
+  .m-sleeping .squash { animation: breathe-deep 4s ease-in-out infinite; }
+  .m-sleeping .tilt { transform: rotate(5deg); }
+  .m-sleeping .zz { animation: float-z 3.6s ease-in-out infinite; opacity: 0; }
+  .m-sleeping .zz.z2 { animation-delay: 1.2s; } .m-sleeping .zz.z3 { animation-delay: 2.4s; }
+  .m-sleeping .snore { animation: snore 4s ease-in-out infinite; transform-origin: 100px 120px; }
+  @keyframes breathe-deep { 50% { transform: scale(1.04, .955); } }
+  @keyframes float-z { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 25% { opacity: 1; } 100% { transform: translate(22px, -46px) scale(1.1); opacity: 0; } }
+  @keyframes snore { 50% { transform: scale(1.35); } }
+
+  /* oops: a shake, worried eyes, sweat drop */
+  .m-oops .tilt { animation: shake .45s ease-in-out 3; }
+  .m-oops .drop { animation: drip 1.8s ease-in infinite; }
+  .m-oops .arm-l { transform: rotate(60deg); } .m-oops .arm-r { transform: rotate(-60deg); }
+  @keyframes shake { 20% { transform: translateX(-6px) rotate(-3deg); } 60% { transform: translateX(6px) rotate(3deg); } }
+  @keyframes drip { 0% { transform: translateY(-4px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(18px); opacity: 0; } }
+
+  /* Reduce motion: system setting, or the switch on this page */
+  @media (prefers-reduced-motion: reduce) {
+    .shifty, .shifty * { animation: none !important; }
+    .m-sleeping .zz, .m-happy .cf, .m-oops .drop { opacity: 1; }
+    .m-happy .cf { transform: translate(var(--dx), var(--dy)); }
+  }
+  html[data-reduce] .shifty, html[data-reduce] .shifty * { animation: none !important; }
+  html[data-reduce] .m-sleeping .zz, html[data-reduce] .m-happy .cf, html[data-reduce] .m-oops .drop { opacity: 1; }
+  html[data-reduce] .m-happy .cf { transform: translate(var(--dx), var(--dy)); }
+  html[data-reduce] .m-happy .arm-r { transform: rotate(-135deg); }
+  html[data-reduce] .m-happy .arm-l { transform: rotate(135deg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Meet Shifty</h1>
+  <p class="lead">AutoShift’s cartoon mascot: a friendly WhatsApp-style chat bubble in brand green, with the logo’s double chevron as a little tuft. It shows up only at key moments (empty screens, AI thinking, wins and errors), never in tables or customer chats.</p>
+
+  <div class="toolbar" role="group" aria-label="Preview settings">
+    <button class="chip" id="themeBtn" type="button" aria-pressed="false">🌙 Dark mode</button>
+    <label class="switch"><input type="checkbox" id="reduceSw"> Reduce motion</label>
+    <label class="switch"><input type="checkbox" id="mascotSw" checked> Show mascot</label>
+    <label class="switch" for="lang">Language
+      <select class="chip" id="lang">
+        <option value="en">English</option><option value="pt">Português</option>
+        <option value="es">Español</option><option value="ko">한국어</option>
+      </select>
+    </label>
+  </div>
+
+  <section class="card hero" aria-labelledby="pg">
+    <div class="stage"><div class="shifty-slot" id="heroSlot"></div></div>
+    <div>
+      <h2 id="pg" style="margin-top:0">Playground</h2>
+      <p class="sub">Pick a mood and a size. This is what the in-app component would draw.</p>
+      <div class="moods" role="group" aria-label="Mood" id="moodBtns"></div>
+      <div class="range"><label for="size">Size</label><input type="range" id="size" min="32" max="240" step="8" value="200"><output id="sizeOut">200px</output></div>
+      <p class="moodnote" id="moodNote"></p>
+      <p class="tip">Tip: in Idle, move your mouse or finger. Shifty’s eyes follow you.</p>
+    </div>
+  </section>
+
+  <h2>Five moods</h2>
+  <p class="sub">Smooth cartoon animations that stop when Reduce motion is on.</p>
+  <div class="grid" id="moodGrid"></div>
+
+  <h2>Where Shifty appears</h2>
+  <p class="sub">Phone-size mock screens. Switch the language above; the text around Shifty is in all four app languages.</p>
+  <div class="ctx">
+    <div><div class="ctx-label">Empty inbox · sleeping</div>
+      <div class="card phone"><div class="screen"><div class="center">
+        <div class="shifty-slot" data-mood="sleeping" data-size="120"></div>
+        <h3 data-i18n="emptyTitle"></h3><p data-i18n="emptyBody"></p>
+      </div></div></div></div>
+
+    <div><div class="ctx-label">AI drafting a reply · thinking</div>
+      <div class="card phone"><div class="screen">
+        <div class="bubble in">Hi! Do you deliver to Chennai?</div>
+        <div class="typing"><span data-i18n="thinking"></span><span class="shifty-slot" data-mood="thinking" data-size="56"></span></div>
+        <div class="composer"><div class="field">✨ …</div></div>
+      </div></div></div>
+
+    <div><div class="ctx-label">Success moment · happy</div>
+      <div class="card phone"><div class="screen"><div class="center">
+        <div class="toast">
+          <span class="shifty-slot" id="toastSlot" data-mood="happy" data-size="64" data-once="1"></span>
+          <div><b data-i18n="successTitle"></b><span data-i18n="successBody"></span></div>
+        </div>
+        <button class="btn ghost" type="button" id="replay" data-i18n="replay"></button>
+      </div></div></div></div>
+
+    <div><div class="ctx-label">Onboarding greeting · idle</div>
+      <div class="card phone"><div class="screen"><div class="center">
+        <div class="shifty-slot" data-mood="idle" data-size="130" data-track="1"></div>
+        <h3 data-i18n="greetTitle"></h3><p data-i18n="greetBody"></p>
+        <button class="btn" type="button" data-i18n="start"></button>
+      </div></div></div></div>
+
+    <div><div class="ctx-label">404 / error · oops</div>
+      <div class="card phone"><div class="screen"><div class="center">
+        <div class="shifty-slot" data-mood="oops" data-size="120"></div>
+        <h3 data-i18n="oopsTitle"></h3><p data-i18n="oopsBody"></p>
+        <button class="btn" type="button" data-i18n="backHome"></button>
+      </div></div></div></div>
+  </div>
+
+  <h2>Sizes</h2>
+  <p class="sub">A vector drawing, so it stays sharp from a tiny icon to a big illustration.</p>
+  <div class="card sizes" id="sizes"></div>
+
+  <h2>Build notes (for the app)</h2>
+  <div class="card"><ul class="notes">
+    <li>One component: <code>&lt;Shifty mood="happy" size={64} /&gt;</code> drawn as inline SVG with CSS animation, a few KB, no images, no libraries.</li>
+    <li>Colours come from theme tokens, so light and dark mode work automatically.</li>
+    <li>Decorative only (<code>aria-hidden</code>); the message next to it always carries the meaning.</li>
+    <li>All animation and eye-following stop with the system “Reduce motion” setting.</li>
+    <li>Users can switch it off in <b>Settings → Appearance → Show mascot</b>.</li>
+    <li>Never shown in tables, the admin panel, invoices or messages sent to customers.</li>
+  </ul></div>
+
+  <footer>Shifty preview · AutoShift design concept · not yet in the app</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var uid = 0;
+
+  // Smooth speech-bubble body with a tail at the bottom left.
+  var BODY = "M84 40 H116 A44 44 0 0 1 160 84 V104 A44 44 0 0 1 116 148 H88 Q74 164 50 172 Q62 158 61 142 A44 44 0 0 1 40 104 V84 A44 44 0 0 1 84 40 Z";
+
+  function eyeOpen(side, cx, opts) {
+    var r = opts.small ? 5.5 : 7.5;
+    var px = cx + (opts.look ? opts.look[0] : 0), py = 94 + (opts.look ? opts.look[1] : 0);
+    return '<g class="eye eye-' + side + '">' +
+      '<ellipse class="white" cx="' + cx + '" cy="92" rx="' + (opts.big ? 15 : 13) + '" ry="' + (opts.big ? 17 : 15) + '"/>' +
+      '<g class="pupils"><circle class="pupil" cx="' + px + '" cy="' + py + '" r="' + r + '"/>' +
+      '<circle class="glint" cx="' + (px - 2.5) + '" cy="' + (py - 3) + '" r="' + (opts.small ? 1.8 : 2.6) + '"/></g></g>';
+  }
+
+  var FACES = {
+    idle: function () {
+      return eyeOpen("l", 78, {}) + eyeOpen("r", 122, {}) +
+        '<path class="mouth" d="M86 112 Q100 130 114 112 Z"/><ellipse class="tongue" cx="100" cy="120" rx="6" ry="3"/>';
+    },
+    thinking: function () {
+      return eyeOpen("l", 78, { look: [4, -6] }) + eyeOpen("r", 122, { look: [4, -6] }) +
+        '<path class="brow" d="M66 70 Q78 68 90 71"/><path class="brow" d="M110 66 Q122 58 134 64"/>' +
+        '<path class="line" d="M92 120 Q101 114 110 119"/>';
+    },
+    happy: function () {
+      return '<path class="line" d="M66 96 Q78 80 90 96"/><path class="line" d="M110 96 Q122 80 134 96"/>' +
+        '<path class="mouth" d="M80 108 Q100 142 120 108 Z"/><ellipse class="tongue" cx="100" cy="126" rx="9" ry="5"/>';
+    },
+    sleeping: function () {
+      return '<path class="line" d="M66 92 Q78 102 90 92"/><path class="line" d="M110 92 Q122 102 134 92"/>' +
+        '<ellipse class="mouth snore" cx="100" cy="120" rx="5" ry="4.5"/>';
+    },
+    oops: function () {
+      return eyeOpen("l", 78, { big: true, small: true }) + eyeOpen("r", 122, { big: true, small: true }) +
+        '<path class="brow" d="M64 74 L88 68"/><path class="brow" d="M136 74 L112 68"/>' +
+        '<path class="line" d="M82 120 q5 -6 9 0 t9 0 t9 0 t9 0"/>';
+    }
+  };
+
+  function extras(mood) {
+    if (mood === "thinking") {
+      return '<g class="thought-small"><circle class="thought" cx="150" cy="56" r="4"/><circle class="thought" cx="160" cy="44" r="6.5"/></g>' +
+        '<rect class="thought" x="150" y="4" width="50" height="30" rx="15"/>' +
+        '<circle class="tdot d1" cx="163" cy="19" r="4"/><circle class="tdot d2" cx="175" cy="19" r="4"/><circle class="tdot d3" cx="187" cy="19" r="4"/>';
+    }
+    if (mood === "happy") {
+      var bits = [
+        ["rect", 96, 40, "cf1", -60, -40], ["circle", 100, 40, "cf2", 55, -45], ["rect", 100, 44, "cf3", -75, 5],
+        ["circle", 100, 44, "cf1", 78, 0], ["rect", 100, 40, "cf2", -20, -62], ["circle", 100, 40, "cf3", 25, -66],
+        ["rect", 100, 44, "cf3", 62, -28], ["circle", 100, 44, "cf2", -55, -22]
+      ];
+      return '<g class="confetti">' + bits.map(function (b) {
+        var style = 'style="--dx:' + b[4] + 'px;--dy:' + b[5] + 'px;transform-origin:' + b[1] + 'px ' + b[2] + 'px"';
+        return b[0] === "rect"
+          ? '<rect class="cf ' + b[3] + '" x="' + (b[1] - 4) + '" y="' + (b[2] - 3) + '" width="8" height="6" rx="1.5" ' + style + '/>'
+          : '<circle class="cf ' + b[3] + '" cx="' + b[1] + '" cy="' + b[2] + '" r="4" ' + style + '/>';
+      }).join("") + '</g>';
+    }
+    if (mood === "sleeping") {
+      return '<text class="zz z1" x="146" y="58">z</text><text class="zz z2" x="146" y="58">z</text><text class="zz z3" x="146" y="58">Z</text>';
+    }
+    if (mood === "oops") {
+      return '<path class="drop" d="M150 48 Q160 64 150 70 Q140 64 150 48 Z"/>';
+    }
+    return "";
+  }
+
+  function shifty(mood, size, opts) {
+    opts = opts || {};
+    var id = "sg" + (++uid);
+    return '<svg class="shifty m-' + mood + (opts.once ? ' once' : '') + '" viewBox="0 0 200 200" width="' + size + '" height="' + size + '"' +
+      (opts.track ? ' data-track="1"' : '') + ' aria-hidden="true" focusable="false">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" style="stop-color:var(--s-top)"/><stop offset="1" style="stop-color:var(--s-bottom)"/></linearGradient></defs>' +
+      '<ellipse class="ground" cx="100" cy="182" rx="46" ry="7"/>' +
+      '<g class="jump"><g class="squash">' +
+        '<ellipse class="foot" cx="84" cy="162" rx="14" ry="9"/><ellipse class="foot" cx="120" cy="162" rx="14" ry="9"/>' +
+        '<g class="arm arm-l"><ellipse class="arm" cx="42" cy="120" rx="9" ry="16"/></g>' +
+        '<g class="arm arm-r"><ellipse class="arm" cx="158" cy="120" rx="9" ry="16"/></g>' +
+        '<g class="tilt">' +
+          '<path class="tuft" d="M88 30 L100 18 L112 30"/><path class="tuft" d="M88 42 L100 30 L112 42"/>' +
+          '<path class="body" d="' + BODY + '" fill="url(#' + id + ')"/>' +
+          '<ellipse class="shine" cx="70" cy="62" rx="16" ry="8" transform="rotate(-25 70 62)"/>' +
+          '<ellipse class="cheek" cx="62" cy="112" rx="9" ry="5.5"/><ellipse class="cheek" cx="138" cy="112" rx="9" ry="5.5"/>' +
+          FACES[mood]() +
+        '</g>' +
+      '</g></g>' + extras(mood) + '</svg>';
+  }
+
+  /* ---------- eyes follow the pointer (Idle only, off with Reduce motion) ---------- */
+  var reduceMq = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  var pending = null;
+  function follow(x, y) {
+    if (document.documentElement.hasAttribute("data-reduce") || reduceMq.matches) return;
+    document.querySelectorAll('svg.shifty.m-idle[data-track] .pupils').forEach(function (g) {
+      var svg = g.ownerSVGElement, r = svg.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height * 0.46;
+      var dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(1, d / 300);
+      g.setAttribute("transform", "translate(" + (dx / d * 5 * m).toFixed(2) + " " + (dy / d * 5 * m).toFixed(2) + ")");
+    });
+  }
+  window.addEventListener("pointermove", function (e) {
+    if (pending) return;
+    pending = requestAnimationFrame(function () { pending = null; follow(e.clientX, e.clientY); });
+  }, { passive: true });
+
+  /* ---------- page ---------- */
+  var MOODS = [
+    ["idle", "Idle", "Breathes, blinks and waves now and then. Eyes follow you. Used on onboarding and calm screens."],
+    ["thinking", "Thinking", "Tilts its head with a thought bubble. Used while AI drafts a reply or a page loads."],
+    ["happy", "Happy", "Squash-and-stretch jump with confetti, about 2 seconds. Used for wins: WhatsApp connected, flow activated."],
+    ["sleeping", "Sleeping", "Slow breathing with floating Zz. Used for an empty inbox."],
+    ["oops", "Oops", "A worried shake and a sweat drop. Used for errors and the 404 page."]
+  ];
+  var state = { mood: "idle", size: 200 };
+  var heroSlot = document.getElementById("heroSlot"), moodBtns = document.getElementById("moodBtns"), moodNote = document.getElementById("moodNote");
+
+  function renderHero() {
+    heroSlot.innerHTML = shifty(state.mood, state.size, { track: true });
+    moodNote.textContent = MOODS.filter(function (x) { return x[0] === state.mood; })[0][2];
+    Array.prototype.forEach.call(moodBtns.children, function (b) { b.setAttribute("aria-pressed", String(b.dataset.mood === state.mood)); });
+  }
+  MOODS.forEach(function (m) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.dataset.mood = m[0]; b.textContent = m[1];
+    b.addEventListener("click", function () { state.mood = m[0]; renderHero(); });
+    moodBtns.appendChild(b);
+  });
+  var size = document.getElementById("size"), sizeOut = document.getElementById("sizeOut");
+  size.addEventListener("input", function () { state.size = Number(size.value); sizeOut.textContent = size.value + "px"; renderHero(); });
+
+  var grid = document.getElementById("moodGrid");
+  MOODS.forEach(function (m) {
+    var c = document.createElement("div");
+    c.className = "card mood-card";
+    c.innerHTML = '<div class="shifty-slot">' + shifty(m[0], 120, { track: m[0] === "idle" }) + '</div><b>' + m[1] + '</b><span>' + m[2] + '</span>';
+    grid.appendChild(c);
+  });
+  document.querySelectorAll(".shifty-slot[data-mood]").forEach(function (el) {
+    el.innerHTML = shifty(el.dataset.mood, Number(el.dataset.size || 48), { once: el.dataset.once === "1", track: el.dataset.track === "1" });
+  });
+  var sizes = document.getElementById("sizes");
+  [32, 48, 64, 96, 128].forEach(function (s) {
+    var f = document.createElement("figure");
+    f.innerHTML = '<div class="shifty-slot">' + shifty("idle", s) + '</div><figcaption>' + s + 'px</figcaption>';
+    sizes.appendChild(f);
+  });
+  document.getElementById("replay").addEventListener("click", function () {
+    document.getElementById("toastSlot").innerHTML = shifty("happy", 64, { once: true });
+  });
+
+  /* ---------- theme, motion, mascot ---------- */
+  var root = document.documentElement, themeBtn = document.getElementById("themeBtn");
+  function isDark() { var t = root.getAttribute("data-theme"); return t ? t === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
+  function syncTheme() { var d = isDark(); themeBtn.setAttribute("aria-pressed", String(d)); themeBtn.textContent = d ? "☀️ Light mode" : "🌙 Dark mode"; }
+  themeBtn.addEventListener("click", function () { root.setAttribute("data-theme", isDark() ? "light" : "dark"); syncTheme(); });
+  syncTheme();
+  var reduceSw = document.getElementById("reduceSw");
+  if (reduceMq.matches) reduceSw.checked = true;
+  function syncReduce() {
+    if (reduceSw.checked) {
+      root.setAttribute("data-reduce", "");
+      document.querySelectorAll("svg.shifty .pupils").forEach(function (g) { g.removeAttribute("transform"); });
+    } else root.removeAttribute("data-reduce");
+  }
+  reduceSw.addEventListener("change", syncReduce); syncReduce();
+  var mascotSw = document.getElementById("mascotSw");
+  mascotSw.addEventListener("change", function () { root.setAttribute("data-mascot", mascotSw.checked ? "on" : "off"); });
+
+  /* ---------- the four app languages ---------- */
+  var I18N = {
+    en: { emptyTitle: "No chats yet", emptyBody: "When a customer messages your WhatsApp number, it shows up here.",
+          thinking: "Shifty is drafting a reply…", successTitle: "WhatsApp connected!", successBody: "You can start replying to customers now.",
+          greetTitle: "Hi, I’m Shifty 👋", greetBody: "Let’s set up your business in 3 quick steps.", start: "Let’s start",
+          oopsTitle: "Page not found", oopsBody: "This page moved or never existed.", backHome: "Back to dashboard", replay: "Replay" },
+    pt: { emptyTitle: "Nenhuma conversa ainda", emptyBody: "Quando um cliente enviar mensagem para o seu número do WhatsApp, ela aparece aqui.",
+          thinking: "O Shifty está escrevendo uma resposta…", successTitle: "WhatsApp conectado!", successBody: "Você já pode responder aos clientes.",
+          greetTitle: "Oi, eu sou o Shifty 👋", greetBody: "Vamos configurar seu negócio em 3 passos rápidos.", start: "Vamos começar",
+          oopsTitle: "Página não encontrada", oopsBody: "Esta página mudou ou nunca existiu.", backHome: "Voltar ao painel", replay: "Repetir" },
+    es: { emptyTitle: "Aún no hay chats", emptyBody: "Cuando un cliente escriba a tu número de WhatsApp, aparecerá aquí.",
+          thinking: "Shifty está redactando una respuesta…", successTitle: "¡WhatsApp conectado!", successBody: "Ya puedes responder a tus clientes.",
+          greetTitle: "Hola, soy Shifty 👋", greetBody: "Configuremos tu negocio en 3 pasos rápidos.", start: "Empecemos",
+          oopsTitle: "Página no encontrada", oopsBody: "Esta página se movió o nunca existió.", backHome: "Volver al panel", replay: "Repetir" },
+    ko: { emptyTitle: "아직 대화가 없어요", emptyBody: "고객이 WhatsApp 번호로 메시지를 보내면 여기에 표시돼요.",
+          thinking: "Shifty가 답장을 작성하는 중…", successTitle: "WhatsApp이 연결됐어요!", successBody: "이제 고객에게 답장할 수 있어요.",
+          greetTitle: "안녕하세요, Shifty예요 👋", greetBody: "3단계로 빠르게 비즈니스를 설정해요.", start: "시작하기",
+          oopsTitle: "페이지를 찾을 수 없어요", oopsBody: "페이지가 이동했거나 존재하지 않아요.", backHome: "대시보드로 돌아가기", replay: "다시 보기" }
+  };
+  var lang = document.getElementById("lang");
+  function applyLang() { var d = I18N[lang.value]; document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = d[el.dataset.i18n]; }); }
+  lang.addEventListener("change", applyLang);
+
+  renderHero(); applyLang();
+})();
+</script>
+</body>
+</html>
