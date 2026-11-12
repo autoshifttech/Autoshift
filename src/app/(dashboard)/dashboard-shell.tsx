@@ -17,7 +17,6 @@ import { BrowserNotificationsListener } from "@/components/notifications/browser
 import { SkipLink } from "@/components/layout/skip-link";
 import { AccountNotices } from "@/components/layout/account-notices";
 import { CommandPalette } from "@/components/layout/command-palette";
-import { HelpButton } from "@/components/layout/help-button";
 import { ViewAsBanner } from "@/components/admin/view-as-banner";
 
 // Auth-gated dashboard shell. Extracted from the layout so the layout
@@ -60,7 +59,6 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
           Your profile). Headless — renders nothing. */}
       <BrowserNotificationsListener />
       <CommandPalette />
-      <HelpButton />
       <NavFrame />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <ViewAsBanner />
