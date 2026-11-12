@@ -1,0 +1,112 @@
+# Render Blueprint: the AutoShift website/app (Next.js) and the API (FastAPI).
+# Render → New → Blueprint → pick this repository. Values marked `sync: false` are asked for
+# once in the Render dashboard (copy them from Vercel / backend .env); they are never stored here.
+# Guide: docs/deploy-render.md
+
+services:
+  # ---------------------------------------------------------------- website + app
+  - type: web
+    name: autoshift-web
+    runtime: node
+    region: singapore
+    plan: starter            # Free sleeps after 15 minutes idle, which delays WhatsApp webhooks.
+    branch: main
+    buildCommand: >-
+      npm ci &&
+      npm run build &&
+      cp -r .next/static .next/standalone/.next/static &&
+      cp -r public .next/standalone/public
+    startCommand: node .next/standalone/server.js
+    healthCheckPath: /privacy
+    domains:
+      - www.autoshift.tech
+      - autoshift.tech
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://www.autoshift.tech
+      - key: NEXT_PUBLIC_APP_LOCALE
+        value: en
+      - key: ALLOWED_INVITE_HOSTS
+        value: autoshift.tech,www.autoshift.tech,autoshift-web.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.autoshift.tech
+      - key: AUTOSHIFT_API_URL
+        value: https://api.autoshift.tech
+      - key: AUTOSHIFT_INTERNAL_SECRET     # same value as the API's INTERNAL_SECRET
+        fromService:
+          type: web
+          name: autoshift-api
+          envVarKey: INTERNAL_SECRET
+      # Supabase
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Keep the same values as on Vercel (changing ENCRYPTION_KEY makes saved tokens unreadable).
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: AUTOMATION_CRON_SECRET
+        sync: false
+      # Meta / WhatsApp
+      - key: META_APP_SECRET
+        sync: false
+      - key: META_APP_ID
+        sync: false
+      - key: NEXT_PUBLIC_META_APP_ID
+        sync: false
+      - key: NEXT_PUBLIC_META_ES_CONFIG_ID
+        sync: false
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        sync: false
+      - key: META_SYSTEM_USER_TOKEN
+        sync: false
+
+  # ---------------------------------------------------------------- API (FastAPI)
+  - type: web
+    name: autoshift-api
+    runtime: docker
+    region: singapore
+    plan: starter            # Runs background jobs (webhook retries, closing businesses); must not sleep.
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    domains:
+      - api.autoshift.tech
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: SITE_URL
+        value: https://www.autoshift.tech
+      - key: CORS_ORIGINS
+        value: https://www.autoshift.tech,https://autoshift.tech,https://autoshift-web.onrender.com
+      - key: MCP_ALLOWED_HOSTS
+        value: api.autoshift.tech,api.autoshift.tech:*
+      - key: INTERNAL_SECRET
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET           # leave empty: the project uses the new signing keys
+        sync: false
+      - key: ENCRYPTION_KEY                # same value as autoshift-web
+        sync: false
+      - key: SELLER_STATE_CODE             # first two digits of your GSTIN
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
