@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { backendUrl } from "@/lib/backend/client";
 import { ADMIN_NOW, UNIT_ECONOMICS, type Usage } from "@/lib/admin/data";
 import { date, inr, num, pct } from "@/lib/admin/format";
 import { act, useAdmin, useBusinesses, type Coupon, type PlanConfig } from "@/lib/admin/store";
@@ -86,6 +87,7 @@ function PlanCard({ plan, subscribers }: { plan: PlanConfig; subscribers: number
           onClick={() => {
             const changes = (Object.keys(draft) as (keyof PlanConfig)[]).filter((k) => draft[k] !== plan[k]).map((k) => (k === "monthly" ? `price ${inr(plan.monthly)} → ${inr(draft.monthly)}` : `${k} ${String(plan[k] ?? "∞")} → ${String(draft[k] ?? "∞")}`));
             act("Changed plan", `${plan.name} plan`, changes.join(", "), (s) => ({ plans: s.plans.map((p) => (p.id === plan.id ? draft : p)) }));
+            if (backendUrl()) void import("@/lib/admin/admin-data-sync").then((m) => m.savePlan(draft));
             toast.success(`${draft.name} plan saved`);
           }}
         >
@@ -114,6 +116,7 @@ function RatesPanel() {
           onClick={() => {
             const next = { ...prices, ...Object.fromEntries(kinds.map((k) => [k, Number(draft[k])])) } as Record<keyof Usage, number>;
             act("Changed prices", "Wallet rates", kinds.filter((k) => next[k] !== prices[k]).map((k) => `${UNIT_ECONOMICS[k].label} ${inr(prices[k], 2)} → ${inr(next[k], 2)}`).join(", "), () => ({ prices: next }));
+            if (backendUrl()) void import("@/lib/admin/admin-data-sync").then((m) => m.saveRates(Object.fromEntries(kinds.map((k) => [k, next[k]]))));
             toast.success("Prices saved");
           }}
         >

@@ -9,9 +9,11 @@ import { BarChart } from "@/components/tremor/bar-chart";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
-import { JOBS, SERVICES, SYSTEM_EVENTS, WEBHOOK_HOURS, businessById, type ServiceStatus, type SystemEvent } from "@/lib/admin/data";
+import { type ServiceStatus, type SystemEvent } from "@/lib/admin/data";
+import { useAdminStats } from "@/lib/admin/live-stats";
+import { backendUrl } from "@/lib/backend/client";
 import { num, numCompact, pct, relTime } from "@/lib/admin/format";
-import { act, adminStore, useAdmin } from "@/lib/admin/store";
+import { act, adminStore, useAdmin, useBusinesses } from "@/lib/admin/store";
 import { DataTable, EmptyState, PageHeader, Panel, Pill, td } from "./admin-ui";
 
 const SERVICE_ICON = { operational: CheckCircle2, degraded: CircleAlert, down: CircleX } as const;
@@ -31,18 +33,20 @@ function ServiceCard({ s }: { s: ServiceStatus }) {
       </div>
       <div className="mt-3 flex items-center justify-between text-xs">
         <Pill tone={s.status === "operational" ? "green" : s.status === "degraded" ? "amber" : "red"}>{s.status === "operational" ? "Operational" : s.status === "degraded" ? "Slow" : "Down"}</Pill>
-        <span className="text-muted-foreground tabular-nums">
-          {s.uptime}% uptime · {num(s.latencyMs)} ms
-        </span>
+        {s.uptime > 0 && (
+          <span className="text-muted-foreground tabular-nums">
+            {s.uptime}% uptime · {num(s.latencyMs)} ms
+          </span>
+        )}
       </div>
-      {/* 30-day uptime strip: one bar per day. */}
-      <div className="mt-3 flex h-6 items-end gap-[2px]" aria-hidden>
+      {/* 30-day uptime strip: one bar per day (design preview only; real uptime isn't measured yet). */}
+      {s.uptime > 0 && <div className="mt-3 flex h-6 items-end gap-[2px]" aria-hidden>
         {Array.from({ length: 30 }, (_, i) => {
           const bad = s.status !== "operational" && (i === 29 || i === 17);
           const warn = !bad && (i * 7 + s.id.length) % 23 === 0;
           return <span key={i} className={cn("h-full flex-1 rounded-sm", bad ? "bg-amber-400" : warn ? "bg-amber-200 dark:bg-amber-900" : "bg-emerald-500/70")} />;
         })}
-      </div>
+      </div>}
     </div>
   );
 }
@@ -53,11 +57,16 @@ export function SystemPage() {
   const [show, setShow] = useState<"open" | "all">("open");
   const [running, setRunning] = useState<string | null>(null);
 
+  const { services: SERVICES, events: SYSTEM_EVENTS, webhook_hours: WEBHOOK_HOURS, jobs: JOBS, loaded } = useAdminStats();
+  const businesses = useBusinesses();
+  const businessById = (id: string) => businesses.find((b) => b.id === id);
+  const live = backendUrl() !== null;
   const isResolved = (e: SystemEvent) => e.resolved || resolvedEvents.includes(e.id);
   const events = SYSTEM_EVENTS.filter((e) => (source === "all" || e.source === source) && (show === "all" || !isResolved(e)));
   const delivered = WEBHOOK_HOURS.reduce((s, h) => s + h.delivered, 0);
   const failed = WEBHOOK_HOURS.reduce((s, h) => s + h.failed, 0);
   const allOk = SERVICES.every((s) => s.status === "operational");
+  const issues = SERVICES.filter((s) => s.status !== "operational");
 
   const resolve = (e: SystemEvent, how: "resolved" | "retried") => {
     act(how === "retried" ? "Retried event" : "Resolved error", businessById(e.businessId)?.name ?? e.businessId, `${e.code}: ${e.message}`, (s) => ({ resolvedEvents: [...s.resolvedEvents, e.id] }));
@@ -71,8 +80,8 @@ export function SystemPage() {
       <div className={cn("flex items-center gap-3 rounded-2xl border p-4", allOk ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5")}>
         {allOk ? <CheckCircle2 className="size-6 text-emerald-600" /> : <CircleAlert className="size-6 text-amber-500" />}
         <div>
-          <p className="font-semibold text-foreground">{allOk ? "All systems operational" : "Some services are slow"}</p>
-          <p className="text-sm text-muted-foreground">{allOk ? "Everything is working normally." : SERVICES.filter((s) => s.status !== "operational").map((s) => `${s.name} (${s.detail}) is slower than usual.`).join(" ")}</p>
+          <p className="font-semibold text-foreground">{!loaded ? "Checking…" : allOk ? "All systems operational" : "Some services need attention"}</p>
+          <p className="text-sm text-muted-foreground">{!loaded ? "Loading the latest checks." : allOk ? "Everything is working normally." : issues.map((s) => `${s.name}: ${s.detail}.`).join(" ")}</p>
         </div>
       </div>
 
@@ -82,11 +91,11 @@ export function SystemPage() {
         ))}
       </div>
 
-      <Panel title="Meta webhook deliveries" description={`Last 24 hours · ${num(delivered)} delivered · ${num(failed)} failed (${pct(failed / (delivered + failed), 2)})`}>
+      <Panel title={live ? "Outgoing webhook deliveries" : "Meta webhook deliveries"} description={`Last 24 hours · ${num(delivered)} delivered · ${num(failed)} failed (${pct(delivered + failed ? failed / (delivered + failed) : 0, 2)})`}>
         <BarChart className="h-52" data={WEBHOOK_HOURS.map((h) => ({ hour: h.hour, Delivered: h.delivered, Failed: h.failed }))} index="hour" categories={["Delivered", "Failed"]} colors={["brand", "pink"]} type="stacked" yAxisWidth={44} valueFormatter={(v) => numCompact(v)} />
       </Panel>
 
-      <Panel title="Scheduled jobs" bodyClassName="px-0 pb-0">
+      {JOBS.length > 0 && <Panel title="Scheduled jobs" bodyClassName="px-0 pb-0">
         <DataTable head={["Job", "Schedule", "Last run", "Took", "Status", ""]}>
           {JOBS.map((j) => {
             const ranNow = jobRuns[j.id];
@@ -124,7 +133,7 @@ export function SystemPage() {
             );
           })}
         </DataTable>
-      </Panel>
+      </Panel>}
 
       <Panel
         title="Recent errors"
@@ -172,7 +181,7 @@ export function SystemPage() {
                     <Pill tone="green">Resolved</Pill>
                   ) : (
                     <div className="flex justify-end gap-1.5">
-                      {e.source !== "razorpay" && (
+                      {!live && e.source !== "razorpay" && (
                         <Button size="sm" variant="outline" className="gap-1" onClick={() => resolve(e, "retried")}>
                           <RotateCcw className="size-3.5" />
                           Retry

@@ -100,6 +100,51 @@ export async function loadStaffData(): Promise<void> {
   ])
   const people = new Map(team.map((a) => [a.user_id, toAdmin(a)]))
   adminStore.set((s) => ({ ...s, tickets: tickets.map((t) => toTicket(t)), announcements: anns.map((a) => toAnnouncement(a)), team: team.map(toAdmin), audit: audit.map((a) => toAudit(a, people)) }))
+  await loadPlansAndRates().catch(() => {})
+}
+
+interface PlanRow {
+  id: string
+  name: string
+  monthly_paise: number
+  seats: number | null
+  contacts: number | null
+  ai_replies: number
+  active: boolean
+}
+const RATE_KEYS = ['marketing', 'utility', 'authentication', 'service', 'ai'] as const
+
+/** The real plans and the wallet rate card (rupees), replacing the built-in defaults. */
+export async function loadPlansAndRates(): Promise<void> {
+  const [plans, rates] = await Promise.all([backend<PlanRow[]>('/v1/platform/plans'), backend<{ rates_paise: Record<string, number> }>('/v1/platform/rates')])
+  adminStore.set((s) => ({
+    ...s,
+    plans: plans.map((p) => ({ id: p.id, name: p.name, monthly: p.monthly_paise / 100, seats: p.seats, contacts: p.contacts, aiReplies: p.ai_replies, active: p.active })),
+    prices: { ...s.prices, ...Object.fromEntries(RATE_KEYS.map((k) => [k, (rates.rates_paise[`charge_${k}`] ?? 0) / 100])) },
+  }))
+}
+
+/** Saves a plan's price and limits on the server (super admins). */
+export async function savePlan(p: { id: string; name: string; monthly: number; seats: number | null; contacts: number | null; aiReplies: number; active: boolean }): Promise<void> {
+  try {
+    await backend(`/v1/platform/plans/${p.id}`, {
+      method: 'PATCH',
+      body: { name: p.name, monthly_paise: Math.round(p.monthly * 100), seats: p.seats ?? undefined, ...(p.contacts === null ? { unlimited_contacts: true } : { contacts: p.contacts }), ai_replies: p.aiReplies, active: p.active },
+    })
+  } catch (e) {
+    fail(e)
+  }
+  await loadPlansAndRates().catch(fail)
+}
+
+/** Saves the wallet rate card on the server (super admins). Prices are in rupees. */
+export async function saveRates(prices: Partial<Record<(typeof RATE_KEYS)[number], number>>): Promise<void> {
+  try {
+    await backend('/v1/platform/rates', { method: 'PUT', body: Object.fromEntries(Object.entries(prices).map(([k, v]) => [k, Math.round((v ?? 0) * 100)])) })
+  } catch (e) {
+    fail(e)
+  }
+  await loadPlansAndRates().catch(fail)
 }
 
 const reload = () => loadStaffData().catch(fail)

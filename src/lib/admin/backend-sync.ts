@@ -66,7 +66,7 @@ export function toBusiness(r: BusinessRow): Business {
     team: r.members,
     contacts: r.contacts ?? 0,
     // WhatsApp health comes from Meta, which is connected in a later phase.
-    whatsapp: { status: 'not_connected', number: '', displayName: '', quality: 'green', tier: '250', templatesApproved: 0, templatesRejected: 0, connectedAt: null },
+    whatsapp: { status: 'not_connected', number: '', displayName: '', quality: 'green', tier: '250', templatesApproved: 0, templatesRejected: 0, connectedAt: null, ratingKnown: false },
     usage: { marketing: u.marketing ?? 0, utility: u.utility ?? 0, authentication: u.authentication ?? 0, service: u.service ?? 0, ai: u.ai ?? 0 },
     lastActiveAt: r.created_at,
     flags: [],
@@ -223,6 +223,7 @@ export function startAdminSync() {
       accessStore.set('ok')
       loadAdminBusinesses().catch(fail)
       loadAdminPayments().catch(() => {})
+      import('./live-stats').then((m) => m.loadAdminStats()).catch(() => {})
       import('./admin-data-sync').then((m) => m.loadStaffData()).catch(() => {})
     },
     () => {

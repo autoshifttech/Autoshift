@@ -4,6 +4,7 @@
  * filled in per business when the backend sends them.
  */
 import { createStore, useStore } from '@/lib/workspace/store'
+import { backendUrl } from '@/lib/backend/client'
 
 export const EMAIL_VARIABLES = ['owner_name', 'business_name', 'plan', 'days_left', 'amount', 'wallet_balance', 'template_name', 'reason', 'date', 'link'] as const
 
@@ -62,6 +63,8 @@ export function unknownVariables(text: string): string[] {
   return [...new Set([...text.matchAll(/\{\{\s*([a-z_]+)\s*\}\}/g)].map((m) => m[1]).filter((k) => !known.has(k)))]
 }
 
-export const emailsStore = createStore(() => ({ emails: DEFAULT_EMAILS }), 'autoshift.admin.emails.v1')
-const SERVER = { emails: DEFAULT_EMAILS }
+// With the backend these emails aren't sent yet, so there are no send or open numbers to show.
+const startEmails = () => (backendUrl() ? DEFAULT_EMAILS.map((e) => ({ ...e, sent30d: 0, openRate: 0 })) : DEFAULT_EMAILS)
+export const emailsStore = createStore(() => ({ emails: startEmails() }), backendUrl() ? 'autoshift.admin.emails.live' : 'autoshift.admin.emails.v1')
+const SERVER = { emails: startEmails() }
 export const useOwnerEmails = () => useStore(emailsStore, SERVER).emails

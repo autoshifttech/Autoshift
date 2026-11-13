@@ -594,3 +594,109 @@ async def remove_user(user_id: str, body: Reason, admin: SuperOnly, sdb: Service
     await sdb.delete("member_presence", {"user_id": user_id})
     await audit.record(sdb, scope="platform", action="user.remove", actor_id=admin.user.id, account_id=p.get("account_id"), target=user_id, details={"reason": body.reason, "api_keys_revoked": revoked})
     return {"ok": True, "removed": True, "kept": "business data, invoices and wallet ledger"}
+
+
+# ------------------------------------------------------------------ admin panel charts
+@router.get("/stats")
+async def stats(_: AnyStaff, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)]):
+    """Everything the admin panel's charts need, from real rows (amounts in rupees):
+    12 months of money and signups, 30 days of AI replies, 24 hours of webhook deliveries,
+    service checks, recent errors, and each business's WhatsApp details."""
+    now = _now()
+    # ---- months (oldest first, this month last)
+    months: list[dict] = []
+    for i in range(11, -1, -1):
+        y, m = now.year, now.month - i
+        while m <= 0:
+            m += 12
+            y -= 1
+        months.append({"key": f"{y:04d}-{m:02d}", "month": datetime(y, m, 1).strftime("%b"), "signups": 0, "paying": 0, "mrr": 0, "subscriptions": 0, "topups": 0, "metaCost": 0, "aiCost": 0})
+    by_month = {mo["key"]: mo for mo in months}
+    first = f"{months[0]['key']}-01T00:00:00+00:00"
+    for a in await sdb.select("accounts", {"created_at": ("gte", first)}, limit=20000):
+        mo = by_month.get(str(a.get("created_at"))[:7])
+        if mo:
+            mo["signups"] += 1
+    for inv in await sdb.select("invoices", {"issued_at": ("gte", first)}, limit=20000):
+        mo = by_month.get(str(inv["issued_at"])[:7])
+        if mo:
+            mo["subscriptions" if inv["kind"] == "subscription" else "topups"] += int(inv["base_paise"]) / 100
+    for e in await sdb.select("wallet_ledger", {"created_at": ("gte", first)}, limit=50000):
+        mo = by_month.get(str(e["created_at"])[:7])
+        if mo and e["kind"].startswith("charge_"):
+            mo["aiCost" if e["kind"] == "charge_ai" else "metaCost"] += -int(e["amount_paise"]) / 100
+    subs = await sdb.select("subscriptions")
+    plans = {p["id"]: p for p in await sdb.select("plans")}
+    active = [s for s in subs if s["status"] == "active"]
+    months[-1]["paying"] = len(active)
+    months[-1]["mrr"] = round(sum(plans[s["plan_id"]]["monthly_paise"] * (1 if s["cycle"] == "monthly" else 10 / 12) for s in active if s["plan_id"] in plans) / 100)
+    for mo in months:
+        for k in ("subscriptions", "topups", "metaCost", "aiCost"):
+            mo[k] = round(mo[k])
+        mo.pop("key")
+
+    # ---- AI replies per day by model tier (fast vs the rest)
+    tiers = {f"{x['vendor']}/{x['model_id']}": x.get("tier") for x in await sdb.select("platform_ai_models")}
+    ai_days = []
+    day_index: dict[str, dict] = {}
+    for i in range(29, -1, -1):
+        d = (now - timedelta(days=i)).date()
+        row = {"day": d.strftime("%d %b"), "fast": 0, "smart": 0, "errors": 0}
+        ai_days.append(row)
+        day_index[d.isoformat()] = row
+    models: Counter = Counter()
+    for u in await sdb.select("ai_usage_log", {"created_at": ("gte", _since(30))}, limit=50000):
+        row = day_index.get(str(u["created_at"])[:10])
+        key = f"{u.get('provider')}/{u.get('model')}"
+        models[key] += 1
+        if row:
+            row["fast" if tiers.get(key) == "fast" else "smart"] += 1
+
+    # ---- webhook deliveries per hour, last 24 hours
+    hours = []
+    hour_index: dict[str, dict] = {}
+    for i in range(23, -1, -1):
+        h = now - timedelta(hours=i)
+        row = {"hour": h.strftime("%H:00"), "delivered": 0, "failed": 0}
+        hours.append(row)
+        hour_index[h.strftime("%Y-%m-%dT%H")] = row
+    for d in await sdb.select("webhook_deliveries", {"created_at": ("gte", _since(1))}, limit=20000):
+        row = hour_index.get(str(d["created_at"])[:13])
+        if row and d.get("status") in ("delivered", "failed"):
+            row[d["status"]] += 1
+
+    # ---- service checks
+    status = await system_status(_, sdb, settings)
+    q = status["queues"]
+    services = [
+        {"id": "db", "name": "Database", "detail": "Supabase Postgres", "status": "operational" if status["checks"]["database"] == "ok" else "down"},
+        {"id": "api", "name": "AutoShift API", "detail": "This server", "status": "operational"},
+        {"id": "meta", "name": "WhatsApp sending", "detail": f"{q['failed_messages_24h']} failed in 24 hours" if q["failed_messages_24h"] else "No failed messages in 24 hours", "status": "degraded" if q["failed_messages_24h"] >= 20 else "operational"},
+        {"id": "webhooks", "name": "Outgoing webhooks", "detail": f"{q['failed_webhook_deliveries_24h']} failed in 24 hours" if q["failed_webhook_deliveries_24h"] else "No failures in 24 hours", "status": "degraded" if q["failed_webhook_deliveries_24h"] else "operational"},
+        {"id": "razorpay", "name": "Razorpay", "detail": "Not set up" if not status["config"]["razorpay"] else (f"{q['failed_razorpay_events']} events failed" if q["failed_razorpay_events"] else "Payments and webhooks"), "status": "degraded" if (not status["config"]["razorpay"] or q["failed_razorpay_events"]) else "operational"},
+        {"id": "bridge", "name": "Web app bridge", "detail": "Used by AI and MCP sends" if status["config"]["whatsapp_bridge"] else "INTERNAL_SECRET is not set", "status": "operational" if status["config"]["whatsapp_bridge"] else "down"},
+    ]
+
+    # ---- recent errors: failed sends and failed payments
+    events = []
+    failed = await sdb.select("messages", {"status": "failed", "created_at": ("gte", _since(7))}, order="created_at.desc", limit=50)
+    owner = await _conv_accounts(sdb, [m["conversation_id"] for m in failed])
+    for m in failed:
+        events.append({"id": f"msg-{m['id']}", "source": "send", "businessId": owner.get(m["conversation_id"], ""), "message": m.get("error_title") or "Message failed", "code": str(m.get("error_code") or ""), "at": m["created_at"], "retries": 0, "resolved": False})
+    for o in await sdb.select("payment_orders", {"status": "failed", "created_at": ("gte", _since(30))}, order="created_at.desc", limit=20):
+        events.append({"id": f"pay-{o['id']}", "source": "razorpay", "businessId": o["account_id"], "message": "Wallet top-up failed", "code": "PAYMENT_FAILED", "at": o["created_at"], "retries": 0, "resolved": False})
+    events.sort(key=lambda e: str(e["at"]), reverse=True)
+
+    # ---- WhatsApp per business, and rejected templates
+    wa = {r["account_id"]: r for r in await _wa_rows(sdb)}
+    approved = Counter(t["account_id"] for t in await sdb.select("message_templates", {"status": "APPROVED"}) if t.get("account_id"))
+    rejected_templates = [
+        {"businessId": t["account_id"], "template": t["name"], "reason": t.get("rejection_reason") or "No reason given", "at": t.get("updated_at")}
+        for t in await sdb.select("message_templates", {"status": "REJECTED"}, order="updated_at.desc", limit=50)
+        if t.get("account_id")
+    ]
+    whatsapp = {
+        acct: {"status": r["status"], "phone_number_id": r["phone_number_id"], "connected_at": r["connected_at"], "approved": approved.get(acct, 0), "rejected": r["rejected_templates"], "failed_24h": r["failed_messages_24h"], "error": r["registration_error"]}
+        for acct, r in wa.items()
+    }
+    return {"months": months, "ai_days": ai_days, "ai_models": dict(models), "webhook_hours": hours, "services": services, "events": events[:60], "whatsapp": whatsapp, "rejected_templates": rejected_templates}

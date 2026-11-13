@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { TIERS, seeded, type Business, type Quality } from "@/lib/admin/data";
 import { num, relTime } from "@/lib/admin/format";
 import { act, useBusinesses } from "@/lib/admin/store";
+import { useAdminStats } from "@/lib/admin/live-stats";
+import { backendUrl } from "@/lib/backend/client";
 import { DataTable, EmptyState, Initials, Kpi, Meter, PageHeader, Panel, Pill, QUALITY_META, QualityPill, StatusPill, td } from "./admin-ui";
 
 const REJECTION_REASONS = [
@@ -35,6 +37,9 @@ export function WhatsAppHealthPage() {
   const businesses = useBusinesses();
   const [quality, setQuality] = useState<Quality | "all">("all");
   const [query, setQuery] = useState("");
+  const stats = useAdminStats();
+  // Real accounts: Meta's quality rating and messaging limit aren't read from Meta yet.
+  const live = backendUrl() !== null;
 
   const connected = businesses.filter((b) => b.whatsapp.status === "connected" && b.status !== "cancelled" && b.status !== "expired");
   const byQuality = (q: Quality) => connected.filter((b) => b.whatsapp.quality === q).length;
@@ -49,7 +54,12 @@ export function WhatsAppHealthPage() {
     .filter((b) => !q || `${b.name} ${b.whatsapp.number}`.toLowerCase().includes(q))
     .sort((a, b) => order[a.whatsapp.quality] - order[b.whatsapp.quality] || b.usage.marketing - a.usage.marketing);
 
-  const rejections = sampleRejections(connected);
+  const rejections = live
+    ? stats.rejected_templates.flatMap((r) => {
+        const b = businesses.find((x) => x.id === r.businessId);
+        return b ? [{ b, template: r.template, reason: r.reason, at: r.at }] : [];
+      })
+    : sampleRejections(connected);
 
   const tierCounts = TIERS.map((t) => ({ t, n: connected.filter((b) => b.whatsapp.tier === t).length }));
   const maxTier = Math.max(...tierCounts.map((x) => x.n), 1);
@@ -60,9 +70,9 @@ export function WhatsAppHealthPage() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Kpi icon={Signal} label="Connected numbers" value={num(connected.length)} />
-        <Kpi icon={ShieldCheck} tone="mint" label="High quality" value={num(byQuality("green"))} />
-        <Kpi icon={ShieldAlert} tone="butter" label="Medium quality" value={num(byQuality("yellow"))} hint="watch these" />
-        <Kpi icon={ShieldAlert} tone="peach" label="Low quality" value={num(byQuality("red"))} hint="act now" />
+        <Kpi icon={ShieldCheck} tone="mint" label="High quality" value={live ? "—" : num(byQuality("green"))} hint={live ? "not read from Meta yet" : undefined} />
+        <Kpi icon={ShieldAlert} tone="butter" label="Medium quality" value={live ? "—" : num(byQuality("yellow"))} hint={live ? "not read from Meta yet" : "watch these"} />
+        <Kpi icon={ShieldAlert} tone="peach" label="Low quality" value={live ? "—" : num(byQuality("red"))} hint={live ? "not read from Meta yet" : "act now"} />
         <Kpi icon={PhoneOff} tone="sky" label="Not connected" value={num(notConnected.length)} hint="trial or paying" />
         <Kpi icon={FileX2} tone="lilac" label="Templates rejected" value={num(rejected)} hint={`${num(approved)} approved`} />
       </div>
@@ -92,15 +102,15 @@ export function WhatsAppHealthPage() {
                 </td>
                 <td className={cn(td, "whitespace-nowrap font-mono text-xs")}>{b.whatsapp.number}</td>
                 <td className={td}>
-                  <QualityPill quality={b.whatsapp.quality} />
+                  {b.whatsapp.ratingKnown === false ? <span className="text-xs text-muted-foreground">Not checked</span> : <QualityPill quality={b.whatsapp.quality} />}
                 </td>
-                <td className={cn(td, "tabular-nums")}>{b.whatsapp.tier}</td>
+                <td className={cn(td, "tabular-nums")}>{b.whatsapp.ratingKnown === false ? "—" : b.whatsapp.tier}</td>
                 <td className={cn(td, "tabular-nums")}>{num(b.usage.marketing)}</td>
                 <td className={cn(td, "whitespace-nowrap tabular-nums")}>
                   {b.whatsapp.templatesApproved} ok{b.whatsapp.templatesRejected > 0 && <span className="text-rose-700 dark:text-rose-400"> · {b.whatsapp.templatesRejected} rejected</span>}
                 </td>
                 <td className={cn(td, "text-right")}>
-                  {b.whatsapp.quality !== "green" && (
+                  {b.whatsapp.ratingKnown !== false && b.whatsapp.quality !== "green" && (
                     <Button
                       size="icon-sm"
                       variant="outline"
@@ -121,7 +131,7 @@ export function WhatsAppHealthPage() {
         </Panel>
 
         <div className="space-y-6">
-          <Panel title="Messaging limits" description="How many customers each number can start chats with per day.">
+          {!live && <Panel title="Messaging limits" description="How many customers each number can start chats with per day.">
             <ul className="space-y-3">
               {tierCounts.map(({ t, n }) => (
                 <li key={t}>
@@ -133,7 +143,7 @@ export function WhatsAppHealthPage() {
                 </li>
               ))}
             </ul>
-          </Panel>
+          </Panel>}
           <Panel title="Signed up, not connected" description="They can't send messages yet. A setup call usually fixes it." bodyClassName="px-0 pb-2">
             <ul className="max-h-80 divide-y divide-border overflow-y-auto">
               {notConnected.map((b) => (
@@ -164,7 +174,7 @@ export function WhatsAppHealthPage() {
       </div>
 
       <Panel title="Recent template rejections" description="Meta's reason, so you can help them fix and resubmit." bodyClassName="px-0 pb-0">
-        <DataTable head={["Business", "Template", "Reason", "When"]}>
+        <DataTable head={["Business", "Template", "Reason", "When"]} empty={rejections.length === 0 ? <EmptyState icon={ShieldCheck} title="No rejected templates" /> : undefined}>
           {rejections.map(({ b, template, reason, at }, i) => (
             <tr key={i}>
               <td className={cn(td, "font-medium")}>

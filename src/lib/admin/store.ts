@@ -7,6 +7,7 @@
 import { useStore, createStore } from '@/lib/workspace/store'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
 import { backendUrl } from '@/lib/backend/client'
+import { useAdminStats } from './live-stats'
 import { adminBackendStore, remoteDeleteBusiness, remoteSaveTeam, remoteUpdateBusiness, useAdminBackend } from './backend-sync'
 import {
   ADMIN_NOW,
@@ -117,7 +118,8 @@ export function initialAdminState(): AdminState {
     prices: Object.fromEntries(Object.entries(UNIT_ECONOMICS).map(([k, v]) => [k, v.price])) as Record<keyof Usage, number>,
     trialDays: 14,
     minTopup: 500,
-    coupons: [
+    // Coupons aren't on the server yet: the design preview shows samples, real admin starts empty.
+    coupons: backendUrl() ? [] : [
       { code: 'DIWALI20', percentOff: 20, appliesTo: 'all', expiresAt: new Date(ADMIN_NOW + 11 * 864e5).toISOString(), redemptions: 9, maxRedemptions: 100, active: true },
       { code: 'CLINIC10', percentOff: 10, appliesTo: 'growth', expiresAt: new Date(ADMIN_NOW + 60 * 864e5).toISOString(), redemptions: 3, maxRedemptions: null, active: true },
       { code: 'LAUNCH50', percentOff: 50, appliesTo: 'starter', expiresAt: new Date(ADMIN_NOW - 30 * 864e5).toISOString(), redemptions: 41, maxRedemptions: 50, active: false },
@@ -180,7 +182,25 @@ export function applyOverride(b: Business, o: BusinessOverride | undefined): Bus
 export function useBusinesses(): Business[] {
   const { overrides, createdBusinesses, deletedBusinesses, teams } = useAdmin()
   const remote = useAdminBackend()
-  if (backendUrl()) return remote.businesses
+  const stats = useAdminStats()
+  if (backendUrl())
+    return remote.businesses.map((b) => {
+      const w = stats.whatsapp[b.id]
+      if (!w) return b
+      return {
+        ...b,
+        whatsapp: {
+          ...b.whatsapp,
+          status: w.status === 'connected' ? 'connected' : w.status === 'not_connected' ? 'not_connected' : 'disconnected',
+          number: w.phone_number_id ?? '',
+          templatesApproved: w.approved,
+          templatesRejected: w.rejected,
+          connectedAt: w.connected_at,
+          ratingKnown: false,
+          failed24h: w.failed_24h,
+        },
+      }
+    })
   return [...BUSINESSES, ...createdBusinesses]
     .filter((b) => !deletedBusinesses.includes(b.id))
     .map((b) => ({ ...applyOverride(b, overrides[b.id]), team: teams[b.id]?.length ?? b.team }))

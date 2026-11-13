@@ -83,6 +83,10 @@ export interface Business {
     templatesApproved: number
     templatesRejected: number
     connectedAt: string | null
+    /** False when Meta's quality rating and limit aren't known (real accounts until they're read from Meta). */
+    ratingKnown?: boolean
+    /** Sends that failed in the last 24 hours (real accounts). */
+    failed24h?: number
   }
   /** Last 30 days. */
   usage: Usage

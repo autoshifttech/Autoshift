@@ -147,3 +147,21 @@ def test_platform_tools_with_a_platform_key(client, world):
     ws = _mint(client, world, scope="write")["key"]
     err, text = call_tool(client, ws, "platform_users_list")
     assert err
+
+
+def test_stats_for_admin_charts(client, world):
+    _, conv = seed_chat(world)
+    world.store["whatsapp_config"] = [{"id": "w", "account_id": world.acct_a, "status": "connected", "phone_number_id": "123", "connected_at": iso()}]
+    world.store["messages"].append({"id": "mf", "conversation_id": conv["id"], "sender_type": "agent", "status": "failed", "error_title": "Not on WhatsApp", "error_code": 131026, "created_at": iso()})
+    world.store["invoices"] = [{"id": "i1", "account_id": world.acct_a, "kind": "topup", "base_paise": 100000, "gst_paise": 18000, "total_paise": 118000, "issued_at": iso()}]
+    world.store["ai_usage_log"] = [{"id": "a", "account_id": world.acct_a, "provider": "openai", "model": "gpt-5.4-mini", "created_at": iso(), "total_tokens": 10}]
+    world.store["message_templates"] = [{"id": "t", "account_id": world.acct_a, "name": "promo", "status": "REJECTED", "rejection_reason": "INVALID_FORMAT", "updated_at": iso()}]
+    assert client.get("/v1/platform/stats", headers=world.headers("owner_a")).status_code == 403
+    s = client.get("/v1/platform/stats", headers=S(world, "staff_support")).json()
+    assert len(s["months"]) == 12 and s["months"][-1]["topups"] == 1000
+    assert len(s["ai_days"]) == 30 and s["ai_days"][-1]["fast"] == 1
+    assert len(s["webhook_hours"]) == 24
+    assert s["whatsapp"][world.acct_a]["status"] == "connected" and s["whatsapp"][world.acct_a]["failed_24h"] == 1
+    assert s["events"][0]["code"] == "131026" and s["events"][0]["businessId"] == world.acct_a
+    assert s["rejected_templates"][0]["reason"] == "INVALID_FORMAT"
+    assert {x["id"] for x in s["services"]} >= {"db", "meta", "razorpay"}

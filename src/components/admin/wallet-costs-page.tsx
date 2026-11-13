@@ -5,7 +5,8 @@ import { Bot, Coins, HandCoins, Landmark, PiggyBank, Wallet } from "lucide-react
 
 import { BarChart } from "@/components/tremor/bar-chart";
 import { cn } from "@/lib/utils";
-import { MONTHS, UNIT_ECONOMICS, usageRevenue, type Usage } from "@/lib/admin/data";
+import { UNIT_ECONOMICS, usageRevenue, type Usage } from "@/lib/admin/data";
+import { useAdminStats } from "@/lib/admin/live-stats";
 import { inr, inrCompact, inrShort, num, pct } from "@/lib/admin/format";
 import { useAdmin, useBusinesses } from "@/lib/admin/store";
 import { DataTable, Initials, Kpi, Meter, PageHeader, Panel, StatusPill, td } from "./admin-ui";
@@ -14,6 +15,7 @@ import { MetaFeesSwitch } from "./meta-fees-switch";
 export function WalletCostsPage() {
   const businesses = useBusinesses();
   const { prices, alerts } = useAdmin();
+  const { months: MONTHS } = useAdminStats();
   const kinds = Object.keys(UNIT_ECONOMICS) as (keyof Usage)[];
 
   const totals = kinds.map((k) => {

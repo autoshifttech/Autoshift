@@ -4,7 +4,8 @@ import Link from "next/link";
 import { BadgeIndianRupee, Building2, ChevronRight, Hourglass, PiggyBank, Repeat, TrendingDown, UserPlus, Wallet, X } from "lucide-react";
 
 import { BarChart } from "@/components/tremor/bar-chart";
-import { ADMIN_NOW, INDUSTRY_LABEL, MONTHS, usageRevenue, type Business } from "@/lib/admin/data";
+import { ADMIN_NOW, INDUSTRY_LABEL, usageRevenue, type Business } from "@/lib/admin/data";
+import { useAdminStats } from "@/lib/admin/live-stats";
 import { buildAlerts } from "@/lib/admin/alerts";
 import { date, inr, inrCompact, inrShort, num, pct, relTime } from "@/lib/admin/format";
 import { adminStore, useAdmin, useBusinesses, usePayments } from "@/lib/admin/store";
@@ -51,6 +52,7 @@ export function platformTotals(businesses: Business[]) {
 export function AdminOverview() {
   const businesses = useBusinesses();
   const payments = usePayments();
+  const { months: MONTHS } = useAdminStats();
   const state = useAdmin();
   const alerts = buildAlerts(businesses, state);
   const totals = platformTotals(businesses);
