@@ -25,6 +25,7 @@
 //   }
 // ============================================================
 
+import { AsyncLocalStorage } from "node:async_hooks";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -106,7 +107,19 @@ export interface AccountContext {
  * Use `requireRole(min)` instead when the route also needs a
  * minimum-role check — it's a thin wrapper over this.
  */
+// Set only by the internal MCP bridge (src/app/api/internal/mcp), after it has checked the shared
+// AUTOSHIFT_INTERNAL_SECRET and the backend has checked the caller's key and role. It lets that
+// bridge run an existing route handler for one business without a browser session.
+const actingAccount = new AsyncLocalStorage<AccountContext>();
+
+/** Runs `fn` with `ctx` as the signed-in account. Server-only; never call it with user input. */
+export function runAsAccount<T>(ctx: AccountContext, fn: () => Promise<T>): Promise<T> {
+  return actingAccount.run(ctx, fn);
+}
+
 export async function getCurrentAccount(): Promise<AccountContext> {
+  const acting = actingAccount.getStore();
+  if (acting) return acting;
   const supabase = await createClient();
 
   const {

@@ -256,6 +256,245 @@ def build_mcp(get_app) -> MCPServer:
         """The AI providers and models a business may pick for its assistants."""
         return await call("GET", "/v1/ai-models/available")
 
+    # ------------------------------------------------------- messaging (WhatsApp)
+    def _send_body(to, conversation_id, text, template_name, template_language, body_params, header_media_url, header_text, media_url, media_type, filename, name) -> dict:
+        body: dict[str, Any] = {k: v for k, v in {"to": to, "conversation_id": conversation_id, "text": text, "media_url": media_url, "media_type": media_type, "filename": filename, "name": name}.items() if v}
+        if template_name:
+            body["template"] = {"name": template_name, "language": template_language, "body_params": body_params or [], "header_media_url": header_media_url, "header_text": header_text}
+        return body
+
+    @mcp.tool()
+    async def messages_send(
+        to: str | None = None,
+        conversation_id: str | None = None,
+        text: str | None = None,
+        template_name: str | None = None,
+        template_language: str = "en_US",
+        body_params: list[str] | None = None,
+        header_media_url: str | None = None,
+        header_text: str | None = None,
+        media_url: str | None = None,
+        media_type: str | None = None,
+        filename: str | None = None,
+        name: str | None = None,
+        confirm: bool = False,
+    ) -> dict:
+        """Send a WhatsApp message to a phone (to, with country code) or an existing conversation_id. Needs confirm=true.
+        Free text or media only works within 24 hours of the customer's last message; otherwise use an APPROVED
+        template (template_name, body_params for {{1}}, {{2}}..., header_media_url https link for an image/video/document header).
+        People who sent STOP and blocked numbers are always refused. Agent role needed."""
+        body = _send_body(to, conversation_id, text, template_name, template_language, body_params, header_media_url, header_text, media_url, media_type, filename, name)
+        check = await call("POST", "/v1/ws/messages/check", json_body=body)
+        if not check["can_send"]:
+            raise ToolFailure("Can't send: " + "; ".join(check["blockers"]))
+        if not confirm:
+            return preview("send this WhatsApp message", to=check["to"], kind=check["kind"], template=check["template"], text=text)
+        return await call("POST", "/v1/ws/messages/send", json_body=body)
+
+    @mcp.tool()
+    async def whatsapp_status() -> dict:
+        """Whether the workspace's WhatsApp number is connected, with its ids and last registration error."""
+        return await call("GET", "/v1/ws/whatsapp")
+
+    @mcp.tool()
+    async def conversations_list(status: str | None = None, unread_only: bool = False, limit: int = 30) -> list:
+        """Inbox chats, newest first. status: open, pending or closed."""
+        params: dict[str, Any] = {"limit": limit, "unread_only": unread_only}
+        if status:
+            params["status"] = status
+        return await call("GET", "/v1/ws/conversations", params=params)
+
+    @mcp.tool()
+    async def conversation_get(conversation_id: str, limit: int = 30) -> dict:
+        """One chat with its latest messages, and whether free text can still be sent (24-hour window)."""
+        return await call("GET", f"/v1/ws/conversations/{conversation_id}", params={"limit": limit})
+
+    @mcp.tool()
+    async def conversation_update(conversation_id: str, status: str | None = None, assigned_to: str | None = None, ai_paused: bool | None = None, mark_read: bool | None = None) -> dict:
+        """Close/reopen a chat (status open, pending, closed), assign it to a teammate's user id ('none' to unassign),
+        pause or resume the AI for it, or mark it read."""
+        body = {k: v for k, v in {"status": status, "assigned_to": assigned_to, "ai_paused": ai_paused, "mark_read": mark_read}.items() if v is not None}
+        return await call("PATCH", f"/v1/ws/conversations/{conversation_id}", json_body=body)
+
+    @mcp.tool()
+    async def templates_list(status: str | None = None) -> list:
+        """WhatsApp message templates (status: APPROVED, PENDING, REJECTED...). Run templates_sync first if one is missing."""
+        return await call("GET", "/v1/ws/templates", params={"status": status} if status else None)
+
+    @mcp.tool()
+    async def templates_sync() -> dict:
+        """Pull the latest templates and their approval status from Meta (admin role)."""
+        return await call("POST", "/v1/ws/templates/sync")
+
+    @mcp.tool()
+    async def templates_create(name: str, category: str, body_text: str, body_samples: list[str] | None = None, language: str = "en_US", footer_text: str | None = None, header_type: str | None = None, header_content: str | None = None, confirm: bool = False) -> dict:
+        """Submit a new template to Meta for approval (admin role). Needs confirm=true.
+        name: lower_case_with_underscores. category: Marketing, Utility or Authentication. Use {{1}}, {{2}} in body_text
+        with one example per variable in body_samples. header_type text/image/video/document; header_content is the text or an https sample link."""
+        body = {k: v for k, v in {"name": name, "category": category, "language": language, "body_text": body_text, "body_samples": body_samples or [], "footer_text": footer_text, "header_type": header_type, "header_content": header_content}.items() if v is not None}
+        if not confirm:
+            return preview("submit this template to Meta for approval", **body)
+        return await call("POST", "/v1/ws/templates", json_body=body)
+
+    # ----------------------------------------------------------- contacts and leads
+    @mcp.tool()
+    async def contacts_search(query: str | None = None, tag: str | None = None, limit: int = 50) -> list:
+        """Find contacts by name, phone, email or company, and/or by tag."""
+        params: dict[str, Any] = {"limit": limit}
+        if query:
+            params["q"] = query
+        if tag:
+            params["tag"] = tag
+        return await call("GET", "/v1/ws/contacts", params=params)
+
+    @mcp.tool()
+    async def contact_get(contact_id: str) -> dict:
+        """One contact with tags, and whether they opted out or are blocked."""
+        return await call("GET", f"/v1/ws/contacts/{contact_id}")
+
+    @mcp.tool()
+    async def contacts_create(phone: str, name: str | None = None, email: str | None = None, company: str | None = None, tags: list[str] | None = None) -> dict:
+        """Add a contact (phone with country code, e.g. +919876543210)."""
+        return await call("POST", "/v1/ws/contacts", json_body={"phone": phone, "name": name, "email": email, "company": company, "tags": tags or []})
+
+    @mcp.tool()
+    async def contacts_update(contact_id: str, name: str | None = None, email: str | None = None, company: str | None = None, add_tags: list[str] | None = None, remove_tags: list[str] | None = None) -> dict:
+        """Change a contact's details or tags. Only what you pass changes."""
+        body = {k: v for k, v in {"name": name, "email": email, "company": company}.items() if v is not None}
+        body.update(add_tags=add_tags or [], remove_tags=remove_tags or [])
+        return await call("PATCH", f"/v1/ws/contacts/{contact_id}", json_body=body)
+
+    @mcp.tool()
+    async def contacts_delete(contact_id: str, confirm: bool = False) -> dict:
+        """Delete a contact and their chats (admin role). Can't be undone. Needs confirm=true."""
+        found = await call("GET", f"/v1/ws/contacts/{contact_id}")
+        if not confirm:
+            return preview("delete this contact and their chat history", contact={k: found.get(k) for k in ("name", "phone")})
+        return await call("DELETE", f"/v1/ws/contacts/{contact_id}")
+
+    @mcp.tool()
+    async def leads_list(status: str | None = None, limit: int = 50) -> list:
+        """Leads in the sales pipeline with stage, value and contact. status: open, won or lost."""
+        params: dict[str, Any] = {"limit": limit}
+        if status:
+            params["status"] = status
+        return await call("GET", "/v1/ws/leads", params=params)
+
+    @mcp.tool()
+    async def lead_update(lead_id: str, stage: str | None = None, status: str | None = None, value: float | None = None, notes: str | None = None, assigned_to: str | None = None) -> dict:
+        """Move a lead to another stage (name or id), mark it won/lost/open, change its value or notes, or assign it."""
+        body = {k: v for k, v in {"stage": stage, "status": status, "value": value, "notes": notes, "assigned_to": assigned_to}.items() if v is not None}
+        return await call("PATCH", f"/v1/ws/leads/{lead_id}", json_body=body)
+
+    @mcp.tool()
+    async def segments_list() -> list:
+        """Customer groups (tags) and how many people are in each. Use a tag as a broadcast audience."""
+        return await call("GET", "/v1/ws/segments")
+
+    @mcp.tool()
+    async def optouts_list(limit: int = 100) -> list:
+        """People who sent STOP (and haven't sent START since) and blocked numbers. They are never messaged."""
+        return await call("GET", "/v1/ws/optouts", params={"limit": limit})
+
+    @mcp.tool()
+    async def blocklist_add(contact_id: str | None = None, phone: str | None = None, blocked: bool = True, confirm: bool = False) -> dict:
+        """Block a number (no messages or broadcasts go to it), or unblock with blocked=false (admin role). Needs confirm=true."""
+        if not confirm:
+            return preview("block this number" if blocked else "unblock this number", contact_id=contact_id, phone=phone)
+        return await call("POST", "/v1/ws/blocklist", json_body={"contact_id": contact_id, "phone": phone, "blocked": blocked})
+
+    # ------------------------------------------------------ campaigns and automation
+    @mcp.tool()
+    async def broadcasts_list(limit: int = 20) -> list:
+        """Recent broadcasts with sent, delivered, read and failed counts."""
+        return await call("GET", "/v1/ws/broadcasts", params={"limit": limit})
+
+    @mcp.tool()
+    async def broadcast_get(broadcast_id: str) -> dict:
+        """One broadcast with recipients by status and the most common errors."""
+        return await call("GET", f"/v1/ws/broadcasts/{broadcast_id}")
+
+    @mcp.tool()
+    async def broadcast_create(template_name: str, tag: str | None = None, recipients: list[dict] | None = None, params: list[str] | None = None, template_language: str = "en_US", name: str | None = None, confirm: bool = False) -> dict:
+        """Send an APPROVED template to everyone with a tag, or to recipients [{"to": "+91...", "params": ["Asha"]}] (up to 1000).
+        params are body values used for everyone when sending to a tag. People who opted out or are blocked are skipped.
+        Marketing templates cost wallet credit per message. Needs confirm=true."""
+        body = {"template_name": template_name, "template_language": template_language, "name": name, "tag": tag, "recipients": recipients or [], "params": params or []}
+        check = await call("POST", "/v1/ws/broadcasts/check", json_body=body)
+        if not confirm:
+            return preview("send this broadcast now", **check)
+        return await call("POST", "/v1/ws/broadcasts", json_body=body)
+
+    @mcp.tool()
+    async def broadcast_cancel(broadcast_id: str, confirm: bool = False) -> dict:
+        """Cancel a draft or scheduled broadcast. Needs confirm=true."""
+        found = await call("GET", f"/v1/ws/broadcasts/{broadcast_id}")
+        if not confirm:
+            return preview("cancel this broadcast", broadcast=found.get("name"), status=found.get("status"))
+        return await call("POST", f"/v1/ws/broadcasts/{broadcast_id}/cancel")
+
+    @mcp.tool()
+    async def automations_list() -> list:
+        """Automations with their trigger, on/off state and run counts."""
+        return await call("GET", "/v1/ws/automations")
+
+    @mcp.tool()
+    async def automation_toggle(automation_id: str, active: bool) -> dict:
+        """Switch an automation on or off (admin role)."""
+        return await call("PATCH", f"/v1/ws/automations/{automation_id}", json_body={"active": active})
+
+    @mcp.tool()
+    async def flows_list() -> list:
+        """Chat flows with their status (draft, active, archived), trigger and run counts."""
+        return await call("GET", "/v1/ws/flows")
+
+    @mcp.tool()
+    async def flow_toggle(flow_id: str, active: bool) -> dict:
+        """Turn a flow on (active) or off (back to draft) (admin role)."""
+        return await call("PATCH", f"/v1/ws/flows/{flow_id}", json_body={"active": active})
+
+    # --------------------------------------------------------- AI, insights, money
+    @mcp.tool()
+    async def knowledge_list() -> list:
+        """Documents the AI assistants answer from."""
+        return await call("GET", "/v1/ws/knowledge")
+
+    @mcp.tool()
+    async def knowledge_add(title: str, content: str) -> dict:
+        """Add a document the AI assistants can answer from, e.g. opening hours, prices, policies (admin role)."""
+        return await call("POST", "/v1/ws/knowledge", json_body={"title": title, "content": content})
+
+    @mcp.tool()
+    async def insights_get(days: int = 30) -> dict:
+        """Business results over the last N days: chats, reply speed, AI replies, leads won, broadcast reach."""
+        return await call("GET", "/v1/ws/insights", params={"days": days})
+
+    @mcp.tool()
+    async def hooks_create(url: str, events: list[str] | None = None, label: str = "") -> dict:
+        """Add an outgoing webhook (e.g. an n8n URL) for events such as message.received or lead.created (admin role).
+        The signing secret is shown once in the app, never to the AI."""
+        res = await call("POST", "/v1/hooks", json_body={"url": url, "events": events or ["*"], "label": label})
+        res.pop("secret", None)
+        return {**res, "note": "Signing secret not shown here; copy it from Settings, or delete and recreate the webhook in the app."}
+
+    @mcp.tool()
+    async def hooks_delete(hook_id: str, confirm: bool = False) -> dict:
+        """Delete an outgoing webhook (admin role). Needs confirm=true."""
+        if not confirm:
+            return preview("delete this webhook", hook_id=hook_id)
+        return await call("DELETE", f"/v1/hooks/{hook_id}")
+
+    @mcp.tool()
+    async def wallet_topup_link(amount_inr: int, confirm: bool = False) -> dict:
+        """A link where the business owner tops up the wallet themselves (payment happens in the app; the AI never pays).
+        Needs confirm=true."""
+        settings = get_settings()
+        if not settings.topup_min_inr <= amount_inr <= settings.topup_max_inr:
+            raise ToolFailure(f"Top-ups are between ₹{settings.topup_min_inr} and ₹{settings.topup_max_inr}")
+        if not confirm:
+            return preview("create a wallet top-up link", amount_inr=amount_inr, note="GST is added at checkout.")
+        return {"url": f"{settings.site_url.rstrip('/')}/wallet?topup={amount_inr}", "amount_inr": amount_inr, "note": "Open it while signed in to pay."}
+
     # ------------------------------------------------------------ platform tools
     @mcp.tool()
     async def platform_ai_models() -> dict:

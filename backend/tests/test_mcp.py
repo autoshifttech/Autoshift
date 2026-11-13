@@ -103,3 +103,31 @@ def test_team_invite_and_business_close_need_confirmation(client, world):
     assert not err and "/join/" in text
     err, text = call_tool(client, key, "support_open", subject="Help", message="Need help please")
     assert not err and "T-1041" in text
+
+
+def test_messages_send_previews_refuses_opted_out_and_sends_on_confirm(client, world):
+    from .test_workspace_ops import FakeBridge, seed_chat
+    from app.deps import get_web_bridge
+
+    bridge = FakeBridge()
+    client.app.dependency_overrides[get_web_bridge] = lambda: bridge
+    key = _mint(client, world, scope="write")["key"]
+    _, conv = seed_chat(world)
+    err, text = call_tool(client, key, "messages_send", conversation_id=conv["id"], text="Hello")
+    assert not err and "confirmation_required" in text and bridge.calls == []
+    err, text = call_tool(client, key, "messages_send", conversation_id=conv["id"], text="Hello", confirm=True)
+    assert not err and "wamid.1" in text and bridge.calls[0][0] == "send"
+    _, stopped = seed_chat(world, phone="+913333333333", texts=("STOP",))
+    err, text = call_tool(client, key, "messages_send", conversation_id=stopped["id"], text="Hello", confirm=True)
+    assert err and "opted out" in text and len(bridge.calls) == 1
+
+
+def test_business_tools_are_listed_and_hook_secret_hidden(client, world, monkeypatch):
+    from app import events
+
+    monkeypatch.setattr(events.socket, "getaddrinfo", lambda host, port, **kw: [(2, 1, 6, "", ("93.184.216.34", port))])
+    key = _mint(client, world, scope="write")["key"]
+    names = {t["name"] for t in rpc(client, key, "tools/list").json()["result"]["tools"]}
+    assert {"messages_send", "conversations_list", "contacts_search", "broadcast_create", "leads_list", "optouts_list", "insights_get", "wallet_topup_link"} <= names
+    err, text = call_tool(client, key, "hooks_create", url="https://n8n.example.com/webhook/x")
+    assert not err and "whsec_" not in text

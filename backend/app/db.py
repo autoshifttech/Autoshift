@@ -49,7 +49,16 @@ class SupabaseDb:
 
     @staticmethod
     def _eq(filters: dict[str, str] | None) -> dict[str, str]:
-        return {k: f"eq.{v}" for k, v in (filters or {}).items()}
+        # A plain value means equals; a tuple (op, value) passes a PostgREST operator,
+        # e.g. ("in", ["a", "b"]), ("gte", "2026-01-01"), ("ilike", "*ann*"), ("is", "null").
+        out = {}
+        for k, v in (filters or {}).items():
+            if isinstance(v, tuple):
+                op, val = v
+                out[k] = f"in.({','.join(str(x) for x in val)})" if op == "in" else f"{op}.{val}"
+            else:
+                out[k] = f"eq.{v}"
+        return out
 
     async def select(self, table, filters=None, *, order=None, limit=None):
         params = self._eq(filters)

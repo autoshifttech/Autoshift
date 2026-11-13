@@ -53,7 +53,27 @@ class FakeDb:
 
     @staticmethod
     def _match(row: dict, filters: dict[str, str] | None) -> bool:
-        return all(str(row.get(k)).lower() == str(v).lower() for k, v in (filters or {}).items())
+        def one(val, f) -> bool:
+            if not isinstance(f, tuple):
+                return str(val).lower() == str(f).lower()
+            op, arg = f
+            if op == "in":
+                return str(val) in {str(a) for a in arg}
+            if op == "is":
+                return val is None if str(arg) == "null" else str(val).lower() == str(arg).lower()
+            if op == "neq":
+                return str(val).lower() != str(arg).lower()
+            if op == "ilike":
+                import fnmatch
+                return val is not None and fnmatch.fnmatch(str(val).lower(), str(arg).lower())
+            if op in ("gte", "lte", "gt", "lt"):
+                if val is None:
+                    return False
+                a, b = (val, type(val)(arg)) if isinstance(val, (int, float)) else (str(val), str(arg))
+                return {"gte": a >= b, "lte": a <= b, "gt": a > b, "lt": a < b}[op]
+            raise NotImplementedError(op)
+
+        return all(one(row.get(k), v) for k, v in (filters or {}).items())
 
     async def select(self, table, filters=None, *, order=None, limit=None):
         rows = [dict(r) for r in self._visible(table) if self._match(r, filters)]
@@ -70,6 +90,8 @@ class FakeDb:
         ident = {"id": n} if table in ("support_messages", "business_notes", "audit_log") else {"id": str(uuid.uuid4())}
         if table == "support_tickets":
             ident["number"] = 1041 + len(self.store.get("support_tickets", []))
+        if table == "contacts" and row.get("phone"):
+            ident["phone_normalized"] = "".join(c for c in row["phone"] if c.isdigit())  # a generated column in Postgres
         new = {**ident, "created_at": f"2026-01-01T00:00:{n:06d}Z", **DEFAULTS.get(table, {}), **row}
         self.store.setdefault(table, []).append(new)
         return dict(new)

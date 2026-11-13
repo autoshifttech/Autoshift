@@ -12,6 +12,7 @@ from .db import Db, service_db, user_db
 from .auth_admin import AuthAdmin, SupabaseAuthAdmin
 from .llm import HttpLlm, Llm
 from .razorpay import RazorpayClient
+from .web_bridge import HttpWebBridge, WebBridge
 from .security import KEY_PREFIX, AuthError, TokenUser, hash_key, verify_token
 
 ROLE_ORDER = {"viewer": 0, "agent": 1, "admin": 2, "owner": 3}
@@ -27,6 +28,10 @@ def get_auth_admin(settings: Annotated[Settings, Depends(get_settings)]) -> Auth
 
 def get_llm() -> Llm:
     return HttpLlm()
+
+
+def get_web_bridge(settings: Annotated[Settings, Depends(get_settings)]) -> WebBridge:
+    return HttpWebBridge(settings)
 
 
 def get_razorpay(settings: Annotated[Settings, Depends(get_settings)]) -> RazorpayClient:
@@ -140,6 +145,8 @@ def require_platform_role(*allowed: str):
 
 
 Rzp = Annotated[RazorpayClient, Depends(get_razorpay)]
+Bridge = Annotated[WebBridge, Depends(get_web_bridge)]
+AgentMember = Annotated[AccountCtx, Depends(require_role("agent"))]
 Member = Annotated[AccountCtx, Depends(get_account)]
 AdminMember = Annotated[AccountCtx, Depends(require_role("admin"))]
 UserDb = Annotated[Db, Depends(get_user_db)]

@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     internal_secret: str = ""
     # Public address of the web app, for invite links (…/join/<token>).
     site_url: str = "http://localhost:3000"
+    # Where the backend reaches the web app's internal bridge (/api/internal/mcp) for WhatsApp sends,
+    # broadcasts, templates and knowledge. Empty = use site_url.
+    web_internal_url: str = ""
     # State code of the seller (first two digits of its GSTIN): decides CGST+SGST versus IGST.
     seller_state_code: str = "29"
     gst_rate: float = 0.18
