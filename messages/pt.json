@@ -2150,7 +2150,40 @@
     },
     "security": {
       "title": "Login e segurança",
-      "description": "Altere sua senha e saia dos seus dispositivos. Isso mantém sua conta segura."
+      "description": "Altere sua senha e saia dos seus dispositivos. Isso mantém sua conta segura.",
+      "loading": "Carregando…",
+      "phoneTitle": "Número do WhatsApp",
+      "phoneDesc": "Os códigos para alterar ou redefinir sua senha são enviados para cá pelo WhatsApp.",
+      "phoneVerified": "Verificado: {phone}",
+      "phoneMissing": "Adicione e verifique seu número do WhatsApp para alterar ou redefinir a senha com um código.",
+      "phoneUnavailable": "Os códigos pelo WhatsApp ainda não estão disponíveis. Você ainda pode alterar a senha usando a senha atual.",
+      "verifyPhone": "Verificar número do WhatsApp",
+      "passwordTitle": "Alterar senha",
+      "passwordDesc": "Enviaremos um código de 6 dígitos para {phone} pelo WhatsApp. Você não precisa da senha atual, então isso também funciona se você a esqueceu.",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirme a nova senha",
+      "mismatch": "As senhas não coincidem.",
+      "sendCode": "Enviar código no WhatsApp",
+      "codeLabel": "Código enviado para {phone}",
+      "changePassword": "Alterar senha",
+      "resend": "Enviar um novo código",
+      "resendIn": "Reenviar em {seconds}s",
+      "back": "Voltar",
+      "changed": "Senha alterada",
+      "error": {
+        "not_available": "Os códigos pelo WhatsApp não estão disponíveis agora.",
+        "no_phone": "Verifique primeiro seu número do WhatsApp.",
+        "wait": "Aguarde {seconds} segundos antes de pedir outro código.",
+        "too_many": "Muitos códigos solicitados. Tente novamente em uma hora.",
+        "send_failed": "Não conseguimos enviar o código. Tente novamente em instantes.",
+        "invalid_code": "Digite o código de 6 dígitos.",
+        "no_code": "Peça um código primeiro.",
+        "expired": "Este código expirou. Envie um novo.",
+        "too_many_attempts": "Muitas tentativas erradas. Envie um novo código.",
+        "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
+        "weak_password": "Use pelo menos {min} caracteres.",
+        "generic": "Algo deu errado. Tente novamente."
+      }
     },
     "browserNotifications": {
       "title": "Notificações do navegador",
@@ -2477,6 +2510,63 @@
       "on": "Verificação por telefone ativada",
       "off": "Verificação por telefone desativada",
       "verifiedCount": "{count, plural, =0 {Nenhum telefone verificado ainda} one {# pessoa verificou o telefone} other {# pessoas verificaram o telefone}}"
+    },
+    "mcpGuide": {
+      "title": "Conecte a AutoShift a uma IA",
+      "desc": "Deixe um assistente de IA como Claude, Cursor ou n8n ler e operar sua AutoShift: conversas, contatos, modelos, transmissões e mais. Ele usa a chave de API que você cria acima.",
+      "descPlatform": "Deixe um assistente de IA usar as ferramentas de administração da AutoShift (as ferramentas platform_*) com uma chave de plataforma.",
+      "step1": "Crie uma chave acima. Escolha “Leitura e escrita” se a IA deve fazer alterações; “Somente leitura” permite consultar sem alterar nada.",
+      "step2": "Copie a chave quando ela aparecer (ela é mostrada uma vez). A configuração abaixo já a preenche logo depois de criada.",
+      "step3": "Escolha seu app de IA abaixo e siga os passos.",
+      "serverUrl": "Endereço do servidor MCP",
+      "chooseApp": "Escolha seu app de IA",
+      "apps": {
+        "claudeCode": "Claude Code",
+        "claudeDesktop": "Claude Desktop",
+        "cursor": "Cursor",
+        "vscode": "VS Code",
+        "n8n": "n8n",
+        "other": "Outros apps"
+      },
+      "steps": {
+        "claudeCode": [
+          "Abra um terminal no seu computador.",
+          "Cole o comando abaixo e pressione Enter.",
+          "No Claude Code, digite /mcp para conferir se a AutoShift aparece conectada."
+        ],
+        "claudeDesktop": [
+          "Instale o Node.js (nodejs.org) se ainda não tiver.",
+          "No Claude Desktop, abra Settings → Developer → Edit Config.",
+          "Cole a configuração abaixo em claude_desktop_config.json (mantenha os servidores que já existem), salve e reinicie o Claude."
+        ],
+        "cursor": [
+          "No Cursor, abra Settings → MCP → Add new MCP server.",
+          "Cole a configuração abaixo em mcp.json e salve.",
+          "A AutoShift aparece na lista de MCP com um ponto verde quando está conectada."
+        ],
+        "vscode": [
+          "No seu projeto, crie o arquivo .vscode/mcp.json.",
+          "Cole a configuração abaixo e salve.",
+          "Abra o Copilot Chat no modo Agent e escolha as ferramentas da AutoShift."
+        ],
+        "n8n": [
+          "No seu fluxo, adicione um nó AI Agent e depois adicione a ele a “MCP Client Tool”.",
+          "Endpoint: cole o endereço do servidor MCP acima. Server transport: HTTP Streamable.",
+          "Authentication: Bearer Auth. Crie uma credencial e cole sua chave como token."
+        ],
+        "other": [
+          "Use qualquer app de IA que permita adicionar um servidor MCP remoto por HTTP com um cabeçalho personalizado.",
+          "Informe o endereço e o cabeçalho abaixo.",
+          "Apps que só permitem entrar com login (OAuth) ainda não aceitam chaves de API."
+        ]
+      },
+      "tipScope": "Chaves somente leitura podem consultar; alterações exigem uma chave de “Leitura e escrita” e a função certa.",
+      "tipConfirm": "Enviar mensagens, excluir ou gastar dinheiro sempre pede que a IA confirme antes.",
+      "tipSecret": "Trate a chave como uma senha: nunca a cole em um chat nem a compartilhe. Revogue-a aqui se vazar.",
+      "tipTry": "Experimente pedir: “Mostre minhas últimas conversas” ou “Liste meus modelos aprovados”.",
+      "copyLabel": "Copiar {what}",
+      "copied": "Copiado",
+      "copyFailed": "Não foi possível copiar. Selecione o texto e copie manualmente."
     }
   },
   "SignupPage": {
@@ -2512,7 +2602,36 @@
     "emailLabel": "E-mail",
     "emailPlaceholder": "voce@exemplo.com",
     "sending": "Enviando...",
-    "sendLink": "Enviar link de redefinição"
+    "sendLink": "Enviar link de redefinição",
+    "whatsapp": {
+      "option": "Receber um código no WhatsApp",
+      "intro": "Digite o e-mail da sua conta. Se ela tiver um número de WhatsApp verificado, enviaremos um código de 6 dígitos para ele.",
+      "sentIfAccount": "Se esta conta tiver um número de WhatsApp verificado, um código está a caminho. Ele expira em 10 minutos.",
+      "emailLabel": "E-mail",
+      "codeLabel": "Código de 6 dígitos",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirme a nova senha",
+      "send": "Enviar código no WhatsApp",
+      "reset": "Definir nova senha",
+      "resend": "Enviar um novo código",
+      "resendIn": "Reenviar em {seconds}s",
+      "useEmail": "Usar um link por e-mail",
+      "mismatch": "As senhas não coincidem.",
+      "done": "Sua senha foi alterada. Entre com a nova senha.",
+      "signIn": "Entrar",
+      "error": {
+        "invalid_email": "Digite o e-mail da sua conta.",
+        "not_available": "Os códigos pelo WhatsApp não estão disponíveis agora. Use o link por e-mail.",
+        "too_many": "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+        "invalid_code": "Digite o código de 6 dígitos.",
+        "no_code": "Peça um código primeiro.",
+        "expired": "Este código expirou. Envie um novo.",
+        "too_many_attempts": "Muitas tentativas erradas. Envie um novo código.",
+        "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
+        "weak_password": "Use pelo menos {min} caracteres.",
+        "generic": "Algo deu errado. Tente novamente."
+      }
+    }
   },
   "ResetPasswordPage": {
     "title": "Escolha uma nova senha",

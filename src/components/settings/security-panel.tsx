@@ -1,6 +1,6 @@
 'use client';
 
-import { PasswordForm } from './password-form';
+import { WhatsAppPasswordSection } from './whatsapp-password';
 import { SessionsCard } from './sessions-card';
 import { SettingsPanelHead } from './settings-panel-head';
 import { useTranslations } from 'next-intl';
@@ -18,7 +18,7 @@ export function SecurityPanel() {
         description={t('description')}
       />
       <div className="space-y-4">
-        <PasswordForm />
+        <WhatsAppPasswordSection />
         <SessionsCard />
       </div>
     </section>

@@ -2150,7 +2150,40 @@
     },
     "security": {
       "title": "Login & security",
-      "description": "Change your password and sign out of your devices. These keep your account safe."
+      "description": "Change your password and sign out of your devices. These keep your account safe.",
+      "loading": "Loading…",
+      "phoneTitle": "WhatsApp number",
+      "phoneDesc": "Codes for changing or resetting your password are sent here on WhatsApp.",
+      "phoneVerified": "Verified: {phone}",
+      "phoneMissing": "Add and verify your WhatsApp number to change or reset your password with a code.",
+      "phoneUnavailable": "WhatsApp codes aren't available yet. You can still change your password with your current one.",
+      "verifyPhone": "Verify WhatsApp number",
+      "passwordTitle": "Change password",
+      "passwordDesc": "We'll send a 6-digit code to {phone} on WhatsApp. You don't need your current password, so this also works if you forgot it.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "mismatch": "The passwords don't match.",
+      "sendCode": "Send code on WhatsApp",
+      "codeLabel": "Code sent to {phone}",
+      "changePassword": "Change password",
+      "resend": "Send a new code",
+      "resendIn": "Send again in {seconds}s",
+      "back": "Back",
+      "changed": "Password changed",
+      "error": {
+        "not_available": "WhatsApp codes aren't available right now.",
+        "no_phone": "Verify your WhatsApp number first.",
+        "wait": "Please wait {seconds} seconds before asking for another code.",
+        "too_many": "Too many codes asked for. Try again in an hour.",
+        "send_failed": "We couldn't send the code. Try again in a moment.",
+        "invalid_code": "Enter the 6-digit code.",
+        "no_code": "Ask for a code first.",
+        "expired": "This code has expired. Send a new one.",
+        "too_many_attempts": "Too many wrong tries. Send a new code.",
+        "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
+        "weak_password": "Use at least {min} characters.",
+        "generic": "Something went wrong. Try again."
+      }
     },
     "browserNotifications": {
       "title": "Browser notifications",
@@ -2477,6 +2510,63 @@
       "on": "Phone verification is on",
       "off": "Phone verification is off",
       "verifiedCount": "{count, plural, =0 {No verified phones yet} one {# person has verified a phone} other {# people have verified a phone}}"
+    },
+    "mcpGuide": {
+      "title": "Connect AutoShift to an AI",
+      "desc": "Let an AI assistant like Claude, Cursor or n8n read and run your AutoShift: chats, contacts, templates, broadcasts and more. It uses the API key you create above.",
+      "descPlatform": "Let an AI assistant run the AutoShift admin tools (the platform_* tools) with a platform key.",
+      "step1": "Create a key above. Pick “Read and write” if the AI should make changes; “Read only” lets it look but not change anything.",
+      "step2": "Copy the key when it appears (it's shown once). The setup below fills it in for you right after you create it.",
+      "step3": "Choose your AI app below and follow its steps.",
+      "serverUrl": "MCP server address",
+      "chooseApp": "Choose your AI app",
+      "apps": {
+        "claudeCode": "Claude Code",
+        "claudeDesktop": "Claude Desktop",
+        "cursor": "Cursor",
+        "vscode": "VS Code",
+        "n8n": "n8n",
+        "other": "Other apps"
+      },
+      "steps": {
+        "claudeCode": [
+          "Open a terminal on your computer.",
+          "Paste the command below and press Enter.",
+          "In Claude Code, type /mcp to check AutoShift shows as connected."
+        ],
+        "claudeDesktop": [
+          "Install Node.js (nodejs.org) if you don't have it.",
+          "In Claude Desktop open Settings → Developer → Edit Config.",
+          "Paste the setup below into claude_desktop_config.json (keep any servers you already have), save, and restart Claude."
+        ],
+        "cursor": [
+          "In Cursor open Settings → MCP → Add new MCP server.",
+          "Paste the setup below into mcp.json and save.",
+          "AutoShift appears in the MCP list with a green dot when it's connected."
+        ],
+        "vscode": [
+          "In your project, create the file .vscode/mcp.json.",
+          "Paste the setup below and save.",
+          "Open Copilot Chat in Agent mode and pick the AutoShift tools."
+        ],
+        "n8n": [
+          "In your workflow add an AI Agent node, then add the “MCP Client Tool” to it.",
+          "Endpoint: paste the MCP server address above. Server transport: HTTP Streamable.",
+          "Authentication: Bearer Auth. Create a credential and paste your key as the token."
+        ],
+        "other": [
+          "Use any AI app that can add a remote MCP server over HTTP with a custom header.",
+          "Enter the address and the header below.",
+          "Apps that only allow signing in (OAuth) can't use API keys yet."
+        ]
+      },
+      "tipScope": "Read-only keys can look things up; changes need a “Read and write” key and the right role.",
+      "tipConfirm": "Sending messages, deleting or spending money always asks the AI to confirm first.",
+      "tipSecret": "Treat a key like a password: never paste it in a chat or share it. Revoke it here if it leaks.",
+      "tipTry": "Try asking: “Show my latest chats” or “List my approved templates”.",
+      "copyLabel": "Copy {what}",
+      "copied": "Copied",
+      "copyFailed": "Couldn't copy. Select the text and copy it yourself."
     }
   },
   "SignupPage": {
@@ -2512,7 +2602,36 @@
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "sending": "Sending...",
-    "sendLink": "Send reset link"
+    "sendLink": "Send reset link",
+    "whatsapp": {
+      "option": "Get a code on WhatsApp instead",
+      "intro": "Enter your account email. If it has a verified WhatsApp number, we'll send a 6-digit code there.",
+      "sentIfAccount": "If this account has a verified WhatsApp number, a code is on its way. It expires in 10 minutes.",
+      "emailLabel": "Email",
+      "codeLabel": "6-digit code",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "send": "Send code on WhatsApp",
+      "reset": "Set new password",
+      "resend": "Send a new code",
+      "resendIn": "Send again in {seconds}s",
+      "useEmail": "Use an email link instead",
+      "mismatch": "The passwords don't match.",
+      "done": "Your password is changed. Sign in with your new password.",
+      "signIn": "Sign in",
+      "error": {
+        "invalid_email": "Enter your account email.",
+        "not_available": "WhatsApp codes aren't available right now. Use the email link instead.",
+        "too_many": "Too many tries. Wait a few minutes and try again.",
+        "invalid_code": "Enter the 6-digit code.",
+        "no_code": "Ask for a code first.",
+        "expired": "This code has expired. Send a new one.",
+        "too_many_attempts": "Too many wrong tries. Send a new code.",
+        "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
+        "weak_password": "Use at least {min} characters.",
+        "generic": "Something went wrong. Try again."
+      }
+    }
   },
   "ResetPasswordPage": {
     "title": "Choose a new password",

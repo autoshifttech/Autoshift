@@ -18,7 +18,8 @@ export async function POST(request: Request): Promise<Response> {
   if (!phone) return NextResponse.json({ error: 'invalid_phone' }, { status: 400 })
 
   const settings = await getOtpSettings(db)
-  if (!settings.enabled || !settings.sender_account_id) return NextResponse.json({ error: 'not_enabled' }, { status: 409 })
+  // A sending number is enough: people can verify on their own (for password codes) before it's required.
+  if (!settings.sender_account_id) return NextResponse.json({ error: 'not_enabled' }, { status: 409 })
 
   const { data: taken } = await db.from('profiles').select('user_id').eq('phone', phone).not('phone_verified_at', 'is', null).neq('user_id', user.id).limit(1)
   if (taken?.length) return NextResponse.json({ error: 'phone_taken' }, { status: 409 })

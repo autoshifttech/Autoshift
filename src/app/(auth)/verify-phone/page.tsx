@@ -42,7 +42,7 @@ function VerifyPhone() {
     fetch("/api/account/phone")
       .then((r) => (r.ok ? r.json() : null))
       .then((s) => {
-        if (s && (!s.required || s.verified)) router.replace(next);
+        if (s?.verified) router.replace(next);
       })
       .catch(() => {});
   }, [router, next]);

@@ -13,6 +13,7 @@ import { toast } from '@/lib/toast';
 import { backend, backendUrl } from '@/lib/backend/client';
 import { ApiKeysSettings } from './api-keys-settings';
 import { SettingsPanelHead } from './settings-panel-head';
+import { McpConnectGuide } from './mcp-connect-guide';
 
 interface ApiKey {
   id: string;
@@ -173,6 +174,8 @@ export function ApiKeysPanel({ platform = false }: { platform?: boolean } = {}) 
           </li>
         ))}
       </ul>
+
+      <McpConnectGuide platform={platform} apiKey={fresh} />
 
       <ConfirmDialog
         open={revoking !== null}

@@ -15,7 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle, ArrowLeft } from "lucide-react";
+import { CheckCircle, ArrowLeft, MessageCircle } from "lucide-react";
+import { WhatsAppReset } from "./whatsapp-reset";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("ForgotPasswordPage");
@@ -23,6 +24,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [viaWhatsApp, setViaWhatsApp] = useState(false);
   const supabase = createClient();
 
   const handleReset = async (e: React.FormEvent) => {
@@ -95,6 +97,10 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {viaWhatsApp ? (
+            <WhatsAppReset initialEmail={email} onUseEmail={() => setViaWhatsApp(false)} />
+          ) : (
+            <>
           <form onSubmit={handleReset} className="flex flex-col gap-4">
             {error && (
               <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-400">
@@ -125,6 +131,12 @@ export default function ForgotPasswordPage() {
               {loading ? t("sending") : t("sendLink")}
             </Button>
           </form>
+              <Button type="button" variant="outline" className="mt-3 min-h-11 w-full gap-2" onClick={() => setViaWhatsApp(true)}>
+                <MessageCircle className="size-4" aria-hidden />
+                {t("whatsapp.option")}
+              </Button>
+            </>
+          )}
 
           <Link
             href="/login"

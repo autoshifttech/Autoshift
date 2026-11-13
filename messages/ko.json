@@ -2150,7 +2150,40 @@
     },
     "security": {
       "title": "로그인 & 보안",
-      "description": "비밀번호를 변경하고 기기에서 로그아웃하세요. 계정을 안전하게 유지하는 데 도움이 됩니다."
+      "description": "비밀번호를 변경하고 기기에서 로그아웃하세요. 계정을 안전하게 유지하는 데 도움이 됩니다.",
+      "loading": "불러오는 중…",
+      "phoneTitle": "WhatsApp 번호",
+      "phoneDesc": "비밀번호 변경 또는 재설정 코드는 이 번호로 WhatsApp을 통해 전송됩니다.",
+      "phoneVerified": "인증됨: {phone}",
+      "phoneMissing": "코드로 비밀번호를 변경하거나 재설정하려면 WhatsApp 번호를 추가하고 인증하세요.",
+      "phoneUnavailable": "아직 WhatsApp 코드를 사용할 수 없습니다. 현재 비밀번호로 변경할 수 있습니다.",
+      "verifyPhone": "WhatsApp 번호 인증",
+      "passwordTitle": "비밀번호 변경",
+      "passwordDesc": "{phone}(으)로 WhatsApp 6자리 코드를 보내 드립니다. 현재 비밀번호가 필요 없으므로 비밀번호를 잊었을 때도 사용할 수 있습니다.",
+      "newPassword": "새 비밀번호",
+      "confirmPassword": "새 비밀번호 확인",
+      "mismatch": "비밀번호가 일치하지 않습니다.",
+      "sendCode": "WhatsApp으로 코드 받기",
+      "codeLabel": "{phone}(으)로 보낸 코드",
+      "changePassword": "비밀번호 변경",
+      "resend": "새 코드 받기",
+      "resendIn": "{seconds}초 후 다시 보내기",
+      "back": "뒤로",
+      "changed": "비밀번호를 변경했습니다",
+      "error": {
+        "not_available": "지금은 WhatsApp 코드를 사용할 수 없습니다.",
+        "no_phone": "먼저 WhatsApp 번호를 인증하세요.",
+        "wait": "{seconds}초 후에 새 코드를 요청하세요.",
+        "too_many": "코드를 너무 많이 요청했습니다. 1시간 후에 다시 시도하세요.",
+        "send_failed": "코드를 보내지 못했습니다. 잠시 후 다시 시도하세요.",
+        "invalid_code": "6자리 코드를 입력하세요.",
+        "no_code": "먼저 코드를 요청하세요.",
+        "expired": "코드가 만료되었습니다. 새 코드를 받으세요.",
+        "too_many_attempts": "잘못된 시도가 너무 많습니다. 새 코드를 받으세요.",
+        "wrong_code": "코드가 맞지 않습니다. {left, plural, =0 {새 코드를 받으세요.} other {#번 더 시도할 수 있습니다.}}",
+        "weak_password": "{min}자 이상 입력하세요.",
+        "generic": "문제가 발생했습니다. 다시 시도하세요."
+      }
     },
     "browserNotifications": {
       "title": "브라우저 알림",
@@ -2477,6 +2510,63 @@
       "on": "전화번호 인증을 켰습니다",
       "off": "전화번호 인증을 껐습니다",
       "verifiedCount": "{count, plural, =0 {아직 인증된 전화번호가 없습니다} other {#명이 전화번호를 인증했습니다}}"
+    },
+    "mcpGuide": {
+      "title": "AutoShift를 AI에 연결하기",
+      "desc": "Claude, Cursor, n8n 같은 AI 어시스턴트가 AutoShift의 채팅, 연락처, 템플릿, 브로드캐스트 등을 조회하고 실행할 수 있게 합니다. 위에서 만든 API 키를 사용합니다.",
+      "descPlatform": "플랫폼 키로 AI 어시스턴트가 AutoShift 관리자 도구(platform_* 도구)를 사용할 수 있게 합니다.",
+      "step1": "위에서 키를 만드세요. AI가 변경까지 하려면 “읽기 및 쓰기”, 조회만 하려면 “읽기 전용”을 고르세요.",
+      "step2": "키가 표시되면 복사하세요(한 번만 표시됩니다). 키를 만든 직후에는 아래 설정에 자동으로 채워집니다.",
+      "step3": "아래에서 사용하는 AI 앱을 고르고 안내를 따르세요.",
+      "serverUrl": "MCP 서버 주소",
+      "chooseApp": "AI 앱 선택",
+      "apps": {
+        "claudeCode": "Claude Code",
+        "claudeDesktop": "Claude Desktop",
+        "cursor": "Cursor",
+        "vscode": "VS Code",
+        "n8n": "n8n",
+        "other": "기타 앱"
+      },
+      "steps": {
+        "claudeCode": [
+          "컴퓨터에서 터미널을 여세요.",
+          "아래 명령을 붙여넣고 Enter를 누르세요.",
+          "Claude Code에서 /mcp를 입력해 AutoShift가 연결되었는지 확인하세요."
+        ],
+        "claudeDesktop": [
+          "Node.js(nodejs.org)가 없다면 설치하세요.",
+          "Claude Desktop에서 Settings → Developer → Edit Config를 여세요.",
+          "아래 설정을 claude_desktop_config.json에 붙여넣고(기존 서버는 그대로 두세요) 저장한 뒤 Claude를 다시 시작하세요."
+        ],
+        "cursor": [
+          "Cursor에서 Settings → MCP → Add new MCP server를 여세요.",
+          "아래 설정을 mcp.json에 붙여넣고 저장하세요.",
+          "연결되면 MCP 목록에 AutoShift가 초록색 점과 함께 표시됩니다."
+        ],
+        "vscode": [
+          "프로젝트에 .vscode/mcp.json 파일을 만드세요.",
+          "아래 설정을 붙여넣고 저장하세요.",
+          "Copilot Chat을 Agent 모드로 열고 AutoShift 도구를 선택하세요."
+        ],
+        "n8n": [
+          "워크플로에 AI Agent 노드를 추가한 다음 “MCP Client Tool”을 연결하세요.",
+          "Endpoint에는 위의 MCP 서버 주소를, Server transport는 HTTP Streamable을 고르세요.",
+          "Authentication은 Bearer Auth로 하고, 자격 증명을 만들어 키를 토큰으로 붙여넣으세요."
+        ],
+        "other": [
+          "사용자 지정 헤더와 함께 HTTP 원격 MCP 서버를 추가할 수 있는 AI 앱이면 사용할 수 있습니다.",
+          "아래 주소와 헤더를 입력하세요.",
+          "로그인(OAuth)만 지원하는 앱은 아직 API 키를 사용할 수 없습니다."
+        ]
+      },
+      "tipScope": "읽기 전용 키는 조회만 할 수 있습니다. 변경하려면 “읽기 및 쓰기” 키와 알맞은 역할이 필요합니다.",
+      "tipConfirm": "메시지 발송, 삭제, 결제 같은 작업은 AI가 항상 먼저 확인을 요청합니다.",
+      "tipSecret": "키는 비밀번호처럼 다루세요. 채팅에 붙여넣거나 공유하지 말고, 유출되면 여기서 바로 폐기하세요.",
+      "tipTry": "이렇게 물어보세요: “최근 채팅 보여 줘” 또는 “승인된 템플릿 목록 알려 줘”.",
+      "copyLabel": "{what} 복사",
+      "copied": "복사됨",
+      "copyFailed": "복사하지 못했습니다. 텍스트를 선택해 직접 복사하세요."
     }
   },
   "SignupPage": {
@@ -2512,7 +2602,36 @@
     "emailLabel": "이메일",
     "emailPlaceholder": "you@example.com",
     "sending": "전송 중...",
-    "sendLink": "재설정 링크 보내기"
+    "sendLink": "재설정 링크 보내기",
+    "whatsapp": {
+      "option": "WhatsApp으로 코드 받기",
+      "intro": "계정 이메일을 입력하세요. 인증된 WhatsApp 번호가 있으면 그 번호로 6자리 코드를 보내 드립니다.",
+      "sentIfAccount": "이 계정에 인증된 WhatsApp 번호가 있으면 코드가 전송됩니다. 10분 후 만료됩니다.",
+      "emailLabel": "이메일",
+      "codeLabel": "6자리 코드",
+      "newPassword": "새 비밀번호",
+      "confirmPassword": "새 비밀번호 확인",
+      "send": "WhatsApp으로 코드 받기",
+      "reset": "새 비밀번호 설정",
+      "resend": "새 코드 받기",
+      "resendIn": "{seconds}초 후 다시 보내기",
+      "useEmail": "이메일 링크로 재설정",
+      "mismatch": "비밀번호가 일치하지 않습니다.",
+      "done": "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요.",
+      "signIn": "로그인",
+      "error": {
+        "invalid_email": "계정 이메일을 입력하세요.",
+        "not_available": "지금은 WhatsApp 코드를 사용할 수 없습니다. 이메일 링크를 이용하세요.",
+        "too_many": "시도가 너무 많습니다. 몇 분 후 다시 시도하세요.",
+        "invalid_code": "6자리 코드를 입력하세요.",
+        "no_code": "먼저 코드를 요청하세요.",
+        "expired": "코드가 만료되었습니다. 새 코드를 받으세요.",
+        "too_many_attempts": "잘못된 시도가 너무 많습니다. 새 코드를 받으세요.",
+        "wrong_code": "코드가 맞지 않습니다. {left, plural, =0 {새 코드를 받으세요.} other {#번 더 시도할 수 있습니다.}}",
+        "weak_password": "{min}자 이상 입력하세요.",
+        "generic": "문제가 발생했습니다. 다시 시도하세요."
+      }
+    }
   },
   "ResetPasswordPage": {
     "title": "새 비밀번호 설정",
