@@ -2574,7 +2574,13 @@
       "tipTry": "Experimente pedir: “Mostre minhas últimas conversas” ou “Liste meus modelos aprovados”.",
       "copyLabel": "Copiar {what}",
       "copied": "Copiado",
-      "copyFailed": "Não foi possível copiar. Selecione o texto e copie manualmente."
+      "copyFailed": "Não foi possível copiar. Selecione o texto e copie manualmente.",
+      "groupsTitle": "Só as ferramentas de que você precisa",
+      "groupsDesc": "Adicione grupos ao endereço para a IA ver menos ferramentas. É mais rápido e mais seguro. Sem grupos, ela recebe tudo o que a sua chave permite.",
+      "groupsList": "Grupos: account, chats, contacts, leads, campaigns, automation, ai, whatsapp, team, integrations, insights.",
+      "groupsListPlatform": "Grupos: admin-reports, admin-businesses, admin-users, admin-money, admin-pricing, admin-whatsapp-ai, admin-support, admin-system (ou admin para todos).",
+      "tipLimits": "Cada chave tem limites diários (300 mensagens, 2.000 destinatários de transmissão, 200 respostas de IA) e 120 chamadas por minuto. Uma chave só de leitura pode ver, mas nunca alterar nada.",
+      "tipPrompts": "Seu app de IA também recebe tarefas prontas (prompts), como “Resumo do dia” e “Retomar leads parados”."
     }
   },
   "SignupPage": {

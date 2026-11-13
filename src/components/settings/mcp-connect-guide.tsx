@@ -111,7 +111,16 @@ export function McpConnectGuide({ platform = false, apiKey }: { platform?: boole
         {snippet[client] && <CodeBlock code={snippet[client]!} label={t(`apps.${client}`)} />}
       </div>
 
+      <div className="space-y-2 border-t border-border pt-3">
+        <h4 className="text-sm font-semibold text-foreground">{t('groupsTitle')}</h4>
+        <p className="text-sm text-muted-foreground">{t('groupsDesc')}</p>
+        <CodeBlock code={`${url}?groups=${platform ? 'admin-reports,admin-support' : 'chats,contacts'}`} label={t('groupsTitle')} />
+        <p className="text-xs break-words text-muted-foreground">{platform ? t('groupsListPlatform') : t('groupsList')}</p>
+      </div>
+
       <ul className="space-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
+        <li>{t('tipLimits')}</li>
+        <li>{t('tipPrompts')}</li>
         <li>{t('tipScope')}</li>
         <li>{t('tipConfirm')}</li>
         <li>{t('tipSecret')}</li>

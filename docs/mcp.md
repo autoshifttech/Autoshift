@@ -56,3 +56,31 @@ scopes. Give an assistant a read-only key and read-only config and it
 physically cannot send anything. See the
 [server README](../mcp-server/README.md) for the full tool list and
 safety model.
+
+## Hosted MCP server (`/mcp/` on the API)
+
+The backend also serves MCP over HTTP at `https://<api>/mcp/` with an API key in
+`Authorization: Bearer …` or `X-API-Key`. It has 166 tools and 8 prompts:
+
+- **Business keys** see the business tools (90) and 5 prompts (daily summary, follow up
+  cold leads, fix my WhatsApp, weekly business report, clean my contacts).
+- **Platform keys** see the admin tools (76) and 3 prompts (morning check, weekly business
+  review, investigate a business). `whoami` and custom tools are shared.
+- **Groups:** `…/mcp/?groups=chats,contacts` shows only those groups. Business groups:
+  account, chats, contacts, leads, campaigns, automation, ai, whatsapp, team,
+  integrations, insights. Admin groups: admin-reports, admin-businesses, admin-users,
+  admin-money, admin-pricing, admin-whatsapp-ai, admin-support, admin-system (`admin` = all).
+
+Safety built in:
+
+- Read-only keys can't change anything; roles still apply (viewer, agent, admin, owner and staff roles).
+- Sending, spending, deleting and cancelling tools return a preview first and need `confirm=true`.
+- Daily limits per key (300 messages, 2,000 broadcast recipients, 200 AI replies; change them
+  in `platform_settings.api_key_limits`) and 120 calls a minute per key.
+- `request_id` on `messages_send` and `broadcast_create`: a retry with the same id never sends twice.
+- Opted-out (STOP) and blocked people are never messaged, including scheduled broadcasts, which
+  are checked again at send time.
+- Customer message text is marked as data, not instructions.
+- No tool returns or accepts secrets, grants admin access, closes a business or removes a login;
+  those stay in the admin panel. Every change is in the audit log.
+- Heavy admin reports are cached for 2 minutes for API keys.

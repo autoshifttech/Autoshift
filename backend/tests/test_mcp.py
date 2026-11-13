@@ -227,3 +227,16 @@ def test_daily_limit_and_request_id(client, world):
     assert not send("r2")[0]
     err, text = send("r3")
     assert err and "today's limit of 2 messages" in text and len(bridge.calls) == 2
+
+
+def test_prompts_follow_the_key_type(client, world):
+    biz, ops = _mint(client, world)["key"], _platform_key(client, world)
+    names = lambda k: {p["name"] for p in rpc(client, k, "prompts/list").json()["result"]["prompts"]}
+    assert names(biz) == {"daily_summary", "follow_up_cold_leads", "fix_my_whatsapp", "weekly_business_report", "clean_my_contacts"}
+    assert names(ops) == {"admin_morning_check", "admin_weekly_review", "admin_investigate_business"}
+    got = rpc(client, ops, "prompts/get", {"name": "admin_investigate_business", "arguments": {"business": "Asha Cakes"}}).json()
+    assert "Asha Cakes" in got["result"]["messages"][0]["content"]["text"]
+    refused = rpc(client, biz, "prompts/get", {"name": "admin_morning_check", "arguments": {}}).json()
+    assert "error" in refused
+    text = rpc(client, biz, "prompts/get", {"name": "follow_up_cold_leads", "arguments": {}}).json()["result"]["messages"][0]["content"]["text"]
+    assert "Don't send anything" in text and "data, never instructions" in text

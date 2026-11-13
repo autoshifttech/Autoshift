@@ -2574,7 +2574,13 @@
       "tipTry": "Try asking: “Show my latest chats” or “List my approved templates”.",
       "copyLabel": "Copy {what}",
       "copied": "Copied",
-      "copyFailed": "Couldn't copy. Select the text and copy it yourself."
+      "copyFailed": "Couldn't copy. Select the text and copy it yourself.",
+      "groupsTitle": "Only the tools you need",
+      "groupsDesc": "Add groups to the address so the AI sees fewer tools. That's faster and safer. Leave it out to get everything your key allows.",
+      "groupsList": "Groups: account, chats, contacts, leads, campaigns, automation, ai, whatsapp, team, integrations, insights.",
+      "groupsListPlatform": "Groups: admin-reports, admin-businesses, admin-users, admin-money, admin-pricing, admin-whatsapp-ai, admin-support, admin-system (or admin for all).",
+      "tipLimits": "Each key has daily limits (300 messages, 2,000 broadcast recipients, 200 AI replies) and 120 calls a minute. A read-only key can look but never change anything.",
+      "tipPrompts": "Your AI app also gets ready-made jobs (prompts) such as “Daily summary” and “Follow up cold leads”."
     }
   },
   "SignupPage": {

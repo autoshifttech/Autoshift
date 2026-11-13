@@ -2574,7 +2574,13 @@
       "tipTry": "이렇게 물어보세요: “최근 채팅 보여 줘” 또는 “승인된 템플릿 목록 알려 줘”.",
       "copyLabel": "{what} 복사",
       "copied": "복사됨",
-      "copyFailed": "복사하지 못했습니다. 텍스트를 선택해 직접 복사하세요."
+      "copyFailed": "복사하지 못했습니다. 텍스트를 선택해 직접 복사하세요.",
+      "groupsTitle": "필요한 도구만 연결",
+      "groupsDesc": "주소에 그룹을 추가하면 AI가 보는 도구가 줄어들어 더 빠르고 안전합니다. 그룹을 빼면 키가 허용하는 모든 도구를 받습니다.",
+      "groupsList": "그룹: account, chats, contacts, leads, campaigns, automation, ai, whatsapp, team, integrations, insights.",
+      "groupsListPlatform": "그룹: admin-reports, admin-businesses, admin-users, admin-money, admin-pricing, admin-whatsapp-ai, admin-support, admin-system (전체는 admin).",
+      "tipLimits": "키마다 하루 한도(메시지 300건, 브로드캐스트 수신자 2,000명, AI 답장 200건)와 분당 120회 호출 제한이 있습니다. 읽기 전용 키는 볼 수만 있고 바꿀 수는 없습니다.",
+      "tipPrompts": "AI 앱에서 “오늘 요약”, “식은 리드 후속 연락” 같은 준비된 작업(프롬프트)도 쓸 수 있습니다."
     }
   },
   "SignupPage": {
