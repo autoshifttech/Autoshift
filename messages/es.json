@@ -2521,6 +2521,7 @@
       "serverUrl": "Dirección del servidor MCP",
       "chooseApp": "Elige tu app de IA",
       "apps": {
+        "claudeApp": "Claude (app y web)",
         "claudeCode": "Claude Code",
         "claudeDesktop": "Claude Desktop",
         "cursor": "Cursor",
@@ -2529,6 +2530,13 @@
         "other": "Otras apps"
       },
       "steps": {
+        "claudeApp": [
+          "En Claude abre Settings → Connectors → Add custom connector.",
+          "Nombre: AutoShift. Server URL: pega la dirección del servidor MCP de arriba.",
+          "Authentication: elige “No sign-in” (AutoShift usa una clave de API, no OAuth).",
+          "Request headers → Add header. Nombre: X-API-Key. Valor: tu clave. Marca “Required”.",
+          "Pulsa Add y activa AutoShift desde el menú de herramientas de un chat."
+        ],
         "claudeCode": [
           "Abre una terminal en tu ordenador.",
           "Pega el comando de abajo y pulsa Intro.",

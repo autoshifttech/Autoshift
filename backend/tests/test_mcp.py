@@ -131,3 +131,13 @@ def test_business_tools_are_listed_and_hook_secret_hidden(client, world, monkeyp
     assert {"messages_send", "conversations_list", "contacts_search", "broadcast_create", "leads_list", "optouts_list", "insights_get", "wallet_topup_link"} <= names
     err, text = call_tool(client, key, "hooks_create", url="https://n8n.example.com/webhook/x")
     assert not err and "whsec_" not in text
+
+
+def test_key_can_come_in_an_api_key_header(client, world):
+    key = _mint(client, world)["key"]
+    for header in ("X-API-Key", "api-key"):
+        for value in (key, f"Bearer {key}"):
+            res = client.post("/mcp/", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}, headers={**MCP_HEADERS, header: value})
+            assert res.status_code == 200, (header, res.text)
+    res = client.post("/mcp/", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, headers={**MCP_HEADERS, "X-API-Key": "not-a-key"})
+    assert res.status_code == 401

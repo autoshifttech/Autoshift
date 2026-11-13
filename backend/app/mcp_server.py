@@ -30,6 +30,21 @@ from .security import KEY_PREFIX
 _auth: contextvars.ContextVar[str | None] = contextvars.ContextVar("mcp_auth", default=None)
 
 
+def _key_from(headers: dict[str, str]) -> str | None:
+    """The caller's key as 'Bearer asmcp_...': from Authorization, or from an X-API-Key / api-key header
+    (apps such as Claude's custom connectors that send an API key in a header of its own)."""
+    auth = headers.get("authorization", "").strip()
+    if auth.lower().startswith("bearer ") and auth[7:].strip().startswith(KEY_PREFIX):
+        return f"Bearer {auth[7:].strip()}"
+    for name in ("x-api-key", "api-key"):
+        raw = headers.get(name, "").strip()
+        if raw.lower().startswith("bearer "):
+            raw = raw[7:].strip()
+        if raw.startswith(KEY_PREFIX):
+            return f"Bearer {raw}"
+    return None
+
+
 class AuthCapture:
     """ASGI wrapper: keeps the caller's key for the tools and refuses anything that isn't one."""
 
@@ -40,9 +55,9 @@ class AuthCapture:
         if scope["type"] != "http":
             return await self.inner(scope, receive, send)
         headers = {k.decode().lower(): v.decode() for k, v in scope["headers"]}
-        value = headers.get("authorization", "")
-        if not value.lower().startswith("bearer ") or not value[7:].strip().startswith(KEY_PREFIX):
-            body = json.dumps({"error": "Use an AutoShift API key (asmcp_...) as a Bearer token"}).encode()
+        value = _key_from(headers)
+        if not value:
+            body = json.dumps({"error": "Use an AutoShift API key (asmcp_...): 'Authorization: Bearer <key>' or an 'X-API-Key: <key>' header"}).encode()
             await send({"type": "http.response.start", "status": 401, "headers": [(b"content-type", b"application/json"), (b"www-authenticate", b"Bearer")]})
             await send({"type": "http.response.body", "body": body})
             return

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { backendUrl } from '@/lib/backend/client';
 
-const CLIENTS = ['claudeCode', 'claudeDesktop', 'cursor', 'vscode', 'n8n', 'other'] as const;
+const CLIENTS = ['claudeApp', 'claudeCode', 'claudeDesktop', 'cursor', 'vscode', 'n8n', 'other'] as const;
 type Client = (typeof CLIENTS)[number];
 
 function CodeBlock({ code, label }: { code: string; label: string }) {
@@ -42,19 +42,20 @@ function CodeBlock({ code, label }: { code: string; label: string }) {
  */
 export function McpConnectGuide({ platform = false, apiKey }: { platform?: boolean; apiKey?: string | null }) {
   const t = useTranslations('Settings.mcpGuide');
-  const [client, setClient] = useState<Client>('claudeCode');
+  const [client, setClient] = useState<Client>('claudeApp');
   const base = backendUrl();
   if (!base) return null;
   const url = `${base}/mcp/`;
   const key = apiKey || 'asmcp_YOUR_KEY';
 
   const snippet: Record<Client, string | null> = {
+    claudeApp: `URL:          ${url}\nHeader name:  X-API-Key\nHeader value: ${key}`,
     claudeCode: `claude mcp add --transport http autoshift ${url} \\\n  --header "Authorization: Bearer ${key}"`,
     claudeDesktop: JSON.stringify({ mcpServers: { autoshift: { command: 'npx', args: ['-y', 'mcp-remote', url, '--header', 'Authorization:${AUTOSHIFT_AUTH}'], env: { AUTOSHIFT_AUTH: `Bearer ${key}` } } } }, null, 2),
     cursor: JSON.stringify({ mcpServers: { autoshift: { url, headers: { Authorization: `Bearer ${key}` } } } }, null, 2),
     vscode: JSON.stringify({ servers: { autoshift: { type: 'http', url, headers: { Authorization: `Bearer ${key}` } } } }, null, 2),
     n8n: null,
-    other: `URL:    ${url}\nHeader: Authorization: Bearer ${key}`,
+    other: `URL:    ${url}\nHeader: Authorization: Bearer ${key}\n(or)    X-API-Key: ${key}`,
   };
   const steps = (t.raw(`steps.${client}`) as string[]) ?? [];
 

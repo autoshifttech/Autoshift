@@ -2521,6 +2521,7 @@
       "serverUrl": "MCP 서버 주소",
       "chooseApp": "AI 앱 선택",
       "apps": {
+        "claudeApp": "Claude (앱 및 웹)",
         "claudeCode": "Claude Code",
         "claudeDesktop": "Claude Desktop",
         "cursor": "Cursor",
@@ -2529,6 +2530,13 @@
         "other": "기타 앱"
       },
       "steps": {
+        "claudeApp": [
+          "Claude에서 Settings → Connectors → Add custom connector를 여세요.",
+          "이름: AutoShift. Server URL: 위의 MCP 서버 주소를 붙여넣으세요.",
+          "Authentication: “No sign-in”을 고르세요(AutoShift는 OAuth가 아닌 API 키를 사용합니다).",
+          "Request headers → Add header. 이름: X-API-Key, 값: 내 키. “Required”를 체크하세요.",
+          "Add를 누른 뒤 채팅의 도구 메뉴에서 AutoShift를 켜세요."
+        ],
         "claudeCode": [
           "컴퓨터에서 터미널을 여세요.",
           "아래 명령을 붙여넣고 Enter를 누르세요.",

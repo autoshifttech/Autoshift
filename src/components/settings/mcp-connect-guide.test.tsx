@@ -18,11 +18,11 @@ describe('MCP connection guide', () => {
     const html = render({})
     expect(html).toContain('Connect AutoShift to an AI')
     expect(html).toContain('https://api.example.com/mcp/')
-    expect(html).toContain('claude mcp add --transport http autoshift')
+    expect(html).toContain('X-API-Key')
     expect(html).toContain('asmcp_YOUR_KEY')
   })
 
   it('fills in a freshly created key', () => {
-    expect(render({ apiKey: 'asmcp_abc123' })).toContain('Bearer asmcp_abc123')
+    expect(render({ apiKey: 'asmcp_abc123' })).toContain('Header value: asmcp_abc123')
   })
 })
