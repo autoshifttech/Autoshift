@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -10,9 +10,29 @@ router = APIRouter(prefix="/v1/platform", tags=["platform"])
 
 
 @router.get("/audit")
-async def audit_log(_: Annotated[PlatformAdmin, Depends(get_platform_admin)], sdb: ServiceDb, limit: int = Query(100, ge=1, le=500)):
-    """Newest first: every admin and account action the backend recorded."""
-    rows: list = await sdb.select("audit_log", order="created_at.desc", limit=limit)
+async def audit_log(
+    _: Annotated[PlatformAdmin, Depends(get_platform_admin)],
+    sdb: ServiceDb,
+    limit: int = Query(100, ge=1, le=500),
+    action: str | None = Query(None, max_length=60, description="Exact action, or a prefix ending in * (e.g. payment.*)"),
+    account_id: str | None = None,
+    actor_id: str | None = None,
+    scope: str | None = Query(None, pattern="^(account|platform)$"),
+    days: int | None = Query(None, ge=1, le=365),
+):
+    """Newest first: every admin and account action the backend recorded, optionally filtered."""
+    filters: dict = {}
+    if action:
+        filters["action"] = ("ilike", action) if action.endswith("*") else action
+    if account_id:
+        filters["account_id"] = account_id
+    if actor_id:
+        filters["actor_id"] = actor_id
+    if scope:
+        filters["scope"] = scope
+    if days:
+        filters["created_at"] = ("gte", (datetime.now(timezone.utc) - timedelta(days=days)).isoformat())
+    rows: list = await sdb.select("audit_log", filters or None, order="created_at.desc", limit=limit)
     return rows
 
 
