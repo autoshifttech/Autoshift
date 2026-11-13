@@ -40,7 +40,7 @@ async def _account(sdb, account_id: str) -> dict:
 async def can_send(body: InternalCanSend, _: Internal, sdb: ServiceDb):
     """Before a send: is the business active and is there money for it?"""
     acct = await _account(sdb, body.account_id)
-    need = wallet.RATES_PAISE[f"charge_{body.category}"] * body.units
+    need = (await wallet.rates(sdb))[f"charge_{body.category}"] * body.units
     if body.category in platform_settings.MESSAGE_CATEGORIES and not await platform_settings.wallet_pays_meta_fees(sdb):
         need = 0  # Meta bills the business directly for messages
     have = await wallet.balance(sdb, body.account_id)
@@ -64,9 +64,10 @@ async def charge(body: InternalCharge, _: Internal, sdb: ServiceDb):
         raise HTTPException(402, "Not enough money in the wallet")
     if done is None:  # free (service conversations)
         return {"charged_paise": 0, "balance_paise": await wallet.balance(sdb, body.account_id), "applied": False}
-    if done.applied and done.balance_paise < LOW_BALANCE_PAISE <= done.balance_paise + wallet.RATES_PAISE[f"charge_{body.category}"] * body.units:
+    unit = (await wallet.rates(sdb))[f"charge_{body.category}"]
+    if done.applied and done.balance_paise < LOW_BALANCE_PAISE <= done.balance_paise + unit * body.units:
         await events.emit(sdb, body.account_id, "wallet.low", {"balance_paise": done.balance_paise})  # once, when it crosses the line
-    return {"charged_paise": wallet.RATES_PAISE[f"charge_{body.category}"] * body.units if done.applied else 0, "balance_paise": done.balance_paise, "applied": done.applied}
+    return {"charged_paise": unit * body.units if done.applied else 0, "balance_paise": done.balance_paise, "applied": done.applied}
 
 
 @router.post("/ai-reply")

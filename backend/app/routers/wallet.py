@@ -15,7 +15,7 @@ Cfg = Annotated[Settings, Depends(get_settings)]
 
 @router.get("")
 async def get_wallet(ctx: Member, sdb: ServiceDb):
-    return {"balance_paise": await wallet.balance(sdb, ctx.account_id), "rates_paise": wallet.RATES_PAISE}
+    return {"balance_paise": await wallet.balance(sdb, ctx.account_id), "rates_paise": await wallet.rates(sdb)}
 
 
 @router.get("/ledger")

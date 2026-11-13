@@ -85,7 +85,7 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     if allowed is not None and await usage.ai_replies_this_month(sdb, account_id) >= allowed:
         return Reply("plan_limit", reason="This month's AI replies on your plan are used up")
     have = await wallet.balance(sdb, account_id)
-    if have < wallet.RATES_PAISE["charge_ai"]:
+    if have < (await wallet.rates(sdb))["charge_ai"]:
         return Reply("no_funds", reason="The wallet is empty", balance_paise=have)
 
     try:

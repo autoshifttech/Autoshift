@@ -605,6 +605,269 @@ def build_mcp(get_app) -> MCPServer:
             body["amount_paise"] = amount_paise
         return await call("POST", f"/v1/platform/payments/{payment_id}/refund", json_body=body)
 
+    # ------------------------------------------------- platform: businesses
+    @mcp.tool()
+    async def platform_business_create(name: str, owner_name: str, owner_email: str, industry: str = "", city: str = "", plan_id: str = "starter", confirm: bool = False) -> dict:
+        """Platform key (support): create a business with its owner on a trial. The owner gets an email to set
+        their own password (the AI never sees or sets passwords). Needs confirm=true."""
+        body = {"name": name, "industry": industry, "city": city, "owner": {"name": owner_name, "email": owner_email}, "plan_id": plan_id}
+        if not confirm:
+            return preview("create this business and email its owner an invite", **body)
+        return await call("POST", "/v1/platform/businesses", json_body=body)
+
+    @mcp.tool()
+    async def platform_business_update(account_id: str, name: str | None = None, industry: str | None = None, city: str | None = None) -> dict:
+        """Platform key (support): change a business's name, industry or city."""
+        body = {k: v for k, v in {"name": name, "industry": industry, "city": city}.items() if v is not None}
+        return await call("PATCH", f"/v1/platform/businesses/{account_id}", json_body=body)
+
+    @mcp.tool()
+    async def platform_business_set_plan(account_id: str, plan_id: str, confirm: bool = False) -> dict:
+        """Platform key (support): move a business to another plan (starter, growth, pro). Needs confirm=true."""
+        if not confirm:
+            b = await call("GET", f"/v1/platform/businesses/{account_id}")
+            return preview(f"move this business to the {plan_id} plan", business=b.get("name"), current_plan=b.get("plan"))
+        return await call("POST", f"/v1/platform/businesses/{account_id}/subscription", json_body={"plan_id": plan_id})
+
+    @mcp.tool()
+    async def platform_business_extend_trial(account_id: str, days: int, confirm: bool = False) -> dict:
+        """Platform key (support): add 1 to 90 days to a business's free trial. Needs confirm=true."""
+        if not confirm:
+            b = await call("GET", f"/v1/platform/businesses/{account_id}")
+            return preview(f"extend this trial by {days} days", business=b.get("name"))
+        return await call("POST", f"/v1/platform/businesses/{account_id}/subscription", json_body={"extend_trial_days": days})
+
+    @mcp.tool()
+    async def platform_business_notes(account_id: str) -> list:
+        """Platform key: staff-only notes on a business."""
+        return await call("GET", f"/v1/platform/businesses/{account_id}/notes")
+
+    @mcp.tool()
+    async def platform_business_note_add(account_id: str, text: str) -> dict:
+        """Platform key (support): add a staff-only note to a business (the business never sees it)."""
+        return await call("POST", f"/v1/platform/businesses/{account_id}/notes", json_body={"text": text})
+
+    @mcp.tool()
+    async def platform_business_team(account_id: str) -> list:
+        """Platform key: the people on a business and their roles."""
+        return await call("GET", f"/v1/platform/businesses/{account_id}/team")
+
+    @mcp.tool()
+    async def platform_business_usage(account_id: str, days: int = 30) -> dict:
+        """Platform key: a business's contacts, chats, AI replies, broadcasts and wallet spend over N days."""
+        return await call("GET", f"/v1/platform/businesses/{account_id}/usage", params={"days": days})
+
+    # ------------------------------------------------- platform: money
+    @mcp.tool()
+    async def platform_invoices(account_id: str | None = None, limit: int = 50) -> list:
+        """Platform key: GST invoices, newest first, optionally for one business."""
+        params: dict[str, Any] = {"limit": limit}
+        if account_id:
+            params["account_id"] = account_id
+        return await call("GET", "/v1/platform/invoices", params=params)
+
+    @mcp.tool()
+    async def platform_failed_payments(days: int = 30) -> dict:
+        """Platform key: failed and abandoned top-ups, failed Razorpay events and past-due subscriptions."""
+        return await call("GET", "/v1/platform/failed-payments", params={"days": days})
+
+    @mcp.tool()
+    async def platform_revenue_report(days: int = 30, group: str = "day") -> dict:
+        """Platform key (finance): invoiced revenue before and after GST, by day or month and by kind."""
+        return await call("GET", "/v1/platform/revenue", params={"days": days, "group": group})
+
+    @mcp.tool()
+    async def platform_costs(days: int = 30) -> dict:
+        """Platform key: what businesses were charged for messages and AI, and AI tokens by model."""
+        return await call("GET", "/v1/platform/costs", params={"days": days})
+
+    @mcp.tool()
+    async def platform_low_wallets(below_inr: int = 200) -> list:
+        """Platform key: businesses whose wallet is below an amount (₹), lowest first."""
+        return await call("GET", "/v1/platform/low-wallets", params={"below_paise": below_inr * 100})
+
+    # ------------------------------------------------- platform: plans and rates
+    @mcp.tool()
+    async def platform_plans_list() -> list:
+        """Platform key: every plan, including hidden ones, with price (paise) and limits."""
+        return await call("GET", "/v1/platform/plans")
+
+    @mcp.tool()
+    async def platform_plans_update(plan_id: str, name: str | None = None, monthly_inr: int | None = None, seats: int | None = None, contacts: int | None = None, unlimited_contacts: bool | None = None, ai_replies: int | None = None, active: bool | None = None, popular: bool | None = None, confirm: bool = False) -> dict:
+        """Platform key (super admin): change a plan's price or limits, hide it (active=false) or mark it popular.
+        Current subscribers keep their price until they renew on a new checkout. Needs confirm=true."""
+        body = {k: v for k, v in {"name": name, "monthly_paise": monthly_inr * 100 if monthly_inr is not None else None, "seats": seats, "contacts": contacts, "unlimited_contacts": unlimited_contacts, "ai_replies": ai_replies, "active": active, "popular": popular}.items() if v is not None}
+        if not confirm:
+            current = next((p for p in await call("GET", "/v1/platform/plans") if p["id"] == plan_id), None)
+            if not current:
+                raise ToolFailure("No such plan")
+            return preview("change this plan", plan=plan_id, before={k: current.get(k) for k in body if k in current}, after=body)
+        return await call("PATCH", f"/v1/platform/plans/{plan_id}", json_body=body)
+
+    @mcp.tool()
+    async def platform_rates_update(marketing: int | None = None, utility: int | None = None, authentication: int | None = None, service: int | None = None, ai: int | None = None, confirm: bool = False) -> dict:
+        """Platform key (super admin): change what the wallet charges per message or AI reply, in paise (100 = ₹1).
+        Applies to every business from the next charge. Needs confirm=true."""
+        body = {k: v for k, v in {"marketing": marketing, "utility": utility, "authentication": authentication, "service": service, "ai": ai}.items() if v is not None}
+        if not confirm:
+            current = await call("GET", "/v1/platform/rates")
+            return preview("change the rate card for every business", before={k: current["rates_paise"][f"charge_{k}"] for k in body}, after=body)
+        return await call("PUT", "/v1/platform/rates", json_body=body)
+
+    # ------------------------------------------------- platform: health
+    @mcp.tool()
+    async def platform_whatsapp_health(hours: int = 24) -> dict:
+        """Platform key: every business's WhatsApp connection, failed sends and rejected templates."""
+        return await call("GET", "/v1/platform/whatsapp-health", params={"hours": hours})
+
+    @mcp.tool()
+    async def platform_whatsapp_issues(hours: int = 24) -> list:
+        """Platform key: only businesses with WhatsApp problems, with their top errors."""
+        return await call("GET", "/v1/platform/whatsapp-issues", params={"hours": hours})
+
+    @mcp.tool()
+    async def platform_ai_usage(days: int = 30) -> dict:
+        """Platform key: AI replies and tokens by model, by mode and by business."""
+        return await call("GET", "/v1/platform/ai-usage", params={"days": days})
+
+    @mcp.tool()
+    async def platform_system_status() -> dict:
+        """Platform key: database check, what's configured, and queues (stuck broadcasts, failed webhooks, failed sends)."""
+        return await call("GET", "/v1/platform/system-status")
+
+    @mcp.tool()
+    async def platform_alerts(include_dismissed: bool = False) -> list:
+        """Platform key: things that need attention: low wallets, failed payments, trials ending, WhatsApp problems, system issues, urgent tickets."""
+        return await call("GET", "/v1/platform/alerts", params={"include_dismissed": include_dismissed})
+
+    @mcp.tool()
+    async def platform_alert_dismiss(alert_id: str) -> dict:
+        """Platform key (support): hide an alert from the list."""
+        return await call("POST", f"/v1/platform/alerts/{alert_id}/dismiss")
+
+    @mcp.tool()
+    async def platform_alert_settings(rules: dict | None = None, low_wallet_below_inr: int | None = None, channels: dict | None = None, digest: bool | None = None) -> dict:
+        """Platform key: read the alert rules, or change them by passing values (super admin).
+        rules keys: lowWallet, quality, paymentFailed, trialEnding, marketingSpike, systemDown. channels: panel, email, whatsapp."""
+        body = {k: v for k, v in {"rules": rules, "low_wallet_below_inr": low_wallet_below_inr, "channels": channels, "digest": digest}.items() if v is not None}
+        if not body:
+            return await call("GET", "/v1/platform/alert-settings")
+        return await call("PUT", "/v1/platform/alert-settings", json_body=body)
+
+    @mcp.tool()
+    async def platform_settings_update(meta_fees_billed_to: str, confirm: bool = False) -> dict:
+        """Platform key (super admin): who Meta bills for WhatsApp messages: "business" (each business's own card)
+        or "autoshift" (AutoShift's credit line; the wallet is then charged per message). Needs confirm=true."""
+        if not confirm:
+            current = await call("GET", "/v1/platform/settings")
+            return preview("change who pays Meta for WhatsApp messages", before=current.get("meta_fees_billed_to"), after=meta_fees_billed_to)
+        return await call("PUT", "/v1/platform/settings/meta-fees", json_body={"billed_to": meta_fees_billed_to})
+
+    # ------------------------------------------------- platform: support and announcements
+    @mcp.tool()
+    async def platform_ticket_get(ticket_number: int) -> dict:
+        """Platform key: one support request with every message and staff note."""
+        return await call("GET", f"/v1/platform/tickets/{ticket_number}")
+
+    @mcp.tool()
+    async def platform_ticket_status(ticket_number: int, status: str | None = None, priority: str | None = None) -> dict:
+        """Platform key (support): set a ticket's status (open, pending, closed) or priority (low, normal, high, urgent)."""
+        body = {k: v for k, v in {"status": status, "priority": priority}.items() if v is not None}
+        return await call("PATCH", f"/v1/platform/tickets/{ticket_number}", json_body=body)
+
+    @mcp.tool()
+    async def platform_ticket_assign(ticket_number: int, assignee: str) -> dict:
+        """Platform key (support): assign a ticket to a staff member by name."""
+        return await call("PATCH", f"/v1/platform/tickets/{ticket_number}", json_body={"assignee": assignee})
+
+    @mcp.tool()
+    async def platform_announcements_list() -> list:
+        """Platform key: every announcement, including drafts and scheduled ones."""
+        return await call("GET", "/v1/platform/announcements")
+
+    @mcp.tool()
+    async def platform_announcement_update(announcement_id: str, title: str | None = None, body: str | None = None, kind: str | None = None, audience: str | None = None, draft: bool | None = None, publish_at: str | None = None) -> dict:
+        """Platform key (support): edit an announcement, publish it (draft=false) or move it back to drafts."""
+        patch = {k: v for k, v in {"title": title, "body": body, "kind": kind, "audience": audience, "draft": draft, "publish_at": publish_at}.items() if v is not None}
+        return await call("PATCH", f"/v1/platform/announcements/{announcement_id}", json_body=patch)
+
+    @mcp.tool()
+    async def platform_announcement_delete(announcement_id: str, confirm: bool = False) -> dict:
+        """Platform key (support): delete an announcement. Needs confirm=true."""
+        if not confirm:
+            found = next((a for a in await call("GET", "/v1/platform/announcements") if a["id"] == announcement_id), None)
+            if not found:
+                raise ToolFailure("Announcement not found")
+            return preview("delete this announcement", title=found.get("title"))
+        return await call("DELETE", f"/v1/platform/announcements/{announcement_id}")
+
+    # ------------------------------------------------- platform: user logins
+    @mcp.tool()
+    async def platform_users_list(query: str | None = None, account_id: str | None = None, limit: int = 50) -> list:
+        """Platform key: people with an AutoShift login, by name or email, optionally for one business."""
+        params: dict[str, Any] = {"limit": limit}
+        if query:
+            params["q"] = query
+        if account_id:
+            params["account_id"] = account_id
+        return await call("GET", "/v1/platform/users", params=params)
+
+    @mcp.tool()
+    async def platform_user_get(user_id: str) -> dict:
+        """Platform key: one person's business, role, last sign-in, and whether their login is disabled."""
+        return await call("GET", f"/v1/platform/users/{user_id}")
+
+    @mcp.tool()
+    async def platform_user_invite(account_id: str, name: str, email: str, role: str, confirm: bool = False) -> dict:
+        """Platform key (support): add a person to a business as admin, agent or viewer. They get an email to set
+        their own password. Never grants AutoShift admin access. Needs confirm=true."""
+        if not confirm:
+            return preview(f"invite {email} to this business as {role}", account_id=account_id, name=name)
+        return await call("POST", "/v1/platform/users/invite", json_body={"account_id": account_id, "name": name, "email": email, "role": role})
+
+    @mcp.tool()
+    async def platform_user_set_role(user_id: str, role: str, confirm: bool = False) -> dict:
+        """Platform key (support): change a person's role on their business (owner, admin, agent, viewer).
+        A business always keeps an owner. Needs confirm=true."""
+        if not confirm:
+            u = await call("GET", f"/v1/platform/users/{user_id}")
+            return preview(f"change this person's role to {role}", user=u.get("email"), business=u.get("business"), current_role=u.get("role"))
+        return await call("PATCH", f"/v1/platform/users/{user_id}/role", json_body={"role": role})
+
+    @mcp.tool()
+    async def platform_user_disable(user_id: str, reason: str = "", confirm: bool = False) -> dict:
+        """Platform key (support): block a person from signing in and revoke their API keys. Data stays. Needs confirm=true."""
+        if not confirm:
+            u = await call("GET", f"/v1/platform/users/{user_id}")
+            return preview("disable this login", user=u.get("email"), business=u.get("business"), reason=reason)
+        return await call("POST", f"/v1/platform/users/{user_id}/disable", json_body={"reason": reason})
+
+    @mcp.tool()
+    async def platform_user_enable(user_id: str, confirm: bool = False) -> dict:
+        """Platform key (support): let a disabled person sign in again. Needs confirm=true."""
+        if not confirm:
+            u = await call("GET", f"/v1/platform/users/{user_id}")
+            return preview("enable this login", user=u.get("email"), business=u.get("business"))
+        return await call("POST", f"/v1/platform/users/{user_id}/enable")
+
+    @mcp.tool()
+    async def platform_user_send_reset(user_id: str, confirm: bool = False) -> dict:
+        """Platform key (support): email the person a password-reset link. The link goes only to their inbox. Needs confirm=true."""
+        if not confirm:
+            u = await call("GET", f"/v1/platform/users/{user_id}")
+            return preview("email a password-reset link", to=u.get("email"))
+        return await call("POST", f"/v1/platform/users/{user_id}/send-reset")
+
+    @mcp.tool()
+    async def platform_user_remove(user_id: str, reason: str = "", confirm: bool = False) -> dict:
+        """Platform key (super admin): remove a login for good. Wipes their name and email, takes them off their business,
+        locks the login and revokes keys; business data, invoices and the wallet ledger are kept.
+        A business's only owner can't be removed. Can't be undone. Needs confirm=true."""
+        if not confirm:
+            u = await call("GET", f"/v1/platform/users/{user_id}")
+            return preview("remove this login for good (business data and money records are kept)", user=u.get("email"), business=u.get("business"), role=u.get("role"))
+        return await call("POST", f"/v1/platform/users/{user_id}/remove", json_body={"reason": reason})
+
     return mcp
 
 

@@ -215,6 +215,9 @@ class FakeAuthAdmin:
     def __init__(self, world):
         self.world = world
         self.invited: list[str] = []
+        self.logins: dict[str, dict] = {}
+        self.updates: list[tuple[str, dict]] = []
+        self.recoveries: list[str] = []
 
     async def invite(self, email, name):
         self.invited.append(email)
@@ -225,6 +228,24 @@ class FakeAuthAdmin:
         uid = self.world.add_user(email.split("@")[0], None, None, bare=True)
         next(p for p in self.world.rows("profiles") if p["user_id"] == uid)["email"] = email
         return uid
+
+    async def get_user(self, user_id):
+        p = next((p for p in self.world.rows("profiles") if p["user_id"] == user_id), None)
+        if not p:
+            return None
+        extra = self.logins.setdefault(user_id, {})
+        return {"id": user_id, "email": extra.get("email", p.get("email")), "created_at": "2026-01-01T00:00:00Z", "last_sign_in_at": None, "email_confirmed_at": "2026-01-01T00:00:00Z", "banned_until": extra.get("banned_until")}
+
+    async def update_user(self, user_id, attrs):
+        extra = self.logins.setdefault(user_id, {})
+        if "ban_duration" in attrs:
+            extra["banned_until"] = None if attrs["ban_duration"] == "none" else "2126-01-01T00:00:00Z"
+        if "email" in attrs:
+            extra["email"] = attrs["email"]
+        self.updates.append((user_id, attrs))
+
+    async def send_recovery(self, email):
+        self.recoveries.append(email)
 
 
 class World:

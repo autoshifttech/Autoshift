@@ -46,9 +46,16 @@ async def apply(
     return Applied(applied=bool(out["applied"]), balance_paise=int(out["balance_paise"]))
 
 
+async def rates(sdb: Db) -> dict[str, int]:
+    """The rate card: the defaults above, with any platform override (platform_settings key rates_paise)."""
+    rows = await sdb.select("platform_settings", {"key": "rates_paise"}, limit=1)
+    override = rows[0]["value"] if rows and isinstance(rows[0].get("value"), dict) else {}
+    return {k: int(override.get(k, v)) for k, v in RATES_PAISE.items()}
+
+
 async def charge(sdb: Db, account_id: str, kind: str, units: int, ref: str, idem_key: str) -> Applied | None:
     """Charge for messages or AI replies at the rate card. Free kinds are skipped."""
-    amount = RATES_PAISE[kind] * units
+    amount = (await rates(sdb))[kind] * units
     if amount == 0:
         return None
     return await apply(sdb, account_id, -amount, kind, ref, idem_key)
