@@ -10,6 +10,19 @@ from .mcp_server import mount_mcp
 from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_ops, platform_ops, custom_tools
 
 
+class McpPathFix:
+    """Serves /mcp exactly like /mcp/. MCP clients (Claude's connector check among them) often drop the
+    trailing slash and don't follow the 307 redirect the mount would otherwise send."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope.get("path") == "/mcp":
+            scope = {**scope, "path": "/mcp/", "raw_path": b"/mcp/"}
+        await self.app(scope, receive, send)
+
+
 def create_app() -> FastAPI:
     async def webhook_loop():
         from . import events
@@ -45,6 +58,7 @@ def create_app() -> FastAPI:
                 worker.cancel()
 
     app = FastAPI(title="AutoShift API", version="0.2.0", lifespan=lifespan)
+    app.add_middleware(McpPathFix)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=get_settings().cors_list,

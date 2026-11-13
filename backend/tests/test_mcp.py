@@ -141,3 +141,10 @@ def test_key_can_come_in_an_api_key_header(client, world):
             assert res.status_code == 200, (header, res.text)
     res = client.post("/mcp/", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, headers={**MCP_HEADERS, "X-API-Key": "not-a-key"})
     assert res.status_code == 401
+
+
+def test_mcp_works_without_the_trailing_slash(client, world):
+    key = _mint(client, world)["key"]
+    res = client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}, headers={**MCP_HEADERS, "X-API-Key": key}, follow_redirects=False)
+    assert res.status_code == 200, res.text
+    assert "whoami" in res.text
