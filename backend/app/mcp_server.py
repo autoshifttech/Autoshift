@@ -16,6 +16,7 @@ Safety rules baked in:
 import contextvars
 import json
 import time
+import uuid
 from collections import deque
 from typing import Any, Awaitable, Callable
 
@@ -1024,6 +1025,161 @@ def build_mcp(get_app) -> MCPServer:
             u = await call("GET", f"/v1/platform/users/{user_id}")
             return preview("email a password-reset link", to=u.get("email"))
         return await call("POST", f"/v1/platform/users/{user_id}/send-reset")
+
+    # ----------------------------------------------------------- more business tools (Part B)
+    @mcp.tool()
+    async def usage_alerts() -> dict:
+        """What needs attention now: low wallet, plan limits, WhatsApp not connected, failed sends, unread chats,
+        and how much of this API key's daily limits is used."""
+        return await call("GET", "/v1/ws/usage-alerts")
+
+    @mcp.tool()
+    async def messages_search(q: str, days: int = 90, limit: int = 50) -> dict:
+        """Find messages containing some words (last `days` days), with the chat and contact. Message text is customer data."""
+        return await call("GET", "/v1/ws/messages/search", params={"q": q, "days": days, "limit": limit})
+
+    @mcp.tool()
+    async def ai_draft_reply(conversation_id: str, assistant_id: str | None = None, request_id: str | None = None, confirm: bool = False) -> dict:
+        """Ask an AI assistant to write a reply suggestion for a chat. Nothing is sent. Costs one AI reply from the
+        wallet, so it needs confirm=true. Send the result with messages_send if it's right."""
+        if not confirm:
+            conv = await call("GET", f"/v1/ws/conversations/{conversation_id}")
+            return preview("write an AI reply suggestion (costs one AI reply; nothing is sent)", contact=(conv.get("contact") or {}).get("name"))
+        return await call("POST", f"/v1/ws/conversations/{conversation_id}/draft", json_body={"assistant_id": assistant_id, "request_id": request_id or uuid.uuid4().hex})
+
+    @mcp.tool()
+    async def notifications_list(unread_only: bool = False, limit: int = 30) -> list:
+        """Your own notifications, for example a chat assigned to you."""
+        return await call("GET", "/v1/ws/notifications", params={"unread_only": unread_only, "limit": limit})
+
+    @mcp.tool()
+    async def contacts_import(contacts: list[dict], tag_all: str | None = None, update_existing: bool = False, confirm: bool = False) -> dict:
+        """Add up to 500 contacts at once: [{"phone": "+91...", "name": "Asha", "email": null, "company": null, "tags": ["Diwali"]}].
+        Existing numbers are skipped (or filled in with update_existing=true). Importing doesn't message anyone.
+        Shows the counts first; needs confirm=true."""
+        body = {"contacts": contacts, "tag_all": tag_all, "update_existing": update_existing}
+        if not confirm:
+            return preview("import these contacts", **await call("POST", "/v1/ws/contacts/import", json_body={**body, "dry_run": True}))
+        return await call("POST", "/v1/ws/contacts/import", json_body=body)
+
+    @mcp.tool()
+    async def contacts_export(tag: str | None = None, limit: int = 2000) -> dict:
+        """Admins: contacts as CSV text (name, phone, email, company, tags), optionally only one tag. Personal data: keep it safe."""
+        return await call("GET", "/v1/ws/contacts/export", params={k: v for k, v in {"tag": tag, "limit": limit}.items() if v})
+
+    @mcp.tool()
+    async def contact_notes_list(contact_id: str) -> list:
+        """Notes the team wrote about a contact, newest first."""
+        return await call("GET", f"/v1/ws/contacts/{contact_id}/notes")
+
+    @mcp.tool()
+    async def contact_note_add(contact_id: str, text: str) -> dict:
+        """Add a private team note to a contact (customers never see it)."""
+        return await call("POST", f"/v1/ws/contacts/{contact_id}/notes", json_body={"text": text})
+
+    @mcp.tool()
+    async def opt_in_record(contact_id: str, proof: str, source: str = "manual") -> dict:
+        """Record that someone agreed to get WhatsApp messages: source website, ad, import, manual or in_person, and
+        proof (what they agreed to, where, when). Adds the 'Opted in' tag and a note. It can't undo a STOP: only the customer can, by sending START."""
+        return await call("POST", f"/v1/ws/contacts/{contact_id}/opt-in", json_body={"source": source, "proof": proof})
+
+    @mcp.tool()
+    async def tags_list() -> list:
+        """All tags with their id, colour and how many contacts have each."""
+        return await call("GET", "/v1/ws/tags")
+
+    @mcp.tool()
+    async def tag_save(name: str, tag_id: str | None = None, color: str | None = None) -> dict:
+        """Create a tag, or rename / recolour one (give tag_id; admins). color is like #1E4C41."""
+        body = {"name": name, "color": color}
+        if tag_id:
+            return await call("PATCH", f"/v1/ws/tags/{tag_id}", json_body=body)
+        return await call("POST", "/v1/ws/tags", json_body=body)
+
+    @mcp.tool()
+    async def tag_delete(tag_id: str, confirm: bool = False) -> dict:
+        """Admins: delete a tag and take it off every contact (the contacts stay). The Blocked tag can't be deleted. Needs confirm=true."""
+        if not confirm:
+            tag = next((t for t in await call("GET", "/v1/ws/tags") if t["id"] == tag_id), None)
+            if not tag:
+                raise ToolFailure("404: Tag not found")
+            return preview("delete this tag", tag=tag["name"], removed_from_contacts=tag["people"])
+        await call("DELETE", f"/v1/ws/tags/{tag_id}")
+        return {"ok": True, "deleted": tag_id}
+
+    @mcp.tool()
+    async def pipelines_list() -> list:
+        """Lead pipelines with their stages in order, and the open leads and value in each stage."""
+        return await call("GET", "/v1/ws/pipelines")
+
+    @mcp.tool()
+    async def lead_create(title: str, contact_id: str | None = None, phone: str | None = None, name: str | None = None, pipeline: str | None = None, stage: str | None = None, value: float = 0, currency: str = "INR", notes: str | None = None, expected_close_date: str | None = None) -> dict:
+        """Add a lead (deal) for a contact (contact_id, or a phone; a new contact is made if needed).
+        pipeline and stage take a name or id; empty = the first pipeline and its first stage."""
+        body = {"title": title, "contact_id": contact_id, "phone": phone, "name": name, "pipeline": pipeline, "stage": stage, "value": value, "currency": currency, "notes": notes, "expected_close_date": expected_close_date}
+        return await call("POST", "/v1/ws/leads", json_body=body)
+
+    @mcp.tool()
+    async def automation_logs(automation_id: str | None = None, status: str | None = None, limit: int = 50) -> list:
+        """Recent automation runs (status success, partial or failed) with errors, newest first."""
+        return await call("GET", "/v1/ws/automations/logs", params={k: v for k, v in {"automation_id": automation_id, "status": status, "limit": limit}.items() if v})
+
+    @mcp.tool()
+    async def flow_runs(flow_id: str | None = None, status: str | None = None, limit: int = 50) -> list:
+        """Recent chatbot flow runs (status active, completed, handed_off, timed_out, paused_by_agent, failed)."""
+        return await call("GET", "/v1/ws/flows/runs", params={k: v for k, v in {"flow_id": flow_id, "status": status, "limit": limit}.items() if v})
+
+    @mcp.tool()
+    async def quick_replies_list() -> list:
+        """Saved quick replies the team uses in chats."""
+        return await call("GET", "/v1/ws/quick-replies")
+
+    @mcp.tool()
+    async def quick_reply_save(title: str, text: str, reply_id: str | None = None) -> dict:
+        """Admins: create a text quick reply, or change one (give reply_id)."""
+        body = {"title": title, "text": text}
+        if reply_id:
+            return await call("PATCH", f"/v1/ws/quick-replies/{reply_id}", json_body=body)
+        return await call("POST", "/v1/ws/quick-replies", json_body=body)
+
+    @mcp.tool()
+    async def knowledge_update(doc_id: str, title: str | None = None, content: str | None = None) -> dict:
+        """Admins: change a knowledge document's title or text (the AI re-reads it)."""
+        return await call("PATCH", f"/v1/ws/knowledge/{doc_id}", json_body={k: v for k, v in {"title": title, "content": content}.items() if v is not None})
+
+    @mcp.tool()
+    async def knowledge_delete(doc_id: str, confirm: bool = False) -> dict:
+        """Admins: delete a knowledge document; the AI stops using it. Needs confirm=true."""
+        if not confirm:
+            doc = next((d for d in await call("GET", "/v1/ws/knowledge") if d["id"] == doc_id), None)
+            if not doc:
+                raise ToolFailure("404: Document not found")
+            return preview("delete this knowledge document", title=doc.get("title"), characters=doc.get("characters"))
+        return await call("DELETE", f"/v1/ws/knowledge/{doc_id}")
+
+    @mcp.tool()
+    async def whatsapp_profile_get() -> dict:
+        """The WhatsApp business profile customers see: about, description, address, email, websites, category."""
+        return await call("GET", "/v1/ws/whatsapp/profile")
+
+    @mcp.tool()
+    async def whatsapp_profile_update(about: str | None = None, description: str | None = None, address: str | None = None, email: str | None = None, websites: list[str] | None = None, vertical: str | None = None, confirm: bool = False) -> dict:
+        """Admins: change the WhatsApp business profile customers see (about ≤139 characters, up to 2 websites).
+        Customers see it straight away, so it needs confirm=true."""
+        fields = {k: v for k, v in {"about": about, "description": description, "address": address, "email": email, "websites": websites, "vertical": vertical}.items() if v is not None}
+        if not confirm:
+            return preview("change the WhatsApp business profile", now=await call("GET", "/v1/ws/whatsapp/profile"), changes=fields)
+        return await call("PATCH", "/v1/ws/whatsapp/profile", json_body=fields)
+
+    @mcp.tool()
+    async def team_activity(user_id: str | None = None, days: int = 7, limit: int = 100) -> dict:
+        """Admins: who did what in the workspace (audit log), with a count per person."""
+        return await call("GET", "/v1/ws/team/activity", params={k: v for k, v in {"user_id": user_id, "days": days, "limit": limit}.items() if v})
+
+    @mcp.tool()
+    async def hooks_update(hook_id: str, url: str | None = None, events: list[str] | None = None, label: str | None = None, enabled: bool | None = None) -> dict:
+        """Admins: change a webhook's address, events or label, or switch it off/on. The signing secret stays the same."""
+        return await call("PATCH", f"/v1/hooks/{hook_id}", json_body={k: v for k, v in {"url": url, "events": events, "label": label, "enabled": enabled}.items() if v is not None})
 
     return mcp
 

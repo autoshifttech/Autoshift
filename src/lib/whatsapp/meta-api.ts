@@ -1280,3 +1280,41 @@ export async function exchangeEmbeddedSignupCode(args: { code: string; appId: st
   if (!data.access_token) throw new Error('Meta did not return an access token')
   return data.access_token
 }
+
+// ============================================================
+// Business profile (what customers see on the number's WhatsApp profile)
+// ============================================================
+
+export interface BusinessProfile {
+  about?: string
+  address?: string
+  description?: string
+  email?: string
+  profile_picture_url?: string
+  websites?: string[]
+  vertical?: string
+}
+
+const PROFILE_FIELDS = 'about,address,description,email,profile_picture_url,websites,vertical'
+
+export async function getBusinessProfile(args: VerifyPhoneNumberArgs): Promise<BusinessProfile> {
+  const { phoneNumberId, accessToken } = args
+  const response = await fetch(`${META_API_BASE}/${phoneNumberId}/whatsapp_business_profile?fields=${PROFILE_FIELDS}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) await throwMetaError(response, `Meta API error: ${response.status}`)
+  const json = (await response.json()) as { data?: BusinessProfile[] }
+  return json.data?.[0] ?? {}
+}
+
+export async function updateBusinessProfile(
+  args: VerifyPhoneNumberArgs & { profile: Omit<BusinessProfile, 'profile_picture_url'> }
+): Promise<void> {
+  const { phoneNumberId, accessToken, profile } = args
+  const response = await fetch(`${META_API_BASE}/${phoneNumberId}/whatsapp_business_profile`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messaging_product: 'whatsapp', ...profile }),
+  })
+  if (!response.ok) await throwMetaError(response, `Meta API error: ${response.status}`)
+}

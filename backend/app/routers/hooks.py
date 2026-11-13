@@ -4,6 +4,7 @@ import secrets
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from .. import audit, events
 from ..config import Settings, get_settings
@@ -49,6 +50,34 @@ async def create_hook(body: HookCreate, ctx: AdminMember, sdb: ServiceDb, settin
     row = await sdb.insert("webhook_subscriptions", {"account_id": ctx.account_id, "url": body.url, "events": body.events, "label": body.label, "secret_cipher": encrypt(secret, settings), "enabled": True, "created_by": ctx.user.id})
     await audit.record(sdb, scope="account", action="webhook.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=row["id"], details={"url": body.url, "events": body.events})
     return {**_public(row), "secret": secret}  # the secret is shown only now
+
+
+class HookPatch(BaseModel):
+    url: str | None = Field(None, max_length=500)
+    events: list[str] | None = Field(None, min_length=1, max_length=10)
+    label: str | None = Field(None, max_length=80)
+    enabled: bool | None = None
+
+
+@router.patch("/{hook_id}")
+async def update_hook(hook_id: str, body: HookPatch, ctx: AdminMember, sdb: ServiceDb):
+    """Change where a webhook goes, its events, label, or switch it on/off. The secret stays the same."""
+    await _own(sdb, ctx, hook_id)
+    patch = body.model_dump(exclude_none=True)
+    if not patch:
+        raise HTTPException(422, "Nothing to change")
+    if "events" in patch:
+        unknown = [e for e in patch["events"] if e != "*" and e not in events.EVENT_TYPES]
+        if unknown:
+            raise HTTPException(422, f"Unknown events: {', '.join(unknown)}")
+    if "url" in patch:
+        try:
+            await events.check_url(patch["url"])
+        except events.UnsafeUrl as exc:
+            raise HTTPException(422, str(exc)) from exc
+    await sdb.update("webhook_subscriptions", {"id": hook_id, "account_id": ctx.account_id}, patch)
+    await audit.record(sdb, scope="account", action="webhook.update", actor_id=ctx.user.id, account_id=ctx.account_id, target=hook_id, details=patch)
+    return _public((await sdb.select("webhook_subscriptions", {"id": hook_id, "account_id": ctx.account_id}, limit=1))[0])
 
 
 @router.delete("/{hook_id}", status_code=204)

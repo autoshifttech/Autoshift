@@ -25,6 +25,9 @@ import { POST as syncTemplates } from '@/app/api/whatsapp/templates/sync/route'
 import { POST as submitTemplate } from '@/app/api/whatsapp/templates/submit/route'
 import { DELETE as deleteTemplate } from '@/app/api/whatsapp/templates/[id]/route'
 import { POST as addKnowledge } from '@/app/api/ai/knowledge/route'
+import { PATCH as patchKnowledge, DELETE as removeKnowledge } from '@/app/api/ai/knowledge/[id]/route'
+import { decrypt } from '@/lib/whatsapp/encryption'
+import { getBusinessProfile, MetaApiError, updateBusinessProfile, type BusinessProfile } from '@/lib/whatsapp/meta-api'
 
 export const maxDuration = 60
 
@@ -156,6 +159,37 @@ export async function POST(request: Request) {
 
       case 'knowledge_add':
         return relay(await asAccount(ctx, addKnowledge, { title: body.title, content: body.content }))
+
+      case 'knowledge_update':
+      case 'knowledge_delete': {
+        const id = str(body.doc_id)
+        if (!id) return fail(400, 'doc_id is required')
+        const params = { params: Promise.resolve({ id }) }
+        if (action === 'knowledge_delete') {
+          return relay(await runAsAccount(ctx, () => removeKnowledge(new Request('http://internal/api', { method: 'DELETE' }), params)))
+        }
+        const req = new Request('http://internal/api', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: body.title, content: body.content }) })
+        return relay(await runAsAccount(ctx, () => patchKnowledge(req, params)))
+      }
+
+      case 'whatsapp_profile_get':
+      case 'whatsapp_profile_update': {
+        const { data: config } = await db.from('whatsapp_config').select('phone_number_id, access_token').eq('account_id', accountId).maybeSingle()
+        if (!config?.phone_number_id || !config.access_token) return fail(409, 'No WhatsApp number is connected')
+        const args = { phoneNumberId: config.phone_number_id as string, accessToken: decrypt(config.access_token as string) }
+        try {
+          if (action === 'whatsapp_profile_update') {
+            const allowed = ['about', 'address', 'description', 'email', 'websites', 'vertical'] as const
+            const given = (body.profile && typeof body.profile === 'object' ? body.profile : {}) as Body
+            const profile = Object.fromEntries(allowed.filter((k) => given[k] !== undefined).map((k) => [k, given[k]])) as Omit<BusinessProfile, 'profile_picture_url'>
+            await updateBusinessProfile({ ...args, profile })
+          }
+          return NextResponse.json(await getBusinessProfile(args))
+        } catch (err) {
+          if (err instanceof MetaApiError) return fail(502, `WhatsApp said: ${err.message}`)
+          throw err
+        }
+      }
 
       default:
         return fail(400, `Unknown action: ${action}`)
