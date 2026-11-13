@@ -434,6 +434,15 @@ def build_mcp(get_app) -> MCPServer:
         return await call("POST", f"/v1/ws/broadcasts/{broadcast_id}/cancel")
 
     @mcp.tool()
+    async def broadcast_delete(broadcast_id: str, confirm: bool = False) -> dict:
+        """Delete a broadcast and its recipient list (admin role). Messages already sent stay in the chats.
+        Not while it is sending. Can't be undone. Needs confirm=true."""
+        found = await call("GET", f"/v1/ws/broadcasts/{broadcast_id}")
+        if not confirm:
+            return preview("delete this broadcast and its recipient list", broadcast=found.get("name"), status=found.get("status"), sent=found.get("sent_count"))
+        return await call("DELETE", f"/v1/ws/broadcasts/{broadcast_id}")
+
+    @mcp.tool()
     async def automations_list() -> list:
         """Automations with their trigger, on/off state and run counts."""
         return await call("GET", "/v1/ws/automations")

@@ -703,6 +703,17 @@ async def cancel_broadcast(broadcast_id: str, ctx: AgentMember, sdb: ServiceDb):
     return {"ok": True, "status": "cancelled"}
 
 
+@router.delete("/broadcasts/{broadcast_id}", status_code=204)
+async def delete_broadcast(broadcast_id: str, ctx: AdminMember, sdb: ServiceDb):
+    """Delete a broadcast and its recipient list. Messages already sent stay in the chats."""
+    row = await _own(sdb, "broadcasts", ctx.account_id, broadcast_id, "Broadcast")
+    if row.get("status") == "sending":
+        raise HTTPException(409, "This broadcast is still sending; wait for it to finish")
+    await sdb.delete("broadcast_recipients", {"broadcast_id": broadcast_id})
+    await sdb.delete("broadcasts", {"id": broadcast_id, "account_id": ctx.account_id})
+    await audit.record(sdb, scope="account", action="broadcast.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=broadcast_id, details={"name": row.get("name"), "status": row.get("status"), "sent": row.get("sent_count")})
+
+
 # ------------------------------------------------------------------ automations and flows
 @router.get("/automations")
 async def list_automations(ctx: Member, sdb: ServiceDb):

@@ -209,3 +209,14 @@ def test_knowledge_add_and_list(client, world, bridge):
     assert client.post("/v1/ws/knowledge", json={"title": "Returns", "content": "7 days"}, headers=world.headers("agent_a")).status_code == 403
     assert client.post("/v1/ws/knowledge", json={"title": "Returns", "content": "7 days"}, headers=world.headers("admin_a")).status_code == 201
     assert bridge.calls[0][0] == "knowledge_add"
+
+
+def test_broadcast_delete(client, world):
+    world.store["broadcasts"] = [{"id": "b1", "account_id": world.acct_a, "status": "sent", "name": "x"}, {"id": "b2", "account_id": world.acct_a, "status": "sending", "name": "y"}]
+    world.store["broadcast_recipients"] = [{"id": "r1", "broadcast_id": "b1", "status": "sent"}]
+    assert client.delete("/v1/ws/broadcasts/b1", headers=world.headers("agent_a")).status_code == 403
+    assert client.delete("/v1/ws/broadcasts/b1", headers=world.headers("admin_b")).status_code == 404
+    assert client.delete("/v1/ws/broadcasts/b2", headers=world.headers("admin_a")).status_code == 409
+    assert client.delete("/v1/ws/broadcasts/b1", headers=world.headers("admin_a")).status_code == 204
+    assert [b["id"] for b in world.store["broadcasts"]] == ["b2"] and world.store["broadcast_recipients"] == []
+    assert any(a["action"] == "broadcast.delete" for a in world.store["audit_log"])
