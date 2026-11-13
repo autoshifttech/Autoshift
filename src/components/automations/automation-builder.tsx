@@ -27,7 +27,6 @@ import {
   GitBranch,
   Webhook,
   CircleSlash,
-  ShieldCheck,
   Zap,
   Loader2,
   ArrowDown,
@@ -136,7 +135,6 @@ const STEP_META: Record<AutomationStepType, StepMeta> = {
   condition: { label: "condition", icon: GitBranch, border: "border-l-amber-500" },
   send_webhook: { label: "send_webhook", icon: Webhook, border: "border-l-primary" },
   close_conversation: { label: "close_conversation", icon: CircleSlash, border: "border-l-primary" },
-  send_verification_code: { label: "send_verification_code", icon: ShieldCheck, border: "border-l-primary" },
 }
 
 const ADDABLE_STEPS: AutomationStepType[] = [
@@ -152,8 +150,6 @@ const ADDABLE_STEPS: AutomationStepType[] = [
   "condition",
   "send_webhook",
   "close_conversation",
-  // Only offered to the business that sends AutoShift's codes (see `otpSender`).
-  "send_verification_code",
 ]
 
 const TRIGGER_OPTIONS: { value: AutomationTriggerType }[] = [
@@ -165,10 +161,7 @@ const TRIGGER_OPTIONS: { value: AutomationTriggerType }[] = [
   { value: "conversation_assigned" },
   { value: "tag_added" },
   { value: "time_based" },
-  // Only offered to the business that sends AutoShift's codes (see `otpSender`).
-  { value: "verification_code_requested" },
 ]
-const OTP_ONLY: string[] = ["verification_code_requested", "send_verification_code"]
 
 function cid(): string {
   return (
@@ -223,7 +216,6 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
     case "send_webhook":
       return { url: "", headers: {}, body_template: "" }
     case "close_conversation":
-    case "send_verification_code":
       return {}
     default:
       return {}
@@ -247,8 +239,6 @@ interface AutomationResources {
   customFields: CustomField[]
   pipelines: PipelineOption[]
   stages: PipelineStageOption[]
-  /** This business sends AutoShift's verification codes. */
-  otpSender: boolean
 }
 
 interface PipelineOption {
@@ -270,7 +260,6 @@ const ResourcesContext = createContext<AutomationResources>({
   customFields: [],
   pipelines: [],
   stages: [],
-  otpSender: false,
 })
 
 function useResources(): AutomationResources {
@@ -284,18 +273,6 @@ function ResourcesProvider({ children }: { children: ReactNode }) {
   const [customFields, setCustomFields] = useState<CustomField[]>([])
   const [pipelines, setPipelines] = useState<PipelineOption[]>([])
   const [stages, setStages] = useState<PipelineStageOption[]>([])
-  const [otpSender, setOtpSender] = useState(false)
-
-  useEffect(() => {
-    let live = true
-    fetch("/api/automations/verification")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => live && setOtpSender(!!d?.sender))
-      .catch(() => {})
-    return () => {
-      live = false
-    }
-  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -350,7 +327,7 @@ function ResourcesProvider({ children }: { children: ReactNode }) {
 
   return (
     <ResourcesContext.Provider
-      value={{ tags, members, templates, customFields, pipelines, stages, otpSender }}
+      value={{ tags, members, templates, customFields, pipelines, stages }}
     >
       {children}
     </ResourcesContext.Provider>
@@ -848,7 +825,6 @@ function TriggerCard({
   onConfigChange: (c: Record<string, unknown>) => void
   t: ReturnType<typeof useTranslations>
 }) {
-  const { otpSender } = useResources()
   const [open, setOpen] = useState(false)
   return (
     // Card width: full on mobile, fixed 320px on sm+. The canvas wrapper
@@ -884,7 +860,7 @@ function TriggerCard({
                 onChange={(e) => onTypeChange(e.target.value as AutomationTriggerType)}
                 className="w-full"
               >
-                {TRIGGER_OPTIONS.filter((o) => otpSender || o.value === type || !OTP_ONLY.includes(o.value)).map((o) => (
+                {TRIGGER_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
                     {t(`triggers.${o.value}.label`)}
                   </option>
@@ -1302,7 +1278,6 @@ function BranchColumn({
 
 function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
   const t = useTranslations("Automations.builder")
-  const { otpSender } = useResources()
   return (
     <div className="relative flex flex-col items-center">
       <div className="h-4 w-[2px] bg-border" aria-hidden />
@@ -1318,7 +1293,7 @@ function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
           align="center"
           className="max-h-80 min-w-56 overflow-y-auto"
         >
-          {ADDABLE_STEPS.filter((tp) => otpSender || !OTP_ONLY.includes(tp)).map((tp) => {
+          {ADDABLE_STEPS.map((tp) => {
             const Icon = STEP_META[tp].icon
             return (
               <DropdownMenuItem key={tp} onClick={() => onPick(tp)}>
@@ -1611,8 +1586,6 @@ function StepEditor({
           </FieldBlock>
         </>
       )
-    case "send_verification_code":
-      return <p className="text-xs text-muted-foreground">{t("config.verificationCodeHint")}</p>
     case "close_conversation":
       return (
         <p className="text-xs text-muted-foreground">

@@ -1,8 +1,7 @@
 // POST /api/account/phone/start { phone } — send a 6-digit code on WhatsApp.
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
-import { CODE_TTL_MIN, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, normalisePhone } from '@/lib/auth/phone-otp'
-import { deliverCode } from '@/lib/auth/otp-delivery'
+import { CODE_TTL_MIN, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, normalisePhone, sendOtp, senderConfig } from '@/lib/auth/phone-otp'
 import { signedIn } from '../shared'
 
 export async function POST(request: Request): Promise<Response> {
@@ -42,7 +41,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const code = newCode()
   try {
-    await deliverCode(db, phone, code, 'phone_verification')
+    await sendOtp(await senderConfig(db, settings.sender_account_id), settings, phone, code)
   } catch (err) {
     console.error('[phone-otp] send failed', err)
     return NextResponse.json({ error: 'send_failed', detail: err instanceof Error ? err.message : '' }, { status: 502 })

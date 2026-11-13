@@ -7,8 +7,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { CODE_TTL_MIN, MAX_ATTEMPTS, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, sameHash } from './phone-otp'
-import { deliverCode } from './otp-delivery'
+import { CODE_TTL_MIN, MAX_ATTEMPTS, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, sameHash, sendOtp, senderConfig } from './phone-otp'
 
 export type OtpPurpose = 'password_change' | 'password_reset'
 
@@ -58,7 +57,7 @@ export async function issueCode(db: SupabaseClient, userId: string, purpose: Otp
 
   const code = newCode()
   try {
-    await deliverCode(db, phone, code, purpose)
+    await sendOtp(await senderConfig(db, settings.sender_account_id), settings, phone, code)
   } catch (err) {
     console.error('[otp-codes] send failed', err)
     return { ok: false, error: 'send_failed', detail: err instanceof Error ? err.message : '' }
