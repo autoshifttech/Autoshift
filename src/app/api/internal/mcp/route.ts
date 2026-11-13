@@ -22,6 +22,7 @@ import { sendMessageToConversation, validateSendMessageParams, SendMessageError 
 import { createBroadcast, deliverBroadcast, BroadcastError } from '@/lib/whatsapp/broadcast-core'
 import { POST as syncTemplates } from '@/app/api/whatsapp/templates/sync/route'
 import { POST as submitTemplate } from '@/app/api/whatsapp/templates/submit/route'
+import { DELETE as deleteTemplate } from '@/app/api/whatsapp/templates/[id]/route'
 import { POST as addKnowledge } from '@/app/api/ai/knowledge/route'
 
 export const maxDuration = 60
@@ -139,6 +140,12 @@ export async function POST(request: Request) {
 
       case 'templates_submit':
         return relay(await asAccount(ctx, submitTemplate, body.template ?? {}))
+
+      case 'templates_delete': {
+        const id = str(body.template_id)
+        if (!id) return fail(400, 'template_id is required')
+        return relay(await runAsAccount(ctx, () => deleteTemplate(new Request('http://internal/api', { method: 'DELETE' }), { params: Promise.resolve({ id }) })))
+      }
 
       case 'knowledge_add':
         return relay(await asAccount(ctx, addKnowledge, { title: body.title, content: body.content }))

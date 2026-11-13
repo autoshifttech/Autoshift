@@ -375,6 +375,15 @@ async def create_template(body: TemplateCreate, ctx: AdminMember, sdb: ServiceDb
     return result
 
 
+@router.delete("/templates/{template_id}")
+async def delete_template(template_id: str, ctx: AdminMember, sdb: ServiceDb, bridge: Bridge):
+    """Delete a template at Meta and here. Messages already sent with it are not affected."""
+    row = await _own(sdb, "message_templates", ctx.account_id, template_id, "Template")
+    result = await _bridge(bridge, ctx, "templates_delete", template_id=template_id)
+    await audit.record(sdb, scope="account", action="template.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=row["name"], details={"language": row.get("language"), "status": row.get("status")})
+    return result
+
+
 # ------------------------------------------------------------------ contacts
 @router.get("/contacts")
 async def search_contacts(ctx: Member, sdb: ServiceDb, q: str | None = None, tag: str | None = None, limit: int = Query(50, ge=1, le=MAX_LIST)):

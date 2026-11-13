@@ -336,6 +336,17 @@ def build_mcp(get_app) -> MCPServer:
             return preview("submit this template to Meta for approval", **body)
         return await call("POST", "/v1/ws/templates", json_body=body)
 
+    @mcp.tool()
+    async def templates_delete(template_id: str, confirm: bool = False) -> dict:
+        """Delete a template at Meta and in AutoShift (admin role). Meta won't accept a new template with the same
+        name for about 30 days. Can't be undone. Needs confirm=true. Get ids from templates_list."""
+        found = next((t for t in await call("GET", "/v1/ws/templates") if t["id"] == template_id), None)
+        if not found:
+            raise ToolFailure("Template not found")
+        if not confirm:
+            return preview("delete this template at Meta and in AutoShift", template=found["name"], language=found["language"], status=found["status"])
+        return await call("DELETE", f"/v1/ws/templates/{template_id}")
+
     # ----------------------------------------------------------- contacts and leads
     @mcp.tool()
     async def contacts_search(query: str | None = None, tag: str | None = None, limit: int = 50) -> list:

@@ -220,3 +220,13 @@ def test_broadcast_delete(client, world):
     assert client.delete("/v1/ws/broadcasts/b1", headers=world.headers("admin_a")).status_code == 204
     assert [b["id"] for b in world.store["broadcasts"]] == ["b2"] and world.store["broadcast_recipients"] == []
     assert any(a["action"] == "broadcast.delete" for a in world.store["audit_log"])
+
+
+def test_template_delete_goes_through_bridge(client, world, bridge):
+    seed_template(world, "old_one")
+    tid = world.store["message_templates"][0]["id"]
+    assert client.delete(f"/v1/ws/templates/{tid}", headers=world.headers("agent_a")).status_code == 403
+    assert client.delete(f"/v1/ws/templates/{tid}", headers=world.headers("admin_b")).status_code == 404
+    assert client.delete(f"/v1/ws/templates/{tid}", headers=world.headers("admin_a")).status_code == 200
+    assert bridge.calls == [("templates_delete", world.acct_a, {"template_id": tid})]
+    assert any(a["action"] == "template.delete" for a in world.store["audit_log"])
