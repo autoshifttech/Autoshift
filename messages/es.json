@@ -2370,7 +2370,9 @@
       "revoked": "Clave revocada",
       "loadFailed": "No se pudieron cargar las claves",
       "createFailed": "No se pudo crear la clave",
-      "revokeFailed": "No se pudo revocar la clave"
+      "revokeFailed": "No se pudo revocar la clave",
+      "platformTitle": "Claves de API de la plataforma",
+      "platformDesc": "Claves para asistentes de IA y herramientas que gestionan toda la plataforma AutoShift (las herramientas MCP platform_*). Solo superadministradores. Cada clave se muestra una sola vez."
     }
   },
   "SignupPage": {

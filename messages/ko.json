@@ -2370,7 +2370,9 @@
       "revoked": "키를 폐기했습니다",
       "loadFailed": "키를 불러오지 못했습니다",
       "createFailed": "키를 만들지 못했습니다",
-      "revokeFailed": "키를 폐기하지 못했습니다"
+      "revokeFailed": "키를 폐기하지 못했습니다",
+      "platformTitle": "플랫폼 API 키",
+      "platformDesc": "AutoShift 플랫폼 전체를 관리하는 AI 어시스턴트와 도구(platform_* MCP 도구)용 키예요. 최고 관리자만 쓸 수 있어요. 키는 한 번만 표시돼요."
     }
   },
   "SignupPage": {

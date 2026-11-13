@@ -2370,7 +2370,9 @@
       "revoked": "Key revoked",
       "loadFailed": "Couldn't load the keys",
       "createFailed": "Couldn't create the key",
-      "revokeFailed": "Couldn't revoke the key"
+      "revokeFailed": "Couldn't revoke the key",
+      "platformTitle": "Platform API keys",
+      "platformDesc": "Keys for AI assistants and tools that manage the whole AutoShift platform (the platform_* MCP tools). Super admins only. Each key is shown once."
     }
   },
   "SignupPage": {
