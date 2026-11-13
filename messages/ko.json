@@ -441,7 +441,8 @@
       "assignmentUpdateFailed": "담당자 변경에 실패했습니다",
       "networkError": "네트워크 오류",
       "documentFallback": "문서",
-      "you": "나"
+      "you": "나",
+      "helloWorldTestOnly": "샘플 “Hello World” 템플릿은 Meta 테스트 번호에서만 보낼 수 있어요. 승인된 내 템플릿을 선택하세요."
     },
     "sessionTimer": {
       "expired": "만료됨",
@@ -727,7 +728,8 @@
       "toastCustomFieldsFailed": "커스텀 필드를 저장하지 못했습니다",
       "toastTemplateSent": "\"{name}\" 템플릿을 보냈습니다",
       "toastTemplateFailed": "템플릿을 보내지 못했습니다: {reason}",
-      "networkError": "네트워크 오류"
+      "networkError": "네트워크 오류",
+      "helloWorldTestOnly": "샘플 “Hello World” 템플릿은 Meta 테스트 번호에서만 보낼 수 있어요. 승인된 내 템플릿을 선택하세요."
     },
     "importModal": {
       "title": "연락처 가져오기",

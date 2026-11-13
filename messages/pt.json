@@ -441,7 +441,8 @@
       "assignmentUpdateFailed": "Falha ao atualizar a atribuição",
       "networkError": "erro de rede",
       "documentFallback": "Documento",
-      "you": "Você"
+      "you": "Você",
+      "helloWorldTestOnly": "O modelo de exemplo “Hello World” só funciona com o número de teste da Meta. Escolha um dos seus modelos aprovados."
     },
     "sessionTimer": {
       "expired": "Expirada",
@@ -727,7 +728,8 @@
       "toastCustomFieldsFailed": "Falha ao salvar os campos personalizados",
       "toastTemplateSent": "Modelo \"{name}\" enviado",
       "toastTemplateFailed": "Falha ao enviar o modelo: {reason}",
-      "networkError": "erro de rede"
+      "networkError": "erro de rede",
+      "helloWorldTestOnly": "O modelo de exemplo “Hello World” só funciona com o número de teste da Meta. Escolha um dos seus modelos aprovados."
     },
     "importModal": {
       "title": "Importar contatos",

@@ -441,7 +441,8 @@
       "assignmentUpdateFailed": "Failed to update assignment",
       "networkError": "network error",
       "documentFallback": "Document",
-      "you": "You"
+      "you": "You",
+      "helloWorldTestOnly": "The sample “Hello World” template only works from Meta's test number. Pick one of your own approved templates instead."
     },
     "sessionTimer": {
       "expired": "Expired",
@@ -727,7 +728,8 @@
       "toastCustomFieldsFailed": "Failed to save custom fields",
       "toastTemplateSent": "Template \"{name}\" sent",
       "toastTemplateFailed": "Failed to send template: {reason}",
-      "networkError": "network error"
+      "networkError": "network error",
+      "helloWorldTestOnly": "The sample “Hello World” template only works from Meta's test number. Pick one of your own approved templates instead."
     },
     "importModal": {
       "title": "Import Contacts",

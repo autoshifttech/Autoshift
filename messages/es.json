@@ -441,7 +441,8 @@
       "assignmentUpdateFailed": "Error al actualizar la asignación",
       "networkError": "error de red",
       "documentFallback": "Documento",
-      "you": "Tú"
+      "you": "Tú",
+      "helloWorldTestOnly": "La plantilla de ejemplo “Hello World” solo funciona con el número de prueba de Meta. Elige una de tus plantillas aprobadas."
     },
     "sessionTimer": {
       "expired": "Expirada",
@@ -727,7 +728,8 @@
       "toastCustomFieldsFailed": "Error al guardar los campos personalizados",
       "toastTemplateSent": "Plantilla \"{name}\" enviada",
       "toastTemplateFailed": "Error al enviar la plantilla: {reason}",
-      "networkError": "error de red"
+      "networkError": "error de red",
+      "helloWorldTestOnly": "La plantilla de ejemplo “Hello World” solo funciona con el número de prueba de Meta. Elige una de tus plantillas aprobadas."
     },
     "importModal": {
       "title": "Importar contactos",

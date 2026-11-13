@@ -817,7 +817,7 @@ export function MessageThread({
         if (!res.ok) {
           const reason = payload?.error || `HTTP ${res.status}`;
           console.error("Failed to send template:", reason);
-          toast.error(t("sendTemplateFailed", { reason }));
+          toast.error(String(reason).includes("131058") ? t("helloWorldTestOnly") : t("sendTemplateFailed", { reason }));
           onUpdateMessage(tempId, { status: "failed" });
           return;
         }

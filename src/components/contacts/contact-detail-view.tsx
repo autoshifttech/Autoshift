@@ -346,7 +346,7 @@ export function ContactDetailView({
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
         const reason = payload?.error || `HTTP ${res.status}`;
-        toast.error(t('toastTemplateFailed', { reason }));
+        toast.error(String(reason).includes('131058') ? t('helloWorldTestOnly') : t('toastTemplateFailed', { reason }));
         return;
       }
 
