@@ -78,10 +78,17 @@ def test_send_text_inside_window_goes_through_bridge(client, world, bridge):
     assert any(a["action"] == "message.send" for a in world.store["audit_log"])
 
 
-def test_send_refuses_viewer_opted_out_blocked_and_closed_window(client, world, bridge):
+def test_send_refuses_viewer_opted_out_blocked_and_closed_window(client, world, bridge, monkeypatch):
+    from types import SimpleNamespace
+
+    from app.routers import workspace_ops
+
     _, conv = seed_chat(world)
     assert client.post("/v1/ws/messages/send", json={"conversation_id": conv["id"], "text": "x"}, headers=world.headers("viewer_a")).status_code == 403
     _, stale = seed_chat(world, phone="+912222222222", inbound_ago=timedelta(days=3))
+    # The 24-hour check is switched off for now: the send goes to Meta, which decides.
+    assert client.post("/v1/ws/messages/check", json={"conversation_id": stale["id"], "text": "x"}, headers=world.headers("agent_a")).json()["blockers"] == []
+    monkeypatch.setattr(workspace_ops, "get_settings", lambda: SimpleNamespace(enforce_whatsapp_window=True))
     res = client.post("/v1/ws/messages/send", json={"conversation_id": stale["id"], "text": "x"}, headers=world.headers("agent_a"))
     assert res.status_code == 409 and "24-hour" in res.json()["detail"]
     _, stopped = seed_chat(world, phone="+913333333333", texts=("Hi", "STOP"))

@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .. import audit, key_limits
+from ..config import get_settings
 from ..deps import AdminMember, AgentMember, Bridge, Member, ServiceDb
 from ..web_bridge import BridgeError
 
@@ -301,7 +302,7 @@ async def _send_check(sdb, ctx, body: SendBody) -> dict:
         if consent["opted_out"]:
             blockers.append(f"This person opted out (sent STOP on {consent['opted_out_at']}); never message them")
     last_inbound = _ts(conv.get("last_inbound_at")) if conv else consent["last_inbound_at"]
-    if not body.template and not (last_inbound and _now() - last_inbound < WINDOW):
+    if get_settings().enforce_whatsapp_window and not body.template and not (last_inbound and _now() - last_inbound < WINDOW):
         blockers.append("Outside the 24-hour window: they haven't written in the last 24 hours, so only an approved template can be sent")
     return {
         "to": _contact_public(contact) if contact else {"phone": body.to, "new_contact": True},

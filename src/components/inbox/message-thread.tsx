@@ -1,5 +1,6 @@
 "use client";
 
+import { ENFORCE_WHATSAPP_WINDOW } from "@/lib/whatsapp/session-window";
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -1275,7 +1276,7 @@ export function MessageThread({
       {/* Composer */}
       <MessageComposer
         conversationId={conversation.id}
-        sessionExpired={sessionInfo.expired}
+        sessionExpired={ENFORCE_WHATSAPP_WINDOW && sessionInfo.expired}
         onSend={handleSend}
         onSendMedia={handleSendMedia}
         onSendInteractive={handleSendInteractive}

@@ -8,6 +8,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # WhatsApp 24-hour window check on free-form sends. Temporarily off (Meta still enforces it).
+    enforce_whatsapp_window: bool = False
+
     # Supabase project.
     supabase_url: str = ""
     # The key the backend uses for trusted work (never sent to a browser).
