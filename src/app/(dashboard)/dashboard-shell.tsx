@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { isDemoMode } from "@/lib/supabase/client";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
@@ -33,6 +34,21 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
     if (!loading && !user) {
       router.push("/login");
     }
+  }, [user, loading, router]);
+
+  // New sign-ups verify their phone on WhatsApp before using the app (when AutoShift has it switched on).
+  useEffect(() => {
+    if (loading || !user || isDemoMode()) return;
+    let live = true;
+    fetch("/api/account/phone")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (live && s?.required) router.replace(`/verify-phone?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
   }, [user, loading, router]);
 
   if (loading) {

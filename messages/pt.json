@@ -2451,6 +2451,32 @@
       "runTest": "Executar teste",
       "testFailed": "O teste falhou",
       "close": "Fechar"
+    },
+    "phoneOtp": {
+      "title": "Verificação por telefone",
+      "desc": "Novos cadastros verificam o telefone com um código de 6 dígitos no WhatsApp antes de usar a AutoShift. Quem se cadastrou antes de você ativar não precisa.",
+      "sender": "Enviar códigos de",
+      "chooseSender": "Escolha uma empresa",
+      "senderHelp": "A empresa cujo número de WhatsApp conectado envia os códigos, normalmente a própria AutoShift. Cada código custa uma mensagem de autenticação.",
+      "saved": "Salvo",
+      "template": "Modelo de OTP ({name})",
+      "templateNeedsSender": "Escolha primeiro a empresa que envia.",
+      "templateMissing": "Ainda não criado. Crie e aguarde a aprovação da Meta.",
+      "status": {
+        "APPROVED": "Aprovado pela Meta.",
+        "PENDING": "Aguardando aprovação da Meta.",
+        "REJECTED": "Rejeitado pela Meta: {reason}",
+        "OTHER": "Status na Meta: {status}"
+      },
+      "createTemplate": "Criar modelo",
+      "submitted": "Enviado à Meta para aprovação",
+      "refresh": "Verificar o status de novo",
+      "require": "Exigir verificação por telefone em novos cadastros",
+      "requireHelp": "Quando ativado, novos usuários precisam verificar antes de usar o app.",
+      "requireNeedsTemplate": "Disponível quando a Meta aprovar o modelo de OTP.",
+      "on": "Verificação por telefone ativada",
+      "off": "Verificação por telefone desativada",
+      "verifiedCount": "{count, plural, =0 {Nenhum telefone verificado ainda} one {# pessoa verificou o telefone} other {# pessoas verificaram o telefone}}"
     }
   },
   "SignupPage": {
@@ -4432,5 +4458,34 @@
     "removeTitle": "Remover {name}?",
     "removeDesc": "Os fluxos que usam esta conta deixam de funcionar até você conectar outra.",
     "removeConfirm": "Remover"
+  },
+  "VerifyPhone": {
+    "title": "Verifique seu telefone",
+    "desc": "Enviaremos um código de 6 dígitos para o seu WhatsApp. Isso protege a AutoShift contra contas falsas.",
+    "phoneLabel": "Número do WhatsApp",
+    "phoneHelp": "Com o código do país, por exemplo +55 11 91234 5678.",
+    "send": "Enviar código no WhatsApp",
+    "codeTitle": "Digite o código",
+    "codeDesc": "Enviamos um código de 6 dígitos para {phone} no WhatsApp. Ele expira em 10 minutos.",
+    "codeLabel": "Código de 6 dígitos",
+    "verify": "Verificar",
+    "resend": "Enviar um novo código",
+    "resendIn": "Reenviar em {seconds}s",
+    "changeNumber": "Trocar número",
+    "signOut": "Sair",
+    "error": {
+      "invalid_phone": "Digite o número completo com o código do país.",
+      "phone_taken": "Este número já foi verificado em outra conta.",
+      "not_enabled": "A verificação por telefone não está disponível agora. Tente mais tarde.",
+      "wait": "Aguarde {seconds} segundos antes de pedir outro código.",
+      "too_many": "Muitos códigos solicitados. Tente novamente em uma hora.",
+      "send_failed": "Não conseguimos enviar o código para este número. Confira se ele tem WhatsApp.",
+      "invalid_code": "Digite o código de 6 dígitos.",
+      "no_code": "Peça um código primeiro.",
+      "expired": "Este código expirou. Envie um novo.",
+      "too_many_attempts": "Muitas tentativas erradas. Envie um novo código.",
+      "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
+      "generic": "Algo deu errado. Tente novamente."
+    }
   }
 }

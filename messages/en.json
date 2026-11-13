@@ -2451,6 +2451,32 @@
       "runTest": "Run test",
       "testFailed": "The test failed",
       "close": "Close"
+    },
+    "phoneOtp": {
+      "title": "Phone verification",
+      "desc": "New sign-ups verify their phone with a 6-digit code on WhatsApp before using AutoShift. People who signed up before you switch it on aren't asked.",
+      "sender": "Send codes from",
+      "chooseSender": "Choose a business",
+      "senderHelp": "The business whose connected WhatsApp number sends the codes, usually AutoShift's own. Each code costs one authentication message.",
+      "saved": "Saved",
+      "template": "OTP template ({name})",
+      "templateNeedsSender": "Choose the sending business first.",
+      "templateMissing": "Not created yet. Create it, then wait for Meta's approval.",
+      "status": {
+        "APPROVED": "Approved by Meta.",
+        "PENDING": "Waiting for Meta's approval.",
+        "REJECTED": "Rejected by Meta: {reason}",
+        "OTHER": "Status at Meta: {status}"
+      },
+      "createTemplate": "Create template",
+      "submitted": "Sent to Meta for approval",
+      "refresh": "Check status again",
+      "require": "Require phone verification for new sign-ups",
+      "requireHelp": "When on, new users must verify before they can use the app.",
+      "requireNeedsTemplate": "Available once Meta approves the OTP template.",
+      "on": "Phone verification is on",
+      "off": "Phone verification is off",
+      "verifiedCount": "{count, plural, =0 {No verified phones yet} one {# person has verified a phone} other {# people have verified a phone}}"
     }
   },
   "SignupPage": {
@@ -4432,5 +4458,34 @@
     "removeTitle": "Remove {name}?",
     "removeDesc": "Flows that use this account will stop working until you connect another one.",
     "removeConfirm": "Remove"
+  },
+  "VerifyPhone": {
+    "title": "Verify your phone",
+    "desc": "We'll send a 6-digit code to your WhatsApp. This keeps AutoShift safe from fake accounts.",
+    "phoneLabel": "WhatsApp number",
+    "phoneHelp": "With country code, for example +91 98765 43210.",
+    "send": "Send code on WhatsApp",
+    "codeTitle": "Enter the code",
+    "codeDesc": "We sent a 6-digit code to {phone} on WhatsApp. It expires in 10 minutes.",
+    "codeLabel": "6-digit code",
+    "verify": "Verify",
+    "resend": "Send a new code",
+    "resendIn": "Send again in {seconds}s",
+    "changeNumber": "Change number",
+    "signOut": "Sign out",
+    "error": {
+      "invalid_phone": "Enter a full phone number with country code.",
+      "phone_taken": "This number is already verified on another account.",
+      "not_enabled": "Phone verification isn't available right now. Try again later.",
+      "wait": "Please wait {seconds} seconds before asking for another code.",
+      "too_many": "Too many codes asked for. Try again in an hour.",
+      "send_failed": "We couldn't send the code to this number. Check that it has WhatsApp.",
+      "invalid_code": "Enter the 6-digit code.",
+      "no_code": "Ask for a code first.",
+      "expired": "This code has expired. Send a new one.",
+      "too_many_attempts": "Too many wrong tries. Send a new code.",
+      "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
+      "generic": "Something went wrong. Try again."
+    }
   }
 }
