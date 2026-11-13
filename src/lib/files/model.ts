@@ -3,7 +3,10 @@
  * drips and AI replies. Sample files plus uploads held in memory for this
  * tab (nothing is uploaded until storage exists on the backend).
  */
+import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
+import { createClient } from '@/lib/supabase/client'
+import { isLive, myAccount } from '@/lib/workspace/live'
 
 export const FILE_KINDS = ['image', 'pdf', 'video', 'other'] as const
 export type FileKind = (typeof FILE_KINDS)[number]
@@ -59,6 +62,56 @@ function sampleFiles(): LibraryFile[] {
   ]
 }
 
-export const filesStore = createStore<{ files: LibraryFile[] }>(() => ({ files: sampleFiles() }))
-const SERVER = { files: sampleFiles() }
-export const useFiles = () => useStore(filesStore, SERVER).files
+// Real accounts: the account's uploaded media (Supabase Storage, bucket chat-media). Demo: samples.
+export const MEDIA_BUCKET = 'chat-media'
+export const filesStore = createStore<{ files: LibraryFile[] }>(() => ({ files: isLive() ? [] : sampleFiles() }))
+const SERVER = { files: isLive() ? [] : sampleFiles() }
+let liveLoad: Promise<void> | null = null
+
+export function loadLiveFiles(force = false): Promise<void> {
+  if (!isLive()) return Promise.resolve()
+  if (!liveLoad || force) {
+    liveLoad = (async () => {
+      const { accountId } = await myAccount()
+      const sb = createClient()
+      const dir = `account-${accountId}`
+      const { data, error } = await sb.storage.from(MEDIA_BUCKET).list(dir, { limit: 1000, sortBy: { column: 'created_at', order: 'desc' } })
+      if (error) throw error
+      const files: LibraryFile[] = (data ?? [])
+        .filter((o) => o.id) // folders have no id
+        .map((o) => {
+          const path = `${dir}/${o.name}`
+          const size = Number((o.metadata as { size?: number } | null)?.size ?? 0)
+          return {
+            id: path,
+            name: o.name.replace(/^\d{10,}-/, ''),
+            kind: kindOf({ name: o.name, type: (o.metadata as { mimetype?: string } | null)?.mimetype }),
+            size,
+            tint: '#1E4C41',
+            url: sb.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl,
+            usedIn: [],
+            uploadedAt: o.created_at ?? new Date().toISOString(),
+          }
+        })
+      filesStore.set({ files })
+    })().catch((err) => {
+      console.error('[files] load failed', err)
+      liveLoad = null
+    })
+  }
+  return liveLoad
+}
+
+export const useFiles = () => {
+  useEffect(() => {
+    void loadLiveFiles()
+  }, [])
+  return useStore(filesStore, SERVER).files
+}
+
+/** Deletes an uploaded file for real (its id is the storage path). */
+export async function deleteLiveFile(id: string): Promise<void> {
+  if (!isLive()) return
+  const { error } = await createClient().storage.from(MEDIA_BUCKET).remove([id])
+  if (error) throw new Error(error.message)
+}

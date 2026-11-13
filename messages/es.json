@@ -3892,7 +3892,10 @@
     "cancel": "Cancelar",
     "save": "Guardar segmento",
     "saved": "Segmento guardado.",
-    "created": "Segmento creado."
+    "created": "Segmento creado.",
+    "emptyTitle": "Todavía no hay segmentos",
+    "emptyDesc": "{count, plural, =0 {Añade contactos primero y luego agrúpalos aquí por etiqueta, último mensaje o consentimiento.} one {Agrupa tu # contacto por etiqueta, último mensaje o consentimiento.} other {Agrupa tus # contactos por etiqueta, último mensaje o consentimiento.}}",
+    "loadingAudience": "Cargando tus contactos…"
   },
   "Drips": {
     "title": "Secuencias",
@@ -3977,7 +3980,8 @@
     "costEach": "Coste por persona (todos los pasos)",
     "costAll": "{count, plural, one {Para # persona} other {Para # personas}}",
     "costNote": "La mayoría sale antes porque responde, así que el coste real suele ser menor.",
-    "previewStep": "Vista previa del paso {n}"
+    "previewStep": "Vista previa del paso {n}",
+    "previewNotice": "Las secuencias son una vista previa: puedes planificarlas aquí, pero todavía no envían mensajes."
   },
   "Insights": {
     "title": "Análisis",
@@ -4030,7 +4034,11 @@
     "kind_drip": "Secuencia",
     "heatTitle": "Horas de más actividad",
     "heatDesc": "Mensajes recibidos por día y hora: refuerza el equipo en las celdas más oscuras.",
-    "heatCell": "{count} mensajes a las {hour}:00"
+    "heatCell": "{count} mensajes a las {hour}:00",
+    "loading": "Cargando tus cifras…",
+    "loadFailed": "No se pudieron cargar tus cifras. Actualiza la página para intentarlo de nuevo.",
+    "noData": "Todavía no hay nada en este periodo.",
+    "sourcesNotTracked": "El origen de los leads aún no se registra. Aparecerá aquí cuando lleguen leads con origen."
   },
   "Files": {
     "title": "Archivos",

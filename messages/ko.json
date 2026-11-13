@@ -3892,7 +3892,10 @@
     "cancel": "취소",
     "save": "세그먼트 저장",
     "saved": "세그먼트를 저장했습니다.",
-    "created": "세그먼트를 만들었습니다."
+    "created": "세그먼트를 만들었습니다.",
+    "emptyTitle": "아직 세그먼트가 없습니다",
+    "emptyDesc": "{count, plural, =0 {먼저 연락처를 추가한 다음 태그, 마지막 메시지, 수신 동의로 묶어 보세요.} other {연락처 #명을 태그, 마지막 메시지, 수신 동의로 묶어 보세요.}}",
+    "loadingAudience": "연락처를 불러오는 중…"
   },
   "Drips": {
     "title": "드립 캠페인",
@@ -3977,7 +3980,8 @@
     "costEach": "1인당 비용 (전체 단계)",
     "costAll": "{count, plural, other {#명 기준}}",
     "costNote": "대부분 답장하면 중간에 빠지므로 실제 비용은 보통 더 낮습니다.",
-    "previewStep": "{n}단계 미리보기"
+    "previewStep": "{n}단계 미리보기",
+    "previewNotice": "드립은 미리보기 기능입니다. 여기서 계획할 수는 있지만 아직 메시지를 보내지는 않습니다."
   },
   "Insights": {
     "title": "인사이트",
@@ -4030,7 +4034,11 @@
     "kind_drip": "드립",
     "heatTitle": "가장 바쁜 시간",
     "heatDesc": "요일·시간별 수신 메시지입니다. 진한 칸에 인력을 배치하세요.",
-    "heatCell": "{hour}:00에 메시지 {count}건"
+    "heatCell": "{hour}:00에 메시지 {count}건",
+    "loading": "수치를 불러오는 중…",
+    "loadFailed": "수치를 불러오지 못했습니다. 새로고침해서 다시 시도하세요.",
+    "noData": "이 기간에는 아직 데이터가 없습니다.",
+    "sourcesNotTracked": "리드 출처는 아직 기록되지 않습니다. 출처가 있는 리드가 들어오면 여기에 표시됩니다."
   },
   "Files": {
     "title": "파일",

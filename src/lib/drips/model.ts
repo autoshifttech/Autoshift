@@ -4,7 +4,10 @@
  * Each step waits, checks a condition and sends a template. Sample data
  * kept in the browser until the scheduler exists on the backend.
  */
+import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
+import { createClient } from '@/lib/supabase/client'
+import { isLive } from '@/lib/workspace/live'
 import { RATES } from '@/lib/wallet/model'
 
 export const TRIGGERS = ['segment', 'new_lead', 'tag_added', 'manual'] as const
@@ -53,8 +56,33 @@ export interface Drip {
   createdAt: string
 }
 
+// Real accounts pick from their own approved WhatsApp templates; the demo keeps the samples.
+export const dripTemplatesStore = createStore<{ templates: DripTemplate[]; loaded: boolean }>(() => (isLive() ? { templates: [], loaded: false } : { templates: DRIP_TEMPLATES, loaded: true }))
+let templatesLoad: Promise<void> | null = null
+
+export function useDripTemplates(): DripTemplate[] {
+  useEffect(() => {
+    if (!isLive() || templatesLoad) return
+    templatesLoad = (async () => {
+      const { data, error } = await createClient().from('message_templates').select('name, category, body_text, buttons').eq('status', 'APPROVED').order('name')
+      if (error) throw error
+      const templates = (data ?? []).map((t) => ({
+        name: t.name as string,
+        category: (String(t.category).toLowerCase() === 'marketing' ? 'marketing' : 'utility') as DripTemplate['category'],
+        body: (t.body_text as string) ?? '',
+        buttons: Array.isArray(t.buttons) ? (t.buttons as { text?: string }[]).map((b) => b.text ?? '').filter(Boolean) : [],
+      }))
+      dripTemplatesStore.set({ templates, loaded: true })
+    })().catch((err) => {
+      console.error('[drips] templates load failed', err)
+      templatesLoad = null
+    })
+  }, [])
+  return useStore(dripTemplatesStore, isLive() ? { templates: [], loaded: false } : { templates: DRIP_TEMPLATES, loaded: true }).templates
+}
+
 export const priceOf = (template: string) => {
-  const t = DRIP_TEMPLATES.find((x) => x.name === template)
+  const t = dripTemplatesStore.get().templates.find((x) => x.name === template)
   return RATES.find((r) => r.kind === (t?.category ?? 'marketing'))?.price ?? 0
 }
 
@@ -111,7 +139,7 @@ export function newDrip(trigger: Drip['trigger'] = { kind: 'new_lead', value: 'h
     name: '',
     status: 'draft',
     trigger,
-    steps: [step('s1', 0, 'minutes', DRIP_TEMPLATES[0].name, 'always', { sent: 0, read: 0, replied: 0 })],
+    steps: [step('s1', 0, 'minutes', dripTemplatesStore.get().templates[0]?.name ?? '', 'always', { sent: 0, read: 0, replied: 0 })],
     stopOnReply: true,
     window: { start: '09:00', end: '20:00' },
     skipWeekends: false,
@@ -120,8 +148,11 @@ export function newDrip(trigger: Drip['trigger'] = { kind: 'new_lead', value: 'h
   }
 }
 
-export const dripsStore = createStore<{ drips: Drip[] }>(() => ({ drips: sampleDrips() }), 'autoshift.drips')
-const SERVER = { drips: sampleDrips() }
+// Real accounts start with no drips (kept in this browser; nothing sends them yet).
+export const dripsStore = isLive()
+  ? createStore<{ drips: Drip[] }>(() => ({ drips: [] }), 'autoshift.drips.live')
+  : createStore<{ drips: Drip[] }>(() => ({ drips: sampleDrips() }), 'autoshift.drips')
+const SERVER = { drips: isLive() ? [] : sampleDrips() }
 export const useDrips = () => useStore(dripsStore, SERVER).drips
 
 export function updateDrip(id: string, patch: Partial<Drip>) {

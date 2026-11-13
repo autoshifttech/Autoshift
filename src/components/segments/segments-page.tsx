@@ -7,6 +7,7 @@ import { toast } from "@/lib/toast";
 import { Copy, Megaphone, Pencil, Plus, Repeat, Trash2, Users, X } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,15 +15,13 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
 import {
-  AUDIENCE,
-  CITIES,
   FIELD_OPS,
   SEGMENT_FIELDS,
   SOURCES,
-  TAGS,
   defaultValue,
   members,
   segmentsStore,
+  useAudience,
   useSegments,
   type Segment,
   type SegmentField,
@@ -46,6 +45,7 @@ export function SegmentsPage() {
   const t = useTranslations("Segments");
   const locale = useLocale();
   const segments = useSegments();
+  const audience = useAudience();
   const ruleText = useRuleText();
   const [editing, setEditing] = useState<Segment | "new" | null>(null);
 
@@ -62,9 +62,13 @@ export function SegmentsPage() {
         </Button>
       </div>
 
+      {segments.length === 0 && (
+        <EmptyPanel icon={Users} title={t("emptyTitle")} description={audience.loaded ? t("emptyDesc", { count: audience.customers.length }) : t("loadingAudience")} />
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {segments.map((s) => {
-          const list = members(s, AUDIENCE);
+          const list = members(s, audience.customers);
           const reachable = list.filter((c) => c.optedIn).length;
           return (
             <div key={s.id} className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
@@ -126,11 +130,13 @@ export function SegmentsPage() {
 function ValueInput({ rule, onChange }: { rule: SegmentRule; onChange: (v: string) => void }) {
   const t = useTranslations("Segments");
   const tl = useTranslations("LeadsPage");
+  const audience = useAudience();
+  const withCurrent = (list: string[]) => (rule.value && !list.includes(rule.value) ? [rule.value, ...list] : list);
   const opts: [string, string][] | null =
     rule.field === "tag"
-      ? TAGS.map((x) => [x, x])
+      ? withCurrent(audience.tags).map((x) => [x, x])
       : rule.field === "city"
-        ? CITIES.map((x) => [x, x])
+        ? withCurrent(audience.cities).map((x) => [x, x])
         : rule.field === "temp"
           ? ["hot", "warm", "cold"].map((x) => [x, t(`temp_${x}`)])
           : rule.field === "source"
@@ -175,7 +181,8 @@ function SegmentDialog({ segment, onClose }: { segment: Segment | null; onClose:
       },
   );
   const [tried, setTried] = useState(false);
-  const list = members(draft, AUDIENCE);
+  const audience = useAudience();
+  const list = members(draft, audience.customers);
   const reachable = list.filter((c) => c.optedIn).length;
   const setRule = (id: string, patch: Partial<SegmentRule>) => setDraft({ ...draft, rules: draft.rules.map((r) => (r.id === id ? { ...r, ...patch } : r)) });
 
@@ -257,7 +264,7 @@ function SegmentDialog({ segment, onClose }: { segment: Segment | null; onClose:
                 variant="outline"
                 size="sm"
                 className="gap-1"
-                onClick={() => setDraft({ ...draft, rules: [...draft.rules, { id: `r${Date.now()}`, field: "tag", op: "is", value: TAGS[0] }] })}
+                onClick={() => setDraft({ ...draft, rules: [...draft.rules, { id: `r${Date.now()}`, field: "tag", op: "is", value: audience.tags[0] ?? "" }] })}
               >
                 <Plus className="size-3.5" />
                 {t("addRule")}

@@ -4,7 +4,10 @@
  * target broadcasts and drip campaigns. Sample audience kept in the
  * browser until the contacts query runs on the backend.
  */
+import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
+import { createClient } from '@/lib/supabase/client'
+import { BLOCKED_TAG, isLive, keywordReplies, tagsByContact } from '@/lib/workspace/live'
 
 export interface Customer {
   id: string
@@ -83,11 +86,11 @@ export function members(segment: Pick<Segment, 'match' | 'rules'>, audience: Cus
 export function defaultValue(field: SegmentField): string {
   switch (field) {
     case 'tag':
-      return TAGS[0]
+      return isLive() ? (audienceStore.get().tags[0] ?? '') : TAGS[0]
     case 'temp':
       return 'hot'
     case 'city':
-      return CITIES[0]
+      return isLive() ? '' : CITIES[0]
     case 'source':
       return SOURCES[0]
     case 'last_message':
@@ -135,8 +138,70 @@ export function sampleSegments(): Segment[] {
   ]
 }
 
+/** Sample audience for the demo. Real accounts use `useAudience()`. */
 export const AUDIENCE = sampleAudience()
 
-export const segmentsStore = createStore<{ segments: Segment[] }>(() => ({ segments: sampleSegments() }), 'autoshift.segments')
-const SERVER = { segments: sampleSegments() }
+// Real accounts start with no saved segments (kept in this browser under their own key) and
+// build them from their real contacts; the demo keeps the sample segments.
+export const segmentsStore = isLive()
+  ? createStore<{ segments: Segment[] }>(() => ({ segments: [] }), 'autoshift.segments.live')
+  : createStore<{ segments: Segment[] }>(() => ({ segments: sampleSegments() }), 'autoshift.segments')
+const SERVER = { segments: isLive() ? [] : sampleSegments() }
 export const useSegments = () => useStore(segmentsStore, SERVER).segments
+
+export interface Audience {
+  customers: Customer[]
+  tags: string[]
+  cities: string[]
+  loaded: boolean
+}
+const DEMO_AUDIENCE: Audience = { customers: AUDIENCE, tags: TAGS, cities: CITIES, loaded: true }
+const EMPTY_AUDIENCE: Audience = { customers: [], tags: [], cities: [], loaded: false }
+export const audienceStore = createStore<Audience>(() => (isLive() ? EMPTY_AUDIENCE : DEMO_AUDIENCE))
+let audienceLoad: Promise<void> | null = null
+
+/** The people segments are built from: real contacts for real accounts, the sample audience in the demo. */
+export function useAudience(): Audience {
+  useEffect(() => {
+    if (!isLive() || audienceLoad) return
+    audienceLoad = fetchLiveAudience()
+      .then((a) => audienceStore.set(a))
+      .catch((err) => {
+        console.error('[segments] audience load failed', err)
+        audienceLoad = null
+      })
+  }, [])
+  return useStore(audienceStore, isLive() ? EMPTY_AUDIENCE : DEMO_AUDIENCE)
+}
+
+async function fetchLiveAudience(): Promise<Audience> {
+  const sb = createClient()
+  const { data: contacts, error } = await sb.from('contacts').select('id, name, phone, created_at').order('created_at', { ascending: false }).limit(5000)
+  if (error) throw error
+  const rows = contacts ?? []
+  const ids = rows.map((c) => c.id)
+  const [tags, replies] = await Promise.all([tagsByContact(ids), keywordReplies()])
+  const lastIn = new Map<string, number>()
+  const { data: convs } = await sb.from('conversations').select('contact_id, last_inbound_at').not('last_inbound_at', 'is', null).limit(10000)
+  for (const c of convs ?? []) {
+    const t = new Date(c.last_inbound_at).getTime()
+    if (t > (lastIn.get(c.contact_id) ?? 0)) lastIn.set(c.contact_id, t)
+  }
+  const now = Date.now()
+  const days = (t: number) => Math.max(0, Math.floor((now - t) / 864e5))
+  const customers: Customer[] = rows.map((c) => ({
+    id: c.id,
+    name: c.name || c.phone,
+    phone: c.phone,
+    city: '',
+    tags: tags.get(c.id) ?? [],
+    temp: null,
+    // Never written: treat as a long time ago, so "within N days" doesn't match them.
+    lastMessageDays: lastIn.has(c.id) ? days(lastIn.get(c.id)!) : 9999,
+    optedIn: replies.get(c.id)?.status !== 'opted_out' && !(tags.get(c.id) ?? []).some((t) => t.toLowerCase() === BLOCKED_TAG.toLowerCase()),
+    source: 'organic',
+    joinedDays: days(new Date(c.created_at).getTime()),
+  }))
+  const tagNames = [...new Set(customers.flatMap((c) => c.tags))].sort((a, b) => a.localeCompare(b))
+  return { customers, tags: tagNames, cities: [], loaded: true }
+}

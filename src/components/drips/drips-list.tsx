@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/wallet/model";
 import { costPerContact, dripsStore, newDrip, updateDrip, useDrips } from "@/lib/drips/model";
 import { DripStatusChip, useTriggerText } from "./drip-ui";
+import { isLive } from "@/lib/workspace/live";
 
 export function DripsList() {
   return (
@@ -53,6 +54,11 @@ function DripsListInner() {
         <div>
           <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
+          {isLive() && (
+            <p role="note" className="mt-2 max-w-2xl rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm text-foreground">
+              {t("previewNotice")}
+            </p>
+          )}
         </div>
         <Button onClick={() => create()} className="gap-1.5 self-start">
           <Plus className="size-4" />

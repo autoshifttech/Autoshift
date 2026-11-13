@@ -4,7 +4,10 @@
  * Plus per-industry AI presets.
  * Kept in the browser until the Supabase tables exist.
  */
+import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
+import { createClient } from '@/lib/supabase/client'
+import { contactsById, isLive, myAccount } from '@/lib/workspace/live'
 import type { Industry } from '@/lib/workspace/setup'
 
 export type AnswerType = 'text' | 'choice' | 'number'
@@ -343,8 +346,121 @@ const SERVER_SETTINGS = defaultLeadSettings()
 export const useLeadSettings = () => useStore(leadStore, SERVER_SETTINGS)
 
 // v2: leads gained status, source, assistant and a timeline.
-export const leadsStore = createStore<{ leads: Lead[] }>(() => ({ leads: sampleLeads() }), 'autoshift.leadlist.v2')
-const SERVER_LEADS = { leads: sampleLeads(0) }
-export const useLeads = () => useStore(leadsStore, SERVER_LEADS).leads
+// Real accounts: leads are the sales pipeline's deals (never sample data, never kept in the browser).
+export const leadsStore = isLive()
+  ? createStore<{ leads: Lead[] }>(() => ({ leads: [] }))
+  : createStore<{ leads: Lead[] }>(() => ({ leads: sampleLeads() }), 'autoshift.leadlist.v2')
+const SERVER_LEADS = { leads: isLive() ? [] : sampleLeads(0) }
+let liveLoad: Promise<void> | null = null
+
+/** Loads the account's leads (pipeline deals) once per page load; `force` reloads. */
+export function loadLiveLeads(force = false): Promise<void> {
+  if (!isLive()) return Promise.resolve()
+  if (!liveLoad || force) {
+    liveLoad = fetchLiveLeads()
+      .then((leads) => leadsStore.set({ leads }))
+      .catch((err) => {
+        console.error('[leads] load failed', err)
+        liveLoad = null
+      })
+  }
+  return liveLoad
+}
+
+export const useLeads = () => {
+  useEffect(() => {
+    void loadLiveLeads()
+  }, [])
+  return useStore(leadsStore, SERVER_LEADS).leads
+}
+
+function statusFromDeal(status: string, stage: string | undefined): LeadStatus {
+  if (status === 'won' || status === 'lost') return status
+  const s = (stage ?? '').toLowerCase()
+  if (s.includes('qualif') || s.includes('proposal') || s.includes('negotiat')) return 'qualified'
+  if (s.includes('contact')) return 'contacted'
+  return 'new'
+}
+
+async function fetchLiveLeads(): Promise<Lead[]> {
+  const sb = createClient()
+  const { data: deals, error } = await sb
+    .from('deals')
+    .select('id, title, status, stage_id, contact_id, assigned_to, created_at, updated_at, closed_at')
+    .order('created_at', { ascending: false })
+    .limit(1000)
+  if (error) throw error
+  const rows = deals ?? []
+  const contacts = await contactsById(rows.map((d) => d.contact_id))
+  const stageIds = [...new Set(rows.map((d) => d.stage_id).filter(Boolean))]
+  const stages = new Map<string, string>()
+  if (stageIds.length) {
+    const { data } = await sb.from('pipeline_stages').select('id, name').in('id', stageIds)
+    for (const st of data ?? []) stages.set(st.id, st.name)
+  }
+  const people = new Map<string, string>()
+  const assignees = [...new Set(rows.map((d) => d.assigned_to).filter(Boolean))]
+  if (assignees.length) {
+    const { data } = await sb.from('profiles').select('user_id, full_name, email').in('user_id', assignees)
+    for (const p of data ?? []) people.set(p.user_id, p.full_name || p.email || '')
+  }
+  return rows.map((d) => {
+    const c = contacts.get(d.contact_id)
+    const status = statusFromDeal(d.status, stages.get(d.stage_id))
+    const events: LeadEvent[] = [{ at: d.created_at, kind: 'captured', text: 'organic' }]
+    if (d.closed_at && (status === 'won' || status === 'lost')) events.push({ at: d.closed_at, kind: 'status', text: status })
+    return {
+      id: d.id,
+      name: c?.name || d.title || c?.phone || '',
+      phone: c?.phone ?? '',
+      answers: {},
+      capturedAt: d.created_at,
+      handedOffTo: d.assigned_to ? people.get(d.assigned_to) || null : null,
+      status,
+      source: 'organic' as LeadSource,
+      assistant: '',
+      events,
+    }
+  })
+}
+
+/** "Take over": assigns the lead's deal to the signed-in person (real accounts). */
+export async function assignLiveLeadToMe(id: string): Promise<void> {
+  if (!isLive()) return
+  const { userId } = await myAccount()
+  const { error } = await createClient().from('deals').update({ assigned_to: userId, updated_at: new Date().toISOString() }).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+/** Saves a lead's status or owner back to its pipeline deal (real accounts). */
+export async function saveLiveLead(id: string, patch: Partial<Pick<Lead, 'status' | 'handedOffTo'>>): Promise<void> {
+  if (!isLive()) return
+  const sb = createClient()
+  const update: Record<string, unknown> = {}
+  if (patch.status) {
+    const closed = patch.status === 'won' || patch.status === 'lost'
+    update.status = closed ? patch.status : 'open'
+    update.closed_at = closed ? new Date().toISOString() : null
+    if (!closed) {
+      const { data: deal } = await sb.from('deals').select('pipeline_id').eq('id', id).maybeSingle()
+      if (deal) {
+        const { data: stages } = await sb.from('pipeline_stages').select('id, name, position').eq('pipeline_id', deal.pipeline_id).order('position')
+        const want = patch.status === 'new' ? null : patch.status === 'contacted' ? 'contact' : 'qualif'
+        const match = want ? stages?.find((st) => st.name.toLowerCase().includes(want)) : stages?.[0]
+        if (match) update.stage_id = match.id
+      }
+    }
+  }
+  if (patch.handedOffTo !== undefined) {
+    if (!patch.handedOffTo) update.assigned_to = null
+    else {
+      const { data } = await sb.from('profiles').select('user_id').eq('full_name', patch.handedOffTo).limit(1).maybeSingle()
+      if (data) update.assigned_to = data.user_id
+    }
+  }
+  if (Object.keys(update).length === 0) return
+  const { error } = await sb.from('deals').update({ ...update, updated_at: new Date().toISOString() }).eq('id', id)
+  if (error) throw new Error(error.message)
+}
 
 export const phoneKey = (s: string | null | undefined) => (s ?? '').replace(/\D/g, '').slice(-10)

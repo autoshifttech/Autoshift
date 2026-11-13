@@ -5,7 +5,9 @@
  * lowers the number's quality rating. Sample data in the browser until the
  * backend reads replies from Meta's webhook.
  */
+import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
+import { blockedContacts, contactsById, isLive, keywordReplies, setBlocked } from '@/lib/workspace/live'
 
 export const CONSENT_SOURCES = ['website', 'keyword', 'ad', 'import', 'manual'] as const
 export type ConsentSource = (typeof CONSENT_SOURCES)[number]
@@ -117,6 +119,52 @@ function sample(): ConsentState {
   }
 }
 
-export const consentStore = createStore<ConsentState>(sample, 'autoshift.consent.v1')
-const SERVER = sample()
-export const useConsent = () => useStore(consentStore, SERVER)
+// Real accounts: STOP/START replies come from their chats and the blocklist from contacts tagged
+// "Blocked"; only the rules and manual changes are kept in this browser. The demo keeps the samples.
+const empty = (): ConsentState => ({ settings: DEFAULT_SETTINGS, records: [], blocked: [] })
+export const consentStore = isLive() ? createStore<ConsentState>(empty, 'autoshift.consent.live') : createStore<ConsentState>(sample, 'autoshift.consent.v1')
+const SERVER = isLive() ? empty() : sample()
+let liveLoad: Promise<void> | null = null
+
+export function loadLiveConsent(force = false): Promise<void> {
+  if (!isLive()) return Promise.resolve()
+  if (!liveLoad || force) {
+    liveLoad = (async () => {
+      const { settings } = consentStore.get()
+      const [replies, blocked] = await Promise.all([keywordReplies(settings.optOutKeywords, settings.optInKeywords), blockedContacts()])
+      const people = await contactsById([...replies.keys()])
+      const fromChats: ConsentRecord[] = [...replies.entries()].map(([cid, r]) => ({
+        id: `kw-${cid}`,
+        name: people.get(cid)?.name || people.get(cid)?.phone || '',
+        phone: people.get(cid)?.phone ?? '',
+        status: r.status,
+        source: 'keyword',
+        evidence: r.word,
+        at: r.at,
+      }))
+      consentStore.set((s) => ({
+        ...s,
+        // Manual changes made in this browser stay on top of what the chats say.
+        records: [...s.records.filter((x) => x.source === 'manual'), ...fromChats],
+        blocked: blocked.map((c) => ({ phone: c.phone, name: c.name || c.phone, reason: '', at: c.created_at })),
+      }))
+    })().catch((err) => {
+      console.error('[opt-ins] load failed', err)
+      liveLoad = null
+    })
+  }
+  return liveLoad
+}
+
+export const useConsent = () => {
+  useEffect(() => {
+    void loadLiveConsent()
+  }, [])
+  return useStore(consentStore, SERVER)
+}
+
+/** Blocks or unblocks a number for real (tags the contact "Blocked"); no-op in the demo. */
+export async function saveBlocked(phone: string, blocked: boolean, name?: string): Promise<void> {
+  if (!isLive()) return
+  await setBlocked(phone, blocked, name)
+}

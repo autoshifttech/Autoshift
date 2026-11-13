@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import {
   classifyReply,
   consentStore,
+  loadLiveConsent,
+  saveBlocked,
   excludedPhones,
   isValidPhone,
   phoneKey,
@@ -354,6 +356,10 @@ export function ConsentPage() {
                   onClick={() => {
                     consentStore.set((s) => ({ ...s, blocked: s.blocked.filter((x) => x.phone !== b.phone) }));
                     toast.success(t("unblocked", { phone: b.phone }));
+                    saveBlocked(b.phone, false).catch((err) => {
+                      toast.error(err instanceof Error ? err.message : String(err));
+                      void loadLiveConsent(true);
+                    });
                   }}
                 >
                   {t("unblock")}
@@ -448,6 +454,10 @@ export function ConsentPage() {
               onClick={() => {
                 consentStore.set((s) => ({ ...s, blocked: [{ phone: block.phone.trim(), name: block.name.trim() || t("unknown"), reason: block.reason.trim(), at: new Date().toISOString() }, ...s.blocked] }));
                 toast.success(t("blocked", { phone: block.phone.trim() }));
+                saveBlocked(block.phone.trim(), true, block.name.trim() || undefined).catch((err) => {
+                  toast.error(err instanceof Error ? err.message : String(err));
+                  void loadLiveConsent(true);
+                });
                 setBlock({ phone: "", name: "", reason: "" });
                 setBlockOpen(false);
               }}

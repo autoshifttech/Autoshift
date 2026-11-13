@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { ArrowDownRight, ArrowUpRight, Bot, Download, Printer, MessageSquare, Target, Timer } from "lucide-react";
@@ -10,7 +10,9 @@ import { BarChart } from "@/components/tremor/bar-chart";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
 import { FunnelChart, RouteCard } from "./journey-charts";
-import { RANGES, buildInsights, change, type Range } from "@/lib/insights/model";
+import { RANGES, buildInsights, change, type Insights, type Range } from "@/lib/insights/model";
+import { emptyInsights, loadLiveInsights } from "@/lib/insights/live";
+import { isLive } from "@/lib/workspace/live";
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 
@@ -30,17 +32,35 @@ export function InsightsPage() {
   const tl = useTranslations("LeadsPage");
   const locale = useLocale();
   const [range, setRange] = useState<Range>(30);
-  const data = buildInsights(range);
+  const live = isLive();
+  const [liveData, setLiveData] = useState<{ range: Range; data: Insights } | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!live) return;
+    let current = true;
+    loadLiveInsights(range)
+      .then((d) => current && (setLiveData({ range, data: d }), setFailed(false)))
+      .catch((err) => {
+        console.error("[insights] load failed", err);
+        if (current) setFailed(true);
+      });
+    return () => {
+      current = false;
+    };
+  }, [live, range]);
+  const loading = live && liveData?.range !== range && !failed;
+  // Real accounts never see sample numbers: zeros until their own numbers load.
+  const data = !live ? buildInsights(range) : liveData?.range === range ? liveData.data : emptyInsights(range);
   const label = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short" });
   const tt = data.totals;
-  const max = Math.max(...data.heat.flat());
+  const max = Math.max(1, ...data.heat.flat());
 
   const conv = data.days.map((d) => ({ label: label(d.date), [t("ai")]: d.aiConversations, [t("team")]: d.teamConversations }));
   const leads = data.days.map((d) => ({ label: label(d.date), [t("hot")]: d.hot, [t("warm")]: d.warm, [t("cold")]: d.cold }));
 
   const kpis = [
     { icon: MessageSquare, label: t("kpiConversations"), value: tt.conversations.toLocaleString(locale), delta: change(tt.conversations, tt.previous.conversations) },
-    { icon: Bot, label: t("kpiAiResolved"), value: `${Math.round((tt.aiResolved / tt.conversations) * 100)}%`, delta: null },
+    { icon: Bot, label: t("kpiAiResolved"), value: `${tt.conversations ? Math.round((tt.aiResolved / tt.conversations) * 100) : 0}%`, delta: null },
     { icon: Timer, label: t("kpiReply"), value: t("seconds", { count: tt.medianReplySec }), delta: null },
     { icon: Target, label: t("kpiLeads"), value: tt.leads.toLocaleString(locale), delta: change(tt.leads, tt.previous.leads) },
   ];
@@ -63,6 +83,8 @@ export function InsightsPage() {
         <div>
           <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+          {loading && <p role="status" className="mt-1 text-xs text-muted-foreground">{t("loading")}</p>}
+          {failed && <p role="alert" className="mt-1 text-xs text-destructive">{t("loadFailed")}</p>}
         </div>
         <div className="flex items-center gap-2 self-start">
           <div role="tablist" className="inline-flex rounded-full bg-muted p-1 text-xs">
@@ -141,6 +163,11 @@ export function InsightsPage() {
               </tr>
             </thead>
             <tbody>
+              {data.sources.length === 0 && (
+                <tr className="border-t border-border">
+                  <td colSpan={4} className="py-3 text-muted-foreground">{live ? t("sourcesNotTracked") : t("noData")}</td>
+                </tr>
+              )}
               {data.sources.map((s) => (
                 <tr key={s.source} className="border-t border-border">
                   <td className="py-2.5 text-foreground">{tl(`source_${s.source}`)}</td>
@@ -168,6 +195,11 @@ export function InsightsPage() {
               </tr>
             </thead>
             <tbody>
+              {data.assistants.length === 0 && (
+                <tr className="border-t border-border">
+                  <td colSpan={5} className="py-3 text-muted-foreground">{t("noData")}</td>
+                </tr>
+              )}
               {data.assistants.map((a) => (
                 <tr key={a.name} className="border-t border-border">
                   <td className="py-2.5 font-medium text-foreground">{a.name}</td>
@@ -193,8 +225,13 @@ export function InsightsPage() {
               </tr>
             </thead>
             <tbody>
-              {data.campaigns.map((c) => (
-                <tr key={c.name} className="border-t border-border">
+              {data.campaigns.length === 0 && (
+                <tr className="border-t border-border">
+                  <td colSpan={5} className="py-3 text-muted-foreground">{t("noData")}</td>
+                </tr>
+              )}
+              {data.campaigns.map((c, i) => (
+                <tr key={`${c.name}-${i}`} className="border-t border-border">
                   <td className="py-2.5">
                     <span className="block font-medium text-foreground">{c.name}</span>
                     <span className="text-xs text-muted-foreground">{t(`kind_${c.kind}`)}</span>

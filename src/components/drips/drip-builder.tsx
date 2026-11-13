@@ -14,10 +14,10 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/ui/whatsapp-preview";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
-import { AUDIENCE, TAGS, members, useSegments } from "@/lib/segments/model";
+import { members, useAudience, useSegments } from "@/lib/segments/model";
 import {
   CONDITIONS,
-  DRIP_TEMPLATES,
+  useDripTemplates,
   TRIGGERS,
   costPerContact,
   dripsStore,
@@ -34,7 +34,6 @@ import {
 } from "@/lib/drips/model";
 import { DripStatusChip } from "./drip-ui";
 
-const TRIGGER_DEFAULT: Record<TriggerKind, string> = { segment: "sg-hot", new_lead: "hot", tag_added: TAGS[0], manual: "" };
 
 export function DripBuilder({ id }: { id: string }) {
   const t = useTranslations("Drips");
@@ -42,6 +41,9 @@ export function DripBuilder({ id }: { id: string }) {
   const router = useRouter();
   const drips = useDrips();
   const segments = useSegments();
+  const people = useAudience();
+  const templates = useDripTemplates();
+  const TRIGGER_DEFAULT: Record<TriggerKind, string> = { segment: segments[0]?.id ?? "", new_lead: "hot", tag_added: people.tags[0] ?? "", manual: "" };
   const d = drips.find((x) => x.id === id);
   const [previewStep, setPreviewStep] = useState(0);
   const [tried, setTried] = useState(false);
@@ -59,10 +61,10 @@ export function DripBuilder({ id }: { id: string }) {
 
   const set = (patch: Partial<Drip>) => updateDrip(d.id, patch);
   const setStep = (sid: string, patch: Partial<DripStep>) => set({ steps: d.steps.map((s) => (s.id === sid ? { ...s, ...patch } : s)) });
-  const audience = d.trigger.kind === "segment" ? members(segments.find((s) => s.id === d.trigger.value) ?? { match: "all", rules: [] }, AUDIENCE).filter((c) => c.optedIn).length : null;
+  const audience = d.trigger.kind === "segment" ? members(segments.find((s) => s.id === d.trigger.value) ?? { match: "all", rules: [] }, people.customers).filter((c) => c.optedIn).length : null;
   const minutes = totalDuration(d.steps);
   const shown = d.steps[Math.min(previewStep, d.steps.length - 1)];
-  const tpl = DRIP_TEMPLATES.find((x) => x.name === shown?.template);
+  const tpl = templates.find((x) => x.name === shown?.template);
 
   const activate = () => {
     setTried(true);
@@ -161,7 +163,7 @@ export function DripBuilder({ id }: { id: string }) {
               )}
               {d.trigger.kind === "tag_added" && (
                 <NativeSelect value={d.trigger.value} aria-label={t("tag")} onChange={(e) => set({ trigger: { ...d.trigger, value: e.target.value } })}>
-                  {TAGS.map((x) => (
+                  {people.tags.map((x) => (
                     <option key={x}>{x}</option>
                   ))}
                 </NativeSelect>
@@ -173,7 +175,7 @@ export function DripBuilder({ id }: { id: string }) {
           </section>
 
           {d.steps.map((s, i) => {
-            const template = DRIP_TEMPLATES.find((x) => x.name === s.template);
+            const template = templates.find((x) => x.name === s.template);
             return (
               <div key={s.id}>
                 <div className="flex items-center gap-3 py-2 pl-6">
@@ -206,7 +208,7 @@ export function DripBuilder({ id }: { id: string }) {
                       <label className="grid gap-1.5 text-sm">
                         <span className="text-xs text-muted-foreground">{t("template")}</span>
                         <NativeSelect value={s.template} onChange={(e) => setStep(s.id, { template: e.target.value })}>
-                          {DRIP_TEMPLATES.map((x) => (
+                          {templates.map((x) => (
                             <option key={x.name} value={x.name}>
                               {x.name}
                             </option>
@@ -260,7 +262,7 @@ export function DripBuilder({ id }: { id: string }) {
               variant="outline"
               className="gap-1.5"
               onClick={() => {
-                set({ steps: [...d.steps, { id: `s${Date.now()}`, delay: 2, unit: "days", template: DRIP_TEMPLATES[1].name, condition: "not_replied", stats: { sent: 0, read: 0, replied: 0 } }] });
+                set({ steps: [...d.steps, { id: `s${Date.now()}`, delay: 2, unit: "days", template: (templates[1] ?? templates[0])?.name ?? "", condition: "not_replied", stats: { sent: 0, read: 0, replied: 0 } }] });
                 setPreviewStep(d.steps.length);
               }}
             >

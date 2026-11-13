@@ -3892,7 +3892,10 @@
     "cancel": "Cancel",
     "save": "Save segment",
     "saved": "Segment saved.",
-    "created": "Segment created."
+    "created": "Segment created.",
+    "emptyTitle": "No segments yet",
+    "emptyDesc": "{count, plural, =0 {Add contacts first, then group them here by tag, last message or opt-in.} one {Group your # contact by tag, last message or opt-in.} other {Group your # contacts by tag, last message or opt-in.}}",
+    "loadingAudience": "Loading your contacts…"
   },
   "Drips": {
     "title": "Drip campaigns",
@@ -3977,7 +3980,8 @@
     "costEach": "Cost per person (all steps)",
     "costAll": "{count, plural, one {For # person} other {For # people}}",
     "costNote": "Most people leave early because they reply, so real cost is usually lower.",
-    "previewStep": "Step {n} preview"
+    "previewStep": "Step {n} preview",
+    "previewNotice": "Drips are a preview: you can plan them here, but they don't send messages yet."
   },
   "Insights": {
     "title": "Insights",
@@ -4030,7 +4034,11 @@
     "kind_drip": "Drip",
     "heatTitle": "Busiest hours",
     "heatDesc": "Incoming messages by day and hour — staff up when it’s darkest.",
-    "heatCell": "{count} messages at {hour}:00"
+    "heatCell": "{count} messages at {hour}:00",
+    "loading": "Loading your numbers…",
+    "loadFailed": "Couldn't load your numbers. Refresh to try again.",
+    "noData": "Nothing in this period yet.",
+    "sourcesNotTracked": "Lead sources aren't recorded yet. They'll show here once leads come in with a source."
   },
   "Files": {
     "title": "Files",

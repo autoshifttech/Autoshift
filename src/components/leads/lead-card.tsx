@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { Target, UserCheck } from "lucide-react";
 
-import { leadsStore, phoneKey, useLeadSettings, useLeads } from "@/lib/leads/model";
+import { assignLiveLeadToMe, leadsStore, phoneKey, useLeadSettings, useLeads } from "@/lib/leads/model";
 import { TempChip, leadScore } from "./lead-ui";
 
 /** Inbox side panel: the lead's score and answers, with a manual hand-off. Matched by phone number. */
@@ -45,6 +45,7 @@ export function LeadCard({ phone }: { phone: string | null }) {
           className="mt-2 px-1 text-xs font-medium text-primary hover:underline"
           onClick={() => {
             leadsStore.set((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, handedOffTo: t("you") } : l)) }));
+            assignLiveLeadToMe(lead.id).catch((err) => toast.error(err instanceof Error ? err.message : String(err)));
             toast.success(t("takenOver"));
           }}
         >

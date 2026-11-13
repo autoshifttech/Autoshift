@@ -16,6 +16,8 @@ import {
   LEAD_SOURCES,
   LEAD_STATUSES,
   leadsStore,
+  loadLiveLeads,
+  saveLiveLead,
   scoreBreakdown,
   scoreLead,
   temperature,
@@ -53,6 +55,11 @@ function relative(iso: string, locale: string) {
 
 function setLead(id: string, patch: Partial<Lead>, event?: Lead["events"][number]) {
   leadsStore.set((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, ...patch, events: event ? [...l.events, event] : l.events } : l)) }));
+  // Real accounts: save to the pipeline deal; on failure, show the error and reload what's saved.
+  saveLiveLead(id, { status: patch.status, handedOffTo: patch.handedOffTo }).catch((err) => {
+    toast.error(err instanceof Error ? err.message : String(err));
+    void loadLiveLeads(true);
+  });
 }
 
 export function LeadsPage() {

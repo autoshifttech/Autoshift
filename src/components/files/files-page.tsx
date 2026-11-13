@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { FILE_KINDS, MAX_SIZE, STORAGE_LIMIT, filesStore, formatSize, kindOf, useFiles, type FileKind, type LibraryFile } from "@/lib/files/model";
+import { FILE_KINDS, MAX_SIZE, MEDIA_BUCKET, STORAGE_LIMIT, deleteLiveFile, filesStore, formatSize, kindOf, loadLiveFiles, useFiles, type FileKind, type LibraryFile } from "@/lib/files/model";
+import { uploadAccountMedia } from "@/lib/storage/upload-media";
+import { isLive } from "@/lib/workspace/live";
 
 const KIND_ICON: Record<FileKind, LucideIcon> = { image: ImageIcon, pdf: FileText, video: Film, other: Paperclip };
 
@@ -51,10 +53,21 @@ export function FilesPage() {
       }
       accepted.push({ id: `f-${Date.now()}-${accepted.length}`, name: file.name, kind: k, size: file.size, tint: "#1E4C41", url: URL.createObjectURL(file), usedIn: [], uploadedAt: new Date().toISOString() });
     }
-    if (accepted.length) {
+    if (!accepted.length) return;
+    if (!isLive()) {
       filesStore.set((s) => ({ files: [...accepted, ...s.files] }));
       toast.success(t("uploaded", { count: accepted.length }));
+      return;
     }
+    // Real accounts: upload to storage, then show what's really there.
+    const picked = Array.from(list).filter((f) => f.size <= MAX_SIZE[kindOf(f)]);
+    void Promise.allSettled(picked.map((f) => uploadAccountMedia(MEDIA_BUCKET, f))).then(async (results) => {
+      const ok = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      if (ok) toast.success(t("uploaded", { count: ok }));
+      if (failed) toast.error(failed.reason instanceof Error ? failed.reason.message : String(failed.reason));
+      await loadLiveFiles(true);
+    });
   };
 
   return (
@@ -200,9 +213,15 @@ export function FilesPage() {
                     variant="outline"
                     className="gap-1.5 text-destructive hover:text-destructive"
                     onClick={() => {
-                      filesStore.set((s) => ({ files: s.files.filter((x) => x.id !== open.id) }));
+                      const id = open.id;
+                      filesStore.set((s) => ({ files: s.files.filter((x) => x.id !== id) }));
                       setOpenId(null);
-                      toast.success(t("deleted"));
+                      deleteLiveFile(id)
+                        .then(() => toast.success(t("deleted")))
+                        .catch((err) => {
+                          toast.error(err instanceof Error ? err.message : String(err));
+                          void loadLiveFiles(true);
+                        });
                     }}
                   >
                     <Trash2 className="size-4" />
