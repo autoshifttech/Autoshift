@@ -4,7 +4,6 @@
  * Razorpay and Meta's pricing; kept in the browser for now.
  */
 import { createStore, useStore } from '@/lib/workspace/store'
-import { backendUrl } from '@/lib/backend/client'
 
 export const CHARGE_KINDS = ['marketing', 'utility', 'authentication', 'service', 'ai'] as const
 export type ChargeKind = (typeof CHARGE_KINDS)[number]
@@ -92,41 +91,15 @@ export function withGst(amount: number) {
   return { subtotal: amount, gst, total: Math.round((amount + gst) * 100) / 100 }
 }
 
-export function sampleTransactions(now = Date.now()): Transaction[] {
-  const day = 864e5
-  const txs: Transaction[] = [
-    { id: 't-top-1', kind: 'topup', amount: 2000, units: 0, at: new Date(now - 27 * day).toISOString(), method: 'upi', status: 'completed' },
-    { id: 't-top-2', kind: 'topup', amount: 1000, units: 0, at: new Date(now - 12 * day).toISOString(), method: 'card', status: 'completed' },
-    { id: 't-top-3', kind: 'topup', amount: 500, units: 0, at: new Date(now - 3 * day).toISOString(), method: 'auto', status: 'completed', note: 'auto' },
-    { id: 't-refund', kind: 'refund', amount: 12.87, units: 13, at: new Date(now - 9 * day).toISOString(), status: 'completed', note: 'failed_delivery' },
-  ]
-  // One charge line per category per day, like a daily statement.
-  for (let d = 26; d >= 0; d--) {
-    const at = (h: number) => new Date(now - d * day - h * 36e5).toISOString()
-    const wave = 1 + Math.sin(d / 2.3) * 0.45
-    const ai = Math.round(70 * wave)
-    const service = Math.round(140 * wave)
-    const utility = Math.round(25 * wave)
-    const auth = d % 3 === 0 ? 6 : 2
-    txs.push(
-      { id: `t-ai-s-${d}`, kind: 'ai', amount: -+(ai * 0.6 * 0.25).toFixed(2), units: Math.round(ai * 0.6), assistant: 'Sales assistant', at: at(2), status: 'completed' },
-      { id: `t-ai-p-${d}`, kind: 'ai', amount: -+(ai * 0.4 * 0.25).toFixed(2), units: Math.round(ai * 0.4), assistant: 'Support assistant', at: at(2.5), status: 'completed' },
-      { id: `t-svc-${d}`, kind: 'service', amount: 0, units: service, at: at(3), status: 'completed' },
-      { id: `t-utl-${d}`, kind: 'utility', amount: -+(utility * 0.15).toFixed(2), units: utility, at: at(4), status: 'completed' },
-      { id: `t-auth-${d}`, kind: 'authentication', amount: -+(auth * 0.15).toFixed(2), units: auth, at: at(5), status: 'completed' },
-    )
-    if (d === 22 || d === 8) txs.push({ id: `t-mkt-${d}`, kind: 'marketing', amount: -+((d === 22 ? 1262 : 640) * 0.99).toFixed(2), units: d === 22 ? 1262 : 640, at: at(6), status: 'completed', note: d === 22 ? 'Festive sale' : 'Restock alert — linen' })
-  }
-  return txs.sort((a, b) => b.at.localeCompare(a.at))
-}
 
 function initialWallet(): WalletState {
-  // With a backend, the real ledger replaces the sample data as soon as it loads.
-  return { transactions: backendUrl() ? [] : sampleTransactions(), autoRecharge: { enabled: true, below: 300, amount: 1000 }, lowBalanceAlert: 500 }
+  // The real ledger fills this in from the server as soon as it loads.
+  return { transactions: [], autoRecharge: { enabled: true, below: 300, amount: 1000 }, lowBalanceAlert: 500 }
 }
 
-export const walletStore = createStore<WalletState>(initialWallet, 'autoshift.wallet')
-const SERVER_WALLET: WalletState = { transactions: sampleTransactions(0), autoRecharge: { enabled: true, below: 300, amount: 1000 }, lowBalanceAlert: 500 }
+// v2: older browsers may still hold sample transactions under the old key.
+export const walletStore = createStore<WalletState>(initialWallet, 'autoshift.wallet.v2')
+const SERVER_WALLET: WalletState = initialWallet()
 export const useWallet = () => useStore(walletStore, SERVER_WALLET)
 
 export function topUp(amount: number, method: Transaction['method']) {

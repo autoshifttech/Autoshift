@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { DRIP_TEMPLATES, costPerContact, newDrip, priceOf, renderTemplate, totalDuration } from './model'
+import { costPerContact, dripTemplatesStore, newDrip, priceOf, renderTemplate, totalDuration } from './model'
 
 describe('drips', () => {
   it('prices steps by template category', () => {
-    const marketing = DRIP_TEMPLATES.find((t) => t.category === 'marketing')!.name
-    const utility = DRIP_TEMPLATES.find((t) => t.category === 'utility')!.name
+    dripTemplatesStore.set({
+      loaded: true,
+      templates: [
+        { name: 'promo', category: 'marketing', body: 'Hi {{name}}', buttons: [] },
+        { name: 'order_update', category: 'utility', body: 'Hi {{name}}', buttons: [] },
+      ],
+    })
+    const marketing = 'promo'
+    const utility = 'order_update'
     expect(priceOf(marketing)).toBeGreaterThan(priceOf(utility))
     const d = { steps: [{ template: marketing }, { template: utility }] as never }
     expect(costPerContact(d)).toBeCloseTo(priceOf(marketing) + priceOf(utility), 2)

@@ -26,7 +26,7 @@ export function WebsiteAdminPage() {
     try {
       for (const k of SITE_KEYS) window.localStorage.removeItem(k);
     } catch {}
-    act("Reset website", "Public website", "Published changes, draft and sample leads cleared in this browser");
+    act("Reset website", "Public website", "Published changes, draft and contact-form leads cleared in this browser");
     setResetting(false);
     setFrameKey((k) => k + 1);
     toast.success("Website reset to the original version");
@@ -66,7 +66,7 @@ export function WebsiteAdminPage() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Reset the website?</DialogTitle>
-            <DialogDescription>Removes everything you published, your unpublished draft and the sample leads from this browser, and goes back to the original website.</DialogDescription>
+            <DialogDescription>Removes everything you published, your unpublished draft and the contact-form leads from this browser, and goes back to the original website.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetting(false)}>

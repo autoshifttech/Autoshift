@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
+import { fetchAccountMembers, memberLabel } from "@/lib/account/members";
 import { Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -30,7 +31,18 @@ import {
 } from "@/lib/leads/model";
 import { TempChip } from "./lead-ui";
 
-const TEAM = ["Asha Kumar", "Rahul Iyer"];
+/** The workspace's real teammates (names), for the owner filter and hand-off. */
+function useTeamNames(): string[] {
+  const [names, setNames] = useState<string[]>([]);
+  useEffect(() => {
+    let live = true;
+    void fetchAccountMembers().then((m) => live && setNames(m.map(memberLabel)));
+    return () => {
+      live = false;
+    };
+  }, []);
+  return names;
+}
 
 export const STATUS_TONE: Record<LeadStatus, string> = {
   new: "bg-[var(--tone-sky)] text-[#24508F] dark:text-sky-300",
@@ -65,6 +77,7 @@ function setLead(id: string, patch: Partial<Lead>, event?: Lead["events"][number
 export function LeadsPage() {
   const t = useTranslations("LeadsPage");
   const locale = useLocale();
+  const TEAM = useTeamNames();
   const settings = useLeadSettings();
   const leads = useLeads();
   const [query, setQuery] = useState("");
@@ -250,6 +263,7 @@ export function LeadsPage() {
 function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number; temp: LeadTemp; settings: LeadSettings }) {
   const t = useTranslations("LeadsPage");
   const locale = useLocale();
+  const TEAM = useTeamNames();
   const drips = useDrips().filter((d) => d.status !== "draft");
   const matched = scoreBreakdown(lead.answers, settings.rules);
   const qName = (id: string) => settings.questions.find((q) => q.id === id)?.saveAs ?? id;

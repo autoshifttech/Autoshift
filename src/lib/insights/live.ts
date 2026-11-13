@@ -1,7 +1,6 @@
 /**
  * Insights for real accounts, worked out from the account's own rows (row-level security keeps
  * it to this business): chats, messages, pipeline deals, broadcasts and AI usage.
- * The demo keeps `buildInsights` sample numbers.
  */
 import { createClient } from '@/lib/supabase/client'
 import type { DayPoint, Insights, Range } from './model'

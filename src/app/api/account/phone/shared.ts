@@ -8,8 +8,8 @@ export async function signedIn() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Please sign in again' }, { status: 401 }) } as const
+  if (!user) return { ok: false, error: NextResponse.json({ error: 'Please sign in again' }, { status: 401 }) } as const
   const db = supabaseAdmin()
   const { data: profile } = await db.from('profiles').select('phone, phone_verified_at').eq('user_id', user.id).maybeSingle()
-  return { user, db, profile } as const
+  return { ok: true, user, db, profile } as const
 }

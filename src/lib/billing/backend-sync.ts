@@ -1,10 +1,10 @@
 /**
  * Plan, usage, invoices and GST details from the AutoShift backend (only when NEXT_PUBLIC_API_URL is set).
- * Without a backend every export here falls back to the sample data the screens always had.
+ * Without a backend everything here starts empty.
  */
 import { createStore, useStore } from '@/lib/workspace/store'
 import { backend, backendUrl } from '@/lib/backend/client'
-import { SAMPLE_INVOICES, SAMPLE_USAGE, subscriptionStore, type BillingCycle, type PlanId, type Subscription } from './plans'
+import { subscriptionStore, type BillingCycle, type PlanId, type Subscription } from './plans'
 import { billingDetailsStore, emptyBillingDetails, type BillingDetails } from './gst'
 import { loadRazorpay } from '@/lib/razorpay'
 
@@ -41,13 +41,11 @@ export interface InvoiceView {
   item: string
 }
 
-const sampleUsage = (): UsageView => ({ ...SAMPLE_USAGE })
-const sampleInvoices = (): InvoiceView[] => SAMPLE_INVOICES.map((i) => ({ id: i.id, date: i.date, amount: i.amount, item: '' }))
-
-const usageStore = createStore<UsageView>(() => (backendUrl() ? { seats: 0, contacts: 0, aiReplies: 0 } : sampleUsage()))
-const invoicesStore = createStore<InvoiceView[]>(() => (backendUrl() ? [] : sampleInvoices()))
-const SERVER_USAGE = sampleUsage()
-const SERVER_INVOICES = sampleInvoices()
+const noUsage = (): UsageView => ({ seats: 0, contacts: 0, aiReplies: 0 })
+const usageStore = createStore<UsageView>(noUsage)
+const invoicesStore = createStore<InvoiceView[]>(() => [])
+const SERVER_USAGE = noUsage()
+const SERVER_INVOICES: InvoiceView[] = []
 export const useUsage = () => useStore(usageStore, SERVER_USAGE)
 export const useInvoices = () => useStore(invoicesStore, SERVER_INVOICES)
 

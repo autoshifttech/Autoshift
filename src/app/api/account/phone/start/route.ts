@@ -4,9 +4,9 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { CODE_TTL_MIN, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, normalisePhone, sendOtp, senderConfig } from '@/lib/auth/phone-otp'
 import { signedIn } from '../shared'
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   const ctx = await signedIn()
-  if ('error' in ctx) return ctx.error
+  if (!ctx.ok) return ctx.error
   const { user, db, profile } = ctx
   if (profile?.phone_verified_at) return NextResponse.json({ error: 'Your phone is already verified' }, { status: 409 })
 

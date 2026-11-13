@@ -7,9 +7,8 @@ import { AlertOctagon, Bot, Coins, Hand, PiggyBank, Sparkles } from "lucide-reac
 import { BarChart } from "@/components/tremor/bar-chart";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
-import { AI_MODELS, seeded } from "@/lib/admin/data";
+import { AI_MODELS } from "@/lib/admin/data";
 import { useAdminStats } from "@/lib/admin/live-stats";
-import { backendUrl } from "@/lib/backend/client";
 import { inr, inrShort, num, numCompact, pct } from "@/lib/admin/format";
 import { useAdmin, useBusinesses } from "@/lib/admin/store";
 import { DataTable, Initials, Kpi, Meter, PageHeader, Panel, td } from "./admin-ui";
@@ -21,30 +20,17 @@ export function AiUsagePage() {
   const { prices } = useAdmin();
   const [sort, setSort] = useState<Sort>("replies");
   const { ai_days: AI_DAYS } = useAdminStats();
-  const live = backendUrl() !== null;
 
   const rows = useMemo(() => {
-    const r = seeded(55);
     return businesses
       .filter((b) => b.usage.ai > 0)
       .map((b) => {
-        if (live) {
-          // Real accounts: the model split, failed replies and hand-offs per business aren't recorded yet.
-          const charged = b.usage.ai * prices.ai;
-          const cost = b.usage.ai * AI_MODELS[0].costPerReply;
-          return { b, fast: b.usage.ai, smart: 0, cost, charged, margin: charged - cost, errors: 0, handoffs: 0 };
-        }
-        // Pro workspaces lean on the smarter model more often.
-        const smartShare = b.plan === "pro" ? 0.45 + r.next() * 0.2 : b.plan === "growth" ? 0.2 + r.next() * 0.15 : 0.05 + r.next() * 0.1;
-        const smart = Math.round(b.usage.ai * smartShare);
-        const fast = b.usage.ai - smart;
-        const cost = fast * AI_MODELS[0].costPerReply + smart * AI_MODELS[1].costPerReply;
+        // The model split, failed replies and hand-offs per business aren't recorded yet.
         const charged = b.usage.ai * prices.ai;
-        const errors = Math.round(b.usage.ai * (0.002 + r.next() * 0.01));
-        const handoffs = Math.round(b.usage.ai * (0.06 + r.next() * 0.12));
-        return { b, fast, smart, cost, charged, margin: charged - cost, errors, handoffs };
+        const cost = b.usage.ai * AI_MODELS[0].costPerReply;
+        return { b, fast: b.usage.ai, smart: 0, cost, charged, margin: charged - cost, errors: 0, handoffs: 0 };
       });
-  }, [businesses, prices.ai, live]);
+  }, [businesses, prices.ai]);
 
   const sorted = [...rows].sort((a, b) => (sort === "replies" ? b.b.usage.ai - a.b.usage.ai : sort === "cost" ? b.cost - a.cost : sort === "margin" ? b.margin - a.margin : b.errors - a.errors));
   const replies = rows.reduce((s, x) => s + x.b.usage.ai, 0);

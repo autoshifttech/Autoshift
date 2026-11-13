@@ -138,7 +138,7 @@ export function AdminLogin() {
             </div>
           )}
         </div>
-        <p className="mt-4 text-center text-xs text-white/50">Design preview: any email, an 8+ character password and any 6 digits sign you in to sample data.</p>
+        <p className="mt-4 text-center text-xs text-white/50">Use your AutoShift team account. The server checks your admin access.</p>
       </div>
     </div>
   );

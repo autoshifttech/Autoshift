@@ -3215,9 +3215,7 @@
   },
   "Setup": {
     "notConfiguredTitle": "El inicio de sesión aún no está conectado",
-    "notConfiguredDesc": "Esta implementación no tiene un proyecto de Supabase, así que no se pueden crear ni usar cuentas. Añade NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en la configuración del hosting y vuelve a implementar.",
-    "demoButton": "Ver demo",
-    "demoHint": "Explora el CRM con un negocio de ejemplo. No se guarda nada."
+    "notConfiguredDesc": "Esta implementación no tiene un proyecto de Supabase, así que no se pueden crear ni usar cuentas. Añade NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en la configuración del hosting y vuelve a implementar."
   },
   "Onboarding": {
     "skipForNow": "Omitir por ahora",
@@ -3348,14 +3346,11 @@
     "errorTip3": "Asegúrate de que tu cuenta de Facebook es administradora del portafolio comercial.",
     "tryAgain": "Reintentar",
     "getHelp": "Obtener ayuda",
-    "previewOutcome": "Vista previa del diseño — resultado:",
-    "outcome_success": "Éxito",
-    "outcome_cancelled": "Cancelado",
-    "outcome_error": "Error",
     "settingsTitle": "Conectar WhatsApp",
     "settingsDesc": "La forma más rápida de vincular tu número de empresa. Meta se encarga del inicio de sesión y la verificación.",
     "manualHint": "¿Ya tienes una app de la API de WhatsApp Business? Puedes introducir sus credenciales a mano abajo.",
-    "registerLater": "Conectado. El número aún debe registrarse en Meta; abre Configuración → WhatsApp para terminar."
+    "registerLater": "Conectado. El número aún debe registrarse en Meta; abre Configuración → WhatsApp para terminar.",
+    "notConfigured": "La conexión de WhatsApp aún no está configurada en esta AutoShift. Contacta con el soporte de AutoShift."
   },
   "Billing": {
     "title": "Plan y facturación",

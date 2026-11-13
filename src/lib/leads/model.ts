@@ -312,45 +312,15 @@ export function defaultLeadSettings(): LeadSettings {
   )
 }
 
-export function sampleLeads(now = Date.now()): Lead[] {
-  const ago = (m: number) => new Date(now - m * 60_000).toISOString()
-  type Row = [string, string, Record<string, string>, number, string | null, LeadStatus, LeadSource, string]
-  const rows: Row[] = [
-    ['Arjun Mehta', '+91 99620 11873', { name: 'Arjun', budget: '95', location: 'OMR', type: 'Apartment', timeline: 'Within 1 month' }, 18, 'Rahul Iyer', 'qualified', 'whatsapp_ad', 'Sales assistant'],
-    ['Priya Raman', '+91 98765 43210', { name: 'Priya', budget: '60', location: 'Velachery', type: 'Apartment', timeline: '1–3 months' }, 64, null, 'contacted', 'website', 'Sales assistant'],
-    ['Meena Iyer', '+91 94450 12345', { name: 'Meena', budget: '120', location: 'ECR', type: 'Villa', timeline: '1–3 months' }, 140, 'Asha Kumar', 'qualified', 'referral', 'Sales assistant'],
-    ['Omar Hussain', '+91 97000 12345', { name: 'Omar', timeline: 'Just exploring' }, 60 * 26, null, 'new', 'organic', 'Sales assistant'],
-    ['Sara Thomas', '+91 90031 55520', { name: 'Sara', budget: '45', location: 'Tambaram', timeline: '3–6 months' }, 60 * 30, null, 'contacted', 'campaign', 'Sales assistant'],
-    ['Karthik Rao', '+91 98401 22334', { name: 'Karthik', budget: '85', location: 'Adyar', type: 'Apartment', timeline: 'Within 1 month' }, 60 * 5, 'Rahul Iyer', 'won', 'whatsapp_ad', 'Sales assistant'],
-    ['Divya Menon', '+91 99401 55678', { name: 'Divya', budget: '70', location: 'Anna Nagar', type: 'Apartment', timeline: '1–3 months' }, 60 * 9, null, 'new', 'whatsapp_ad', 'Sales assistant'],
-    ['Vikram Singh', '+91 98840 77889', { name: 'Vikram', budget: '150', location: 'ECR', type: 'Villa', timeline: 'Within 1 month' }, 60 * 3, 'Asha Kumar', 'qualified', 'referral', 'Sales assistant'],
-    ['Lakshmi Pillai', '+91 94440 33445', { name: 'Lakshmi', budget: '35', location: 'Porur', timeline: '3–6 months' }, 60 * 50, null, 'lost', 'campaign', 'Sales assistant'],
-    ['Nisha Kapoor', '+91 99887 76655', { name: 'Nisha', budget: '55', location: 'OMR', type: 'Plot', timeline: '1–3 months' }, 60 * 12, null, 'contacted', 'website', 'Support assistant'],
-    ['Farhan Ali', '+91 97890 11223', { name: 'Farhan', type: 'Commercial', timeline: 'Just exploring' }, 60 * 72, null, 'new', 'organic', 'Sales assistant'],
-    ['Rekha Das', '+91 98410 66778', { name: 'Rekha', budget: '90', location: 'Velachery', type: 'Apartment', timeline: 'Within 1 month' }, 60 * 1.5, null, 'new', 'whatsapp_ad', 'Sales assistant'],
-  ]
-  return rows.map(([name, phone, answers, m, handedOffTo, status, source, assistant], i) => {
-    const events: LeadEvent[] = [
-      { at: ago(m), kind: 'captured', text: source },
-      { at: ago(m - 3), kind: 'answered', text: String(Object.keys(answers).length) },
-    ]
-    if (handedOffTo) events.push({ at: ago(m - 6), kind: 'handoff', text: handedOffTo })
-    if (status === 'won') events.push({ at: ago(m - 2000), kind: 'status', text: 'won' })
-    if (status === 'lost') events.push({ at: ago(m - 1500), kind: 'status', text: 'lost' })
-    return { id: `l${i + 1}`, name, phone, answers, capturedAt: ago(m), handedOffTo, status, source, assistant, events }
-  })
-}
 
 export const leadStore = createStore<LeadSettings>(defaultLeadSettings, 'autoshift.leads')
 const SERVER_SETTINGS = defaultLeadSettings()
 export const useLeadSettings = () => useStore(leadStore, SERVER_SETTINGS)
 
 // v2: leads gained status, source, assistant and a timeline.
-// Real accounts: leads are the sales pipeline's deals (never sample data, never kept in the browser).
-export const leadsStore = isLive()
-  ? createStore<{ leads: Lead[] }>(() => ({ leads: [] }))
-  : createStore<{ leads: Lead[] }>(() => ({ leads: sampleLeads() }), 'autoshift.leadlist.v2')
-const SERVER_LEADS = { leads: isLive() ? [] : sampleLeads(0) }
+// Leads are the sales pipeline's deals (never kept in the browser).
+export const leadsStore = createStore<{ leads: Lead[] }>(() => ({ leads: [] }))
+const SERVER_LEADS = { leads: [] as Lead[] }
 let liveLoad: Promise<void> | null = null
 
 /** Loads the account's leads (pipeline deals) once per page load; `force` reloads. */

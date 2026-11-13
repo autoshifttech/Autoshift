@@ -20,17 +20,15 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { sampleConnectedNumber, type ConnectedNumber } from "@/lib/workspace/setup";
+import type { ConnectedNumber } from "@/lib/workspace/setup";
 import { embeddedSignupConfig, finishOnServer, openEmbeddedSignup } from "@/lib/whatsapp/fb-embedded-signup";
-import { isDemoMode } from "@/lib/supabase/client";
 
 /**
  * Meta WhatsApp Embedded Signup. With NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_ES_CONFIG_ID set
- * (and outside demo mode) it opens Meta's real popup and the server finishes the connection.
- * Otherwise the popup is simulated and "Preview outcome" lets reviewers see every state.
+ * it opens Meta's real popup and the server finishes the connection. Without them it says
+ * WhatsApp connection isn't set up yet (nothing is simulated).
  */
 export type SignupPhase = "idle" | "connecting" | "success" | "cancelled" | "error";
-type Outcome = "success" | "cancelled" | "error";
 
 const POPUP_STEPS = ["stepLogin", "stepBusiness", "stepNumber", "stepVerify"] as const;
 
@@ -49,12 +47,11 @@ export function EmbeddedSignup({
   const [phase, setPhase] = useState<SignupPhase>(connected ? "success" : "idle");
   const [number, setNumber] = useState<ConnectedNumber | null>(connected ?? null);
   const [progress, setProgress] = useState(0);
-  const [outcome, setOutcome] = useState<Outcome>("success");
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
 
-  const live = embeddedSignupConfig() !== null && !isDemoMode();
+  const live = embeddedSignupConfig() !== null;
   const [problem, setProblem] = useState<string | null>(null);
 
   const startLive = async () => {
@@ -86,21 +83,8 @@ export function EmbeddedSignup({
 
   const start = () => {
     if (live) return void startLive();
-    setPhase("connecting");
-    setProgress(0);
-    POPUP_STEPS.forEach((_, i) => {
-      timers.current.push(window.setTimeout(() => setProgress(i + 1), 650 * (i + 1)));
-    });
-    timers.current.push(
-      window.setTimeout(() => {
-        if (outcome === "success") {
-          const n = sampleConnectedNumber(displayName);
-          setNumber(n);
-          onConnected?.(n);
-        }
-        setPhase(outcome);
-      }, 650 * (POPUP_STEPS.length + 1)),
-    );
+    setProblem(t("notConfigured"));
+    setPhase("error");
   };
 
   return (
@@ -128,24 +112,6 @@ export function EmbeddedSignup({
         />
       )}
 
-      {!live && phase !== "connecting" && phase !== "success" && (
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-dashed border-border pt-4 text-xs text-muted-foreground">
-          <span>{t("previewOutcome")}</span>
-          {(["success", "cancelled", "error"] as const).map((o) => (
-            <button
-              key={o}
-              type="button"
-              onClick={() => setOutcome(o)}
-              className={cn(
-                "rounded-full border px-2.5 py-0.5 transition-colors",
-                outcome === o ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted",
-              )}
-            >
-              {t(`outcome_${o}`)}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

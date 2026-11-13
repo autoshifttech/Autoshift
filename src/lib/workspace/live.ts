@@ -1,13 +1,12 @@
 /**
- * Real data for screens that started on browser sample data (leads, insights, segments,
+ * Real data for leads, insights, segments,
  * opt-ins, files). With Supabase configured (a real account) these read the account's own
  * rows through the signed-in client, so row-level security limits them to that business.
- * "View demo" (no Supabase) keeps the sample data.
  */
 import { createClient } from '@/lib/supabase/client'
 import { supabasePublicConfig } from '@/lib/supabase/config'
 
-/** True for real accounts: sample data must never be shown. */
+/** True when Supabase is configured (always, for a working AutoShift). */
 export const isLive = () => supabasePublicConfig().configured
 
 export const OPT_OUT_WORDS = ['STOP', 'STOP ALL', 'UNSUBSCRIBE', 'CANCEL', 'OPT OUT', 'OPTOUT']

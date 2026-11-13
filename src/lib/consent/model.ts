@@ -2,8 +2,8 @@
  * Opt-in and opt-out: who agreed to get WhatsApp marketing from this
  * business, who said STOP, and numbers that are blocked. WhatsApp policy
  * requires opt-in before marketing, and messaging people who opted out
- * lowers the number's quality rating. Sample data in the browser until the
- * backend reads replies from Meta's webhook.
+ * lowers the number's quality rating. Opt-outs come from customers' STOP/START
+ * replies; the blocklist is contacts tagged "Blocked".
  */
 import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
@@ -93,37 +93,12 @@ export function excludedPhones(state: Pick<ConsentState, 'records' | 'blocked'>)
   return out
 }
 
-function sample(): ConsentState {
-  const at = (h: number) => new Date(Date.UTC(2026, 9, 25, 9) - h * 36e5).toISOString()
-  const r = (id: string, name: string, phone: string, status: ConsentStatus, source: ConsentSource, evidence: string, h: number): ConsentRecord => ({ id, name, phone, status, source, evidence, at: at(h) })
-  return {
-    settings: DEFAULT_SETTINGS,
-    records: [
-      r('c1', 'Neha Gupta', '+91 98450 22113', 'opted_out', 'keyword', 'STOP', 2),
-      r('c2', 'Priya Raman', '+91 98765 43210', 'opted_in', 'website', DEFAULT_SETTINGS.checkboxText, 5),
-      r('c3', 'Arjun Mehta', '+91 99620 11873', 'opted_in', 'ad', 'Clicked “Festive sale” ad and messaged first', 9),
-      r('c4', 'Vikram Rao', '+91 90030 55621', 'opted_out', 'keyword', 'Unsubscribe', 20),
-      r('c5', 'Sara Thomas', '+91 97410 88234', 'opted_in', 'website', 'Ticked WhatsApp updates at checkout', 26),
-      r('c6', 'Leo Fernandes', '+91 98201 67745', 'opted_in', 'keyword', 'START', 31),
-      r('c7', 'Meena Iyer', '+91 94440 11290', 'opted_in', 'import', 'Imported from POS list with consent column', 48),
-      r('c8', 'Rohit Shah', '+91 98190 33421', 'opted_out', 'keyword', 'stop all', 60),
-      r('c9', 'Ananya Das', '+91 90071 22984', 'opted_in', 'website', DEFAULT_SETTINGS.checkboxText, 77),
-      r('c10', 'Karan Malhotra', '+91 98110 45567', 'opted_in', 'manual', 'Agreed on a phone call', 96),
-      r('c11', 'Divya Nair', '+91 94950 66012', 'opted_out', 'manual', 'Asked in chat not to get offers', 130),
-      r('c12', 'Imran Khan', '+91 98330 77104', 'opted_in', 'ad', 'Clicked “New arrivals” ad', 150),
-    ],
-    blocked: [
-      { phone: '+91 70000 12345', name: 'Unknown', reason: 'Abusive messages', at: at(40) },
-      { phone: '+91 81234 99887', name: 'Spam sender', reason: 'Sends promotions to our number', at: at(200) },
-    ],
-  }
-}
 
 // Real accounts: STOP/START replies come from their chats and the blocklist from contacts tagged
-// "Blocked"; only the rules and manual changes are kept in this browser. The demo keeps the samples.
+// "Blocked"; only the rules and manual changes are kept in this browser.
 const empty = (): ConsentState => ({ settings: DEFAULT_SETTINGS, records: [], blocked: [] })
-export const consentStore = isLive() ? createStore<ConsentState>(empty, 'autoshift.consent.live') : createStore<ConsentState>(sample, 'autoshift.consent.v1')
-const SERVER = isLive() ? empty() : sample()
+export const consentStore = createStore<ConsentState>(empty, 'autoshift.consent.live')
+const SERVER = empty()
 let liveLoad: Promise<void> | null = null
 
 export function loadLiveConsent(force = false): Promise<void> {
@@ -163,7 +138,7 @@ export const useConsent = () => {
   return useStore(consentStore, SERVER)
 }
 
-/** Blocks or unblocks a number for real (tags the contact "Blocked"); no-op in the demo. */
+/** Blocks or unblocks a number (tags the contact "Blocked"). */
 export async function saveBlocked(phone: string, blocked: boolean, name?: string): Promise<void> {
   if (!isLive()) return
   await setBlocked(phone, blocked, name)

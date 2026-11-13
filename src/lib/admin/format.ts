@@ -40,7 +40,7 @@ export const date = (iso: string, withYear = false) =>
 export const dateTime = (iso: string) =>
   new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })
 
-/** "5m ago", "3h ago", "2d ago", "in 4d", measured from the sample data's today. */
+/** "5m ago", "3h ago", "2d ago", "in 4d", measured from now. */
 export function relTime(iso: string, now = ADMIN_NOW): string {
   const diff = now - new Date(iso).getTime()
   const future = diff < -60e3

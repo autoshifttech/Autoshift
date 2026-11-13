@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aiSpendByAssistant, balanceOf, runway, sampleTransactions, spendByKind, withGst, type Transaction } from './model'
+import { aiSpendByAssistant, balanceOf, runway, spendByKind, withGst, type Transaction } from './model'
 
 const NOW = new Date('2026-10-25T12:00:00Z').getTime()
 const tx = (p: Partial<Transaction>): Transaction => ({ id: Math.random().toString(), kind: 'ai', amount: 0, units: 0, at: new Date(NOW - 864e5).toISOString(), status: 'completed', ...p })
@@ -27,8 +27,7 @@ describe('wallet', () => {
     expect(runway([tx({ kind: 'topup', amount: 10 })], 14, NOW).daysLeft).toBeNull()
   })
 
-  it('adds 18% GST and keeps a positive sample balance', () => {
+  it('adds 18% GST', () => {
     expect(withGst(1000)).toEqual({ subtotal: 1000, gst: 180, total: 1180 })
-    expect(balanceOf(sampleTransactions(NOW))).toBeGreaterThan(0)
   })
 })

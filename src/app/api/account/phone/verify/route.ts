@@ -4,9 +4,9 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { MAX_ATTEMPTS, hashCode, sameHash } from '@/lib/auth/phone-otp'
 import { signedIn } from '../shared'
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   const ctx = await signedIn()
-  if ('error' in ctx) return ctx.error
+  if (!ctx.ok) return ctx.error
   const { user, db } = ctx
 
   const limit = checkRateLimit(`otp-verify:${user.id}`, { limit: 10, windowMs: 60_000 })

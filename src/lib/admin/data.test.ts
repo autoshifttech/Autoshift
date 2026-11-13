@@ -1,34 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { BUSINESSES, PAYMENTS, seeded, usageRevenue } from './data'
+import { BUSINESSES, PAYMENTS, usageRevenue, type Business } from './data'
 import { buildAlerts } from './alerts'
 import { applyOverride, initialAdminState } from './store'
 import { inrShort, relTime } from './format'
 
-describe('admin sample data', () => {
-  it('is the same on every run', () => {
-    const a = seeded(5)
-    const b = seeded(5)
-    expect([a.next(), a.next()]).toEqual([b.next(), b.next()])
-  })
+const biz = (p: Partial<Business>): Business => ({
+  id: 'b1', name: 'Shop', industry: '', city: '', owner: { name: 'O', email: 'o@x.in', phone: '' }, plan: 'starter', cycle: 'monthly', status: 'active',
+  createdAt: '2026-01-01T00:00:00Z', trialEndsAt: '2026-01-15T00:00:00Z', renewsAt: null, mrr: 999, wallet: 500, team: 1, contacts: 0,
+  whatsapp: { status: 'connected', number: '', displayName: '', quality: 'green', tier: '250', templatesApproved: 0, templatesRejected: 0, connectedAt: null },
+  usage: { marketing: 0, utility: 0, authentication: 0, service: 0, ai: 0 }, lastActiveAt: '2026-01-01T00:00:00Z', flags: [], ...p,
+})
+const SAMPLE = [biz({}), biz({ id: 'b2', status: 'past_due' }), biz({ id: 'b3', wallet: -10 })]
 
-  it('has unique business ids and owners for each business', () => {
-    expect(new Set(BUSINESSES.map((b) => b.id)).size).toBe(BUSINESSES.length)
-    for (const b of BUSINESSES) expect(b.owner.email).toMatch(/@/)
-  })
-
-  it('only charges MRR for paying businesses', () => {
-    for (const b of BUSINESSES) {
-      if (b.status !== 'active' && b.status !== 'past_due') expect(b.mrr).toBe(0)
-      else expect(b.mrr).toBeGreaterThan(0)
-    }
-  })
-
-  it('links every payment to a business and keeps refunds negative', () => {
-    const ids = new Set(BUSINESSES.map((b) => b.id))
-    for (const p of PAYMENTS) {
-      expect(ids.has(p.businessId)).toBe(true)
-      if (p.kind === 'refund') expect(p.amount).toBeLessThan(0)
-    }
+describe('admin data', () => {
+  it('ships no sample businesses or payments', () => {
+    expect(BUSINESSES).toEqual([])
+    expect(PAYMENTS).toEqual([])
   })
 
   it('works out margin as charged minus cost', () => {
@@ -42,23 +29,23 @@ describe('admin alerts', () => {
   const state = initialAdminState()
 
   it('lists critical alerts first', () => {
-    const alerts = buildAlerts(BUSINESSES, state)
+    const alerts = buildAlerts(SAMPLE, state)
     const order = { critical: 0, warning: 1, info: 2 }
     for (let i = 1; i < alerts.length; i++) expect(order[alerts[i - 1].severity]).toBeLessThanOrEqual(order[alerts[i].severity])
   })
 
   it('hides dismissed alerts and switched-off rules', () => {
-    const all = buildAlerts(BUSINESSES, state)
+    const all = buildAlerts(SAMPLE, state)
     const first = all[0]
-    expect(buildAlerts(BUSINESSES, { ...state, dismissedAlerts: [first.id] }).some((a) => a.id === first.id)).toBe(false)
-    const noPayments = buildAlerts(BUSINESSES, { ...state, alerts: { ...state.alerts, rules: { ...state.alerts.rules, paymentFailed: false } } })
+    expect(buildAlerts(SAMPLE, { ...state, dismissedAlerts: [first.id] }).some((a) => a.id === first.id)).toBe(false)
+    const noPayments = buildAlerts(SAMPLE, { ...state, alerts: { ...state.alerts, rules: { ...state.alerts.rules, paymentFailed: false } } })
     expect(noPayments.some((a) => a.id.startsWith('p-'))).toBe(false)
   })
 })
 
 describe('admin overrides and formatting', () => {
   it('applies plan, status and wallet changes', () => {
-    const b = BUSINESSES[0]
+    const b = SAMPLE[0]
     const out = applyOverride(b, { status: 'blocked', plan: 'pro', walletAdjust: 100 })
     expect(out.status).toBe('blocked')
     expect(out.plan).toBe('pro')

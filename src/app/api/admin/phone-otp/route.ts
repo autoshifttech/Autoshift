@@ -12,20 +12,20 @@ async function superAdmin() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Please sign in again' }, { status: 401 }) } as const
+  if (!user) return { ok: false, error: NextResponse.json({ error: 'Please sign in again' }, { status: 401 }) } as const
   const db = supabaseAdmin()
   const { data } = await db.from('platform_admins').select('role').eq('user_id', user.id).maybeSingle()
-  if (data?.role !== 'super_admin') return { error: NextResponse.json({ error: 'Super admins only' }, { status: 403 }) } as const
-  return { user, db } as const
+  if (data?.role !== 'super_admin') return { ok: false, error: NextResponse.json({ error: 'Super admins only' }, { status: 403 }) } as const
+  return { ok: true, user, db } as const
 }
 
 async function audit(db: ReturnType<typeof supabaseAdmin>, actor: string, action: string, details: Record<string, unknown>) {
   await db.from('audit_log').insert({ actor_id: actor, scope: 'platform', action, target: 'phone_otp', details })
 }
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   const ctx = await superAdmin()
-  if ('error' in ctx) return ctx.error
+  if (!ctx.ok) return ctx.error
   const settings = await getOtpSettings(ctx.db)
   let sender: { phone_number_id: string } | null = null
   let template: { status: string; reason: string | null } | null = null
@@ -43,9 +43,9 @@ export async function GET() {
   return NextResponse.json({ settings, sender, template, problem, verified_users: count ?? 0 })
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: Request): Promise<Response> {
   const ctx = await superAdmin()
-  if ('error' in ctx) return ctx.error
+  if (!ctx.ok) return ctx.error
   const body = (await request.json().catch(() => null)) as { enabled?: boolean; sender_account_id?: string | null } | null
   if (!body) return NextResponse.json({ error: 'Body must be JSON' }, { status: 400 })
   const settings = await getOtpSettings(ctx.db)
@@ -71,9 +71,9 @@ export async function PUT(request: Request) {
   return NextResponse.json({ settings: next })
 }
 
-export async function POST() {
+export async function POST(): Promise<Response> {
   const ctx = await superAdmin()
-  if ('error' in ctx) return ctx.error
+  if (!ctx.ok) return ctx.error
   const settings = await getOtpSettings(ctx.db)
   if (!settings.sender_account_id) return NextResponse.json({ error: 'Choose the business whose WhatsApp number sends the codes first' }, { status: 409 })
   try {

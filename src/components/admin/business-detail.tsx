@@ -9,7 +9,6 @@ import {
   Bot,
   CalendarPlus,
   Copy,
-  Eye,
   Flag,
   IndianRupee,
   Mail,
@@ -33,11 +32,10 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { setDemoCookie } from "@/lib/demo/cookie";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
 import { ADMIN_NOW, INDUSTRY_LABEL, UNIT_ECONOMICS, usageRevenue, type Business, type Usage } from "@/lib/admin/data";
 import { date, dateTime, daysBetween, inr, num, relTime } from "@/lib/admin/format";
-import { CURRENT_ADMIN, act, applyOverride, deleteBusiness, findBusiness, notesOf, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
+import { CURRENT_ADMIN, applyOverride, deleteBusiness, findBusiness, notesOf, updateBusiness, useAdmin, usePayments } from "@/lib/admin/store";
 import { loadAdminBusiness, useAdminBackend } from "@/lib/admin/backend-sync";
 import { backendUrl } from "@/lib/backend/client";
 import { useRouter } from "next/navigation";
@@ -105,11 +103,6 @@ export function BusinessDetail({ id }: { id: string }) {
   const blocked = b.status === "blocked";
   const trialLeft = daysBetween(b.trialEndsAt);
 
-  const viewAs = () => {
-    act("Viewed as business", b.name, "Read-only session opened");
-    setDemoCookie(true);
-    window.open(`/dashboard?viewAs=${encodeURIComponent(b.name)}&from=${encodeURIComponent(`/admin/businesses/${b.id}`)}`, "_blank", "noopener");
-  };
 
   return (
     <>
@@ -144,10 +137,6 @@ export function BusinessDetail({ id }: { id: string }) {
           <Button variant="outline" className="gap-1.5" onClick={() => setEditing(true)}>
             <Pencil className="size-4" />
             Edit
-          </Button>
-          <Button variant="outline" className="gap-1.5" onClick={viewAs}>
-            <Eye className="size-4" />
-            View as business
           </Button>
           {b.status === "trial" && (
             <Button variant="outline" className="gap-1.5" onClick={() => setDialog("trial")}>

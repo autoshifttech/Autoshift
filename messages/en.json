@@ -3215,9 +3215,7 @@
   },
   "Setup": {
     "notConfiguredTitle": "Sign-in isn’t connected yet",
-    "notConfiguredDesc": "This deployment has no Supabase project, so accounts can’t be created or used. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your hosting settings and redeploy.",
-    "demoButton": "View demo",
-    "demoHint": "Explore the CRM with a sample business. Nothing is saved."
+    "notConfiguredDesc": "This deployment has no Supabase project, so accounts can’t be created or used. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your hosting settings and redeploy."
   },
   "Onboarding": {
     "skipForNow": "Skip for now",
@@ -3348,14 +3346,11 @@
     "errorTip3": "Make sure your Facebook account is an admin of the business portfolio.",
     "tryAgain": "Try again",
     "getHelp": "Get help",
-    "previewOutcome": "Design preview — outcome:",
-    "outcome_success": "Success",
-    "outcome_cancelled": "Cancelled",
-    "outcome_error": "Error",
     "settingsTitle": "Connect WhatsApp",
     "settingsDesc": "The quickest way to link your business number. Meta handles login and verification.",
     "manualHint": "Already have a WhatsApp Business API app? You can enter its credentials manually below.",
-    "registerLater": "Connected. The number still needs registering with Meta; open Settings → WhatsApp to finish."
+    "registerLater": "Connected. The number still needs registering with Meta; open Settings → WhatsApp to finish.",
+    "notConfigured": "Connecting WhatsApp isn't set up on this AutoShift yet. Contact AutoShift support."
   },
   "Billing": {
     "title": "Plan & billing",

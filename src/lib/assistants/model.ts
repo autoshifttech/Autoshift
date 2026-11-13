@@ -1,8 +1,8 @@
 /**
  * AI assistants and the tools they can use in a WhatsApp chat. A business
  * can run several assistants (e.g. Sales and Support), each with its own
- * instructions, knowledge, tools, audience and hand-off rules. Sample data
- * kept in the browser until the backend exists.
+ * instructions, knowledge, tools, audience and hand-off rules. Loaded from
+ * and saved to the backend (see backend-sync).
  */
 import { createStore, useStore } from '@/lib/workspace/store'
 
@@ -80,25 +80,11 @@ const builtin = (id: string, category: ToolCategory, name: string, description: 
 
 export function defaultTools(): Tool[] {
   return [
-    builtin('capture_lead', 'leads', 'Save lead details', 'Use when the customer shares their name, budget, location or need. Saves the answers and updates the lead score.', 236),
-    builtin('add_tag', 'leads', 'Add a tag', 'Use to label the contact, for example “Interested” or “VIP”.', 141),
-    builtin('send_template', 'messaging', 'Send a template', 'Use to send an approved WhatsApp template, such as a price list or brochure.', 54),
-    builtin('send_file', 'messaging', 'Send a file', 'Use to share a catalogue, menu or PDF from your Files library.', 61),
-    builtin('handoff', 'team', 'Hand off to a person', 'Use when the customer asks for a person, is upset, or asks something you can’t answer.', 48),
-    {
-      id: 'order_status',
-      builtin: false,
-      category: 'custom',
-      name: 'Check order status',
-      description: 'Use when the customer asks where their order is. Needs the order number.',
-      enabled: true,
-      webhook: {
-        url: 'https://n8n.example.com/webhook/order-status',
-        method: 'POST',
-        params: [{ name: 'order_id', type: 'string', required: true, description: 'Order number the customer gives, e.g. OT-1042' }],
-      },
-      calls: 77,
-    },
+    builtin('capture_lead', 'leads', 'Save lead details', 'Use when the customer shares their name, budget, location or need. Saves the answers and updates the lead score.', 0),
+    builtin('add_tag', 'leads', 'Add a tag', 'Use to label the contact, for example “Interested” or “VIP”.', 0),
+    builtin('send_template', 'messaging', 'Send a template', 'Use to send an approved WhatsApp template, such as a price list or brochure.', 0),
+    builtin('send_file', 'messaging', 'Send a file', 'Use to share a catalogue, menu or PDF from your Files library.', 0),
+    builtin('handoff', 'team', 'Hand off to a person', 'Use when the customer asks for a person, is upset, or asks something you can’t answer.', 0),
   ]
 }
 
@@ -109,7 +95,7 @@ export const ROLE_PRESETS: Record<AssistantRole, Pick<Assistant, 'name' | 'color
     tone: 'friendly',
     instructions:
       'You help new customers find the right product. Answer questions about products, prices and offers. Ask the lead questions naturally, one at a time. When a customer is ready to buy, hand over to the team.',
-    greeting: 'Hi! 👋 Welcome to Olive & Thread. What are you looking for today?',
+    greeting: 'Hi! 👋 Thanks for messaging us. What are you looking for today?',
     toolIds: ['capture_lead', 'add_tag', 'send_file', 'handoff'],
     captureLeads: true,
     audience: 'new_contacts',
@@ -121,7 +107,7 @@ export const ROLE_PRESETS: Record<AssistantRole, Pick<Assistant, 'name' | 'color
     instructions:
       'You help existing customers with orders, delivery and returns. Be clear and short. If you can’t solve it, apologise and hand the chat to the team.',
     greeting: 'Hello! How can I help with your order today?',
-    toolIds: ['order_status', 'send_template', 'handoff'],
+    toolIds: ['send_template', 'handoff'],
     captureLeads: false,
     audience: 'all',
   },
@@ -154,29 +140,13 @@ export function newAssistant(role: AssistantRole, id = `as-${Date.now()}`): Assi
   }
 }
 
-function sampleState(): AssistantsState {
-  const sales = {
-    ...newAssistant('sales', 'as-sales'),
-    knowledge: [
-      { q: 'What are your prices?', a: 'Linen shirts start at ₹1,499 and kurtas at ₹1,899. Bridal orders are quoted after a consultation.' },
-      { q: 'Do you deliver?', a: 'Yes, across India. Orders ship within 24 hours and arrive in 2–4 days.' },
-      { q: 'Where is the store?', a: '12 Cathedral Road, Chennai. Open Monday to Saturday, 10am to 8pm.' },
-    ],
-    stats: { replies: 1156, handoffs: 38, leads: 64 },
-  }
-  const support = {
-    ...newAssistant('support', 'as-support'),
-    knowledge: [
-      { q: 'How do I return an item?', a: 'Reply RETURN with your order number within 7 days. We’ll arrange a free pickup.' },
-      { q: 'When will I get my refund?', a: 'Refunds reach your account 3–5 working days after we receive the item.' },
-    ],
-    stats: { replies: 768, handoffs: 52, leads: 0 },
-  }
-  return { assistants: [sales, support], tools: defaultTools() }
+function emptyState(): AssistantsState {
+  return { assistants: [], tools: defaultTools() }
 }
 
-export const assistantsStore = createStore<AssistantsState>(sampleState, 'autoshift.assistants')
-const SERVER_STATE = sampleState()
+// v2: older browsers may still hold the sample assistants and tools under the old key.
+export const assistantsStore = createStore<AssistantsState>(emptyState, 'autoshift.assistants.v2')
+const SERVER_STATE = emptyState()
 export const useAssistants = () => useStore(assistantsStore, SERVER_STATE)
 
 /** When the backend gives a new assistant its real id, the id used until then keeps working. */
@@ -225,23 +195,17 @@ export function simulateReply(a: Assistant, tools: Tool[], message: string): Sim
   const reply = (text: string, handoff = false): SimulatedReply => ({ text, toolCalls: calls, handoff })
 
   if (/\b(human|person|agent|call me|talk to someone)\b/.test(m) && a.handoff.onRequest) {
-    if (has(a, 'handoff', tools)) calls.push({ toolId: 'handoff', input: 'reason: customer asked for a person', output: 'assigned to Rahul Iyer' })
+    if (has(a, 'handoff', tools)) calls.push({ toolId: 'handoff', input: 'reason: customer asked for a person', output: 'assigned to your team' })
     return reply('Sure — I’m connecting you with our team now. Someone will reply here shortly.', true)
   }
 
-  if (/\b(order|delivery|where is my|track)\b/.test(m) && has(a, 'order_status', tools)) {
-    const id = message.match(/[A-Z]{2}-?\d{3,}/i)?.[0]
-    if (!id) return reply('I can check that for you. What is your order number? It looks like OT-1042.')
-    calls.push({ toolId: 'order_status', input: `order_id: ${id.toUpperCase()}`, output: '{ "status": "shipped", "eta": "Thursday" }' })
-    return reply(`Your order ${id.toUpperCase()} has shipped and should arrive on Thursday. 📦`)
-  }
   if (/\b(budget|lakh|₹|rs|looking for|interested)\b/.test(m) && a.captureLeads && has(a, 'capture_lead', tools)) {
     calls.push({ toolId: 'capture_lead', input: `answer: “${message.slice(0, 60)}”`, output: 'lead score 55 → Warm' })
     if (has(a, 'add_tag', tools)) calls.push({ toolId: 'add_tag', input: 'tag: Interested', output: 'added' })
     return reply('Thanks! That helps. Which area or city are you in, so I can suggest the best option?')
   }
   if (/\b(catalog|catalogue|brochure|menu|pdf)\b/.test(m) && has(a, 'send_file', tools)) {
-    calls.push({ toolId: 'send_file', input: 'file: Festive catalogue.pdf', output: 'sent' })
+    calls.push({ toolId: 'send_file', input: 'file: from your Files library', output: 'sent' })
     return reply('Here’s our latest catalogue 📎 Let me know if anything catches your eye!')
   }
 

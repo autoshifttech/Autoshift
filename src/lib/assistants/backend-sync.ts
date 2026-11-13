@@ -2,7 +2,7 @@
  * Keeps the assistants store in step with the AutoShift backend.
  *
  * Only runs when NEXT_PUBLIC_API_URL is set. Then the server is the source of truth: the list is
- * loaded from it (the browser's sample data is dropped), and every change made in the screens is
+ * loaded from it, and every change made in the screens is
  * written back: created, changed (after a short pause so typing isn't one request per key) and deleted.
  * Fields the backend doesn't hold (model tier, reply counters) stay in the browser.
  */
@@ -230,7 +230,7 @@ export const toolsHttpApi: ToolsApi = {
   remove: (key) => backend<void>(`/v1/tools/${key}`, { method: 'DELETE' }),
 }
 
-export const toolFromRow = (r: ToolRow, local?: Tool): Tool => ({ id: r.key, builtin: r.builtin, category: r.category, name: r.name, description: r.description, enabled: r.enabled, webhook: r.webhook ?? undefined, calls: local?.calls ?? r.calls })
+export const toolFromRow = (r: ToolRow): Tool => ({ id: r.key, builtin: r.builtin, category: r.category, name: r.name, description: r.description, enabled: r.enabled, webhook: r.webhook ?? undefined, calls: r.calls })
 /** What the server is told: built-ins only switch on or off. */
 export const toolBody = (t: Tool): ToolBody => (t.builtin ? { name: t.name, description: t.description, enabled: t.enabled } : { name: t.name, description: t.description, enabled: t.enabled, webhook: t.webhook })
 
@@ -248,7 +248,7 @@ export function createToolsSync(store: Store<AssistantsState>, api: ToolsApi, op
   }
   async function resync() {
     const rows = await api.list()
-    apply(() => store.set((s) => ({ ...s, tools: rows.map((r) => toolFromRow(r, s.tools.find((x) => x.id === r.key))) })))
+    apply(() => store.set((s) => ({ ...s, tools: rows.map((r) => toolFromRow(r)) })))
     known.clear()
     for (const r of rows) known.set(r.key, toolBody(toolFromRow(r)))
   }

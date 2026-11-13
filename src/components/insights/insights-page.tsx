@@ -10,9 +10,8 @@ import { BarChart } from "@/components/tremor/bar-chart";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
 import { FunnelChart, RouteCard } from "./journey-charts";
-import { RANGES, buildInsights, change, type Insights, type Range } from "@/lib/insights/model";
+import { RANGES, change, type Insights, type Range } from "@/lib/insights/model";
 import { emptyInsights, loadLiveInsights } from "@/lib/insights/live";
-import { isLive } from "@/lib/workspace/live";
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 
@@ -32,7 +31,7 @@ export function InsightsPage() {
   const tl = useTranslations("LeadsPage");
   const locale = useLocale();
   const [range, setRange] = useState<Range>(30);
-  const live = isLive();
+  const live = true;
   const [liveData, setLiveData] = useState<{ range: Range; data: Insights } | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -49,8 +48,8 @@ export function InsightsPage() {
     };
   }, [live, range]);
   const loading = live && liveData?.range !== range && !failed;
-  // Real accounts never see sample numbers: zeros until their own numbers load.
-  const data = !live ? buildInsights(range) : liveData?.range === range ? liveData.data : emptyInsights(range);
+  // Zeros until the account's own numbers load.
+  const data = liveData?.range === range ? liveData.data : emptyInsights(range);
   const label = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short" });
   const tt = data.totals;
   const max = Math.max(1, ...data.heat.flat());

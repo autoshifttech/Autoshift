@@ -9,37 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
-import { TIERS, seeded, type Business, type Quality } from "@/lib/admin/data";
+import { TIERS, type Quality } from "@/lib/admin/data";
 import { num, relTime } from "@/lib/admin/format";
 import { act, useBusinesses } from "@/lib/admin/store";
 import { useAdminStats } from "@/lib/admin/live-stats";
-import { backendUrl } from "@/lib/backend/client";
 import { DataTable, EmptyState, Initials, Kpi, Meter, PageHeader, Panel, Pill, QUALITY_META, QualityPill, StatusPill, td } from "./admin-ui";
 
-const REJECTION_REASONS = [
-  "Promotional content in a Utility template",
-  "Variables at the start or end of the message",
-  "Missing sample values for variables",
-  "Looks like it asks for sensitive information",
-  "Too many variables for the amount of text",
-];
-
-/** Sample rejections with Meta's reasons, until template sync reads them from Meta. */
-function sampleRejections(connected: Business[]) {
-  const r = seeded(9);
-  return connected
-    .filter((b) => b.whatsapp.templatesRejected > 0)
-    .slice(0, 8)
-    .map((b) => ({ b, template: r.pick(["festive_offer", "order_update", "appointment_reminder", "new_arrivals", "payment_due", "welcome_message"]), reason: r.pick(REJECTION_REASONS), at: new Date(Date.UTC(2026, 9, 25) - r.int(1, 20) * 864e5).toISOString() }));
-}
 
 export function WhatsAppHealthPage() {
   const businesses = useBusinesses();
   const [quality, setQuality] = useState<Quality | "all">("all");
   const [query, setQuery] = useState("");
   const stats = useAdminStats();
-  // Real accounts: Meta's quality rating and messaging limit aren't read from Meta yet.
-  const live = backendUrl() !== null;
+  // Meta's quality rating and messaging limit aren't read from Meta yet.
+  const live = true;
 
   const connected = businesses.filter((b) => b.whatsapp.status === "connected" && b.status !== "cancelled" && b.status !== "expired");
   const byQuality = (q: Quality) => connected.filter((b) => b.whatsapp.quality === q).length;
@@ -54,12 +37,10 @@ export function WhatsAppHealthPage() {
     .filter((b) => !q || `${b.name} ${b.whatsapp.number}`.toLowerCase().includes(q))
     .sort((a, b) => order[a.whatsapp.quality] - order[b.whatsapp.quality] || b.usage.marketing - a.usage.marketing);
 
-  const rejections = live
-    ? stats.rejected_templates.flatMap((r) => {
-        const b = businesses.find((x) => x.id === r.businessId);
-        return b ? [{ b, template: r.template, reason: r.reason, at: r.at }] : [];
-      })
-    : sampleRejections(connected);
+  const rejections = stats.rejected_templates.flatMap((r) => {
+    const b = businesses.find((x) => x.id === r.businessId);
+    return b ? [{ b, template: r.template, reason: r.reason, at: r.at }] : [];
+  });
 
   const tierCounts = TIERS.map((t) => ({ t, n: connected.filter((b) => b.whatsapp.tier === t).length }));
   const maxTier = Math.max(...tierCounts.map((x) => x.n), 1);

@@ -1,8 +1,8 @@
 /**
  * Drip campaigns: a sequence of WhatsApp template messages sent over time
  * to people who enter a trigger (a segment, a tag, a new lead).
- * Each step waits, checks a condition and sends a template. Sample data
- * kept in the browser until the scheduler exists on the backend.
+ * Each step waits, checks a condition and sends a template. Drips are kept
+ * in this browser until the scheduler exists on the backend (nothing sends them yet).
  */
 import { useEffect } from 'react'
 import { createStore, useStore } from '@/lib/workspace/store'
@@ -24,15 +24,6 @@ export interface DripTemplate {
   buttons: string[]
 }
 
-/** Approved templates available to drips (sample). */
-export const DRIP_TEMPLATES: DripTemplate[] = [
-  { name: 'new_lead_welcome', category: 'utility', body: 'Hi {{name}}, thanks for your interest in Olive & Thread! Here’s our latest catalogue. Reply with any questions — we’re happy to help.', buttons: ['View catalogue'] },
-  { name: 'site_visit_invite', category: 'marketing', body: 'Hi {{name}}, would you like to visit our store this week? Pick a time and we’ll keep a stylist ready for you.', buttons: ['Book a visit', 'Not now'] },
-  { name: 'limited_offer', category: 'marketing', body: 'Hi {{name}}, just for you: 15% off your first order until Sunday. Use code WELCOME15.', buttons: ['Shop now'] },
-  { name: 'last_chance', category: 'marketing', body: 'Hi {{name}}, your 15% welcome offer ends tonight. Want us to hold your size?', buttons: ['Yes, hold it', 'No thanks'] },
-  { name: 'win_back_offer', category: 'marketing', body: 'We miss you, {{name}}! Here’s ₹300 off your next visit — valid for 14 days.', buttons: ['Book now'] },
-  { name: 'review_request', category: 'marketing', body: 'Glad you loved it, {{name}}! Would you leave us a quick Google review? It really helps.', buttons: ['Leave a review'] },
-]
 
 export interface DripStep {
   id: string
@@ -56,9 +47,10 @@ export interface Drip {
   createdAt: string
 }
 
-// Real accounts pick from their own approved WhatsApp templates; the demo keeps the samples.
-export const dripTemplatesStore = createStore<{ templates: DripTemplate[]; loaded: boolean }>(() => (isLive() ? { templates: [], loaded: false } : { templates: DRIP_TEMPLATES, loaded: true }))
+// Drips pick from the account's own approved WhatsApp templates.
+export const dripTemplatesStore = createStore<{ templates: DripTemplate[]; loaded: boolean }>(() => ({ templates: [], loaded: false }))
 let templatesLoad: Promise<void> | null = null
+const EMPTY_TEMPLATES = { templates: [] as DripTemplate[], loaded: false }
 
 export function useDripTemplates(): DripTemplate[] {
   useEffect(() => {
@@ -78,7 +70,7 @@ export function useDripTemplates(): DripTemplate[] {
       templatesLoad = null
     })
   }, [])
-  return useStore(dripTemplatesStore, isLive() ? { templates: [], loaded: false } : { templates: DRIP_TEMPLATES, loaded: true }).templates
+  return useStore(dripTemplatesStore, EMPTY_TEMPLATES).templates
 }
 
 export const priceOf = (template: string) => {
@@ -99,39 +91,6 @@ export const renderTemplate = (body: string, name: string) => body.replace(/\{\{
 
 const step = (id: string, delay: number, unit: DelayUnit, template: string, condition: StepCondition, stats: DripStep['stats']): DripStep => ({ id, delay, unit, template, condition, stats })
 
-function sampleDrips(): Drip[] {
-  const at = new Date(Date.UTC(2026, 8, 15)).toISOString()
-  const base = { stopOnReply: true, window: { start: '09:00', end: '20:00' }, skipWeekends: false, createdAt: at }
-  return [
-    {
-      ...base,
-      id: 'dr-nurture',
-      name: 'New lead nurture',
-      status: 'active',
-      trigger: { kind: 'new_lead', value: 'warm' },
-      steps: [
-        step('s1', 10, 'minutes', 'new_lead_welcome', 'always', { sent: 412, read: 361, replied: 96 }),
-        step('s2', 2, 'days', 'site_visit_invite', 'not_replied', { sent: 288, read: 230, replied: 41 }),
-        step('s3', 3, 'days', 'limited_offer', 'not_read', { sent: 206, read: 158, replied: 22 }),
-        step('s4', 2, 'days', 'last_chance', 'not_read', { sent: 171, read: 120, replied: 18 }),
-      ],
-      stats: { enrolled: 412, active: 58, completed: 296, replied: 177 },
-    },
-    {
-      ...base,
-      id: 'dr-winback',
-      name: 'Win-back after 60 days',
-      status: 'active',
-      trigger: { kind: 'segment', value: 'sg-inactive' },
-      skipWeekends: true,
-      steps: [
-        step('s1', 0, 'minutes', 'win_back_offer', 'always', { sent: 95, read: 71, replied: 12 }),
-        step('s2', 5, 'days', 'last_chance', 'not_replied', { sent: 80, read: 52, replied: 6 }),
-      ],
-      stats: { enrolled: 95, active: 14, completed: 69, replied: 18 },
-    },
-  ]
-}
 
 export function newDrip(trigger: Drip['trigger'] = { kind: 'new_lead', value: 'hot' }): Drip {
   return {
@@ -149,10 +108,8 @@ export function newDrip(trigger: Drip['trigger'] = { kind: 'new_lead', value: 'h
 }
 
 // Real accounts start with no drips (kept in this browser; nothing sends them yet).
-export const dripsStore = isLive()
-  ? createStore<{ drips: Drip[] }>(() => ({ drips: [] }), 'autoshift.drips.live')
-  : createStore<{ drips: Drip[] }>(() => ({ drips: sampleDrips() }), 'autoshift.drips')
-const SERVER = { drips: isLive() ? [] : sampleDrips() }
+export const dripsStore = createStore<{ drips: Drip[] }>(() => ({ drips: [] }), 'autoshift.drips.live')
+const SERVER = { drips: [] as Drip[] }
 export const useDrips = () => useStore(dripsStore, SERVER).drips
 
 export function updateDrip(id: string, patch: Partial<Drip>) {

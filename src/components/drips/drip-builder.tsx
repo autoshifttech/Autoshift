@@ -15,6 +15,7 @@ import { Bubble, QuickButtons, WhatsAppPreview } from "@/components/ui/whatsapp-
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
 import { members, useAudience, useSegments } from "@/lib/segments/model";
+import { useAuth } from "@/hooks/use-auth";
 import {
   CONDITIONS,
   useDripTemplates,
@@ -42,6 +43,7 @@ export function DripBuilder({ id }: { id: string }) {
   const drips = useDrips();
   const segments = useSegments();
   const people = useAudience();
+  const { account } = useAuth();
   const templates = useDripTemplates();
   const TRIGGER_DEFAULT: Record<TriggerKind, string> = { segment: segments[0]?.id ?? "", new_lead: "hot", tag_added: people.tags[0] ?? "", manual: "" };
   const d = drips.find((x) => x.id === id);
@@ -320,7 +322,7 @@ export function DripBuilder({ id }: { id: string }) {
           {shown && tpl && (
             <div>
               <p className="mb-2 text-sm font-medium text-foreground">{t("previewStep", { n: Math.min(previewStep, d.steps.length - 1) + 1 })}</p>
-              <WhatsAppPreview title="Olive & Thread">
+              <WhatsAppPreview title={account?.name ?? ""}>
                 <Bubble from="business" time="10:00">
                   {renderTemplate(tpl.body, "Priya")}
                 </Bubble>

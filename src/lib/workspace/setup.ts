@@ -80,13 +80,3 @@ export function useSetup(): WorkspaceSetup {
 
 const SERVER_SETUP = emptySetup()
 
-/** Sample number the simulated Embedded Signup "connects". */
-export function sampleConnectedNumber(displayName: string): ConnectedNumber {
-  return {
-    displayPhoneNumber: '+91 98765 43210',
-    verifiedName: displayName || 'Your business',
-    quality: 'GREEN',
-    wabaId: '1029384756473829',
-    phoneNumberId: '1122334455667788',
-  }
-}

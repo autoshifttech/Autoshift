@@ -65,14 +65,6 @@ export const subscriptionStore = createStore(initialSubscription, 'autoshift.sub
 const SERVER_SUB = initialSubscription()
 export const useSubscription = () => useStore(subscriptionStore, SERVER_SUB)
 
-/** Sample usage this billing period. */
-export const SAMPLE_USAGE = { seats: 2, contacts: 842, aiReplies: 4310 }
-
-export const SAMPLE_INVOICES = [
-  { id: 'INV-2026-0091', date: '2026-09-25', amount: 2499, status: 'paid' as const },
-  { id: 'INV-2026-0064', date: '2026-08-25', amount: 2499, status: 'paid' as const },
-  { id: 'INV-2026-0037', date: '2026-07-25', amount: 999, status: 'paid' as const },
-]
 
 export function formatInr(amount: number, locale = 'en-IN'): string {
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)

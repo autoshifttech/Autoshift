@@ -6,9 +6,10 @@ const tools = defaultTools()
 describe('simulateReply', () => {
   it('does not use tools the assistant lacks or that are switched off', () => {
     const a = { ...newAssistant('support'), knowledge: [] }
-    const off = tools.map((t) => (t.id === 'order_status' ? { ...t, enabled: false } : t))
-    expect(simulateReply(a, off, 'Where is my order OT-1042?').toolCalls.some((c) => c.toolId === 'order_status')).toBe(false)
-    expect(simulateReply(a, tools, 'Where is my order OT-1042?').toolCalls[0].toolId).toBe('order_status')
+    const off = tools.map((t) => (t.id === 'handoff' ? { ...t, enabled: false } : t))
+    expect(simulateReply(a, off, 'Can I talk to someone?').toolCalls.some((c) => c.toolId === 'handoff')).toBe(false)
+    expect(simulateReply(a, tools, 'Can I talk to someone?').toolCalls[0].toolId).toBe('handoff')
+    expect(tools.every((t) => t.calls === 0 && t.builtin)).toBe(true) // no sample tools or made-up counts
   })
 
   it('hands off on request and answers from knowledge', () => {

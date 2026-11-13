@@ -10,13 +10,6 @@ import { backendUrl } from '@/lib/backend/client'
 import { useAdminStats } from './live-stats'
 import { adminBackendStore, remoteDeleteBusiness, remoteSaveTeam, remoteUpdateBusiness, useAdminBackend } from './backend-sync'
 import {
-  ADMIN_NOW,
-  ADMIN_TEAM,
-  ANNOUNCEMENTS,
-  AUDIT,
-  BUSINESSES,
-  PAYMENTS,
-  TICKETS,
   UNIT_ECONOMICS,
   type AdminRole,
   type AdminUser,
@@ -118,22 +111,18 @@ export function initialAdminState(): AdminState {
     prices: Object.fromEntries(Object.entries(UNIT_ECONOMICS).map(([k, v]) => [k, v.price])) as Record<keyof Usage, number>,
     trialDays: 14,
     minTopup: 500,
-    // Coupons aren't on the server yet: the design preview shows samples, real admin starts empty.
-    coupons: backendUrl() ? [] : [
-      { code: 'DIWALI20', percentOff: 20, appliesTo: 'all', expiresAt: new Date(ADMIN_NOW + 11 * 864e5).toISOString(), redemptions: 9, maxRedemptions: 100, active: true },
-      { code: 'CLINIC10', percentOff: 10, appliesTo: 'growth', expiresAt: new Date(ADMIN_NOW + 60 * 864e5).toISOString(), redemptions: 3, maxRedemptions: null, active: true },
-      { code: 'LAUNCH50', percentOff: 50, appliesTo: 'starter', expiresAt: new Date(ADMIN_NOW - 30 * 864e5).toISOString(), redemptions: 41, maxRedemptions: 50, active: false },
-    ],
+    // Coupons aren't stored on the server yet.
+    coupons: [],
     overrides: {},
     refunded: [],
     createdBusinesses: [],
     deletedBusinesses: [],
     teams: {},
     // With a backend these come from the server (see admin-data-sync.ts).
-    tickets: backendUrl() ? [] : TICKETS,
-    announcements: backendUrl() ? [] : ANNOUNCEMENTS,
-    team: backendUrl() ? [] : ADMIN_TEAM,
-    audit: backendUrl() ? [] : AUDIT,
+    tickets: [],
+    announcements: [],
+    team: [],
+    audit: [],
     alerts: {
       channels: { panel: true, email: true, whatsapp: false },
       destinations: { email: 'founder@autoshift.app', whatsapp: '' },
@@ -147,7 +136,7 @@ export function initialAdminState(): AdminState {
   }
 }
 
-export const adminStore = createStore(initialAdminState, backendUrl() ? undefined : 'autoshift.admin.v2')
+export const adminStore = createStore(initialAdminState)
 const SERVER = initialAdminState()
 export const useAdmin = () => useStore(adminStore, SERVER)
 
@@ -201,7 +190,7 @@ export function useBusinesses(): Business[] {
         },
       }
     })
-  return [...BUSINESSES, ...createdBusinesses]
+  return [...createdBusinesses]
     .filter((b) => !deletedBusinesses.includes(b.id))
     .map((b) => ({ ...applyOverride(b, overrides[b.id]), team: teams[b.id]?.length ?? b.team }))
 }
@@ -210,7 +199,7 @@ export function useBusinesses(): Business[] {
 export function findBusiness(state: AdminState, id: string): Business | undefined {
   if (backendUrl()) return adminBackendStore.get().businesses.find((b) => b.id === id)
   if (state.deletedBusinesses.includes(id)) return undefined
-  return [...BUSINESSES, ...state.createdBusinesses].find((b) => b.id === id)
+  return state.createdBusinesses.find((b) => b.id === id)
 }
 
 export interface BusinessInput {
@@ -285,10 +274,8 @@ export function saveTeam(b: Business, team: BusinessMember[], action: string, de
 }
 
 export function usePayments(): Payment[] {
-  const { refunded } = useAdmin()
   const remote = useAdminBackend()
-  if (backendUrl()) return remote.payments
-  return PAYMENTS.map((p) => (refunded.includes(p.id) ? { ...p, status: 'refunded' as const } : p))
+  return remote.payments
 }
 
 export function updateBusiness(b: Business, action: string, details: string, patch: (o: BusinessOverride) => BusinessOverride) {
