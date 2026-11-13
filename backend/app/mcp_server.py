@@ -605,6 +605,27 @@ def build_mcp(get_app) -> MCPServer:
             body["amount_paise"] = amount_paise
         return await call("POST", f"/v1/platform/payments/{payment_id}/refund", json_body=body)
 
+    # ------------------------------------------------- custom tools (made in the admin panel)
+    async def _custom(path: str, method: str = "GET", body: Any = None) -> Any:
+        """Workspace route first; a platform key falls through to the staff route."""
+        try:
+            return await call(method, f"/v1/custom-tools{path}", json_body=body)
+        except ToolFailure as exc:
+            if "platform use" not in str(exc):
+                raise
+        return await call(method, f"/v1/platform/custom-tools{path if path else '/available'}", json_body=body)
+
+    @mcp.tool()
+    async def custom_tools_list() -> list:
+        """Extra tools the AutoShift team added in the admin panel, with their inputs. Run one with custom_tool_run."""
+        return await _custom("")
+
+    @mcp.tool()
+    async def custom_tool_run(name: str, arguments: dict | None = None, confirm: bool = False) -> dict:
+        """Run a custom tool by name with its inputs (see custom_tools_list). Tools marked needs_confirm
+        only describe what they'd do until you call again with confirm=true."""
+        return await _custom(f"/run/{name}", "POST", {"arguments": arguments or {}, "confirm": confirm})
+
     # ------------------------------------------------- platform: businesses
     @mcp.tool()
     async def platform_business_create(name: str, owner_name: str, owner_email: str, industry: str = "", city: str = "", plan_id: str = "starter", confirm: bool = False) -> dict:

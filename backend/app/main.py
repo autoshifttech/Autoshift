@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .mcp_server import mount_mcp
-from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_ops, platform_ops
+from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_ops, platform_ops, custom_tools
 
 
 def create_app() -> FastAPI:
@@ -57,7 +57,7 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
-    for r in (me.router, internal.router, support.router, tools.router, team.router, billing_details.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router, workspace_ops.router, platform_ops.router):
+    for r in (me.router, internal.router, support.router, tools.router, team.router, billing_details.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router, workspace_ops.router, platform_ops.router, custom_tools.router):
         app.include_router(r)
 
     mcp = mount_mcp(app)
