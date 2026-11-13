@@ -565,7 +565,14 @@
       "send": "Enviar plantilla",
       "headerVarLabel": "Encabezado {var}",
       "bodyVarLabel": "Cuerpo {var}",
-      "urlButtonVarLabel": "Botón de URL \"{text}\": valor para {var}"
+      "urlButtonVarLabel": "Botón de URL \"{text}\": valor para {var}",
+      "headerMediaLabel": "{type, select, image {Imagen} video {Vídeo} other {Documento}} del encabezado",
+      "headerMediaHint": "Esta plantilla empieza con {type, select, image {una imagen} video {un vídeo} other {un documento}}. Sube uno o pega un enlace https público.",
+      "headerMediaUpload": "Subir {type, select, image {imagen} video {vídeo} other {documento}}",
+      "headerMediaUrlPlaceholder": "https://…",
+      "headerMediaWrongType": "Este tipo de archivo no sirve como {type, select, image {imagen} video {vídeo} other {documento}} del encabezado.",
+      "headerMediaTooLarge": "El archivo es demasiado grande. El límite es {max} MB.",
+      "headerMediaUploadFailed": "No se pudo subir. Inténtalo de nuevo o pega un enlace."
     },
     "sidebar": {
       "contactInfo": "Información del contacto",

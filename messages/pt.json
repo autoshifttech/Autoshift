@@ -565,7 +565,14 @@
       "send": "Enviar modelo",
       "headerVarLabel": "Cabeçalho {var}",
       "bodyVarLabel": "Corpo {var}",
-      "urlButtonVarLabel": "Botão de URL \"{text}\" — valor para {var}"
+      "urlButtonVarLabel": "Botão de URL \"{text}\" — valor para {var}",
+      "headerMediaLabel": "{type, select, image {Imagem} video {Vídeo} other {Documento}} do cabeçalho",
+      "headerMediaHint": "Este modelo começa com {type, select, image {uma imagem} video {um vídeo} other {um documento}}. Envie um arquivo ou cole um link https público.",
+      "headerMediaUpload": "Enviar {type, select, image {imagem} video {vídeo} other {documento}}",
+      "headerMediaUrlPlaceholder": "https://…",
+      "headerMediaWrongType": "Este tipo de arquivo não pode ser usado como {type, select, image {imagem} video {vídeo} other {documento}} do cabeçalho.",
+      "headerMediaTooLarge": "O arquivo é grande demais. O limite é {max} MB.",
+      "headerMediaUploadFailed": "Falha no envio. Tente de novo ou cole um link."
     },
     "sidebar": {
       "contactInfo": "Informações do contato",

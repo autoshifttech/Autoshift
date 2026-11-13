@@ -22,11 +22,16 @@ import {
   Loader2,
 } from "lucide-react";
 import { extractVariableIndices } from "@/lib/whatsapp/template-validators";
+import { MEDIA_HEADER_SPECS, isMediaHeaderKind, type MediaHeaderKind } from "@/lib/whatsapp/media-header-types";
+import { uploadAccountMedia, MEDIA_MAX_BYTES_BY_KIND } from "@/lib/storage/upload-media";
+import { toast } from "@/lib/toast";
 import { useTranslations } from "next-intl";
 
 export interface TemplateSendValues {
   body: string[];
   headerText?: string;
+  /** Public link for an image/video/document header, when the template has none saved. */
+  headerMediaUrl?: string;
   buttonParams?: Record<number, string>;
 }
 
@@ -58,6 +63,8 @@ interface UrlButtonSlot {
 function collectVariableSlots(template: MessageTemplate): {
   bodyVars: number[];
   headerVarCount: number;
+  /** A media header that needs a file at send time (synced from Meta, nothing saved here). */
+  mediaKind: MediaHeaderKind | null;
   urlButtonSlots: UrlButtonSlot[];
 } {
   const bodyVars = extractVariableIndices(template.body_text);
@@ -71,7 +78,11 @@ function collectVariableSlots(template: MessageTemplate): {
       urlButtonSlots.push({ index: i, text: b.text, url: b.url });
     }
   });
-  return { bodyVars, headerVarCount, urlButtonSlots };
+  const mediaKind =
+    isMediaHeaderKind(template.header_type ?? "") && !template.header_media_url?.trim()
+      ? (template.header_type as MediaHeaderKind)
+      : null;
+  return { bodyVars, headerVarCount, mediaKind, urlButtonSlots };
 }
 
 export function TemplatePicker({
@@ -87,6 +98,8 @@ export function TemplatePicker({
   const [params, setParams] = useState<string[]>([]);
   const [headerText, setHeaderText] = useState<string>("");
   const [buttonParams, setButtonParams] = useState<Record<number, string>>({});
+  const [headerMediaUrl, setHeaderMediaUrl] = useState<string>("");
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -137,6 +150,27 @@ export function TemplatePicker({
     setParams([]);
     setHeaderText("");
     setButtonParams({});
+    setHeaderMediaUrl("");
+  }
+
+  async function uploadHeaderMedia(file: File, kind: MediaHeaderKind) {
+    if (!MEDIA_HEADER_SPECS[kind].mimeTypes.includes(file.type)) {
+      toast.error(t("headerMediaWrongType", { type: kind }));
+      return;
+    }
+    if (file.size > MEDIA_MAX_BYTES_BY_KIND[kind]) {
+      toast.error(t("headerMediaTooLarge", { max: Math.round(MEDIA_MAX_BYTES_BY_KIND[kind] / 1024 / 1024) }));
+      return;
+    }
+    setUploadingMedia(true);
+    try {
+      const { publicUrl } = await uploadAccountMedia("chat-media", file);
+      setHeaderMediaUrl(publicUrl);
+    } catch {
+      toast.error(t("headerMediaUploadFailed"));
+    } finally {
+      setUploadingMedia(false);
+    }
   }
 
   function handleOpenChange(next: boolean) {
@@ -149,6 +183,7 @@ export function TemplatePicker({
     const noInputsNeeded =
       slots.bodyVars.length === 0 &&
       slots.headerVarCount === 0 &&
+      !slots.mediaKind &&
       slots.urlButtonSlots.length === 0;
     if (noInputsNeeded) {
       onSelect(template, { body: [] });
@@ -159,12 +194,14 @@ export function TemplatePicker({
     setParams(new Array(slots.bodyVars.length).fill(""));
     setHeaderText("");
     setButtonParams({});
+    setHeaderMediaUrl("");
   }
 
   function confirm() {
     if (!selected) return;
     const values: TemplateSendValues = { body: params };
     if (headerText.trim()) values.headerText = headerText.trim();
+    if (slots?.mediaKind && headerMediaUrl.trim()) values.headerMediaUrl = headerMediaUrl.trim();
     if (Object.keys(buttonParams).length > 0) {
       values.buttonParams = Object.fromEntries(
         Object.entries(buttonParams).map(([k, v]) => [Number(k), v.trim()]),
@@ -183,6 +220,8 @@ export function TemplatePicker({
     !!slots &&
     slots.bodyVars.every((_, i) => (params[i] ?? "").trim().length > 0) &&
     (slots.headerVarCount === 0 || headerText.trim().length > 0) &&
+    (!slots.mediaKind || /^https:\/\/\S+$/i.test(headerMediaUrl.trim())) &&
+    !uploadingMedia &&
     slots.urlButtonSlots.every(
       (s) => (buttonParams[s.index] ?? "").trim().length > 0,
     );
@@ -261,6 +300,47 @@ export function TemplatePicker({
                 </p>
               )}
             </div>
+            {slots?.mediaKind && (
+              <div className="space-y-2 rounded-md border border-border bg-background/50 p-3">
+                <Label htmlFor="template-header-media" className="text-xs text-popover-foreground">
+                  {t("headerMediaLabel", { type: slots.mediaKind })}
+                </Label>
+                <p className="text-xs text-muted-foreground">{t("headerMediaHint", { type: slots.mediaKind })}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-medium text-popover-foreground hover:bg-muted focus-within:ring-2 focus-within:ring-ring">
+                    {uploadingMedia ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t("headerMediaUpload", { type: slots.mediaKind })
+                    )}
+                    <input
+                      type="file"
+                      className="sr-only"
+                      accept={MEDIA_HEADER_SPECS[slots.mediaKind].mimeTypes.join(",")}
+                      disabled={uploadingMedia}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = "";
+                        if (f && slots.mediaKind) void uploadHeaderMedia(f, slots.mediaKind);
+                      }}
+                    />
+                  </label>
+                  {headerMediaUrl && slots.mediaKind === "image" && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={headerMediaUrl} src={headerMediaUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} className="h-11 w-11 rounded-md border border-border object-cover" />
+                  )}
+                </div>
+                <Input
+                  id="template-header-media"
+                  type="url"
+                  inputMode="url"
+                  value={headerMediaUrl}
+                  onChange={(e) => setHeaderMediaUrl(e.target.value)}
+                  placeholder={t("headerMediaUrlPlaceholder")}
+                  className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
+                />
+              </div>
+            )}
             {slots && slots.headerVarCount > 0 && (
               <div className="space-y-1">
                 <Label className="text-xs text-popover-foreground">

@@ -565,7 +565,14 @@
       "send": "Send template",
       "headerVarLabel": "Header {var}",
       "bodyVarLabel": "Body {var}",
-      "urlButtonVarLabel": "URL button \"{text}\" — value for {var}"
+      "urlButtonVarLabel": "URL button \"{text}\" — value for {var}",
+      "headerMediaLabel": "Header {type, select, image {image} video {video} other {document}}",
+      "headerMediaHint": "This template starts with {type, select, image {an image} video {a video} other {a document}}. Upload one or paste a public https link.",
+      "headerMediaUpload": "Upload {type, select, image {image} video {video} other {document}}",
+      "headerMediaUrlPlaceholder": "https://…",
+      "headerMediaWrongType": "This file type can't be used for {type, select, image {an image} video {a video} other {a document}} header.",
+      "headerMediaTooLarge": "The file is too large. The limit is {max} MB.",
+      "headerMediaUploadFailed": "Upload failed. Try again or paste a link."
     },
     "sidebar": {
       "contactInfo": "Contact info",

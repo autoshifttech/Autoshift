@@ -565,7 +565,14 @@
       "send": "템플릿 보내기",
       "headerVarLabel": "헤더 {var}",
       "bodyVarLabel": "본문 {var}",
-      "urlButtonVarLabel": "URL 버튼 \"{text}\" — {var} 값"
+      "urlButtonVarLabel": "URL 버튼 \"{text}\" — {var} 값",
+      "headerMediaLabel": "헤더 {type, select, image {이미지} video {동영상} other {문서}}",
+      "headerMediaHint": "이 템플릿은 {type, select, image {이미지} video {동영상} other {문서}}로 시작해요. 파일을 올리거나 공개 https 링크를 붙여 넣으세요.",
+      "headerMediaUpload": "{type, select, image {이미지} video {동영상} other {문서}} 올리기",
+      "headerMediaUrlPlaceholder": "https://…",
+      "headerMediaWrongType": "이 파일 형식은 헤더 {type, select, image {이미지} video {동영상} other {문서}}로 쓸 수 없어요.",
+      "headerMediaTooLarge": "파일이 너무 커요. 최대 {max}MB까지 가능해요.",
+      "headerMediaUploadFailed": "업로드하지 못했어요. 다시 시도하거나 링크를 붙여 넣으세요."
     },
     "sidebar": {
       "contactInfo": "연락처 정보",
