@@ -1134,7 +1134,8 @@
         "wait": "Wait",
         "condition": "Condition (If/Else)",
         "send_webhook": "Send Webhook",
-        "close_conversation": "Close Conversation"
+        "close_conversation": "Close Conversation",
+        "send_verification_code": "Send Verification Code"
       },
       "triggers": {
         "new_message_received": {
@@ -1168,6 +1169,10 @@
         "time_based": {
           "label": "Time-Based",
           "hint": "On a recurring schedule"
+        },
+        "verification_code_requested": {
+          "label": "Verification code requested",
+          "hint": "AutoShift needs to send someone a one-time code (sign-up check, password change or reset). Add “Send verification code”, plus any steps you like."
         }
       },
       "trigger": "Trigger",
@@ -1284,7 +1289,8 @@
         "matchExact": "Exact",
         "waitForReply": "Wait for reply before continuing",
         "waitForReplyHint": "Pauses here until the customer taps a button or replies (up to 24h). The steps after this one, including If/Else on message content, then use their reply.",
-        "closeConversationHint": "Sets the conversation status to \"closed\". No configuration needed."
+        "closeConversationHint": "Sets the conversation status to \"closed\". No configuration needed.",
+        "verificationCodeHint": "Sends the one-time code with your approved OTP template and a Copy code button. The code is never shown in logs or the inbox."
       },
       "preview": {
         "noText": "no text yet",
@@ -2985,7 +2991,9 @@
       "conversationNotInAccount": "conversation does not belong to this account",
       "noContactForConversation": "cannot resolve conversation: no contact",
       "noConversation": "cannot send: contact has no existing conversation",
-      "tagAddedNoConversation": "tag_added automation cannot send: contact has no existing conversation"
+      "tagAddedNoConversation": "tag_added automation cannot send: contact has no existing conversation",
+      "otpNoCode": "No code to send: this step only works in a “Verification code requested” automation",
+      "otpNoPhone": "The contact has no phone number"
     }
   },
   "Validation": {

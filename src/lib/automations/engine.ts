@@ -26,6 +26,7 @@ import { validateInteractivePayload } from '@/lib/whatsapp/interactive'
 import { isDeliverableUrl } from '@/lib/webhooks/ssrf'
 import { getT } from '@/lib/i18n/translate'
 import { isWithinTimeWindow } from './time-of-day'
+import { getOtpSettings, sendOtp, senderConfig } from '@/lib/auth/phone-otp'
 
 /** Step errors land in automation_logs and are shown on the logs page. */
 const tErr = getT('LibErrors.engine')
@@ -47,6 +48,17 @@ export interface AutomationContext {
   agent_id?: string
   /** Button / list-row id the customer tapped, for interactive_reply. */
   interactive_reply_id?: string
+  /** verification_code_requested only: the code to send. Never interpolated into messages, never
+   *  written to logs or to a parked run (it's stripped before saving). */
+  otp?: { code: string; purpose: string }
+}
+
+/** The context as it may be saved: without the one-time code. */
+function storable(context: AutomationContext): AutomationContext {
+  if (!context.otp) return context
+  const rest = { ...context }
+  delete rest.otp
+  return rest
 }
 
 export interface DispatchInput {
@@ -541,7 +553,7 @@ async function executeStepsFrom(args: ExecuteArgs): Promise<ScopeOutcome> {
         branch: args.branch,
         next_step_position: step.position + 1,
         parked_step_id: step.id,
-        context: args.context,
+        context: storable(args.context),
         run_at: new Date(Date.now() + ms).toISOString(),
         status: 'pending',
       })
@@ -724,7 +736,7 @@ async function parkForReply(step: AutomationStep, args: ExecuteArgs): Promise<vo
     branch: args.branch,
     next_step_position: step.position + 1,
     parked_step_id: step.id,
-    context: args.context,
+    context: storable(args.context),
     // For awaiting_reply rows run_at is the reply deadline (migration 045).
     run_at: new Date(Date.now() + REPLY_WAIT_MS).toISOString(),
     status: 'awaiting_reply',
@@ -833,7 +845,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         triggerType: 'tag_added',
         contactId: args.contactId,
         context: {
-          ...args.context,
+          ...storable(args.context),
           tag_id: cfg.tag_id,
           vars: {
             ...(args.context.vars ?? {}),
@@ -984,6 +996,18 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
       })
       if (!res.ok) throw new Error(tErr('webhookStatus', { status: String(res.status) }))
       return `webhook ${res.status}`
+    }
+
+    case 'send_verification_code': {
+      if (!args.contactId) throw new Error(tErr('needsContact', { step: 'send_verification_code' }))
+      const otp = args.context.otp
+      if (!otp?.code) throw new Error(tErr('otpNoCode'))
+      const { data: contact } = await db.from('contacts').select('phone').eq('id', args.contactId).eq('account_id', args.automation.account_id).maybeSingle()
+      const to = (contact?.phone ?? '').replace(/\D/g, '')
+      if (!to) throw new Error(tErr('otpNoPhone'))
+      const settings = await getOtpSettings(db)
+      await sendOtp(await senderConfig(db, args.automation.account_id), settings, to, otp.code)
+      return 'verification code sent'
     }
 
     case 'close_conversation': {

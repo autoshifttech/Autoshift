@@ -1134,7 +1134,8 @@
         "wait": "Aguardar",
         "condition": "Condição (Se/Senão)",
         "send_webhook": "Enviar webhook",
-        "close_conversation": "Fechar conversa"
+        "close_conversation": "Fechar conversa",
+        "send_verification_code": "Enviar código de verificação"
       },
       "triggers": {
         "new_message_received": {
@@ -1168,6 +1169,10 @@
         "time_based": {
           "label": "Por horário",
           "hint": "Em um agendamento recorrente"
+        },
+        "verification_code_requested": {
+          "label": "Código de verificação solicitado",
+          "hint": "A AutoShift precisa enviar um código único a alguém (verificação no cadastro, troca ou redefinição de senha). Adicione “Enviar código de verificação” e as etapas que quiser."
         }
       },
       "trigger": "Gatilho",
@@ -1284,7 +1289,8 @@
         "matchExact": "Exata",
         "waitForReply": "Aguardar resposta antes de continuar",
         "waitForReplyHint": "Pausa aqui até o cliente tocar em um botão ou responder (até 24h). As etapas seguintes, incluindo Se/Senão no conteúdo da mensagem, usam essa resposta.",
-        "closeConversationHint": "Define o status da conversa como \"fechada\". Nenhuma configuração necessária."
+        "closeConversationHint": "Define o status da conversa como \"fechada\". Nenhuma configuração necessária.",
+        "verificationCodeHint": "Envia o código único com seu modelo de OTP aprovado e um botão Copiar código. O código nunca aparece nos registros nem na caixa de entrada."
       },
       "preview": {
         "noText": "sem texto ainda",
@@ -2985,7 +2991,9 @@
       "conversationNotInAccount": "a conversa não pertence a esta conta",
       "noContactForConversation": "não foi possível identificar a conversa: sem contato",
       "noConversation": "não é possível enviar: o contato não tem uma conversa existente",
-      "tagAddedNoConversation": "a automação tag_added não pode enviar: o contato não tem uma conversa existente"
+      "tagAddedNoConversation": "a automação tag_added não pode enviar: o contato não tem uma conversa existente",
+      "otpNoCode": "Não há código para enviar: esta etapa só funciona em uma automação “Código de verificação solicitado”",
+      "otpNoPhone": "O contato não tem número de telefone"
     }
   },
   "Validation": {

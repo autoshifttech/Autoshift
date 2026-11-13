@@ -487,7 +487,10 @@ export type AutomationTriggerType =
   | 'time_based'
   /** Customer tapped a reply button / list row whose id matches; lets
    *  multi-step menus be chained across automations. */
-  | 'interactive_reply';
+  | 'interactive_reply'
+  /** AutoShift needs to send someone a one-time code (sign-up check, password change or reset).
+   *  Fires only in the business that sends AutoShift's codes. */
+  | 'verification_code_requested';
 
 export type AutomationStepType =
   | 'send_message'
@@ -502,7 +505,9 @@ export type AutomationStepType =
   | 'wait'
   | 'condition'
   | 'send_webhook'
-  | 'close_conversation';
+  | 'close_conversation'
+  /** Sends the requested one-time code with the approved authentication template. */
+  | 'send_verification_code';
 
 export type AutomationLogStatus = 'success' | 'partial' | 'failed';
 
