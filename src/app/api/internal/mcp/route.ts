@@ -20,6 +20,7 @@ import { supabaseAdmin } from '@/lib/ai/admin-client'
 import { resolveConversationByPhone } from '@/lib/whatsapp/resolve-conversation'
 import { sendMessageToConversation, validateSendMessageParams, SendMessageError } from '@/lib/whatsapp/send-message'
 import { createBroadcast, deliverBroadcast, BroadcastError } from '@/lib/whatsapp/broadcast-core'
+import { markBroadcastScheduled } from '@/lib/whatsapp/broadcast-schedule'
 import { POST as syncTemplates } from '@/app/api/whatsapp/templates/sync/route'
 import { POST as submitTemplate } from '@/app/api/whatsapp/templates/submit/route'
 import { DELETE as deleteTemplate } from '@/app/api/whatsapp/templates/[id]/route'
@@ -131,6 +132,12 @@ export async function POST(request: Request) {
             params: Array.isArray(r?.params) ? (r.params as unknown[]).filter((p): p is string => typeof p === 'string') : undefined,
           })),
         })
+        // A send time in the future: keep the frozen list and let the every-minute cron send it.
+        const at = str(body.scheduled_at) ? new Date(str(body.scheduled_at)!) : null
+        if (at && !Number.isNaN(at.getTime()) && at.getTime() > Date.now()) {
+          await markBroadcastScheduled(db, plan.broadcastId, at)
+          return NextResponse.json({ broadcast_id: plan.broadcastId, status: 'scheduled', scheduled_at: at.toISOString(), accepted: plan.planned.length, rejected: plan.rejected }, { status: 202 })
+        }
         after(() => deliverBroadcast(db, plan))
         return NextResponse.json({ broadcast_id: plan.broadcastId, status: 'sending', accepted: plan.planned.length, rejected: plan.rejected }, { status: 202 })
       }

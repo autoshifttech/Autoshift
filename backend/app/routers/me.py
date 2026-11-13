@@ -1,7 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
 
 from .. import audit, closing
-from ..deps import Member, Rzp, ServiceDb
+from ..deps import Member, Rzp, ServiceDb, get_token_user
+from ..security import TokenUser
 from ..schemas import CloseBusiness, CloseRequest
 
 router = APIRouter(prefix="/v1", tags=["me"])
@@ -19,6 +22,13 @@ async def me(ctx: Member, sdb: ServiceDb):
         "role": ctx.role,
         "platform_admin": admin[0]["role"] if admin else None,
     }
+
+
+@router.get("/me/key")
+async def my_key(user: Annotated[TokenUser, Depends(get_token_user)]):
+    """What kind of credential is calling: an API key's kind and scope, or a login. Used by the MCP
+    server to show each key only the tools it can use."""
+    return {"kind": user.key_kind or "login", "scope": user.key_scope or "write", "key_id": user.key_id}
 
 
 @router.post("/account/close")

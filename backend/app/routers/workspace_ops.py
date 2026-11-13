@@ -13,7 +13,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from .. import audit
+from .. import audit, key_limits
 from ..deps import AdminMember, AgentMember, Bridge, Member, ServiceDb
 from ..web_bridge import BridgeError
 
@@ -237,6 +237,7 @@ class SendBody(BaseModel):
     media_type: Literal["image", "video", "document", "audio"] | None = None
     filename: str | None = None
     name: str | None = Field(None, description="Name for a new contact")
+    request_id: str | None = Field(None, max_length=100, description="Same id on a retry = sent only once")
 
 
 async def _contact_for_send(sdb, account_id: str, body: SendBody) -> tuple[dict | None, dict | None]:
@@ -314,10 +315,15 @@ async def _send_check(sdb, ctx, body: SendBody) -> dict:
 
 @router.post("/messages/send", status_code=201)
 async def send_message(body: SendBody, ctx: AgentMember, sdb: ServiceDb, bridge: Bridge):
+    if (seen := await key_limits.remembered(sdb, ctx.user, body.request_id, "messages.send")) is not None:
+        return seen
     check = await _send_check(sdb, ctx, body)
     if not check["can_send"]:
         raise HTTPException(409, "; ".join(check["blockers"]))
+    await key_limits.check(sdb, ctx.user, "messages")
     result = await _bridge(bridge, ctx, "send", **_bridge_payload(body))
+    await key_limits.consume(sdb, ctx.user, "messages")
+    await key_limits.remember(sdb, ctx.user, body.request_id, "messages.send", result)
     await audit.record(sdb, scope="account", action="message.send", actor_id=ctx.user.id, account_id=ctx.account_id, target=result.get("conversation_id"), details={"kind": check["kind"], "template": body.template.name if body.template else None, "via": "api"})
     return result
 
@@ -654,6 +660,20 @@ class BroadcastCreate(BaseModel):
     recipients: list[BroadcastRecipient] = Field([], max_length=1000)
     tag: str | None = Field(None, description="Send to everyone with this tag instead of a list")
     params: list[str] = Field([], description="Body values used for everyone when sending to a tag")
+    request_id: str | None = Field(None, max_length=100, description="Same id on a retry = sent only once")
+    scheduled_at: datetime | None = Field(None, description="Send later (ISO time with zone, up to 60 days ahead); empty = now")
+
+
+def _send_time(body: BroadcastCreate) -> str | None:
+    if not body.scheduled_at:
+        return None
+    at = body.scheduled_at if body.scheduled_at.tzinfo else body.scheduled_at.replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    if at <= now + timedelta(minutes=1):
+        raise HTTPException(400, "scheduled_at must be in the future (leave it empty to send now)")
+    if at > now + timedelta(days=60):
+        raise HTTPException(400, "scheduled_at can be at most 60 days ahead")
+    return at.isoformat()
 
 
 async def _broadcast_plan(sdb, ctx, body: BroadcastCreate) -> dict:
@@ -687,18 +707,26 @@ async def _broadcast_plan(sdb, ctx, body: BroadcastCreate) -> dict:
 
 @router.post("/broadcasts/check")
 async def check_broadcast(body: BroadcastCreate, ctx: AgentMember, sdb: ServiceDb):
+    send_at = _send_time(body)
     plan = await _broadcast_plan(sdb, ctx, body)
-    return {"template": plan["template"]["name"], "category": plan["template"].get("category"), "will_send_to": len(plan["recipients"]), "skipped_opted_out_or_blocked": plan["skipped_opted_out_or_blocked"], "sample": [r["to"] for r in plan["recipients"][:5]]}
+    return {"send_at": send_at or "now", "template": plan["template"]["name"], "category": plan["template"].get("category"), "will_send_to": len(plan["recipients"]), "skipped_opted_out_or_blocked": plan["skipped_opted_out_or_blocked"], "sample": [r["to"] for r in plan["recipients"][:5]]}
 
 
 @router.post("/broadcasts", status_code=202)
 async def create_broadcast(body: BroadcastCreate, ctx: AgentMember, sdb: ServiceDb, bridge: Bridge):
+    if (seen := await key_limits.remembered(sdb, ctx.user, body.request_id, "broadcasts.create")) is not None:
+        return seen
+    send_at = _send_time(body)
     plan = await _broadcast_plan(sdb, ctx, body)
     if not plan["recipients"]:
         raise HTTPException(409, "Everyone on the list opted out or is blocked")
-    result = await _bridge(bridge, ctx, "broadcast_create", name=body.name, template_name=body.template_name, template_language=body.template_language, recipients=plan["recipients"])
-    await audit.record(sdb, scope="account", action="broadcast.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=result.get("broadcast_id"), details={"template": body.template_name, "recipients": len(plan["recipients"]), "skipped": plan["skipped_opted_out_or_blocked"]})
-    return {**result, "skipped_opted_out_or_blocked": plan["skipped_opted_out_or_blocked"]}
+    await key_limits.check(sdb, ctx.user, "broadcast_recipients", len(plan["recipients"]))
+    result = await _bridge(bridge, ctx, "broadcast_create", name=body.name, template_name=body.template_name, template_language=body.template_language, recipients=plan["recipients"], **({"scheduled_at": send_at} if send_at else {}))
+    await audit.record(sdb, scope="account", action="broadcast.schedule" if send_at else "broadcast.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=result.get("broadcast_id"), details={"template": body.template_name, "recipients": len(plan["recipients"]), "skipped": plan["skipped_opted_out_or_blocked"], **({"scheduled_at": send_at} if send_at else {})})
+    await key_limits.consume(sdb, ctx.user, "broadcast_recipients", len(plan["recipients"]))
+    out = {**result, "skipped_opted_out_or_blocked": plan["skipped_opted_out_or_blocked"]}
+    await key_limits.remember(sdb, ctx.user, body.request_id, "broadcasts.create", out)
+    return out
 
 
 @router.post("/broadcasts/{broadcast_id}/cancel")

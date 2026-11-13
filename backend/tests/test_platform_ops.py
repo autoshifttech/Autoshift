@@ -139,8 +139,11 @@ def test_platform_tools_with_a_platform_key(client, world):
     key = res.json()["key"]
     err, text = call_tool(client, key, "platform_rates_update", marketing=110)
     assert not err and "confirmation_required" in text
-    err, text = call_tool(client, key, "platform_user_remove", user_id=world.users["agent_a"])
+    err, text = call_tool(client, key, "platform_user_disable", user_id=world.users["agent_a"])
     assert not err and "confirmation_required" in text and "agent_a@example.com" in text
+    # removing a login or closing a business is not an MCP tool any more
+    err, text = call_tool(client, key, "platform_user_remove", user_id=world.users["agent_a"])
+    assert err
     err, text = call_tool(client, key, "platform_system_status")
     assert not err and "database" in text
     # a workspace key can't use platform tools
@@ -165,3 +168,25 @@ def test_stats_for_admin_charts(client, world):
     assert s["events"][0]["code"] == "131026" and s["events"][0]["businessId"] == world.acct_a
     assert s["rejected_templates"][0]["reason"] == "INVALID_FORMAT"
     assert {x["id"] for x in s["services"]} >= {"db", "meta", "razorpay"}
+
+
+def test_reports_are_cached_for_keys_only():
+    import asyncio
+    from types import SimpleNamespace
+
+    from app import key_limits
+
+    key_limits.clear_cache()
+    runs = []
+
+    @key_limits.cached_for_keys(60)
+    async def report(_, days: int = 30):
+        runs.append(days)
+        return len(runs)
+
+    person = SimpleNamespace(user=SimpleNamespace(key_id=None))
+    key = SimpleNamespace(user=SimpleNamespace(key_id="k1"))
+    assert asyncio.run(report(_=person, days=30)) == 1 and asyncio.run(report(_=person, days=30)) == 2
+    assert asyncio.run(report(_=key, days=30)) == 3 and asyncio.run(report(_=key, days=30)) == 3
+    assert asyncio.run(report(_=key, days=7)) == 4
+    key_limits.clear_cache()

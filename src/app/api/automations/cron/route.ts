@@ -8,6 +8,7 @@ import {
   resumePendingExecution,
 } from '@/lib/automations/engine'
 import type { AutomationContext } from '@/lib/automations/engine'
+import { sendDueScheduledBroadcasts } from '@/lib/whatsapp/broadcast-schedule'
 
 /**
  * Drain due `automation_pending_executions` rows. Meant to be hit
@@ -20,6 +21,9 @@ import type { AutomationContext } from '@/lib/automations/engine'
  * only; expensive SELECT ... FOR UPDATE is avoided in favor of a
  * two-step UPDATE-by-id.
  */
+// Scheduled broadcasts are sent inline (up to a few thousand messages).
+export const maxDuration = 300
+
 export async function GET(request: Request) {
   const expected = process.env.AUTOMATION_CRON_SECRET
   if (!expected) {
@@ -42,6 +46,11 @@ export async function GET(request: Request) {
   const requeued = await requeueStalledExecutions()
 
   const admin = supabaseAdmin()
+  // Scheduled broadcasts whose send time has come (created with a send time from the API or MCP).
+  const broadcasts = await sendDueScheduledBroadcasts(admin).catch((err) => {
+    console.error('[cron] scheduled broadcasts failed:', err instanceof Error ? err.message : err)
+    return 0
+  })
   const { data: due, error } = await admin
     .from('automation_pending_executions')
     .select('*')
@@ -51,7 +60,7 @@ export async function GET(request: Request) {
     .limit(50)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!due || due.length === 0) return NextResponse.json({ processed: 0, expired, requeued })
+  if (!due || due.length === 0) return NextResponse.json({ processed: 0, expired, requeued, broadcasts })
 
   let processed = 0
   for (const row of due) {
@@ -75,5 +84,5 @@ export async function GET(request: Request) {
     processed++
   }
 
-  return NextResponse.json({ processed, expired, requeued })
+  return NextResponse.json({ processed, expired, requeued, broadcasts })
 }

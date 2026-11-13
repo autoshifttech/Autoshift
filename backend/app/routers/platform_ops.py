@@ -14,7 +14,7 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from .. import audit, wallet
+from .. import audit, key_limits, wallet
 from ..auth_admin import AuthAdmin, AuthAdminError
 from ..config import Settings, get_settings
 from ..deps import PlatformAdmin, ServiceDb, get_auth_admin, get_platform_admin, require_platform_role
@@ -123,6 +123,7 @@ async def failed_payments(_: AnyStaff, sdb: ServiceDb, days: int = Query(30, ge=
 
 
 @router.get("/revenue")
+@key_limits.cached_for_keys()
 async def revenue(_: Finance, sdb: ServiceDb, days: int = Query(30, ge=1, le=730), group: Literal["day", "month"] = "day"):
     """Invoiced revenue (what customers paid, before and after GST), by period and by kind."""
     invoices = await sdb.select("invoices", {"issued_at": ("gte", _since(days))}, order="issued_at.asc", limit=20000)
@@ -146,6 +147,7 @@ async def revenue(_: Finance, sdb: ServiceDb, days: int = Query(30, ge=1, le=730
 
 
 @router.get("/costs")
+@key_limits.cached_for_keys()
 async def costs(_: AnyStaff, sdb: ServiceDb, days: int = Query(30, ge=1, le=365)):
     """What businesses were charged (messages, AI) and the AI tokens behind it, by provider and model."""
     since = _since(days)
@@ -266,6 +268,7 @@ async def _wa_rows(sdb, hours: int = 24) -> list[dict]:
 
 
 @router.get("/whatsapp-health")
+@key_limits.cached_for_keys()
 async def whatsapp_health(_: AnyStaff, sdb: ServiceDb, hours: int = Query(24, ge=1, le=168)):
     rows = await _wa_rows(sdb, hours)
     return {"connected": sum(1 for r in rows if r["status"] == "connected"), "not_connected": sum(1 for r in rows if r["status"] != "connected"), "businesses": rows}
@@ -279,6 +282,7 @@ async def whatsapp_issues(_: AnyStaff, sdb: ServiceDb, hours: int = Query(24, ge
 
 
 @router.get("/ai-usage")
+@key_limits.cached_for_keys()
 async def ai_usage(_: AnyStaff, sdb: ServiceDb, days: int = Query(30, ge=1, le=365)):
     names = await _names(sdb)
     rows = await sdb.select("ai_usage_log", {"created_at": ("gte", _since(days))}, limit=50000)
@@ -598,6 +602,7 @@ async def remove_user(user_id: str, body: Reason, admin: SuperOnly, sdb: Service
 
 # ------------------------------------------------------------------ admin panel charts
 @router.get("/stats")
+@key_limits.cached_for_keys()
 async def stats(_: AnyStaff, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)]):
     """Everything the admin panel's charts need, from real rows (amounts in rupees):
     12 months of money and signups, 30 days of AI replies, 24 hours of webhook deliveries,

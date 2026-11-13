@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from .. import audit
+from .. import audit, key_limits
 from dataclasses import asdict
 from typing import Annotated
 
@@ -66,6 +66,8 @@ async def delete_assistant(assistant_id: str, ctx: AdminMember, db: UserDb, sdb:
 async def test_reply(assistant_id: str, body: ReplyTest, ctx: AdminMember, db: UserDb, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)], llm: Annotated[object, Depends(get_llm)]):
     """Preview a reply. Uses the real model and costs one AI reply from the wallet."""
     assistant = await _get(db, ctx, assistant_id)
+    await key_limits.check(sdb, ctx.user, "ai_replies")
     out = await ai_runner.reply(sdb, llm, settings, assistant, body.history, body.message, ref=f"test:{ctx.account_id}:{body.idempotency_key}", live=False)
+    await key_limits.consume(sdb, ctx.user, "ai_replies")
     await audit.record(sdb, scope="account", action="assistant.test_reply", actor_id=ctx.user.id, account_id=ctx.account_id, target=assistant_id, details={"status": out.status})
     return asdict(out)

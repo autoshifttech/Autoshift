@@ -230,3 +230,21 @@ def test_template_delete_goes_through_bridge(client, world, bridge):
     assert client.delete(f"/v1/ws/templates/{tid}", headers=world.headers("admin_a")).status_code == 200
     assert bridge.calls == [("templates_delete", world.acct_a, {"template_id": tid})]
     assert any(a["action"] == "template.delete" for a in world.store["audit_log"])
+
+
+def test_broadcast_schedule(client, world, bridge):
+    from datetime import datetime, timedelta, timezone
+
+    seed_template(world)
+    seed_chat(world, phone="+910000000001")
+    body = {"template_name": "order_update", "recipients": [{"to": "+910000000001", "params": ["A"]}]}
+    past = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    far = (datetime.now(timezone.utc) + timedelta(days=90)).isoformat()
+    soon = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    h = world.headers("agent_a")
+    assert client.post("/v1/ws/broadcasts", json={**body, "scheduled_at": past}, headers=h).status_code == 400
+    assert client.post("/v1/ws/broadcasts/check", json={**body, "scheduled_at": far}, headers=h).status_code == 400
+    assert client.post("/v1/ws/broadcasts/check", json={**body, "scheduled_at": soon}, headers=h).json()["send_at"] != "now"
+    assert client.post("/v1/ws/broadcasts", json={**body, "scheduled_at": soon}, headers=h).status_code == 202
+    assert bridge.calls[-1][2]["scheduled_at"].startswith(soon[:16])
+    assert any(r["action"] == "broadcast.schedule" for r in world.store["audit_log"])
