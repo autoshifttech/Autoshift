@@ -8,6 +8,11 @@ import { readAdminToken } from '@/lib/admin/admin-token'
 // middleware.test.ts reads that directory and fails on a missing one.
 const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files', '/opt-ins', '/support', '/verify-phone']
 
+/** Set by the database (migration 080) when a login is on the AutoShift admin team. */
+function isAdminType(user: { app_metadata?: Record<string, unknown> }): boolean {
+  return user.app_metadata?.account_type === 'admin'
+}
+
 export async function middleware(request: NextRequest) {
   // Platform admin panel: every /admin page but the sign-in needs a genuine, unexpired admin
   // device token (issued by /api/admin/login after the password and, when on, the WhatsApp code).
@@ -100,9 +105,23 @@ export async function middleware(request: NextRequest) {
       url.pathname = `/join/${encodeURIComponent(inviteToken)}`
       url.search = ''
     } else {
-      url.pathname = '/dashboard'
+      url.pathname = isAdminType(user) ? '/admin' : '/dashboard'
       url.search = ''
     }
+    return withRefreshedCookies(NextResponse.redirect(url))
+  }
+
+  // Admin-type logins (the AutoShift team) use the admin panel, never the business app.
+  // Their own WhatsApp number check (/verify-phone) stays open for admin sign-in codes.
+  if (
+    user &&
+    isAdminType(user) &&
+    request.nextUrl.pathname !== '/verify-phone' &&
+    PROTECTED_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin'
+    url.search = ''
     return withRefreshedCookies(NextResponse.redirect(url))
   }
 

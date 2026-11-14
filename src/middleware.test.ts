@@ -210,3 +210,25 @@ describe("middleware — admin panel", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 });
+
+describe("middleware — account types", () => {
+  it.each(["/dashboard", "/inbox", "/settings"])("sends an admin-type login from %s to the admin panel", async (route) => {
+    mockUser = { id: "admin-1", app_metadata: { account_type: "admin" } } as typeof mockUser;
+    const res = await middleware(new NextRequest(`https://app.test${route}`));
+    expect(new URL(res.headers.get("location")!).pathname).toBe("/admin");
+  });
+
+  it("sends a signed-in admin from /login to the admin panel, business logins to the dashboard", async () => {
+    mockUser = { id: "admin-1", app_metadata: { account_type: "admin" } } as typeof mockUser;
+    expect(new URL((await middleware(new NextRequest("https://app.test/login"))).headers.get("location")!).pathname).toBe("/admin");
+    mockUser = { id: "user-1" };
+    expect(new URL((await middleware(new NextRequest("https://app.test/login"))).headers.get("location")!).pathname).toBe("/dashboard");
+  });
+
+  it("lets admins verify their own WhatsApp number and leaves business logins alone", async () => {
+    mockUser = { id: "admin-1", app_metadata: { account_type: "admin" } } as typeof mockUser;
+    expect((await middleware(new NextRequest("https://app.test/verify-phone"))).headers.get("location")).toBeNull();
+    mockUser = { id: "user-1", app_metadata: { account_type: "business" } } as typeof mockUser;
+    expect((await middleware(new NextRequest("https://app.test/dashboard"))).headers.get("location")).toBeNull();
+  });
+});
