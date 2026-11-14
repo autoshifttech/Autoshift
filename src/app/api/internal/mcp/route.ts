@@ -27,7 +27,7 @@ import { DELETE as deleteTemplate } from '@/app/api/whatsapp/templates/[id]/rout
 import { POST as addKnowledge } from '@/app/api/ai/knowledge/route'
 import { PATCH as patchKnowledge, DELETE as removeKnowledge } from '@/app/api/ai/knowledge/[id]/route'
 import { decrypt } from '@/lib/whatsapp/encryption'
-import { createOtpTemplate, getOtpSettings, senderConfig } from '@/lib/auth/phone-otp'
+import { createOtpTemplate, getOtpSettings, senderFor } from '@/lib/auth/phone-otp'
 import { getBusinessProfile, MetaApiError, updateBusinessProfile, type BusinessProfile } from '@/lib/whatsapp/meta-api'
 
 export const maxDuration = 60
@@ -195,9 +195,10 @@ export async function POST(request: Request) {
       case 'otp_template_create': {
         // Staff only (the backend checks super admin); runs on the configured sending number.
         const settings = await getOtpSettings(db)
-        if (!settings.sender_account_id || settings.sender_account_id !== accountId) return fail(409, 'Choose the sending WhatsApp number first')
+        const custom = !!settings.custom_sender?.phone_number_id
+        if (!custom && (!settings.sender_account_id || settings.sender_account_id !== accountId)) return fail(409, 'Choose the sending WhatsApp number first')
         try {
-          return NextResponse.json(await createOtpTemplate(await senderConfig(db, accountId), settings))
+          return NextResponse.json(await createOtpTemplate(await senderFor(db, settings), settings))
         } catch (err) {
           return fail(502, err instanceof Error ? err.message : 'Meta refused the template')
         }

@@ -146,16 +146,16 @@ function VerifyPhone() {
                   ref={codeRef}
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  maxLength={6}
+                  maxLength={4}
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="123456"
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  placeholder="1010"
                   className={`${field} text-center font-mono text-xl tracking-[0.5em]`}
                 />
               </div>
             )}
 
-            <Button type="submit" disabled={busy || (step === "code" && code.length !== 6) || (step === "phone" && wait > 0)} className="min-h-11 w-full">
+            <Button type="submit" disabled={busy || (step === "code" && code.length !== 4) || (step === "phone" && wait > 0)} className="min-h-11 w-full">
               {busy && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />}
               {step === "phone" ? (wait > 0 ? t("resendIn", { seconds: wait }) : t("send")) : t("verify")}
             </Button>

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { adminCookie } from '@/lib/admin/session'
 
 /**
  * The AutoShift backend (FastAPI). Screens use it only when NEXT_PUBLIC_API_URL
@@ -27,7 +28,8 @@ export async function backend<T = unknown>(path: string, init: { method?: string
   if (!token) throw new BackendError(401, 'Please sign in again')
   const res = await fetch(`${base}${path}`, {
     method: init.method ?? 'GET',
-    headers: { Authorization: `Bearer ${token}`, ...(init.body ? { 'Content-Type': 'application/json' } : {}) },
+    // The admin device token proves this browser passed admin sign-in (the backend checks it on staff routes).
+    headers: { Authorization: `Bearer ${token}`, ...(adminCookie() ? { 'X-Admin-2FA': adminCookie()! } : {}), ...(init.body ? { 'Content-Type': 'application/json' } : {}) },
     body: init.body ? JSON.stringify(init.body) : undefined,
   })
   if (res.status === 204) return undefined as T

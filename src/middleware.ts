@@ -2,19 +2,20 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { ADMIN_COOKIE } from '@/lib/admin/session'
+import { readAdminToken } from '@/lib/admin/admin-token'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
 const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/segments', '/drips', '/insights', '/files', '/opt-ins', '/support', '/verify-phone']
 
 export async function middleware(request: NextRequest) {
-  // Platform admin panel (design preview): every /admin page but the
-  // sign-in needs the admin session cookie, configured or not.
+  // Platform admin panel: every /admin page but the sign-in needs a genuine, unexpired admin
+  // device token (issued by /api/admin/login after the password and, when on, the WhatsApp code).
   const pathname = request.nextUrl.pathname
   if (
     (pathname === '/admin' || pathname.startsWith('/admin/')) &&
     pathname !== '/admin/login' &&
-    request.cookies.get(ADMIN_COOKIE)?.value !== '1'
+    !(await readAdminToken(request.cookies.get(ADMIN_COOKIE)?.value))
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/login'

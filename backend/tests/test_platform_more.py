@@ -96,3 +96,34 @@ def test_audit_filters(client, world):
     assert [r["id"] for r in client.get("/v1/platform/audit?action=payment.*", headers=h).json()] == [1]
     assert {r["id"] for r in client.get("/v1/platform/audit?scope=platform", headers=h).json()} == {1, 3}
     assert {r["id"] for r in client.get("/v1/platform/audit?days=30", headers=h).json()} == {1, 2}
+
+
+def test_admin_sign_in_code_is_enforced_for_people_not_keys(client, world):
+    import base64
+    import hashlib
+    import hmac
+    import time
+
+    from app.config import get_settings
+
+    base = client.app.dependency_overrides[get_settings]()
+    secret = "test-internal-secret"
+    client.app.dependency_overrides[get_settings] = lambda: base.model_copy(update={"internal_secret": secret})
+    h = S(world)
+    assert client.get("/v1/platform/billing-settings", headers=h).status_code == 200
+    world.store["platform_settings"] = [{"key": "phone_otp", "value": {"admin_2fa": True}}]
+    res = client.get("/v1/platform/billing-settings", headers=h)
+    assert res.status_code == 401 and "WhatsApp code" in res.json()["detail"]
+
+    def token(uid, exp, key=secret):
+        sig = base64.urlsafe_b64encode(hmac.new(key.encode(), f"admin2fa:{uid}.{exp}".encode(), hashlib.sha256).digest()).decode().rstrip("=")
+        return f"{uid}.{exp}.{sig}"
+
+    uid, later = world.users["staff_super"], int(time.time()) + 3600
+    assert client.get("/v1/platform/billing-settings", headers={**h, "X-Admin-2FA": token(uid, later)}).status_code == 200
+    assert client.get("/v1/platform/billing-settings", headers={**h, "X-Admin-2FA": token(uid, int(time.time()) - 5)}).status_code == 401
+    assert client.get("/v1/platform/billing-settings", headers={**h, "X-Admin-2FA": token(world.users["staff_finance"], later)}).status_code == 401
+    assert client.get("/v1/platform/billing-settings", headers={**h, "X-Admin-2FA": token(uid, later, "wrong")}).status_code == 401
+    # API keys (MCP) are not asked: they are created in the panel after sign-in.
+    key = client.post("/v1/platform/mcp-keys", json={"name": "ops", "scope": "read"}, headers={**h, "X-Admin-2FA": token(uid, later)}).json()["key"]
+    assert client.get("/v1/platform/billing-settings", headers={"Authorization": f"Bearer {key}"}).status_code == 200

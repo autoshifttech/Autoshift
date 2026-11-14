@@ -276,7 +276,17 @@ async def ai_model_remove(vendor: str, model_id: str, admin: SuperOnly, sdb: Ser
 
 
 # ------------------------------------------------------------------ phone verification
-OTP_DEFAULT = {"enabled": False, "sender_account_id": None, "template_name": "autoshift_otp", "language": "en_US", "required_since": None}
+OTP_DEFAULT = {"enabled": False, "sender_account_id": None, "custom_sender": None, "admin_2fa": False, "template_name": "autoshift_otp", "language": "en_US", "required_since": None}
+
+
+def _has_sender(s: dict) -> bool:
+    return bool((s.get("custom_sender") or {}).get("phone_number_id") or s.get("sender_account_id"))
+
+
+def _public_otp(s: dict) -> dict:
+    """Settings without the encrypted token."""
+    custom = s.get("custom_sender") or None
+    return {**s, "custom_sender": {k: custom.get(k) for k in ("phone_number_id", "waba_id", "display_phone", "verified_name", "token_tail")} if custom else None}
 
 
 async def _otp(sdb) -> dict:
@@ -290,11 +300,11 @@ async def phone_verification(_: AnyStaff, sdb: ServiceDb):
     s = await _otp(sdb)
     names = await _names(sdb)
     template = None
-    if s["sender_account_id"]:
+    if s["sender_account_id"] and not (s.get("custom_sender") or {}).get("phone_number_id"):
         found = await sdb.select("message_templates", {"account_id": s["sender_account_id"], "name": s["template_name"]}, limit=1)
         template = found[0].get("status") if found else "not created"
     verified = len([p for p in await sdb.select("profiles", {"phone_verified_at": ("gte", "1970-01-01")}, limit=50000)])
-    return {**s, "sender_business": names.get(s["sender_account_id"] or ""), "template_status": template, "people_verified": verified}
+    return {**_public_otp(s), "sender_business": names.get(s["sender_account_id"] or ""), "template_status": template, "people_verified": verified}
 
 
 class OtpPatch(BaseModel):
@@ -305,24 +315,28 @@ class OtpPatch(BaseModel):
 async def phone_verification_set(body: OtpPatch, admin: SuperOnly, sdb: ServiceDb):
     """Switch sign-up phone verification on or off. The sending number is chosen in the admin panel."""
     s = await _otp(sdb)
-    if body.enabled and not s["sender_account_id"]:
-        raise HTTPException(409, "Choose the sending WhatsApp number in the admin panel first (Settings → Phone verification)")
+    if body.enabled and not _has_sender(s):
+        raise HTTPException(409, "Set up the sending WhatsApp number in the admin panel first (Alert settings → Phone verification)")
     s["enabled"] = body.enabled
     if body.enabled and not s.get("required_since"):
         s["required_since"] = _now().isoformat()
     await sdb.upsert("platform_settings", {"key": "phone_otp", "value": s, "updated_by": admin.user.id, "updated_at": _now().isoformat()}, "key")
     await audit.record(sdb, scope="platform", action="phone_otp.toggle", actor_id=admin.user.id, details={"enabled": body.enabled})
-    return s
+    return _public_otp(s)
 
 
 @router.post("/phone-verification/template")
 async def phone_verification_template(admin: SuperOnly, sdb: ServiceDb, bridge: Bridge):
     """Submit the verification-code template to Meta from the sending number (category AUTHENTICATION)."""
     s = await _otp(sdb)
-    if not s["sender_account_id"]:
-        raise HTTPException(409, "Choose the sending WhatsApp number in the admin panel first")
+    if not _has_sender(s):
+        raise HTTPException(409, "Set up the sending WhatsApp number in the admin panel first")
+    account = s["sender_account_id"]
+    if not account:  # WhatsApp details entered directly: any business works for the bridge's lookup
+        mine = await sdb.select("profiles", {"user_id": admin.user.id}, limit=1)
+        account = (mine[0].get("account_id") if mine else None) or ((await sdb.select("accounts", limit=1)) or [{}])[0].get("id")
     try:
-        out = await bridge.call("otp_template_create", s["sender_account_id"], admin.user.id, "owner")
+        out = await bridge.call("otp_template_create", account, admin.user.id, "owner")
     except BridgeError as exc:
         raise HTTPException(exc.status if 400 <= exc.status < 600 else 502, exc.detail) from exc
     await audit.record(sdb, scope="platform", action="phone_otp.template_create", actor_id=admin.user.id, account_id=s["sender_account_id"], details={"template": s["template_name"]})

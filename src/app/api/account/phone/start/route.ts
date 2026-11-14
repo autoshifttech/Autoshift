@@ -1,7 +1,7 @@
-// POST /api/account/phone/start { phone } — send a 6-digit code on WhatsApp.
+// POST /api/account/phone/start { phone } — send an easy 4-digit code (like 1010 or 2255) on WhatsApp.
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
-import { CODE_TTL_MIN, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, normalisePhone, sendOtp, senderConfig } from '@/lib/auth/phone-otp'
+import { CODE_TTL_MIN, RESEND_AFTER_SEC, SIGNUP_MAX_SENDS_PER_HOUR, getOtpSettings, hasSender, hashCode, newFancyCode, normalisePhone, sendOtp, senderFor } from '@/lib/auth/phone-otp'
 import { signedIn } from '../shared'
 
 export async function POST(request: Request): Promise<Response> {
@@ -19,7 +19,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const settings = await getOtpSettings(db)
   // A sending number is enough: people can verify on their own (for password codes) before it's required.
-  if (!settings.sender_account_id) return NextResponse.json({ error: 'not_enabled' }, { status: 409 })
+  if (!hasSender(settings)) return NextResponse.json({ error: 'not_enabled' }, { status: 409 })
 
   const { data: taken } = await db.from('profiles').select('user_id').eq('phone', phone).not('phone_verified_at', 'is', null).neq('user_id', user.id).limit(1)
   if (taken?.length) return NextResponse.json({ error: 'phone_taken' }, { status: 409 })
@@ -32,16 +32,16 @@ export async function POST(request: Request): Promise<Response> {
     const since = (now - new Date(pending.last_sent_at).getTime()) / 1000
     if (since < RESEND_AFTER_SEC) return NextResponse.json({ error: 'wait', retry_after: Math.ceil(RESEND_AFTER_SEC - since) }, { status: 429 })
     const inWindow = now - new Date(pending.window_start).getTime() < 3600_000
-    if (inWindow && pending.sends >= MAX_SENDS_PER_HOUR) return NextResponse.json({ error: 'too_many' }, { status: 429 })
+    if (inWindow && pending.sends >= SIGNUP_MAX_SENDS_PER_HOUR) return NextResponse.json({ error: 'too_many' }, { status: 429 })
     if (inWindow) {
       sends = pending.sends + 1
       windowStart = pending.window_start
     }
   }
 
-  const code = newCode()
+  const code = newFancyCode()
   try {
-    await sendOtp(await senderConfig(db, settings.sender_account_id), settings, phone, code)
+    await sendOtp(await senderFor(db, settings), settings, phone, code)
   } catch (err) {
     console.error('[phone-otp] send failed', err)
     return NextResponse.json({ error: 'send_failed', detail: err instanceof Error ? err.message : '' }, { status: 502 })

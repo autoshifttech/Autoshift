@@ -1,5 +1,5 @@
 /**
- * One-time WhatsApp codes for account actions (change or reset a password), sent to the person's
+ * One-time WhatsApp codes for account actions (change or reset a password, admin sign-in), sent to the person's
  * verified phone from AutoShift's own number. Server-only.
  *
  * Same rules as phone verification: 6 digits, stored as a salted hash, 10 minutes, 5 tries,
@@ -7,9 +7,9 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { CODE_TTL_MIN, MAX_ATTEMPTS, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hashCode, newCode, sameHash, sendOtp, senderConfig } from './phone-otp'
+import { CODE_TTL_MIN, MAX_ATTEMPTS, MAX_SENDS_PER_HOUR, RESEND_AFTER_SEC, getOtpSettings, hasSender, hashCode, newCode, sameHash, sendOtp, senderFor } from './phone-otp'
 
-export type OtpPurpose = 'password_change' | 'password_reset'
+export type OtpPurpose = 'password_change' | 'password_reset' | 'admin_login'
 
 export type IssueResult =
   | { ok: true; phone: string; resend_after: number }
@@ -25,7 +25,7 @@ export function maskPhone(digits: string): string {
 /** Can AutoShift send codes at all (a sending number is set)? */
 export async function codesAvailable(db: SupabaseClient): Promise<boolean> {
   const s = await getOtpSettings(db)
-  return !!s.sender_account_id
+  return hasSender(s)
 }
 
 /** The person's verified phone (digits), or null. */
@@ -36,7 +36,7 @@ export async function verifiedPhone(db: SupabaseClient, userId: string): Promise
 
 export async function issueCode(db: SupabaseClient, userId: string, purpose: OtpPurpose): Promise<IssueResult> {
   const settings = await getOtpSettings(db)
-  if (!settings.sender_account_id) return { ok: false, error: 'not_available' }
+  if (!hasSender(settings)) return { ok: false, error: 'not_available' }
   const phone = await verifiedPhone(db, userId)
   if (!phone) return { ok: false, error: 'no_phone' }
 
@@ -57,7 +57,7 @@ export async function issueCode(db: SupabaseClient, userId: string, purpose: Otp
 
   const code = newCode()
   try {
-    await sendOtp(await senderConfig(db, settings.sender_account_id), settings, phone, code)
+    await sendOtp(await senderFor(db, settings), settings, phone, code)
   } catch (err) {
     console.error('[otp-codes] send failed', err)
     return { ok: false, error: 'send_failed', detail: err instanceof Error ? err.message : '' }

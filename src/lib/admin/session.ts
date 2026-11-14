@@ -1,15 +1,19 @@
 /**
- * Admin sign-in for the design preview: a session cookie set after the
- * 2-step screen. It only opens the sample admin panel. The backend must
- * replace this with a server-checked admin role (Supabase auth + an
- * allow-list table) before any real data is shown here.
+ * Admin panel session in the browser. The cookie holds the signed device token issued by
+ * /api/admin/login (see admin-token.ts); the server sets it, the middleware checks its signature,
+ * and the backend client sends it with staff calls (header X-Admin-2FA).
  */
 export const ADMIN_COOKIE = 'autoshift_admin'
 
-export function isAdminCookieSet(cookieHeader: string): boolean {
-  return cookieHeader.split(';').some((part) => part.trim() === `${ADMIN_COOKIE}=1`)
+/** The device token, or null (browser only). */
+export function adminCookie(): string | null {
+  if (typeof document === 'undefined') return null
+  const part = document.cookie.split(';').map((p) => p.trim()).find((p) => p.startsWith(`${ADMIN_COOKIE}=`))
+  const value = part ? decodeURIComponent(part.slice(ADMIN_COOKIE.length + 1)) : ''
+  return value || null
 }
 
-export function setAdminCookie(on: boolean): void {
-  document.cookie = on ? `${ADMIN_COOKIE}=1; path=/; SameSite=Strict` : `${ADMIN_COOKIE}=; path=/; max-age=0; SameSite=Strict`
+/** Signs this browser out of the admin panel (the device must pass the code again). */
+export function setAdminCookie(on: false): void {
+  if (!on) document.cookie = `${ADMIN_COOKIE}=; path=/; max-age=0; SameSite=Strict`
 }

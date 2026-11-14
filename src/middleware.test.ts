@@ -184,14 +184,22 @@ describe("middleware — admin panel", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("opens the panel with the admin cookie", async () => {
+  it("opens the panel only with a genuine admin device token", async () => {
     mockUser = { id: "user-1" };
-    const req = new NextRequest("https://app.test/admin");
-    req.cookies.set("autoshift_admin", "1");
+    process.env.AUTOSHIFT_INTERNAL_SECRET = "test-secret";
+    const { makeAdminToken } = await import("@/lib/admin/admin-token");
 
-    const res = await middleware(req);
+    const good = new NextRequest("https://app.test/admin");
+    good.cookies.set("autoshift_admin", await makeAdminToken("user-1"));
+    expect((await middleware(good)).headers.get("location")).toBeNull();
 
-    expect(res.headers.get("location")).toBeNull();
+    // The old preview cookie and forged or expired tokens no longer open it.
+    for (const value of ["1", "user-1.9999999999.forged", await makeAdminToken("user-1", -1)]) {
+      const req = new NextRequest("https://app.test/admin");
+      req.cookies.set("autoshift_admin", value);
+      expect(new URL((await middleware(req)).headers.get("location")!).pathname).toBe("/admin/login");
+    }
+    delete process.env.AUTOSHIFT_INTERNAL_SECRET;
   });
 
   it("does not treat look-alike paths as admin", async () => {

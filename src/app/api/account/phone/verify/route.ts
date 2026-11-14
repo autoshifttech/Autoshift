@@ -1,7 +1,7 @@
 // POST /api/account/phone/verify { code } — check the code and mark the phone verified.
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
-import { MAX_ATTEMPTS, hashCode, sameHash } from '@/lib/auth/phone-otp'
+import { SIGNUP_CODE_LENGTH, SIGNUP_MAX_ATTEMPTS as MAX_ATTEMPTS, hashCode, sameHash } from '@/lib/auth/phone-otp'
 import { signedIn } from '../shared'
 
 export async function POST(request: Request): Promise<Response> {
@@ -14,7 +14,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const body = (await request.json().catch(() => null)) as { code?: string } | null
   const code = (body?.code ?? '').replace(/\D/g, '')
-  if (code.length !== 6) return NextResponse.json({ error: 'invalid_code' }, { status: 400 })
+  if (code.length !== SIGNUP_CODE_LENGTH) return NextResponse.json({ error: 'invalid_code' }, { status: 400 })
 
   const { data: pending } = await db.from('phone_verifications').select('*').eq('user_id', user.id).maybeSingle()
   if (!pending) return NextResponse.json({ error: 'no_code' }, { status: 409 })

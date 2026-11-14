@@ -28,7 +28,7 @@ const req = (code: string) => new Request('http://x', { method: 'POST', headers:
 
 describe('POST /api/account/phone/verify', () => {
   beforeEach(() => {
-    state.pending = { user_id: 'u1', phone: '919876543210', code_hash: hashCode('123456', 'u1'), expires_at: new Date(Date.now() + 60_000).toISOString(), attempts: 0 }
+    state.pending = { user_id: 'u1', phone: '919876543210', code_hash: hashCode('1010', 'u1'), expires_at: new Date(Date.now() + 60_000).toISOString(), attempts: 0 }
     state.profileUpdate = null
     state.attempts = null
     state.deleted = false
@@ -36,15 +36,15 @@ describe('POST /api/account/phone/verify', () => {
   })
 
   it('counts a wrong code and does not verify', async () => {
-    const res = await POST(req('000000'))
+    const res = await POST(req('2255'))
     expect(res.status).toBe(400)
-    expect((await res.json()).attempts_left).toBe(4)
+    expect((await res.json()).attempts_left).toBe(2)
     expect(state.attempts).toBe(1)
     expect(state.profileUpdate).toBeNull()
   })
 
   it('verifies the right code and clears it', async () => {
-    const res = await POST(req('123456'))
+    const res = await POST(req('1010'))
     expect(res.status).toBe(200)
     expect(state.profileUpdate).toMatchObject({ phone: '919876543210' })
     expect(state.deleted).toBe(true)
@@ -52,15 +52,15 @@ describe('POST /api/account/phone/verify', () => {
 
   it('refuses expired codes and too many attempts', async () => {
     state.pending = { ...state.pending!, expires_at: new Date(Date.now() - 1000).toISOString() }
-    expect((await POST(req('123456'))).status).toBe(410)
-    state.pending = { ...state.pending!, expires_at: new Date(Date.now() + 60_000).toISOString(), attempts: 5 }
-    expect((await POST(req('123456'))).status).toBe(429)
+    expect((await POST(req('1010'))).status).toBe(410)
+    state.pending = { ...state.pending!, expires_at: new Date(Date.now() + 60_000).toISOString(), attempts: 3 }
+    expect((await POST(req('1010'))).status).toBe(429)
     expect(state.profileUpdate).toBeNull()
   })
 
   it('refuses a number another account verified meanwhile', async () => {
     state.updateError = { code: '23505' }
-    const res = await POST(req('123456'))
+    const res = await POST(req('1010'))
     expect(res.status).toBe(409)
     expect((await res.json()).error).toBe('phone_taken')
   })

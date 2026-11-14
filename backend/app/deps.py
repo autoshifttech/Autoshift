@@ -122,16 +122,45 @@ class PlatformAdmin:
     role: str
 
 
+def admin_device_ok(token: str | None, user_id: str, secret: str) -> bool:
+    """The admin panel's device token ("<user id>.<expiry>.<signature>", see src/lib/admin/admin-token.ts)."""
+    import base64
+    import hashlib
+    import hmac
+    import time
+
+    if not token or not secret:
+        return False
+    parts = token.split(".")
+    if len(parts) != 3 or parts[0] != user_id:
+        return False
+    try:
+        if int(parts[1]) < time.time():
+            return False
+    except ValueError:
+        return False
+    want = base64.urlsafe_b64encode(hmac.new(secret.encode(), f"admin2fa:{parts[0]}.{parts[1]}".encode(), hashlib.sha256).digest()).decode().rstrip("=")
+    return hmac.compare_digest(want, parts[2])
+
+
 async def get_platform_admin(
+    request: Request,
     user: Annotated[TokenUser, Depends(get_token_user)],
     sdb: Annotated[Db, Depends(get_service_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> PlatformAdmin:
-    """Platform staff only; checked against the platform_admins table."""
+    """Platform staff only; checked against the platform_admins table. When admin sign-in codes are
+    on, a person (not an API key) must also show this device's admin token (header X-Admin-2FA)."""
     if user.key_id and user.key_kind != "platform":
         raise HTTPException(403, "Workspace API keys can't use platform routes")
     rows = await sdb.select("platform_admins", {"user_id": user.id}, limit=1)
     if not rows:
         raise HTTPException(403, "Platform admins only")
+    if not user.key_id:
+        otp = await sdb.select("platform_settings", {"key": "phone_otp"}, limit=1)
+        if otp and isinstance(otp[0].get("value"), dict) and otp[0]["value"].get("admin_2fa"):
+            if not admin_device_ok(request.headers.get("x-admin-2fa"), user.id, settings.internal_secret):
+                raise HTTPException(401, "Sign in to the admin panel again (WhatsApp code needed on this device)")
     return PlatformAdmin(user=user, role=str(rows[0]["role"]))
 
 
