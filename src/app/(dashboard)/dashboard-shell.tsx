@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { createClient } from "@/lib/supabase/client";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
@@ -32,6 +33,23 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
     if (!loading && !user) {
       router.push("/login");
     }
+  }, [user, loading, router]);
+
+  // Admin-type logins (the AutoShift team) use the admin panel, not the business app.
+  useEffect(() => {
+    if (loading || !user) return;
+    let live = true;
+    createClient()
+      .from("profiles")
+      .select("account_type")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (live && data?.account_type === "admin") router.replace("/admin");
+      });
+    return () => {
+      live = false;
+    };
   }, [user, loading, router]);
 
   // New sign-ups verify their phone on WhatsApp before using the app (when AutoShift has it switched on).

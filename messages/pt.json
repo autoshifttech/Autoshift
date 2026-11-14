@@ -2525,9 +2525,10 @@
       "customConnected": "Conectado: {phone} {name}",
       "adminCodes": "Pedir um código do WhatsApp aos admins ao entrar",
       "adminCodesHelp": "Em um novo dispositivo, os admins digitam um código de 6 dígitos enviado ao WhatsApp verificado. O dispositivo fica confiável por 30 dias.",
-      "adminCodesNeedsPhone": "Verifique primeiro o seu próprio número do WhatsApp (app da empresa → Configurações → Segurança) para continuar conseguindo entrar.",
+      "adminCodesNeedsPhone": "Verifique primeiro o seu próprio número do WhatsApp para continuar conseguindo entrar.",
       "adminOn": "Códigos de entrada de admin ativados",
-      "adminOff": "Códigos de entrada de admin desativados"
+      "adminOff": "Códigos de entrada de admin desativados",
+      "verifyMyPhone": "Verificar meu número do WhatsApp"
     },
     "mcpGuide": {
       "title": "Conecte a AutoShift a uma IA",
@@ -4654,7 +4655,7 @@
       "badLogin": "E-mail ou senha incorretos.",
       "not_signed_in": "Sua sessão terminou. Entre novamente.",
       "not_admin": "Esta conta não faz parte da equipe de admins do AutoShift.",
-      "no_phone": "Sua conta não tem um número do WhatsApp verificado. Verifique um no app da empresa (Configurações → Segurança) ou peça a um super admin.",
+      "no_phone": "Sua conta não tem um número do WhatsApp verificado. Peça a um super admin ou desative os códigos de entrada de admin no Supabase.",
       "not_available": "Os códigos do WhatsApp não estão configurados. Peça a um super admin.",
       "wait": "Aguarde {seconds} segundos antes de pedir outro código.",
       "too_many": "Muitos códigos pedidos. Tente de novo em uma hora.",

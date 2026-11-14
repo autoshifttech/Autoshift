@@ -2525,9 +2525,10 @@
       "customConnected": "연결됨: {phone} {name}",
       "adminCodes": "관리자 로그인 시 WhatsApp 코드 요청",
       "adminCodesHelp": "새 기기에서 관리자는 인증된 WhatsApp 번호로 받은 6자리 코드를 입력합니다. 그 기기는 30일 동안 신뢰됩니다.",
-      "adminCodesNeedsPhone": "계속 로그인할 수 있도록 먼저 본인의 WhatsApp 번호를 인증하세요(비즈니스 앱 → 설정 → 보안).",
+      "adminCodesNeedsPhone": "계속 로그인할 수 있도록 먼저 본인의 WhatsApp 번호를 인증하세요.",
       "adminOn": "관리자 로그인 코드가 켜졌습니다",
-      "adminOff": "관리자 로그인 코드가 꺼졌습니다"
+      "adminOff": "관리자 로그인 코드가 꺼졌습니다",
+      "verifyMyPhone": "내 WhatsApp 번호 인증"
     },
     "mcpGuide": {
       "title": "AutoShift를 AI에 연결하기",
@@ -4654,7 +4655,7 @@
       "badLogin": "이메일 또는 비밀번호가 올바르지 않습니다.",
       "not_signed_in": "세션이 종료되었습니다. 다시 로그인하세요.",
       "not_admin": "이 계정은 AutoShift 관리자 팀에 속하지 않습니다.",
-      "no_phone": "계정에 인증된 WhatsApp 번호가 없습니다. 비즈니스 앱(설정 → 보안)에서 인증하거나 최고 관리자에게 요청하세요.",
+      "no_phone": "계정에 인증된 WhatsApp 번호가 없습니다. 최고 관리자에게 요청하거나 Supabase에서 관리자 로그인 코드를 끄세요.",
       "not_available": "WhatsApp 코드가 설정되지 않았습니다. 최고 관리자에게 문의하세요.",
       "wait": "{seconds}초 후에 다시 코드를 요청하세요.",
       "too_many": "코드를 너무 많이 요청했습니다. 1시간 후에 다시 시도하세요.",

@@ -49,7 +49,8 @@ def _chunks(items: list, size: int = 100):
 
 
 async def _names(sdb) -> dict[str, str]:
-    return {a["id"]: a["name"] for a in await sdb.select("accounts")}
+    """Customer businesses only (an admin's own workspace is not one)."""
+    return {a["id"]: a["name"] for a in await sdb.select("accounts", {"account_type": ("neq", "admin")})}
 
 
 async def _setting(sdb, key: str, default: Any) -> Any:
@@ -439,13 +440,19 @@ async def _not_staff(sdb, user_id: str) -> None:
 
 
 def _user_public(p: dict, names: dict[str, str]) -> dict:
-    return {"user_id": p["user_id"], "name": p.get("full_name"), "email": p.get("email"), "account_id": p.get("account_id"), "business": names.get(p.get("account_id") or "", ""), "role": p.get("account_role"), "joined": p.get("created_at")}
+    kind = p.get("account_type") or "business"
+    return {"user_id": p["user_id"], "name": p.get("full_name"), "email": p.get("email"), "account_type": kind, "account_id": p.get("account_id") if kind == "business" else None, "business": names.get(p.get("account_id") or "", ""), "role": p.get("account_role") if kind == "business" else None, "joined": p.get("created_at")}
 
 
 @router.get("/users")
-async def users(_: AnyStaff, sdb: ServiceDb, q: str | None = None, account_id: str | None = None, limit: int = Query(50, ge=1, le=500)):
+async def users(_: AnyStaff, sdb: ServiceDb, q: str | None = None, account_id: str | None = None, account_type: Literal["business", "admin"] | None = None, limit: int = Query(50, ge=1, le=500)):
+    """Every login with its type: business (customers) or admin (the AutoShift team)."""
     names = await _names(sdb)
     filters: dict[str, Any] = {"account_id": account_id} if account_id else {}
+    if account_type == "admin":
+        filters["account_type"] = "admin"
+    elif account_type == "business":
+        filters["account_type"] = ("neq", "admin")
     if q and q.strip():
         term = q.strip().replace("*", "").replace(",", " ")
         seen, rows = set(), []
@@ -618,7 +625,7 @@ async def stats(_: AnyStaff, sdb: ServiceDb, settings: Annotated[Settings, Depen
         months.append({"key": f"{y:04d}-{m:02d}", "month": datetime(y, m, 1).strftime("%b"), "signups": 0, "paying": 0, "mrr": 0, "subscriptions": 0, "topups": 0, "metaCost": 0, "aiCost": 0})
     by_month = {mo["key"]: mo for mo in months}
     first = f"{months[0]['key']}-01T00:00:00+00:00"
-    for a in await sdb.select("accounts", {"created_at": ("gte", first)}, limit=20000):
+    for a in await sdb.select("accounts", {"created_at": ("gte", first), "account_type": ("neq", "admin")}, limit=20000):
         mo = by_month.get(str(a.get("created_at"))[:7])
         if mo:
             mo["signups"] += 1

@@ -113,7 +113,7 @@ export async function PUT(request: Request): Promise<Response> {
       if (status?.status !== 'APPROVED') return NextResponse.json({ error: 'The OTP template must be approved by Meta first' }, { status: 409 })
       // Don't let anyone lock themselves out: the admin switching it on needs a verified phone.
       const { data: me } = await ctx.db.from('profiles').select('phone_verified_at').eq('user_id', ctx.user.id).maybeSingle()
-      if (!me?.phone_verified_at) return NextResponse.json({ error: 'Verify your own WhatsApp number first (business app → Settings → Security), so you can still sign in' }, { status: 409 })
+      if (!me?.phone_verified_at) return NextResponse.json({ error: 'Verify your own WhatsApp number first (Alert settings → Verify my WhatsApp number), so you can still sign in' }, { status: 409 })
     }
     next.admin_2fa = body.admin_2fa
   }

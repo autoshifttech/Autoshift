@@ -2525,9 +2525,10 @@
       "customConnected": "Connected: {phone} {name}",
       "adminCodes": "Ask admins for a WhatsApp code at sign-in",
       "adminCodesHelp": "On a new device, admins enter a 6-digit code sent to their verified WhatsApp number. The device is then trusted for 30 days.",
-      "adminCodesNeedsPhone": "Verify your own WhatsApp number first (business app → Settings → Security), so you can still sign in.",
+      "adminCodesNeedsPhone": "Verify your own WhatsApp number first, so you can still sign in.",
       "adminOn": "Admin sign-in codes are on",
-      "adminOff": "Admin sign-in codes are off"
+      "adminOff": "Admin sign-in codes are off",
+      "verifyMyPhone": "Verify my WhatsApp number"
     },
     "mcpGuide": {
       "title": "Connect AutoShift to an AI",
@@ -4654,7 +4655,7 @@
       "badLogin": "Email or password is wrong.",
       "not_signed_in": "Your session ended. Sign in again.",
       "not_admin": "This account isn't on the AutoShift admin team.",
-      "no_phone": "Your account has no verified WhatsApp number. Verify one in the business app (Settings → Security), or ask a super admin.",
+      "no_phone": "Your account has no verified WhatsApp number. Ask a super admin, or switch admin sign-in codes off in Supabase.",
       "not_available": "WhatsApp codes aren't set up. Ask a super admin.",
       "wait": "Please wait {seconds} seconds before asking for another code.",
       "too_many": "Too many codes asked for. Try again in an hour.",

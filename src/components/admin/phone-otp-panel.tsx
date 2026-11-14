@@ -231,6 +231,11 @@ export function PhoneOtpPanel() {
               {t('adminCodes')}
             </Label>
             <p className="text-xs text-muted-foreground">{!approved ? t('requireNeedsTemplate') : state?.my_phone_verified ? t('adminCodesHelp') : t('adminCodesNeedsPhone')}</p>
+            {state && !state.my_phone_verified && hasSender && (
+              <a href={`/verify-phone?next=${encodeURIComponent('/admin/settings')}`} className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+                {t('verifyMyPhone')}
+              </a>
+            )}
           </div>
           <Switch
             id="otp-admin"

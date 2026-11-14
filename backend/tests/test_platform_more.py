@@ -127,3 +127,21 @@ def test_admin_sign_in_code_is_enforced_for_people_not_keys(client, world):
     # API keys (MCP) are not asked: they are created in the panel after sign-in.
     key = client.post("/v1/platform/mcp-keys", json={"name": "ops", "scope": "read"}, headers={**h, "X-Admin-2FA": token(uid, later)}).json()["key"]
     assert client.get("/v1/platform/billing-settings", headers={"Authorization": f"Bearer {key}"}).status_code == 200
+
+
+def test_admin_type_accounts_are_not_businesses(client, world):
+    from .test_platform_ops import S as staff
+
+    for a in world.store["accounts"]:
+        if a["id"] == world.acct_b:
+            a["account_type"] = "admin"
+    for p in world.store["profiles"]:
+        if p.get("account_id") == world.acct_b:
+            p["account_type"] = "admin"
+    ids = [b["id"] for b in client.get("/v1/platform/businesses", headers=staff(world)).json()]
+    assert world.acct_a in ids and world.acct_b not in ids
+    assert world.acct_b not in [b["id"] for b in client.get("/v1/platform/businesses-search?q=business", headers=staff(world)).json()]
+    admins = client.get("/v1/platform/users?account_type=admin", headers=staff(world)).json()
+    assert admins and all(u["account_type"] == "admin" and u["account_id"] is None for u in admins)
+    people = client.get("/v1/platform/users?account_type=business", headers=staff(world)).json()
+    assert people and all(u["account_type"] == "business" for u in people)

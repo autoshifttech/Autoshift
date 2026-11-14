@@ -120,7 +120,7 @@ async def _untouched_personal_account(sdb, profile: dict | None) -> str | None:
 
 @router.get("")
 async def list_businesses(_: AnyStaff, sdb: ServiceDb):
-    return await _views(sdb, await sdb.select("accounts", order="created_at.desc", limit=500))
+    return await _views(sdb, await sdb.select("accounts", {"account_type": ("neq", "admin")}, order="created_at.desc", limit=500))
 
 
 @router.get("/{account_id}")

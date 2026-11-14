@@ -46,7 +46,7 @@ async def daily_report(_: AnyStaff, sdb: ServiceDb, hours: int = Query(24, ge=1,
     """The last day at a glance: new businesses, money in, AI replies, failed payments and sends, support."""
     since = _since(hours / 24)
     names = await _names(sdb)
-    new_accounts = [a for a in await sdb.select("accounts", {"created_at": ("gte", since)}, limit=2000)]
+    new_accounts = [a for a in await sdb.select("accounts", {"created_at": ("gte", since), "account_type": ("neq", "admin")}, limit=2000)]
     paid = await sdb.select("payment_orders", {"status": "paid", "paid_at": ("gte", since)}, limit=5000)
     invoices = await sdb.select("invoices", {"issued_at": ("gte", since)}, limit=5000)
     failed_pay = await sdb.select("payment_orders", {"status": "failed", "created_at": ("gte", since)}, limit=2000)
@@ -69,7 +69,7 @@ async def daily_report(_: AnyStaff, sdb: ServiceDb, hours: int = Query(24, ge=1,
 @key_limits.cached_for_keys()
 async def growth_report(_: AnyStaff, sdb: ServiceDb, months: int = Query(6, ge=1, le=24)):
     """Per month: new businesses, trials started, paying businesses now, MRR now, and churn."""
-    accounts = await sdb.select("accounts", limit=20000)
+    accounts = await sdb.select("accounts", {"account_type": ("neq", "admin")}, limit=20000)
     views = await _views(sdb, accounts)
     start = (_now().replace(day=1) - timedelta(days=31 * (months - 1))).strftime("%Y-%m")
     by_month: dict[str, int] = defaultdict(int)
@@ -104,7 +104,7 @@ async def trials_ending(_: AnyStaff, sdb: ServiceDb, days: int = Query(7, ge=1, 
 async def churn_risk(_: AnyStaff, sdb: ServiceDb, quiet_days: int = Query(14, ge=3, le=90)):
     """Paying or trial businesses showing signs of leaving: no chats lately, empty wallet, cancelling,
     past due, or WhatsApp not connected. Each with the reasons."""
-    views = await _views(sdb, await sdb.select("accounts", limit=20000))
+    views = await _views(sdb, await sdb.select("accounts", {"account_type": ("neq", "admin")}, limit=20000))
     convs = await sdb.select("conversations", {"last_message_at": ("gte", _since(quiet_days))}, limit=20000)
     active = {c["account_id"] for c in convs}
     connected = {c["account_id"] for c in await sdb.select("whatsapp_config") if c.get("status") == "connected"}
@@ -135,7 +135,7 @@ async def business_search(_: AnyStaff, sdb: ServiceDb, q: str = Query(..., min_l
     term = q.strip().lower()
     digits = "".join(c for c in term if c.isdigit())
     ids: list[str] = []
-    for a in await sdb.select("accounts", {"name": ("ilike", f"*{term}*")}, limit=limit):
+    for a in await sdb.select("accounts", {"name": ("ilike", f"*{term}*"), "account_type": ("neq", "admin")}, limit=limit):
         ids.append(a["id"])
     for p in await sdb.select("profiles", limit=20000):
         if p.get("account_id") and (term in (p.get("email") or "").lower() or term in (p.get("full_name") or "").lower() or (len(digits) >= 6 and digits in (p.get("phone") or ""))):

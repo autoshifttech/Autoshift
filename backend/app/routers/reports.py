@@ -57,7 +57,7 @@ async def usage(_: AnyStaff, sdb: ServiceDb, days: int = Query(30, ge=1, le=365)
 
 @router.get("/overview")
 async def overview(_: AnyStaff, sdb: ServiceDb):
-    accounts = await sdb.select("accounts")
+    accounts = await sdb.select("accounts", {"account_type": ("neq", "admin")})
     subs = await sdb.select("subscriptions")
     plans = {p["id"]: p for p in await sdb.select("plans")}
     paid = _recent([o for o in await sdb.select("payment_orders", {"status": "paid"})], "paid_at", 30)
