@@ -276,7 +276,7 @@ async def ai_model_remove(vendor: str, model_id: str, admin: SuperOnly, sdb: Ser
 
 
 # ------------------------------------------------------------------ phone verification
-OTP_DEFAULT = {"enabled": False, "sender_account_id": None, "template_name": "autoshift_verify_code", "language": "en_US", "required_since": None}
+OTP_DEFAULT = {"enabled": False, "sender_account_id": None, "template_name": "autoshift_otp", "language": "en_US", "required_since": None}
 
 
 async def _otp(sdb) -> dict:
