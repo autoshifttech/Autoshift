@@ -117,3 +117,24 @@ def test_create_pipeline_and_flow(client, world):
     assert nodes["lead"]["config"]["pipeline_id"] == pipe["id"] and nodes["lead"]["config"]["stage_id"] == stage["id"]
     assert nodes["tag"]["config"]["tag_id"] and nodes["slot"]["config"]["sections"][0]["rows"][0]["reply_id"]
     assert client.post("/v1/ws/flows", json={**flow, "nodes": [*flow["nodes"][:3], {**flow["nodes"][3], "config": {**flow["nodes"][3]["config"], "pipeline": "Nope"}}, *flow["nodes"][4:]]}, headers=admin).status_code == 422
+
+
+def test_get_update_delete_flow_and_lead(client, world):
+    admin = world.headers("admin_a")
+    nodes = [{"key": "ask", "type": "collect_input", "config": {"prompt_text": "Land ID?", "var_key": "land", "validation": "regex", "regex": "^L\\\\d{3}$", "next_node_key": "bye"}}, {"key": "bye", "type": "end", "config": {}}]
+    made = client.post("/v1/ws/flows", json={"name": "F", "keywords": ["visit"], "nodes": nodes}, headers=admin).json()
+    got = client.get(f"/v1/ws/flows/{made['id']}", headers=world.headers("viewer_a")).json()
+    assert got["nodes"][0]["config"]["validation"] == "regex" and got["keywords"] == ["visit"]
+    new_nodes = [{"key": "hi", "type": "send_message", "config": {"text": "Hi", "next_node_key": "bye"}}, nodes[1]]
+    dry = client.put(f"/v1/ws/flows/{made['id']}", json={"name": "F2", "keywords": ["visit"], "nodes": new_nodes, "dry_run": True}, headers=admin).json()
+    assert dry["was"]["steps"] == ["ask (collect_input)", "bye (end)"]
+    out = client.put(f"/v1/ws/flows/{made['id']}", json={"name": "F2", "keywords": ["visit"], "nodes": new_nodes}, headers=admin).json()
+    assert out["name"] == "F2" and [n["key"] for n in out["nodes"]] == ["hi", "bye"] and out["status"] == "draft"
+    bad = {"name": "F", "keywords": ["x"], "nodes": [{"key": "a", "type": "collect_input", "config": {"prompt_text": "?", "var_key": "a", "validation": "regex", "regex": "([", "next_node_key": "b"}}, {"key": "b", "type": "end", "config": {}}]}
+    assert client.put(f"/v1/ws/flows/{made['id']}", json=bad, headers=admin).status_code == 422
+    assert client.delete(f"/v1/ws/flows/{made['id']}", headers=world.headers("agent_a")).status_code == 403
+    assert client.delete(f"/v1/ws/flows/{made['id']}", headers=admin).status_code == 204
+    assert client.get(f"/v1/ws/flows/{made['id']}", headers=admin).status_code == 404
+    world.store["deals"] = [{"id": "d1", "account_id": world.acct_a, "title": "Test"}, {"id": "d2", "account_id": world.acct_b, "title": "Theirs"}]
+    assert client.delete("/v1/ws/leads/d2", headers=admin).status_code == 404
+    assert client.delete("/v1/ws/leads/d1", headers=admin).status_code == 204 and [d["id"] for d in world.store["deals"]] == ["d2"]

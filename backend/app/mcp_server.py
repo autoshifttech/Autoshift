@@ -46,9 +46,9 @@ TOOL_GROUPS: dict[str, list[str]] = {
     "account": ["whoami", "usage_get", "subscription_get", "subscription_cancel", "plans_list", "wallet_balance", "wallet_ledger", "invoices_list", "wallet_topup_link", "usage_alerts"],
     "chats": ["conversations_list", "conversation_get", "conversation_update", "messages_send", "messages_search", "ai_draft_reply", "notifications_list"],
     "contacts": ["contacts_search", "contact_get", "contacts_create", "contacts_update", "contacts_delete", "contacts_import", "contacts_export", "contact_notes_list", "contact_note_add", "opt_in_record", "tags_list", "tag_save", "tag_delete", "segments_list", "optouts_list", "blocklist_add"],
-    "leads": ["leads_list", "lead_update", "lead_create", "pipelines_list", "pipeline_create"],
+    "leads": ["leads_list", "lead_update", "lead_create", "lead_delete", "pipelines_list", "pipeline_create"],
     "campaigns": ["templates_list", "templates_create", "templates_sync", "templates_delete", "broadcasts_list", "broadcast_get", "broadcast_create", "broadcast_cancel", "broadcast_delete"],
-    "automation": ["automations_list", "automation_toggle", "automation_logs", "flows_list", "flow_toggle", "flow_create", "flow_runs", "quick_replies_list", "quick_reply_save"],
+    "automation": ["automations_list", "automation_toggle", "automation_logs", "flows_list", "flow_get", "flow_toggle", "flow_create", "flow_update", "flow_delete", "flow_runs", "quick_replies_list", "quick_reply_save"],
     "ai": ["assistants_list", "assistants_get", "assistants_create", "assistants_update", "assistants_delete", "assistants_test_reply", "knowledge_list", "knowledge_add", "knowledge_update", "knowledge_delete", "tools_list", "tools_set_enabled", "ai_models_available"],
     "whatsapp": ["whatsapp_status", "whatsapp_profile_get", "whatsapp_profile_update"],
     "team": ["team_list", "team_set_role", "team_remove", "team_invite", "team_activity"],
@@ -1314,6 +1314,43 @@ def build_mcp(get_app) -> MCPServer:
         if not confirm:
             return preview("create this flow" + (" and switch it on" if activate else " (as a draft)"), **{k: v for k, v in checked.items() if k != "ok"})
         return await call("POST", "/v1/ws/flows", json_body=body)
+
+    @mcp.tool()
+    async def flow_get(flow_id: str) -> dict:
+        """A flow with all its steps, in the shape flow_create / flow_update take (edit it and send it back)."""
+        return await call("GET", f"/v1/ws/flows/{flow_id}")
+
+    @mcp.tool()
+    async def flow_update(flow_id: str, name: str, nodes: list[dict], trigger: str = "keyword", keywords: list[str] | None = None, match_type: str = "contains", entry: str | None = None, description: str | None = None, activate: bool = False, confirm: bool = False) -> dict:
+        """Admins: replace a flow's name, trigger and steps (same step format as flow_create; get the current
+        ones with flow_get). collect_input may add "validation": "email" | "phone" | "regex" with "regex";
+        create_lead may add "contact_name" (e.g. "{{vars.name}}"); handoff may add "assign_to" (a user id from
+        team_list). It keeps its on/off state unless activate=true. Shows old vs new first; needs confirm=true."""
+        body = {"name": name, "description": description, "trigger": trigger, "keywords": keywords or [], "match_type": match_type, "nodes": nodes, "entry": entry, "activate": activate}
+        checked = await call("PUT", f"/v1/ws/flows/{flow_id}", json_body={**body, "dry_run": True})
+        if not confirm:
+            return preview("replace this flow's steps", **{k: v for k, v in checked.items() if k != "ok"})
+        return await call("PUT", f"/v1/ws/flows/{flow_id}", json_body=body)
+
+    @mcp.tool()
+    async def flow_delete(flow_id: str, confirm: bool = False) -> dict:
+        """Admins: delete a flow and its steps (past chats and leads stay). Needs confirm=true."""
+        if not confirm:
+            flow = await call("GET", f"/v1/ws/flows/{flow_id}")
+            return preview("delete this flow", name=flow.get("name"), status=flow.get("status"), steps=len(flow.get("nodes", [])))
+        await call("DELETE", f"/v1/ws/flows/{flow_id}")
+        return {"ok": True, "deleted": flow_id}
+
+    @mcp.tool()
+    async def lead_delete(lead_id: str, confirm: bool = False) -> dict:
+        """Admins: delete a lead from the Leads page (the contact and chat stay). Needs confirm=true."""
+        if not confirm:
+            lead = next((x for x in await call("GET", "/v1/ws/leads", params={"limit": 200}) if x["id"] == lead_id), None)
+            if not lead:
+                raise ToolFailure("404: Lead not found")
+            return preview("delete this lead", title=lead.get("title"), pipeline=lead.get("pipeline"), stage=lead.get("stage"))
+        await call("DELETE", f"/v1/ws/leads/{lead_id}")
+        return {"ok": True, "deleted": lead_id}
 
     @mcp.tool()
     async def automation_logs(automation_id: str | None = None, status: str | None = None, limit: int = 50) -> list:

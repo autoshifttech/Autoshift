@@ -14,6 +14,7 @@ export interface CreateLeadCfg {
   title?: string;
   value?: string;
   notes?: string;
+  contact_name?: string;
   next_node_key?: string;
 }
 
@@ -97,6 +98,7 @@ export function CreateLeadForm({
       <TextRow label={t("title")} value={cfg.title ?? ""} onChange={(v) => onUpdateConfig({ title: v })} />
       <TextRow label={t("value")} value={cfg.value ?? ""} onChange={(v) => onUpdateConfig({ value: v })} />
       <TextRow label={t("notes")} value={cfg.notes ?? ""} onChange={(v) => onUpdateConfig({ notes: v })} rows={3} />
+      <TextRow label={t.raw("contactName") as string} value={cfg.contact_name ?? ""} onChange={(v) => onUpdateConfig({ contact_name: v })} />
       <p className="text-xs text-muted-foreground">{t.raw("help") as string}</p>
       <NextNodeRow value={cfg.next_node_key ?? ""} allNodes={allNodes} currentKey={currentKey} onChange={(v) => onUpdateConfig({ next_node_key: v })} label={t("then")} />
     </>

@@ -1481,7 +1481,8 @@
           "value": "Valor (₹, opcional)",
           "notes": "Notas",
           "help": "Usa {{vars.name}} para respuestas guardadas antes en este flujo y {{contact.name}} o {{contact.phone}} para el cliente. Si aún no hay embudo, se crea uno de Ventas.",
-          "then": "Después ir a"
+          "then": "Después ir a",
+          "contactName": "Guardar como nombre del cliente (opcional, p. ej. {{vars.name}})"
         }
       },
       "categories": {

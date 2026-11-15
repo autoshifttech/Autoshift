@@ -1481,7 +1481,8 @@
           "value": "Value (₹, optional)",
           "notes": "Notes",
           "help": "Use {{vars.name}} for answers saved earlier in this flow, and {{contact.name}} or {{contact.phone}} for the customer. With no pipeline yet, a Sales pipeline is made.",
-          "then": "Then go to"
+          "then": "Then go to",
+          "contactName": "Save as the customer's name (optional, e.g. {{vars.name}})"
         }
       },
       "categories": {

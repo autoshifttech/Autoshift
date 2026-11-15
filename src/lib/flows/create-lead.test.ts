@@ -94,3 +94,23 @@ describe("create_lead flow step", () => {
     expect(h.tables.deals[0].pipeline_id).not.toBe("px");
   });
 });
+
+describe("collect_input checks and the typed name", () => {
+  it("accepts only answers that pass the step's check", async () => {
+    const { answerPasses } = await import("./engine");
+    expect(answerPasses({ validation: "regex", regex: "^L\\d{3}$" }, "l005")).toBe(true);
+    expect(answerPasses({ validation: "regex", regex: "^L\\d{3}$" }, "Hello")).toBe(false);
+    expect(answerPasses({ validation: "email" }, "a@b.co")).toBe(true);
+    expect(answerPasses({ validation: "phone" }, "+91 98765 43210")).toBe(true);
+    expect(answerPasses({ validation: "phone" }, "call me")).toBe(false);
+    expect(answerPasses({ validation: "regex", regex: "([" }, "x")).toBe(true);
+    expect(answerPasses({}, "anything")).toBe(true);
+  });
+
+  it("saves the typed name on the contact and uses it in the lead", async () => {
+    setup({}, { contact_name: "Praveen", title: "Visit – {{contact.name}}" });
+    await visit();
+    expect(h.tables.contacts[0].name).toBe("Praveen");
+    expect(h.tables.deals[0].title).toBe("Visit – Praveen");
+  });
+});

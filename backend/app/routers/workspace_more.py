@@ -582,6 +582,13 @@ def _flow_problems(body: FlowCreate) -> list[str]:
             need(n, c.get("false_next"), "the 'no' step")
         if n.type == "create_lead" and not str(c.get("title", "")).strip():
             out.append(f"'{n.key}': the lead title is empty")
+        if n.type == "collect_input" and c.get("validation") == "regex":
+            try:
+                re.compile(str(c.get("regex", "")))
+            except re.error:
+                out.append(f"'{n.key}': the regex pattern is not valid")
+        if n.type == "handoff" and c.get("assign_to") and not re.fullmatch(r"[0-9a-fA-F-]{36}", str(c["assign_to"])):
+            out.append(f"'{n.key}': assign_to must be a team member's user id (see team_list)")
         if n.type == "set_tag" and not (c.get("tag") or c.get("tag_id")):
             out.append(f"'{n.key}': choose a tag")
     return out
@@ -636,3 +643,56 @@ async def create_flow(body: FlowCreate, ctx: AdminMember, sdb: ServiceDb):
         await sdb.update("flows", {"id": flow["id"], "account_id": ctx.account_id}, {"status": "active"})
     await audit.record(sdb, scope="account", action="flow.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=flow["id"], details={"name": body.name, "steps": len(nodes), "active": body.activate})
     return {"id": flow["id"], "status": "active" if body.activate else "draft", **summary}
+
+
+async def _flow_view(sdb, account_id: str, flow_id: str) -> dict:
+    flow = await _own(sdb, "flows", account_id, flow_id, "Flow")
+    nodes = await sdb.select("flow_nodes", {"flow_id": flow_id}, order="position_y.asc")
+    return {
+        "id": flow["id"], "name": flow.get("name"), "description": flow.get("description"), "status": flow.get("status"),
+        "trigger": flow.get("trigger_type"), "keywords": (flow.get("trigger_config") or {}).get("keywords", []),
+        "match_type": (flow.get("trigger_config") or {}).get("match_type", "contains"), "entry": flow.get("entry_node_id"),
+        "nodes": [{"key": n["node_key"], "type": n["node_type"], "config": n.get("config") or {}} for n in nodes],
+    }
+
+
+@router.get("/flows/{flow_id}")
+async def get_flow(flow_id: str, ctx: Member, sdb: ServiceDb):
+    """A flow with all its steps, in the same shape flow_create and flow_update take."""
+    return await _flow_view(sdb, ctx.account_id, flow_id)
+
+
+@router.put("/flows/{flow_id}")
+async def update_flow(flow_id: str, body: FlowCreate, ctx: AdminMember, sdb: ServiceDb):
+    """Replaces a flow's name, trigger and steps. Chats in the middle of a removed step end politely."""
+    before = await _flow_view(sdb, ctx.account_id, flow_id)
+    problems = _flow_problems(body)
+    if problems:
+        raise HTTPException(422, "; ".join(problems[:10]))
+    entry = body.entry or body.nodes[0].key
+    if body.dry_run:
+        return {"ok": True, "name": body.name, "trigger": body.trigger, "keywords": body.keywords, "entry": entry, "steps": [f"{n.key} ({n.type})" for n in body.nodes], "was": {"steps": [f"{n['key']} ({n['type']})" for n in before["nodes"]], "status": before["status"]}}
+    nodes = await _resolve_flow_refs(sdb, ctx, body)
+    trigger_config = {"keywords": [k.strip() for k in body.keywords if k.strip()], "match_type": body.match_type} if body.trigger == "keyword" else {}
+    await sdb.delete("flow_nodes", {"flow_id": flow_id})
+    for i, n in enumerate(nodes):
+        await sdb.insert("flow_nodes", {"flow_id": flow_id, **n, "position_x": 0, "position_y": i * 160})
+    status = "active" if body.activate else before["status"]
+    await sdb.update("flows", {"id": flow_id, "account_id": ctx.account_id}, {"name": body.name.strip(), "description": body.description, "trigger_type": body.trigger, "trigger_config": trigger_config, "entry_node_id": entry, "status": status, "updated_at": _now().isoformat()})
+    await audit.record(sdb, scope="account", action="flow.update", actor_id=ctx.user.id, account_id=ctx.account_id, target=flow_id, details={"steps": len(nodes), "status": status})
+    return await _flow_view(sdb, ctx.account_id, flow_id)
+
+
+@router.delete("/flows/{flow_id}", status_code=204)
+async def delete_flow(flow_id: str, ctx: AdminMember, sdb: ServiceDb):
+    flow = await _own(sdb, "flows", ctx.account_id, flow_id, "Flow")
+    await sdb.delete("flows", {"id": flow_id, "account_id": ctx.account_id})
+    await audit.record(sdb, scope="account", action="flow.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=flow_id, details={"name": flow.get("name")})
+
+
+@router.delete("/leads/{lead_id}", status_code=204)
+async def delete_lead(lead_id: str, ctx: AdminMember, sdb: ServiceDb):
+    """Deletes a lead (the contact and chat stay)."""
+    deal = await _own(sdb, "deals", ctx.account_id, lead_id, "Lead")
+    await sdb.delete("deals", {"id": lead_id, "account_id": ctx.account_id})
+    await audit.record(sdb, scope="account", action="lead.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=lead_id, details={"title": deal.get("title")})

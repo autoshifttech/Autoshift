@@ -611,6 +611,27 @@ function interpolateOptionalVars(
     : interpolateVars(template, vars);
 }
 
+/** The collect_input check: email, phone (8–15 digits), or the author's regex (case-insensitive). */
+export function answerPasses(cfg: Pick<CollectInputNodeConfig, "validation" | "regex">, text: string): boolean {
+  switch (cfg.validation) {
+    case "email":
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
+    case "phone": {
+      const digits = text.replace(/\D/g, "");
+      return digits.length >= 8 && digits.length <= 15;
+    }
+    case "regex":
+      if (!cfg.regex) return true;
+      try {
+        return new RegExp(cfg.regex, "i").test(text);
+      } catch {
+        return true; // a broken pattern never strands the customer
+      }
+    default:
+      return true;
+  }
+}
+
 /** "{{vars.x}}" and "{{contact.name}}" / "{{contact.phone}}" in lead fields. */
 function fillLeadText(template: string | undefined, vars: Record<string, unknown>, contact: { name?: string | null; phone?: string | null } | null): string {
   return interpolateVars(template ?? "", vars)
@@ -655,6 +676,13 @@ async function createLeadFromFlow(db: AdminClient, run: FlowRunRow, cfg: CreateL
     stageId = data?.id ?? null;
   }
   if (!stageId) throw new Error("The pipeline has no stages");
+
+  // The name the customer typed (e.g. {{vars.name}}) replaces their WhatsApp profile name.
+  const typedName = fillLeadText(cfg.contact_name, run.vars, contact).slice(0, 120);
+  if (typedName) {
+    await db.from("contacts").update({ name: typedName }).eq("id", run.contact_id).eq("account_id", run.account_id);
+    if (contact) contact.name = typedName;
+  }
 
   const title = (fillLeadText(cfg.title, run.vars, contact) || contact?.name || contact?.phone || "WhatsApp lead").slice(0, 200);
   const rawValue = fillLeadText(cfg.value, run.vars, contact).replace(/[^\d.]/g, "");
@@ -1211,7 +1239,9 @@ async function handleReplyForActiveRun(
   ) {
     const cfg = currentNode.config as unknown as CollectInputNodeConfig;
     const captured = message.text.trim();
-    if (captured.length > 0 && cfg.var_key && cfg.next_node_key) {
+    // An answer that fails the step's check (email, phone, or the author's pattern) isn't
+    // captured: it falls through to the fallback below, which asks again.
+    if (captured.length > 0 && cfg.var_key && cfg.next_node_key && answerPasses(cfg, captured)) {
       const newVars = { ...run.vars, [cfg.var_key]: captured };
       if (!(await claimReplyTransition(db, run, cfg.next_node_key, { vars: newVars }))) {
         return lostReplyRace(db, run, currentNode.node_key);

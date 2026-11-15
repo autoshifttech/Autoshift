@@ -1481,7 +1481,8 @@
           "value": "금액(₹, 선택)",
           "notes": "메모",
           "help": "이 플로우에서 앞서 저장한 답변은 {{vars.name}}, 고객 정보는 {{contact.name}} 또는 {{contact.phone}}을 사용하세요. 파이프라인이 없으면 영업 파이프라인이 만들어집니다.",
-          "then": "다음 단계"
+          "then": "다음 단계",
+          "contactName": "고객 이름으로 저장(선택, 예: {{vars.name}})"
         }
       },
       "categories": {

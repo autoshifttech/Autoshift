@@ -175,7 +175,7 @@ def test_each_key_type_sees_only_its_own_tools(client, world):
     assert business and admin
     assert not any((tool_group(n, TOOL_GROUPS) or "").startswith("admin") for n in business)
     assert all((tool_group(n, TOOL_GROUPS) or "").startswith("admin") or n in {"whoami", "custom_tools_list", "custom_tool_run"} for n in admin)
-    assert len(business) <= 95 and len(admin) <= 90
+    assert len(business) <= 100 and len(admin) <= 90
 
 
 def test_groups_narrow_the_tool_list(client, world):

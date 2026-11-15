@@ -1481,7 +1481,8 @@
           "value": "Valor (₹, opcional)",
           "notes": "Notas",
           "help": "Use {{vars.name}} para respostas salvas antes neste fluxo e {{contact.name}} ou {{contact.phone}} para o cliente. Sem funil ainda, um funil Vendas é criado.",
-          "then": "Depois ir para"
+          "then": "Depois ir para",
+          "contactName": "Salvar como nome do cliente (opcional, ex. {{vars.name}})"
         }
       },
       "categories": {

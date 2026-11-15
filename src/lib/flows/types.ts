@@ -184,6 +184,8 @@ export interface CreateLeadNodeConfig {
   title: string;
   value?: string;
   notes?: string;
+  /** Saves this (e.g. {{vars.name}}) as the contact's name, instead of their WhatsApp profile name. */
+  contact_name?: string;
   next_node_key: string;
 }
 
