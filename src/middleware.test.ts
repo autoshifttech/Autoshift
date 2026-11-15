@@ -232,3 +232,16 @@ describe("middleware — account types", () => {
     expect((await middleware(new NextRequest("https://app.test/dashboard"))).headers.get("location")).toBeNull();
   });
 });
+
+describe("middleware — admin token must match the signed-in person", () => {
+  it("sends the admin panel back to sign-in when another account is signed in", async () => {
+    process.env.AUTOSHIFT_INTERNAL_SECRET = "test-secret";
+    const { makeAdminToken } = await import("@/lib/admin/admin-token");
+    mockUser = { id: "business-1" };
+    const req = new NextRequest("https://app.test/admin");
+    req.cookies.set("autoshift_admin", await makeAdminToken("admin-1"));
+    const res = await middleware(req);
+    expect(new URL(res.headers.get("location")!).pathname).toBe("/admin/login");
+    delete process.env.AUTOSHIFT_INTERNAL_SECRET;
+  });
+});

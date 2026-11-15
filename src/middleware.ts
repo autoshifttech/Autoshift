@@ -17,11 +17,9 @@ export async function middleware(request: NextRequest) {
   // Platform admin panel: every /admin page but the sign-in needs a genuine, unexpired admin
   // device token (issued by /api/admin/login after the password and, when on, the WhatsApp code).
   const pathname = request.nextUrl.pathname
-  if (
-    (pathname === '/admin' || pathname.startsWith('/admin/')) &&
-    pathname !== '/admin/login' &&
-    !(await readAdminToken(request.cookies.get(ADMIN_COOKIE)?.value))
-  ) {
+  const adminPath = (pathname === '/admin' || pathname.startsWith('/admin/')) && pathname !== '/admin/login'
+  const adminTokenUser = adminPath ? await readAdminToken(request.cookies.get(ADMIN_COOKIE)?.value) : null
+  if (adminPath && !adminTokenUser) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/login'
     url.search = ''
@@ -67,6 +65,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+
   // getUser() transparently refreshes an expired access token, which
   // ROTATES the refresh token and writes the new cookies onto
   // `supabaseResponse` via setAll() above. Any response we return in
@@ -82,6 +81,17 @@ export async function middleware(request: NextRequest) {
       response.cookies.set(cookie)
     })
     return response
+  }
+
+  // One browser holds one sign-in. If it now belongs to someone else (e.g. the business account was
+  // signed in after the admin), the admin device token doesn't match: go back to the admin sign-in.
+  if (adminPath && (!user || user.id !== adminTokenUser)) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/admin/login'
+    url.search = ''
+    const res = NextResponse.redirect(url)
+    res.cookies.set(ADMIN_COOKIE, '', { path: '/', maxAge: 0 })
+    return withRefreshedCookies(res)
   }
 
   // Auth pages - redirect to dashboard if already logged in.

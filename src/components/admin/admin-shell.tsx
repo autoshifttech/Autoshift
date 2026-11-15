@@ -348,7 +348,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="mx-auto max-w-md p-8 text-center">
         <h1 className="text-lg font-semibold text-foreground">No admin access</h1>
         <p className="mt-2 text-sm text-muted-foreground">This account isn&apos;t on the AutoShift admin team. Ask a super admin to add you.</p>
-        <Link href="/dashboard" className="mt-4 inline-block text-sm font-medium text-primary hover:underline">Back to your workspace</Link>
+        <a
+          href="/admin/login"
+          onClick={() => setAdminCookie(false)}
+          className="mt-4 inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
+          Sign in with the admin account
+        </a>
+        <div>
+          <Link href="/dashboard" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">Back to your workspace</Link>
+        </div>
       </div>
     );
   }
