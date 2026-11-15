@@ -46,9 +46,9 @@ TOOL_GROUPS: dict[str, list[str]] = {
     "account": ["whoami", "usage_get", "subscription_get", "subscription_cancel", "plans_list", "wallet_balance", "wallet_ledger", "invoices_list", "wallet_topup_link", "usage_alerts"],
     "chats": ["conversations_list", "conversation_get", "conversation_update", "messages_send", "messages_search", "ai_draft_reply", "notifications_list"],
     "contacts": ["contacts_search", "contact_get", "contacts_create", "contacts_update", "contacts_delete", "contacts_import", "contacts_export", "contact_notes_list", "contact_note_add", "opt_in_record", "tags_list", "tag_save", "tag_delete", "segments_list", "optouts_list", "blocklist_add"],
-    "leads": ["leads_list", "lead_update", "lead_create", "pipelines_list"],
+    "leads": ["leads_list", "lead_update", "lead_create", "pipelines_list", "pipeline_create"],
     "campaigns": ["templates_list", "templates_create", "templates_sync", "templates_delete", "broadcasts_list", "broadcast_get", "broadcast_create", "broadcast_cancel", "broadcast_delete"],
-    "automation": ["automations_list", "automation_toggle", "automation_logs", "flows_list", "flow_toggle", "flow_runs", "quick_replies_list", "quick_reply_save"],
+    "automation": ["automations_list", "automation_toggle", "automation_logs", "flows_list", "flow_toggle", "flow_create", "flow_runs", "quick_replies_list", "quick_reply_save"],
     "ai": ["assistants_list", "assistants_get", "assistants_create", "assistants_update", "assistants_delete", "assistants_test_reply", "knowledge_list", "knowledge_add", "knowledge_update", "knowledge_delete", "tools_list", "tools_set_enabled", "ai_models_available"],
     "whatsapp": ["whatsapp_status", "whatsapp_profile_get", "whatsapp_profile_update"],
     "team": ["team_list", "team_set_role", "team_remove", "team_invite", "team_activity"],
@@ -249,14 +249,17 @@ def build_mcp(get_app) -> MCPServer:
         return await call("GET", f"/v1/assistants/{assistant_id}")
 
     @mcp.tool()
-    async def assistants_create(name: str, instructions: str = "", greeting: str = "", provider: str = "openai", model_id: str = "", tone: str = "friendly") -> dict:
-        """Create an AI assistant (needs a write key and the admin role). It starts switched off."""
-        return await call("POST", "/v1/assistants", json_body={"name": name, "instructions": instructions, "greeting": greeting, "provider": provider, "model_id": model_id, "tone": tone})
+    async def assistants_create(name: str, instructions: str = "", greeting: str = "", provider: str = "openai", model_id: str = "", tone: str = "friendly", knowledge: list[dict] | None = None) -> dict:
+        """Create an AI assistant (needs a write key and the admin role). It starts switched off.
+        knowledge: facts it answers from, [{"q": "short topic", "a": "the facts"}] (up to 30 are always used whole).
+        Switched on, it answers WhatsApp chats automatically (each reply is charged to the wallet)."""
+        return await call("POST", "/v1/assistants", json_body={"name": name, "instructions": instructions, "greeting": greeting, "provider": provider, "model_id": model_id, "tone": tone, "knowledge": knowledge or []})
 
     @mcp.tool()
-    async def assistants_update(assistant_id: str, name: str | None = None, instructions: str | None = None, greeting: str | None = None, enabled: bool | None = None, tone: str | None = None, provider: str | None = None, model_id: str | None = None) -> dict:
-        """Change an assistant. Only the fields you pass are changed."""
-        patch = {k: v for k, v in {"name": name, "instructions": instructions, "greeting": greeting, "enabled": enabled, "tone": tone, "provider": provider, "model_id": model_id}.items() if v is not None}
+    async def assistants_update(assistant_id: str, name: str | None = None, instructions: str | None = None, greeting: str | None = None, enabled: bool | None = None, tone: str | None = None, provider: str | None = None, model_id: str | None = None, knowledge: list[dict] | None = None) -> dict:
+        """Change an assistant. Only the fields you pass are changed. knowledge replaces the whole fact list
+        ([{"q": ..., "a": ...}]). enabled=true makes it answer WhatsApp chats automatically (charged per reply)."""
+        patch = {k: v for k, v in {"name": name, "instructions": instructions, "greeting": greeting, "enabled": enabled, "tone": tone, "provider": provider, "model_id": model_id, "knowledge": knowledge}.items() if v is not None}
         if not patch:
             raise ToolFailure("Nothing to change")
         return await call("PATCH", f"/v1/assistants/{assistant_id}", json_body=patch)
@@ -1281,6 +1284,36 @@ def build_mcp(get_app) -> MCPServer:
         pipeline and stage take a name or id; empty = the first pipeline and its first stage."""
         body = {"title": title, "contact_id": contact_id, "phone": phone, "name": name, "pipeline": pipeline, "stage": stage, "value": value, "currency": currency, "notes": notes, "expected_close_date": expected_close_date}
         return await call("POST", "/v1/ws/leads", json_body=body)
+
+    @mcp.tool()
+    async def pipeline_create(name: str, stages: list[str], confirm: bool = False) -> dict:
+        """Admins: create a lead pipeline with its stages in order, e.g. "Land sales" with
+        ["New", "Visit booked", "Visited", "Negotiation", "Won"]. Needs confirm=true."""
+        if not confirm:
+            return preview("create this lead pipeline", name=name, stages=stages)
+        return await call("POST", "/v1/ws/pipelines", json_body={"name": name, "stages": stages})
+
+    @mcp.tool()
+    async def flow_create(name: str, nodes: list[dict], trigger: str = "keyword", keywords: list[str] | None = None, match_type: str = "contains", entry: str | None = None, description: str | None = None, activate: bool = False, confirm: bool = False) -> dict:
+        """Admins: create a chatbot flow. nodes = [{"key": "ask_land", "type": "...", "config": {...}}], run from
+        `entry` (default: the first node). trigger: keyword (with keywords), first_inbound_message or manual.
+        Step types and their config:
+          send_message  {"text", "next_node_key"}
+          collect_input {"prompt_text", "var_key", "next_node_key"}  → the answer is {{vars.<var_key>}}
+          send_buttons  {"text", "buttons": [{"title" ≤20 chars, "next_node_key"}] (1–3)}
+          send_list     {"text", "button_label" ≤20, "sections": [{"title", "rows": [{"title" ≤24, "description", "next_node_key"}]}] (≤10 rows)}
+                        → the tapped button/row title is {{vars.<this step's key>}}
+          condition     {"subject": "var"|"tag", "subject_key", "operator": "equals"|"contains"|"present"|"absent", "value", "true_next", "false_next"}
+          set_tag       {"tag": "name" (made if new), "mode": "add"|"remove", "next_node_key"}
+          create_lead   {"title", "value", "notes", "pipeline": "name", "stage": "name", "next_node_key"}  (adds a lead to the Leads page)
+          handoff       {"note"} (assigns the chat to a person and ends)   end {}
+        Texts may use {{vars.x}}; lead fields also {{contact.name}} / {{contact.phone}}.
+        Checks everything first and shows a preview; needs confirm=true. activate=true switches it on."""
+        body = {"name": name, "description": description, "trigger": trigger, "keywords": keywords or [], "match_type": match_type, "nodes": nodes, "entry": entry, "activate": activate}
+        checked = await call("POST", "/v1/ws/flows", json_body={**body, "dry_run": True})
+        if not confirm:
+            return preview("create this flow" + (" and switch it on" if activate else " (as a draft)"), **{k: v for k, v in checked.items() if k != "ok"})
+        return await call("POST", "/v1/ws/flows", json_body=body)
 
     @mcp.tool()
     async def automation_logs(automation_id: str | None = None, status: str | None = None, limit: int = 50) -> list:

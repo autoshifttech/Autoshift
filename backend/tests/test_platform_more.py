@@ -154,3 +154,13 @@ def test_daily_report_counts_open_tickets_and_whoami_for_platform_keys(client, w
     assert client.get("/v1/platform/reports/daily", headers=S(world)).json()["open_tickets"] == 1
     err, text = call_tool(client, _platform_key(client, world), "whoami")
     assert not err and '"platform_admin": "super_admin"' in text
+
+
+def test_assistant_uses_the_whole_short_fact_list():
+    from app.ai_runner import build_system
+
+    lands = [{"q": f"L00{i} plot", "a": f"Land L00{i} details"} for i in range(1, 11)]
+    prompt = build_system({"name": "Land Assistant", "knowledge": lands}, "anything under 15 lakh?")
+    assert all(f"Land L00{i} details" in prompt for i in range(1, 11))
+    many = [{"q": f"topic {i}", "a": f"fact {i}"} for i in range(40)]
+    assert build_system({"name": "x", "knowledge": many}, "topic 3").count("Q: ") <= 8

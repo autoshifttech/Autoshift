@@ -8,6 +8,7 @@ agents act on chats and contacts, admins change settings, and every change is in
 
 import csv
 import io
+import re
 from dataclasses import asdict
 from datetime import timedelta
 from typing import Annotated, Any, Literal
@@ -481,3 +482,157 @@ async def team_activity(ctx: AdminMember, sdb: ServiceDb, user_id: str | None = 
         name = people.get(r.get("actor_id")) or "API / system"
         by_person[name] = by_person.get(name, 0) + 1
     return {"by_person": by_person, "events": [{"who": people.get(r.get("actor_id")) or "API / system", "action": r.get("action"), "target": r.get("target"), "at": r.get("created_at")} for r in rows]}
+
+
+# ------------------------------------------------------------------ pipelines and flows (create)
+class PipelineCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=80)
+    stages: list[str] = Field(..., min_length=1, max_length=12)
+
+
+@router.post("/pipelines", status_code=201)
+async def create_pipeline(body: PipelineCreate, ctx: AdminMember, sdb: ServiceDb):
+    """A lead pipeline with its stages in order."""
+    if any(p["name"].lower() == body.name.strip().lower() for p in await sdb.select("pipelines", {"account_id": ctx.account_id})):
+        raise HTTPException(409, "A pipeline with that name already exists")
+    names = [s.strip()[:40] for s in body.stages if s.strip()]
+    if len(set(n.lower() for n in names)) != len(names):
+        raise HTTPException(422, "Stage names must be different")
+    pipe = await sdb.insert("pipelines", {"account_id": ctx.account_id, "user_id": ctx.user.id, "name": body.name.strip()})
+    for i, n in enumerate(names):
+        await sdb.insert("pipeline_stages", {"pipeline_id": pipe["id"], "name": n, "position": i})
+    await audit.record(sdb, scope="account", action="pipeline.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=pipe["id"], details={"name": pipe["name"], "stages": names})
+    return next(p for p in await _pipelines(sdb, ctx.account_id) if p["id"] == pipe["id"])
+
+
+FLOW_NODE_TYPES = {"start", "send_message", "send_buttons", "send_list", "send_media", "collect_input", "condition", "set_tag", "create_lead", "handoff", "end"}
+NEXT_SINGLE = {"start", "send_message", "send_media", "collect_input", "set_tag", "create_lead"}
+
+
+class FlowNodeIn(BaseModel):
+    key: str = Field(..., pattern=r"^[a-z][a-z0-9_]{0,39}$")
+    type: str
+    config: dict[str, Any] = {}
+
+
+class FlowCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=80)
+    description: str | None = Field(None, max_length=300)
+    trigger: Literal["keyword", "first_inbound_message", "manual"] = "keyword"
+    keywords: list[str] = Field([], max_length=20)
+    match_type: Literal["contains", "exact"] = "contains"
+    nodes: list[FlowNodeIn] = Field(..., min_length=1, max_length=40)
+    entry: str | None = None
+    activate: bool = False
+    dry_run: bool = False
+
+
+def _flow_problems(body: FlowCreate) -> list[str]:
+    """The same rules the flow editor checks, so a flow made here opens cleanly there."""
+    keys = [n.key for n in body.nodes]
+    out: list[str] = []
+    if len(set(keys)) != len(keys):
+        out.append("Step keys must be unique")
+    known = set(keys)
+    if body.entry and body.entry not in known:
+        out.append(f"The entry step '{body.entry}' doesn't exist")
+    if body.trigger == "keyword" and not [k for k in body.keywords if k.strip()]:
+        out.append("A keyword flow needs at least one keyword")
+
+    def need(node: FlowNodeIn, target: Any, what: str) -> None:
+        if not target:
+            out.append(f"'{node.key}': {what} is missing")
+        elif target not in known:
+            out.append(f"'{node.key}': {what} points to a missing step '{target}'")
+
+    for n in body.nodes:
+        c = n.config
+        if n.type not in FLOW_NODE_TYPES:
+            out.append(f"'{n.key}': unknown step type '{n.type}'")
+            continue
+        if n.type in NEXT_SINGLE:
+            need(n, c.get("next_node_key"), "the next step")
+        if n.type == "send_message" and not str(c.get("text", "")).strip():
+            out.append(f"'{n.key}': the message text is empty")
+        if n.type == "collect_input":
+            if not str(c.get("prompt_text", "")).strip():
+                out.append(f"'{n.key}': the question (prompt_text) is empty")
+            if not re.fullmatch(r"[a-z][a-z0-9_]{0,39}", str(c.get("var_key", ""))):
+                out.append(f"'{n.key}': var_key must be a short name like 'land'")
+        if n.type == "send_buttons":
+            buttons = c.get("buttons") or []
+            if not 1 <= len(buttons) <= 3:
+                out.append(f"'{n.key}': WhatsApp allows 1 to 3 buttons")
+            for b in buttons:
+                if not 1 <= len(str(b.get("title", ""))) <= 20:
+                    out.append(f"'{n.key}': button titles must be 1–20 characters ('{b.get('title', '')}')")
+                need(n, b.get("next_node_key"), f"the step after button '{b.get('title', '')}'")
+        if n.type == "send_list":
+            rows = [r for s in (c.get("sections") or []) for r in (s.get("rows") or [])]
+            if not 1 <= len(rows) <= 10:
+                out.append(f"'{n.key}': WhatsApp allows 1 to 10 list rows")
+            if not 1 <= len(str(c.get("button_label", ""))) <= 20:
+                out.append(f"'{n.key}': button_label must be 1–20 characters")
+            for r in rows:
+                if not 1 <= len(str(r.get("title", ""))) <= 24:
+                    out.append(f"'{n.key}': list row titles must be 1–24 characters ('{r.get('title', '')}')")
+                need(n, r.get("next_node_key"), f"the step after row '{r.get('title', '')}'")
+        if n.type == "condition":
+            need(n, c.get("true_next"), "the 'yes' step")
+            need(n, c.get("false_next"), "the 'no' step")
+        if n.type == "create_lead" and not str(c.get("title", "")).strip():
+            out.append(f"'{n.key}': the lead title is empty")
+        if n.type == "set_tag" and not (c.get("tag") or c.get("tag_id")):
+            out.append(f"'{n.key}': choose a tag")
+    return out
+
+
+async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
+    """Names to ids: a tag name (made if new) and a pipeline/stage name for create_lead."""
+    pipes = await _pipelines(sdb, ctx.account_id)
+    out = []
+    for n in body.nodes:
+        c = dict(n.config)
+        if n.type == "set_tag" and c.get("tag") and not c.get("tag_id"):
+            from .workspace_ops import _tag_id
+
+            c = {"mode": c.get("mode", "add"), "tag_id": await _tag_id(sdb, ctx, str(c.pop("tag"))), "next_node_key": c.get("next_node_key")}
+        if n.type == "create_lead":
+            want_pipe, want_stage = c.pop("pipeline", None), c.pop("stage", None)
+            pipe = next((p for p in pipes if want_pipe and (p["id"] == want_pipe or p["name"].lower() == str(want_pipe).lower())), None)
+            if want_pipe and not pipe:
+                raise HTTPException(422, f"'{n.key}': no pipeline '{want_pipe}'. Pipelines: {', '.join(p['name'] for p in pipes) or 'none yet'}")
+            stage = next((s for s in (pipe or {}).get("stages", []) if want_stage and (s["id"] == want_stage or s["name"].lower() == str(want_stage).lower())), None)
+            if want_stage and not stage:
+                raise HTTPException(422, f"'{n.key}': no stage '{want_stage}' in that pipeline")
+            c["pipeline_id"] = pipe["id"] if pipe else ""
+            c["stage_id"] = stage["id"] if stage else ""
+        if n.type in ("send_buttons", "send_list"):
+            # Reply ids the editor would make; titles stay as given.
+            if n.type == "send_buttons":
+                c["buttons"] = [{**b, "reply_id": b.get("reply_id") or f"b{i + 1}"} for i, b in enumerate(c.get("buttons") or [])]
+            else:
+                c["sections"] = [{**s, "rows": [{**r, "reply_id": r.get("reply_id") or f"r{si + 1}_{ri + 1}"} for ri, r in enumerate(s.get("rows") or [])]} for si, s in enumerate(c.get("sections") or [])]
+        out.append({"node_key": n.key, "node_type": n.type, "config": c})
+    return out
+
+
+@router.post("/flows", status_code=201)
+async def create_flow(body: FlowCreate, ctx: AdminMember, sdb: ServiceDb):
+    """A chatbot flow with its steps. dry_run checks it without saving."""
+    problems = _flow_problems(body)
+    if problems:
+        raise HTTPException(422, "; ".join(problems[:10]))
+    nodes = await _resolve_flow_refs(sdb, ctx, body) if not body.dry_run else [{"node_key": n.key, "node_type": n.type} for n in body.nodes]
+    entry = body.entry or body.nodes[0].key
+    summary = {"name": body.name, "trigger": body.trigger, "keywords": body.keywords, "entry": entry, "steps": [f"{n['node_key']} ({n['node_type']})" for n in nodes], "activate": body.activate}
+    if body.dry_run:
+        return {"ok": True, **summary}
+    trigger_config = {"keywords": [k.strip() for k in body.keywords if k.strip()], "match_type": body.match_type} if body.trigger == "keyword" else {}
+    flow = await sdb.insert("flows", {"account_id": ctx.account_id, "user_id": ctx.user.id, "name": body.name.strip(), "description": body.description, "status": "draft", "trigger_type": body.trigger, "trigger_config": trigger_config, "entry_node_id": entry})
+    for i, n in enumerate(nodes):
+        await sdb.insert("flow_nodes", {"flow_id": flow["id"], **n, "position_x": 0, "position_y": i * 160})
+    if body.activate:
+        await sdb.update("flows", {"id": flow["id"], "account_id": ctx.account_id}, {"status": "active"})
+    await audit.record(sdb, scope="account", action="flow.create", actor_id=ctx.user.id, account_id=ctx.account_id, target=flow["id"], details={"name": body.name, "steps": len(nodes), "active": body.activate})
+    return {"id": flow["id"], "status": "active" if body.activate else "draft", **summary}

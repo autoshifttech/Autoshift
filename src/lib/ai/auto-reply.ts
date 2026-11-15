@@ -13,6 +13,7 @@ import {
 } from '@/lib/flows/meta-send'
 import { sendTypingIndicator } from '@/lib/whatsapp/meta-api'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { assistantReply, internalConfigured } from '@/lib/backend/internal'
 
 interface DispatchArgs {
   /** Tenancy key — drives config, contact, and whatsapp_config lookups. */
@@ -62,7 +63,11 @@ export async function dispatchInboundToAiReply(
     const db = supabaseAdmin()
 
     const config = await loadAiConfig(db, accountId)
-    if (!config || !config.autoReplyEnabled) return
+    if (!config || !config.autoReplyEnabled) {
+      // No own-key AI set up: use the business's switched-on AI assistant (platform AI, wallet-charged).
+      await replyWithAssistant(db, args)
+      return
+    }
 
     // Deterministic, user-configured responders win over the LLM — the
     // caller already excludes messages a Flow consumed. Message-level
@@ -262,4 +267,58 @@ async function showTypingIndicator(
   } catch (err) {
     console.warn('[ai auto-reply] typing indicator failed (continuing):', err)
   }
+}
+
+/** Same gates as the own-key path: automations and humans win, handed-off chats stay quiet. */
+async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: DispatchArgs): Promise<void> {
+  const { accountId, conversationId, contactId, configOwnerUserId, inboundMessageId } = args
+  if (!internalConfigured()) return
+  const { data: assistant } = await db
+    .from('assistants')
+    .select('id')
+    .eq('account_id', accountId)
+    .eq('enabled', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (!assistant) return
+
+  const { data: autoResponders } = await db
+    .from('automations')
+    .select('id')
+    .eq('account_id', accountId)
+    .eq('is_active', true)
+    .in('trigger_type', ['new_message_received', 'keyword_match'])
+    .limit(1)
+  if (autoResponders && autoResponders.length > 0) return
+
+  const { data: conv } = await db
+    .from('conversations')
+    .select('assigned_agent_id, ai_autoreply_disabled, ai_reply_count')
+    .eq('id', conversationId)
+    .maybeSingle()
+  if (!conv || conv.assigned_agent_id || conv.ai_autoreply_disabled) return
+
+  const messages = await buildConversationContext(db, conversationId)
+  if (messages.length === 0) return
+  const message = latestUserMessage(messages)
+  if (!message) return
+  const lastUser = messages.map((m) => m.role).lastIndexOf('user')
+  const history = messages.slice(0, lastUser).map((m) => ({ role: m.role === 'user' ? ('user' as const) : ('assistant' as const), content: m.content }))
+
+  if (inboundMessageId) await showTypingIndicator(db, accountId, inboundMessageId)
+  const out = await assistantReply({ accountId, assistantId: assistant.id as string, message, history, ref: inboundMessageId || `${conversationId}:${messages.length}` })
+  if (!out) return
+
+  if (out.status === 'handoff') {
+    const summary = buildHandoffSummary({ messages, replyCount: conv.ai_reply_count ?? 0 })
+    await db.from('conversations').update({ ai_autoreply_disabled: true, ai_handoff_summary: summary }).eq('id', conversationId)
+    return
+  }
+  if (out.status !== 'reply' || !out.text) {
+    if (out.status !== 'off') console.warn(`[ai auto-reply] assistant gave no reply for ${accountId}: ${out.status} ${out.reason}`)
+    return
+  }
+  if (inboundMessageId && (await hasNewerInbound(db, conversationId, inboundMessageId))) return
+  await engineSendText({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, aiGenerated: true })
 }

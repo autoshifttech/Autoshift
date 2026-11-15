@@ -46,7 +46,10 @@ def build_system(assistant: dict, message: str) -> str:
     parts = [f"You are {assistant['name']}, a WhatsApp assistant for a business.", TONES.get(assistant.get("tone", "friendly"), "")]
     if assistant.get("instructions"):
         parts.append(assistant["instructions"])
-    facts = pick_knowledge(assistant.get("knowledge") or [], message)
+    knowledge = assistant.get("knowledge") or []
+    # A short list (a price list, a few listings) is given whole, so the AI can compare and filter;
+    # a long one is narrowed to the entries that match the customer's words.
+    facts = [f for f in knowledge if f.get("q") or f.get("a")] if len(knowledge) <= 30 else pick_knowledge(knowledge, message, limit=8)
     if facts:
         parts.append("Answer only from these facts when they apply:\n" + "\n".join(f"Q: {f['q']}\nA: {f['a']}" for f in facts))
     if (assistant.get("handoff") or {}).get("onUnknown", True):

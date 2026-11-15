@@ -85,3 +85,35 @@ def test_history_quick_replies_knowledge_profile_activity_hooks(client, world, b
     assert client.patch("/v1/hooks/h1", json={"enabled": False}, headers=admin).json()["enabled"] is False
     assert client.patch("/v1/hooks/h1", json={"events": ["nope"]}, headers=admin).status_code == 422
     assert client.patch("/v1/hooks/h1", json={"enabled": True}, headers=world.headers("admin_b")).status_code == 404
+
+
+def test_create_pipeline_and_flow(client, world):
+    admin, agent = world.headers("admin_a"), world.headers("agent_a")
+    body = {"name": "Land sales", "stages": ["New", "Visit booked", "Won"]}
+    assert client.post("/v1/ws/pipelines", json=body, headers=agent).status_code == 403
+    pipe = client.post("/v1/ws/pipelines", json=body, headers=admin).json()
+    assert [s["name"] for s in pipe["stages"]] == ["New", "Visit booked", "Won"]
+    assert client.post("/v1/ws/pipelines", json=body, headers=admin).status_code == 409
+
+    flow = {
+        "name": "Site visit booking", "trigger": "keyword", "keywords": ["visit"],
+        "nodes": [
+            {"key": "ask_land", "type": "collect_input", "config": {"prompt_text": "Which land?", "var_key": "land", "next_node_key": "slot"}},
+            {"key": "slot", "type": "send_list", "config": {"text": "Pick a time", "button_label": "Times", "sections": [{"title": "Slots", "rows": [{"title": "Morning 10-12", "next_node_key": "tag"}]}]}},
+            {"key": "tag", "type": "set_tag", "config": {"tag": "Site visit", "next_node_key": "lead"}},
+            {"key": "lead", "type": "create_lead", "config": {"title": "{{vars.land}} visit {{vars.slot}}", "pipeline": "Land sales", "stage": "Visit booked", "next_node_key": "done"}},
+            {"key": "done", "type": "send_message", "config": {"text": "Booked!", "next_node_key": "bye"}},
+            {"key": "bye", "type": "end", "config": {}},
+        ],
+    }
+    dry = client.post("/v1/ws/flows", json={**flow, "dry_run": True}, headers=admin).json()
+    assert dry["entry"] == "ask_land" and len(dry["steps"]) == 6 and not world.store.get("flows")
+    bad = client.post("/v1/ws/flows", json={**flow, "nodes": flow["nodes"][:2]}, headers=admin)
+    assert bad.status_code == 422 and "missing step 'tag'" in bad.json()["detail"]
+    made = client.post("/v1/ws/flows", json={**flow, "activate": True}, headers=admin).json()
+    assert made["status"] == "active"
+    nodes = {n["node_key"]: n for n in world.store["flow_nodes"] if n["flow_id"] == made["id"]}
+    stage = next(s for s in pipe["stages"] if s["name"] == "Visit booked")
+    assert nodes["lead"]["config"]["pipeline_id"] == pipe["id"] and nodes["lead"]["config"]["stage_id"] == stage["id"]
+    assert nodes["tag"]["config"]["tag_id"] and nodes["slot"]["config"]["sections"][0]["rows"][0]["reply_id"]
+    assert client.post("/v1/ws/flows", json={**flow, "nodes": [*flow["nodes"][:3], {**flow["nodes"][3], "config": {**flow["nodes"][3]["config"], "pipeline": "Nope"}}, *flow["nodes"][4:]]}, headers=admin).status_code == 422

@@ -1227,9 +1227,14 @@ async function handleReplyForActiveRun(
   }
 
   if (matched) {
-    if (!(await claimReplyTransition(db, run, matched))) {
+    // The tapped button / list row is kept as {{vars.<step name>}} (e.g. a chosen time slot), so
+    // later steps — a confirmation, a new lead — can use it.
+    const choice = message.kind === "interactive_reply" ? (message.reply_title || message.reply_id || "").slice(0, 200) : "";
+    const newVars = choice ? { ...run.vars, [currentNode.node_key]: choice } : run.vars;
+    if (!(await claimReplyTransition(db, run, matched, choice ? { vars: newVars } : undefined))) {
       return lostReplyRace(db, run, currentNode.node_key);
     }
+    run.vars = newVars;
     const outcome = await advanceFromNodeKey(db, run, matched, nodes);
     return {
       consumed: true,
