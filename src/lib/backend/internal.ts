@@ -73,7 +73,7 @@ export async function assistantReply(args: { accountId: string; assistantId: str
       headers: { 'Content-Type': 'application/json', 'X-AutoShift-Internal': c.secret },
       body: JSON.stringify({ account_id: args.accountId, assistant_id: args.assistantId, message: args.message.slice(0, 4000), history: args.history.slice(-40), ref: args.ref }),
       // A model call: give it longer than the bookkeeping calls above.
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(50000),
     })
     if (!res.ok) {
       console.error('[backend] ai-reply refused:', res.status)

@@ -5,6 +5,7 @@ Order matters: nothing is charged unless a reply was actually produced, and a
 retry with the same `ref` is never charged twice (wallet idempotency).
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from typing import Literal
@@ -21,6 +22,8 @@ TONES = {
     "professional": "Be polite and professional.",
     "concise": "Be brief: one or two short sentences.",
 }
+
+log = logging.getLogger("autoshift.ai")
 
 
 @dataclass(frozen=True)
@@ -64,8 +67,10 @@ async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None
     models = [m for m in await sdb.select("platform_ai_models", {"enabled": "true"}) if m["vendor"] in providers]
     chosen = next((m for m in models if m["vendor"] == assistant.get("provider") and m["model_id"] == assistant.get("model_id")), None)
     chosen = chosen or next((m for m in models if m["is_default"]), None)
-    # The default's provider may be switched off: use any switched-on model rather than none.
-    chosen = chosen or (models[0] if models else None)
+    # The default's provider may be switched off: use a switched-on model rather than none,
+    # preferring fast, stable ones over previews.
+    rank = {"fast": 0, "value": 1, "balanced": 2, "newest": 3}
+    chosen = chosen or (sorted(models, key=lambda m: (rank.get(m.get("tier") or "", 5), "preview" in str(m["model_id"])))[0] if models else None)
     return (chosen["vendor"], chosen["model_id"], providers[chosen["vendor"]]["key_ciphertext"]) if chosen else None
 
 
@@ -96,6 +101,7 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     try:
         result = await llm.complete(vendor, decrypt(ciphertext, settings), model_id, build_system(assistant, message), [*history, {"role": "user", "content": message}])
     except LlmError as exc:
+        log.warning("AI reply failed for %s with %s/%s: %s", account_id, vendor, model_id, exc)
         return Reply("failed", reason=str(exc))
 
     text = result.text.strip()

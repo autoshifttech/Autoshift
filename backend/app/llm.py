@@ -45,11 +45,23 @@ class HttpLlm:
                     return LlmResult("".join(b.get("text", "") for b in data["content"]), usage.get("input_tokens", 0), usage.get("output_tokens", 0))
                 if vendor == "google":
                     contents = [{"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]} for m in messages]
-                    res = await client.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent", headers={"x-goog-api-key": api_key}, json={"systemInstruction": {"parts": [{"text": system}]}, "contents": contents})
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+                    body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": contents}
+                    # Chat replies don't need long "thinking": newer Gemini models think a lot by default,
+                    # which can take most of a minute. Ask for little; models that refuse it get a plain retry.
+                    thinking = {"thinkingLevel": "low"} if model.startswith("gemini-3") else {"thinkingBudget": 0} if "flash" in model else None
+                    if thinking:
+                        res = await client.post(url, headers={"x-goog-api-key": api_key}, json={**body, "generationConfig": {"thinkingConfig": thinking}})
+                        if res.status_code == 400:
+                            res = await client.post(url, headers={"x-goog-api-key": api_key}, json=body)
+                    else:
+                        res = await client.post(url, headers={"x-goog-api-key": api_key}, json=body)
                     data = self._ok(res)
                     usage = data.get("usageMetadata") or {}
                     parts = data["candidates"][0]["content"]["parts"]
                     return LlmResult("".join(p.get("text", "") for p in parts), usage.get("promptTokenCount", 0), usage.get("candidatesTokenCount", 0))
+            except httpx.TimeoutException as exc:
+                raise LlmError(f"{vendor} took too long to answer") from exc
             except httpx.HTTPError as exc:
                 raise LlmError(f"Could not reach {vendor}") from exc
             except (KeyError, IndexError, TypeError) as exc:
@@ -59,5 +71,10 @@ class HttpLlm:
     @staticmethod
     def _ok(res: httpx.Response) -> dict:
         if res.status_code >= 400:
-            raise LlmError(f"The provider refused the request ({res.status_code})")
+            detail = ""
+            try:
+                detail = str((res.json().get("error") or {}).get("message", ""))[:200]
+            except ValueError:
+                pass
+            raise LlmError(f"The provider refused the request ({res.status_code}) {detail}".strip())
         return res.json()
