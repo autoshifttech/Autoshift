@@ -91,7 +91,9 @@ class SupabaseDb:
         params = self._eq(filters)
         if since:
             params[since[0]] = f"gte.{since[1]}"
-        params["select"] = "id" if table not in ("wallet_balances", "subscriptions", "billing_details") else "account_id"
+        # Any column works for counting; use one each table has.
+        key_column = {"wallet_balances": "account_id", "subscriptions": "account_id", "billing_details": "account_id", "support_tickets": "number", "platform_admins": "user_id", "profiles": "user_id"}
+        params["select"] = key_column.get(table, "id")
         headers = {**self._headers, "Prefer": "count=exact", "Range": "0-0"}
         res = await self._client.request("GET", f"{self._base}/{table}", params=params, headers=headers)
         if res.status_code >= 400:

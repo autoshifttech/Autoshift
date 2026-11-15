@@ -25,10 +25,11 @@ async def me(ctx: Member, sdb: ServiceDb):
 
 
 @router.get("/me/key")
-async def my_key(user: Annotated[TokenUser, Depends(get_token_user)]):
-    """What kind of credential is calling: an API key's kind and scope, or a login. Used by the MCP
-    server to show each key only the tools it can use."""
-    return {"kind": user.key_kind or "login", "scope": user.key_scope or "write", "key_id": user.key_id}
+async def my_key(user: Annotated[TokenUser, Depends(get_token_user)], sdb: ServiceDb):
+    """What kind of credential is calling: an API key's kind and scope, or a login, and whose it is.
+    Used by the MCP server to show each key only the tools it can use, and by whoami for platform keys."""
+    admin = await sdb.select("platform_admins", {"user_id": user.id}, limit=1)
+    return {"kind": user.key_kind or "login", "scope": user.key_scope or "write", "key_id": user.key_id, "user": {"id": user.id, "email": user.email}, "platform_admin": admin[0]["role"] if admin else None}
 
 
 @router.post("/account/close")

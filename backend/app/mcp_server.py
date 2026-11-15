@@ -232,7 +232,10 @@ def build_mcp(get_app) -> MCPServer:
     # ----------------------------------------------------------- workspace tools
     @mcp.tool()
     async def whoami() -> dict:
-        """Who this key acts as: the user, workspace and role."""
+        """Who this key acts as: the user, workspace and role (or, for a platform key, the AutoShift staff member)."""
+        key = await call("GET", "/v1/me/key")
+        if key.get("kind") == "platform":
+            return {"key": "platform", "scope": key.get("scope"), "user": key.get("user"), "platform_admin": key.get("platform_admin")}
         return await call("GET", "/v1/me")
 
     @mcp.tool()

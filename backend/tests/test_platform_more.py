@@ -145,3 +145,12 @@ def test_admin_type_accounts_are_not_businesses(client, world):
     assert admins and all(u["account_type"] == "admin" and u["account_id"] is None for u in admins)
     people = client.get("/v1/platform/users?account_type=business", headers=staff(world)).json()
     assert people and all(u["account_type"] == "business" for u in people)
+
+
+def test_daily_report_counts_open_tickets_and_whoami_for_platform_keys(client, world):
+    from .test_mcp import _platform_key, call_tool
+
+    world.store["support_tickets"] = [{"number": 1, "account_id": world.acct_a, "status": "open", "created_at": iso()}]
+    assert client.get("/v1/platform/reports/daily", headers=S(world)).json()["open_tickets"] == 1
+    err, text = call_tool(client, _platform_key(client, world), "whoami")
+    assert not err and '"platform_admin": "super_admin"' in text
