@@ -64,6 +64,8 @@ async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None
     models = [m for m in await sdb.select("platform_ai_models", {"enabled": "true"}) if m["vendor"] in providers]
     chosen = next((m for m in models if m["vendor"] == assistant.get("provider") and m["model_id"] == assistant.get("model_id")), None)
     chosen = chosen or next((m for m in models if m["is_default"]), None)
+    # The default's provider may be switched off: use any switched-on model rather than none.
+    chosen = chosen or (models[0] if models else None)
     return (chosen["vendor"], chosen["model_id"], providers[chosen["vendor"]]["key_ciphertext"]) if chosen else None
 
 

@@ -109,3 +109,14 @@ def test_only_admins_can_run_it_and_not_across_workspaces(client, world):
     assert r.status_code == 403
     r = client.post(f"/v1/assistants/{aid}/test-reply", json={"message": "hi", "idempotency_key": "idem-0000001"}, headers=world.headers("admin_b"))
     assert r.status_code == 404
+
+
+async def test_uses_another_model_when_the_default_provider_is_off(client, world, settings, llm):
+    # Only Gemini has a key; the default model is OpenAI's (switched off): the assistant still answers.
+    g = next(p for p in world.rows("platform_ai_providers") if p["vendor"] == "google")
+    g.update(enabled=True, key_ciphertext=encrypt("gm-key-0000", settings), key_tail="0000")
+    world.rows("platform_ai_models").append({"vendor": "google", "model_id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash", "tier": "fast", "enabled": True, "is_custom": False, "is_default": False})
+    await _fund(world)
+    aid = _assistant(client, world)
+    out = _test(client, world, aid).json()
+    assert out["status"] == "reply" and llm.calls[0]["vendor"] == "google"
