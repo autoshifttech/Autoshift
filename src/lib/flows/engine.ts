@@ -57,6 +57,7 @@ import {
   type SendMediaNodeConfig,
   type SendMessageNodeConfig,
   type SetTagNodeConfig,
+  type CreateLeadNodeConfig,
   type ActionNodeConfig,
   type StartNodeConfig,
   type KeywordTriggerConfig,
@@ -610,6 +611,76 @@ function interpolateOptionalVars(
     : interpolateVars(template, vars);
 }
 
+/** "{{vars.x}}" and "{{contact.name}}" / "{{contact.phone}}" in lead fields. */
+function fillLeadText(template: string | undefined, vars: Record<string, unknown>, contact: { name?: string | null; phone?: string | null } | null): string {
+  return interpolateVars(template ?? "", vars)
+    .replace(/\{\{contact\.name\}\}/g, contact?.name ?? "")
+    .replace(/\{\{contact\.phone\}\}/g, contact?.phone ?? "")
+    .trim();
+}
+
+/**
+ * The create_lead step: a deal on the Leads page for this chat's contact, in the chosen pipeline and
+ * stage (or the first pipeline and its first stage). Makes a "Sales" pipeline with standard stages
+ * when the business has none yet, so the step works on a fresh account.
+ */
+async function createLeadFromFlow(db: AdminClient, run: FlowRunRow, cfg: CreateLeadNodeConfig): Promise<{ id: string; title: string }> {
+  if (!run.contact_id) throw new Error("This chat has no contact");
+  const { data: contact } = await db.from("contacts").select("name, phone").eq("id", run.contact_id).eq("account_id", run.account_id).maybeSingle();
+
+  let pipelineId = cfg.pipeline_id || null;
+  if (pipelineId) {
+    const { data } = await db.from("pipelines").select("id").eq("id", pipelineId).eq("account_id", run.account_id).maybeSingle();
+    if (!data) pipelineId = null;
+  }
+  if (!pipelineId) {
+    const { data } = await db.from("pipelines").select("id").eq("account_id", run.account_id).order("created_at", { ascending: true }).limit(1).maybeSingle();
+    pipelineId = data?.id ?? null;
+  }
+  if (!pipelineId) {
+    const { data: made, error } = await db.from("pipelines").insert({ account_id: run.account_id, user_id: run.user_id, name: "Sales" }).select("id").single();
+    if (error || !made) throw new Error(error?.message ?? "Could not create a pipeline");
+    pipelineId = made.id as string;
+    const names = ["New", "Contacted", "Qualified", "Proposal", "Won"];
+    await db.from("pipeline_stages").insert(names.map((name, position) => ({ pipeline_id: pipelineId, name, position })));
+  }
+
+  let stageId = cfg.stage_id || null;
+  if (stageId) {
+    const { data } = await db.from("pipeline_stages").select("id").eq("id", stageId).eq("pipeline_id", pipelineId).maybeSingle();
+    if (!data) stageId = null;
+  }
+  if (!stageId) {
+    const { data } = await db.from("pipeline_stages").select("id").eq("pipeline_id", pipelineId).order("position", { ascending: true }).limit(1).maybeSingle();
+    stageId = data?.id ?? null;
+  }
+  if (!stageId) throw new Error("The pipeline has no stages");
+
+  const title = (fillLeadText(cfg.title, run.vars, contact) || contact?.name || contact?.phone || "WhatsApp lead").slice(0, 200);
+  const rawValue = fillLeadText(cfg.value, run.vars, contact).replace(/[^\d.]/g, "");
+  const value = rawValue ? Number(rawValue) : 0;
+  const notes = fillLeadText(cfg.notes, run.vars, contact).slice(0, 5000) || null;
+  const { data: deal, error } = await db
+    .from("deals")
+    .insert({
+      account_id: run.account_id,
+      user_id: run.user_id,
+      pipeline_id: pipelineId,
+      stage_id: stageId,
+      contact_id: run.contact_id,
+      conversation_id: run.conversation_id ?? null,
+      title,
+      value: Number.isFinite(value) ? value : 0,
+      currency: "INR",
+      notes,
+      status: "open",
+    })
+    .select("id")
+    .single();
+  if (error || !deal) throw new Error(error?.message ?? "Could not create the lead");
+  return { id: deal.id as string, title };
+}
+
 async function endRun(
   db: AdminClient,
   runId: string,
@@ -820,6 +891,21 @@ async function advanceFromNodeKey(
         // strand the customer mid-flow.
         await logEvent(db, run.id, "error", node.node_key, {
           reason: "set_tag_failed",
+          detail: err instanceof Error ? err.message : String(err),
+        });
+      }
+      currentKey = cfg.next_node_key;
+      continue;
+    }
+    if (node.node_type === "create_lead") {
+      const cfg = node.config as unknown as CreateLeadNodeConfig;
+      try {
+        const lead = await createLeadFromFlow(db, run, cfg);
+        await logEvent(db, run.id, "node_entered", node.node_key, { lead_id: lead.id, title: lead.title });
+      } catch (err) {
+        // Non-fatal, like set_tag: the customer still gets the rest of the flow.
+        await logEvent(db, run.id, "error", node.node_key, {
+          reason: "create_lead_failed",
           detail: err instanceof Error ? err.message : String(err),
         });
       }

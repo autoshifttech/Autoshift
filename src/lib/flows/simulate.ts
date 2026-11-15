@@ -21,7 +21,7 @@ export interface SimChoice {
 export type SimMessage =
   | { kind: "bot"; text: string; footer?: string; media?: string; choices?: SimChoice[]; listLabel?: string }
   | { kind: "user"; text: string }
-  | { kind: "note"; code: "tag" | "action" | "handoff" | "end" | "stuck" | "loop" | "noEntry"; arg?: string };
+  | { kind: "note"; code: "tag" | "action" | "lead" | "handoff" | "end" | "stuck" | "loop" | "noEntry"; arg?: string };
 
 export type SimWait =
   | { type: "choice"; nodeKey: string; choices: SimChoice[]; nexts: Record<string, string> }
@@ -128,6 +128,10 @@ export function run(nodes: SimNode[], startKey: string | null, prior: SimState):
         break;
       case "action":
         messages.push({ kind: "note", code: "action", arg: str(cfg.service) });
+        key = next;
+        break;
+      case "create_lead":
+        messages.push({ kind: "note", code: "lead", arg: fill(str(cfg.title), vars) || undefined });
         key = next;
         break;
       case "handoff":

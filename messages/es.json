@@ -1471,7 +1471,18 @@
         "fileTooLarge": "El archivo pesa {size} MB; el límite es 16 MB.",
         "defaultOptionTitle": "Opción",
         "optionN": "Opción {n}",
-        "newStep": "+ Nuevo paso de mensaje"
+        "newStep": "+ Nuevo paso de mensaje",
+        "lead": {
+          "pipeline": "Embudo",
+          "firstPipeline": "Primer embudo",
+          "stage": "Etapa",
+          "firstStage": "Primera etapa",
+          "title": "Título del lead",
+          "value": "Valor (₹, opcional)",
+          "notes": "Notas",
+          "help": "Usa {{vars.name}} para respuestas guardadas antes en este flujo y {{contact.name}} o {{contact.phone}} para el cliente. Si aún no hay embudo, se crea uno de Ventas.",
+          "then": "Después ir a"
+        }
       },
       "categories": {
         "messaging": "Mensajería",
@@ -1524,6 +1535,10 @@
         "action": {
           "label": "Usar una conexión",
           "blurb": "Hojas, Calendario o enlace de pago"
+        },
+        "create_lead": {
+          "label": "Crear lead",
+          "blurb": "Añade un lead a la página Leads"
         }
       },
       "action": {
@@ -1607,7 +1622,8 @@
             "google_sheets_append": "añadir una fila en Google Sheets",
             "google_calendar_event": "crear un evento en Google Calendar",
             "razorpay_link": "enlace de pago de Razorpay"
-          }
+          },
+          "lead": "Lead creado: {title}"
         }
       },
       "duplicateNode": "Duplicar",
@@ -1654,7 +1670,8 @@
       "action_google_sheets_append": "Añadir una fila en Google Sheets",
       "action_google_calendar_event": "Crear un evento en Google Calendar",
       "action_razorpay_link": "Enlace de pago de Razorpay",
-      "actionNone": "Elige un servicio"
+      "actionNone": "Elige un servicio",
+      "leadNone": "Elige un título para el lead"
     },
     "header": {
       "backToFlows": "Volver a flujos",
@@ -3073,7 +3090,11 @@
       "actionNeedsService": "Elige qué debe hacer este paso de conexión.",
       "actionNeedsConnection": "Elige una cuenta conectada para este paso. Añade una en Conexiones.",
       "actionNeedsNext": "Este paso necesita un paso siguiente.",
-      "actionMissingNext": "Este paso apunta a “{key}”, que no existe."
+      "actionMissingNext": "Este paso apunta a “{key}”, que no existe.",
+      "leadNeedsTitle": "Crear lead necesita un título.",
+      "leadValueNumber": "El valor debe ser un número o el marcador de una respuesta guardada.",
+      "leadNeedsNext": "Crear lead debe apuntar a un paso siguiente.",
+      "leadMissingNext": "Crear lead apunta a un paso que no existe \"{key}\"."
     },
     "automations": {
       "needsStep": "las automatizaciones activas necesitan al menos un paso",

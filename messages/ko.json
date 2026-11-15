@@ -1471,7 +1471,18 @@
         "fileTooLarge": "파일이 {size}MB입니다 — 제한은 16MB입니다.",
         "defaultOptionTitle": "옵션",
         "optionN": "옵션 {n}",
-        "newStep": "+ 새 메시지 단계"
+        "newStep": "+ 새 메시지 단계",
+        "lead": {
+          "pipeline": "파이프라인",
+          "firstPipeline": "첫 번째 파이프라인",
+          "stage": "단계",
+          "firstStage": "첫 번째 단계",
+          "title": "리드 제목",
+          "value": "금액(₹, 선택)",
+          "notes": "메모",
+          "help": "이 플로우에서 앞서 저장한 답변은 {{vars.name}}, 고객 정보는 {{contact.name}} 또는 {{contact.phone}}을 사용하세요. 파이프라인이 없으면 영업 파이프라인이 만들어집니다.",
+          "then": "다음 단계"
+        }
       },
       "categories": {
         "messaging": "메시징",
@@ -1524,6 +1535,10 @@
         "action": {
           "label": "연결 사용",
           "blurb": "시트, 캘린더 또는 결제 링크"
+        },
+        "create_lead": {
+          "label": "리드 만들기",
+          "blurb": "리드 페이지에 리드를 추가합니다"
         }
       },
       "action": {
@@ -1607,7 +1622,8 @@
             "google_sheets_append": "Google 스프레드시트에 행 추가",
             "google_calendar_event": "Google 캘린더 일정 만들기",
             "razorpay_link": "Razorpay 결제 링크"
-          }
+          },
+          "lead": "리드가 만들어졌습니다: {title}"
         }
       },
       "duplicateNode": "복제",
@@ -1654,7 +1670,8 @@
       "action_google_sheets_append": "Google 스프레드시트에 행 추가",
       "action_google_calendar_event": "Google 캘린더 일정 만들기",
       "action_razorpay_link": "Razorpay 결제 링크",
-      "actionNone": "서비스를 선택하세요"
+      "actionNone": "서비스를 선택하세요",
+      "leadNone": "리드 제목을 정하세요"
     },
     "header": {
       "backToFlows": "플로우로 돌아가기",
@@ -3073,7 +3090,11 @@
       "actionNeedsService": "이 연결 단계에서 할 일을 선택하세요.",
       "actionNeedsConnection": "이 단계에 사용할 연결된 계정을 선택하세요. 연결에서 추가할 수 있습니다.",
       "actionNeedsNext": "이 단계에는 다음 단계가 필요합니다.",
-      "actionMissingNext": "이 단계가 존재하지 않는 “{key}”를 가리킵니다."
+      "actionMissingNext": "이 단계가 존재하지 않는 “{key}”를 가리킵니다.",
+      "leadNeedsTitle": "리드 만들기에는 리드 제목이 필요합니다.",
+      "leadValueNumber": "금액은 숫자 또는 저장된 답변 자리표시자여야 합니다.",
+      "leadNeedsNext": "리드 만들기는 다음 단계를 가리켜야 합니다.",
+      "leadMissingNext": "리드 만들기가 없는 단계 \"{key}\"를 가리킵니다."
     },
     "automations": {
       "needsStep": "활성 자동화에는 단계가 하나 이상 필요합니다",

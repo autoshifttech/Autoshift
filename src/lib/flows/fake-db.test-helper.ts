@@ -94,6 +94,11 @@ export function createFakeDb(tables: FakeTables) {
         const data = Array.isArray(result.data) ? (result.data[0] ?? null) : null;
         return { data, error: null };
       },
+      single: async () => {
+        const result = execute();
+        const data = Array.isArray(result.data) ? (result.data[0] ?? null) : null;
+        return { data, error: data ? null : { message: "no rows" } };
+      },
       then: (resolve: (r: ReturnType<typeof execute>) => unknown) =>
         Promise.resolve().then(() => resolve(execute())),
     };

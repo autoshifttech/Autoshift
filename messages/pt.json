@@ -1471,7 +1471,18 @@
         "fileTooLarge": "O arquivo tem {size} MB — o limite é 16 MB.",
         "defaultOptionTitle": "Opção",
         "optionN": "Opção {n}",
-        "newStep": "+ Nova etapa de mensagem"
+        "newStep": "+ Nova etapa de mensagem",
+        "lead": {
+          "pipeline": "Funil",
+          "firstPipeline": "Primeiro funil",
+          "stage": "Etapa",
+          "firstStage": "Primeira etapa",
+          "title": "Título do lead",
+          "value": "Valor (₹, opcional)",
+          "notes": "Notas",
+          "help": "Use {{vars.name}} para respostas salvas antes neste fluxo e {{contact.name}} ou {{contact.phone}} para o cliente. Sem funil ainda, um funil Vendas é criado.",
+          "then": "Depois ir para"
+        }
       },
       "categories": {
         "messaging": "Mensagens",
@@ -1524,6 +1535,10 @@
         "action": {
           "label": "Usar uma conexão",
           "blurb": "Planilhas, Agenda ou link de pagamento"
+        },
+        "create_lead": {
+          "label": "Criar lead",
+          "blurb": "Adiciona um lead à página Leads"
         }
       },
       "action": {
@@ -1607,7 +1622,8 @@
             "google_sheets_append": "adicionar linha no Google Planilhas",
             "google_calendar_event": "criar evento no Google Agenda",
             "razorpay_link": "link de pagamento Razorpay"
-          }
+          },
+          "lead": "Lead criado: {title}"
         }
       },
       "duplicateNode": "Duplicar",
@@ -1654,7 +1670,8 @@
       "action_google_sheets_append": "Adicionar linha no Google Planilhas",
       "action_google_calendar_event": "Criar evento no Google Agenda",
       "action_razorpay_link": "Link de pagamento Razorpay",
-      "actionNone": "Escolha um serviço"
+      "actionNone": "Escolha um serviço",
+      "leadNone": "Escolha um título para o lead"
     },
     "header": {
       "backToFlows": "Voltar aos fluxos",
@@ -3073,7 +3090,11 @@
       "actionNeedsService": "Escolha o que esta etapa de conexão deve fazer.",
       "actionNeedsConnection": "Escolha uma conta conectada para esta etapa. Adicione uma em Conexões.",
       "actionNeedsNext": "Esta etapa precisa de uma próxima etapa.",
-      "actionMissingNext": "Esta etapa aponta para “{key}”, que não existe."
+      "actionMissingNext": "Esta etapa aponta para “{key}”, que não existe.",
+      "leadNeedsTitle": "Criar lead precisa de um título.",
+      "leadValueNumber": "O valor deve ser um número ou o marcador de uma resposta salva.",
+      "leadNeedsNext": "Criar lead deve apontar para um próximo passo.",
+      "leadMissingNext": "Criar lead aponta para um passo inexistente \"{key}\"."
     },
     "automations": {
       "needsStep": "automações ativas precisam de pelo menos uma etapa",

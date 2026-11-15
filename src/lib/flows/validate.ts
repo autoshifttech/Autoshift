@@ -777,6 +777,22 @@ function validateNode(
       break;
     }
 
+    case "create_lead": {
+      const cfg = node.config as { title?: string; value?: string; next_node_key?: string };
+      if (!cfg.title?.trim()) {
+        issues.push({ severity: "error", scope: "node", node_key: node.node_key, field: "title", message: t("leadNeedsTitle") });
+      }
+      if (cfg.value && !/^\s*(\{\{[^}]+\}\}|\d+(\.\d+)?)\s*$/.test(cfg.value)) {
+        issues.push({ severity: "error", scope: "node", node_key: node.node_key, field: "value", message: t("leadValueNumber") });
+      }
+      if (!cfg.next_node_key) {
+        issues.push({ severity: "error", scope: "node", node_key: node.node_key, field: "next_node_key", message: t("leadNeedsNext") });
+      } else if (!knownKeys.has(cfg.next_node_key)) {
+        issues.push({ severity: "error", scope: "node", node_key: node.node_key, field: "next_node_key", message: t("leadMissingNext", { key: cfg.next_node_key }) });
+      }
+      break;
+    }
+
     case "action": {
       const cfg = node.config as {
         service?: string;
@@ -872,7 +888,8 @@ function outgoingEdges(node: NodeInput): string[] {
     case "send_media":
     case "collect_input":
     case "set_tag":
-    case "action": {
+    case "action":
+    case "create_lead": {
       const cfg = node.config as { next_node_key?: string };
       return cfg.next_node_key ? [cfg.next_node_key] : [];
     }

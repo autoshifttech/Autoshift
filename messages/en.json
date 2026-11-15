@@ -1471,7 +1471,18 @@
         "fileTooLarge": "File is {size} MB — limit is 16 MB.",
         "defaultOptionTitle": "Option",
         "optionN": "Option {n}",
-        "newStep": "+ New message step"
+        "newStep": "+ New message step",
+        "lead": {
+          "pipeline": "Pipeline",
+          "firstPipeline": "First pipeline",
+          "stage": "Stage",
+          "firstStage": "First stage",
+          "title": "Lead title",
+          "value": "Value (₹, optional)",
+          "notes": "Notes",
+          "help": "Use {{vars.name}} for answers saved earlier in this flow, and {{contact.name}} or {{contact.phone}} for the customer. With no pipeline yet, a Sales pipeline is made.",
+          "then": "Then go to"
+        }
       },
       "categories": {
         "messaging": "Messaging",
@@ -1524,6 +1535,10 @@
         "action": {
           "label": "Use a connection",
           "blurb": "Sheets, Calendar or a payment link"
+        },
+        "create_lead": {
+          "label": "Create lead",
+          "blurb": "Adds a lead to the Leads page"
         }
       },
       "action": {
@@ -1607,7 +1622,8 @@
             "google_sheets_append": "add a row to Google Sheets",
             "google_calendar_event": "create a Google Calendar event",
             "razorpay_link": "Razorpay payment link"
-          }
+          },
+          "lead": "Lead created: {title}"
         }
       },
       "duplicateNode": "Duplicate",
@@ -1654,7 +1670,8 @@
       "action_google_sheets_append": "Add a row to Google Sheets",
       "action_google_calendar_event": "Create a Google Calendar event",
       "action_razorpay_link": "Razorpay payment link",
-      "actionNone": "Pick a service"
+      "actionNone": "Pick a service",
+      "leadNone": "Pick a lead title"
     },
     "header": {
       "backToFlows": "Back to Flows",
@@ -3073,7 +3090,11 @@
       "actionNeedsService": "Pick what this connection step should do.",
       "actionNeedsConnection": "Pick a connected account for this step. Add one under Connections.",
       "actionNeedsNext": "This step needs a next step.",
-      "actionMissingNext": "This step points to “{key}”, which doesn’t exist."
+      "actionMissingNext": "This step points to “{key}”, which doesn’t exist.",
+      "leadNeedsTitle": "Create-lead needs a lead title.",
+      "leadValueNumber": "The value must be a number or a saved answer placeholder.",
+      "leadNeedsNext": "Create-lead must point to a next node.",
+      "leadMissingNext": "Create-lead points to a missing node \"{key}\"."
     },
     "automations": {
       "needsStep": "active automations need at least one step",

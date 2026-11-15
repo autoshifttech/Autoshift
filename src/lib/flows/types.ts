@@ -173,6 +173,20 @@ export interface SetTagNodeConfig {
   next_node_key: string;
 }
 
+/**
+ * Creates a lead (deal) on the Leads page for the contact in this chat. Pipeline and stage are
+ * picked in the builder; empty = the first pipeline and its first stage. Text fields allow
+ * {{vars.x}} and {{contact.name}} placeholders.
+ */
+export interface CreateLeadNodeConfig {
+  pipeline_id?: string;
+  stage_id?: string;
+  title: string;
+  value?: string;
+  notes?: string;
+  next_node_key: string;
+}
+
 export interface ActionNodeConfig {
   service: "google_sheets_append" | "google_calendar_event" | "razorpay_link";
   /** The connected account (Flows → Connections) this step uses. */
@@ -205,6 +219,7 @@ export type FlowNodeConfig =
   | { node_type: "condition"; config: ConditionNodeConfig }
   | { node_type: "set_tag"; config: SetTagNodeConfig }
   | { node_type: "action"; config: ActionNodeConfig }
+  | { node_type: "create_lead"; config: CreateLeadNodeConfig }
   | { node_type: "handoff"; config: HandoffNodeConfig }
   | { node_type: "end"; config: EndNodeConfig };
 
@@ -391,6 +406,7 @@ export const AUTO_ADVANCING_NODE_TYPES: ReadonlySet<string> = new Set([
   "condition",
   "set_tag",
   "action",
+  "create_lead",
 ]);
 
 export function assertNever(x: never): never {

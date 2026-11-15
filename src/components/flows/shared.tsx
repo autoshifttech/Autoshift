@@ -27,6 +27,7 @@ import {
   Paperclip,
   PlayCircle,
   Tag,
+  Target,
   UserPlus,
   Workflow,
 } from 'lucide-react';
@@ -51,6 +52,7 @@ export type NodeType =
   | 'condition'
   | 'set_tag'
   | 'action'
+  | 'create_lead'
   | 'handoff'
   | 'end';
 
@@ -147,6 +149,12 @@ export const NODE_META: Record<
     color: 'text-pink-700 dark:text-pink-400',
     category: 'logic',
   },
+  create_lead: {
+    slugSeed: 'Create lead',
+    icon: Target,
+    color: 'text-emerald-800 dark:text-emerald-400',
+    category: 'logic',
+  },
   action: {
     slugSeed: 'Use a connection',
     icon: Link2,
@@ -204,6 +212,7 @@ const NODE_HUE: Record<NodeType, { l: number; c: number; h: number }> = {
   condition: { l: 0.72, c: 0.15, h: 65 }, // amber — a fork in the road
   set_tag: { l: 0.65, c: 0.15, h: 350 }, // pink
   action: { l: 0.68, c: 0.16, h: 45 }, // orange — talks to another service
+  create_lead: { l: 0.6, c: 0.14, h: 150 }, // green — a new lead
   handoff: { l: 0.65, c: 0.17, h: 16 }, // rose — hands off
   end: { l: 0.55, c: 0.01, h: 260 }, // neutral grey — terminal
 };
@@ -418,6 +427,10 @@ export function summarizeNode(
       return tagId
         ? t ? t('tagPicked', { mode, tag: tagId.slice(0, 8) }) : `${mode} tag ${tagId.slice(0, 8)}…`
         : t ? t('tagNone', { mode }) : `${mode} tag (none picked)`;
+    }
+    case 'create_lead': {
+      const title = typeof cfg.title === 'string' ? cfg.title : '';
+      return title ? truncate(title) : t ? t('leadNone') : null;
     }
     case 'action': {
       const service = typeof cfg.service === 'string' ? cfg.service : '';

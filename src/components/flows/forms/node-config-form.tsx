@@ -50,6 +50,7 @@ import { uploadAccountMedia, MEDIA_MAX_BYTES } from "@/lib/storage/upload-media"
 import { slugify, type BuilderNode } from "../shared";
 import { NextNodeRow, NodeKeySelect, TextRow } from "./fields";
 import { ActionForm, type ActionCfg } from "./action-form";
+import { CreateLeadForm, type CreateLeadCfg } from "./create-lead-form";
 
 interface NodeConfigFormProps {
   node: BuilderNode;
@@ -206,6 +207,9 @@ export function NodeConfigForm({
           onUpdateConfig={onUpdateConfig}
         />
       );
+
+    case "create_lead":
+      return <CreateLeadForm cfg={cfg as CreateLeadCfg} allNodes={allNodes} currentKey={node.node_key} onUpdateConfig={onUpdateConfig} />;
 
     case "handoff":
       return (

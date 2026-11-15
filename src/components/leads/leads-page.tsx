@@ -221,6 +221,7 @@ export function LeadsPage() {
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className="block font-medium text-foreground">{lead.name}</span>
                   <span className="block font-mono text-xs text-muted-foreground">{lead.phone}</span>
+                  {lead.title && <span className="block max-w-[16rem] truncate text-xs text-foreground">{lead.title}</span>}
                 </td>
                 <td className="px-4 py-3">
                   <TempChip temp={tp} score={score} />
@@ -280,6 +281,12 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-6">
+        {(lead.title || lead.notes) && (
+          <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm">
+            {lead.title && <p className="font-medium text-foreground">{lead.title}</p>}
+            {lead.notes && <p className="mt-1 whitespace-pre-line text-muted-foreground">{lead.notes}</p>}
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <label className="grid gap-1.5 text-sm">
             <span className="text-xs text-muted-foreground">{t("colStatus")}</span>

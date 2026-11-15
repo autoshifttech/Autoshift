@@ -89,6 +89,9 @@ export interface Lead {
   /** Which AI assistant talked to them. */
   assistant: string
   events: LeadEvent[]
+  /** The deal's own title and notes (e.g. a site visit booked by a flow). */
+  title?: string
+  notes?: string
 }
 
 // --- scoring ----------------------------------------------------------------
@@ -356,7 +359,7 @@ async function fetchLiveLeads(): Promise<Lead[]> {
   const sb = createClient()
   const { data: deals, error } = await sb
     .from('deals')
-    .select('id, title, status, stage_id, contact_id, assigned_to, created_at, updated_at, closed_at')
+    .select('id, title, notes, status, stage_id, contact_id, assigned_to, created_at, updated_at, closed_at')
     .order('created_at', { ascending: false })
     .limit(1000)
   if (error) throw error
@@ -390,6 +393,8 @@ async function fetchLiveLeads(): Promise<Lead[]> {
       source: 'organic' as LeadSource,
       assistant: '',
       events,
+      title: c?.name && d.title && d.title !== c.name ? d.title : undefined,
+      notes: d.notes || undefined,
     }
   })
 }
