@@ -134,3 +134,13 @@ def test_web_app_down_means_razorpay_retries(client, world, shop):
     shop["bridge"].fail = False
     assert hook(client, shop["conn"]["id"], "payment_link.paid", payload).json()["status"] == "processed"
     assert len(shop["bridge"].calls) == 1 and len([a for a in world.rows("audit_log") if a["action"] == "shop_payment.paid"]) == 1
+
+
+def test_paid_stage_in_another_language(client, world, shop):
+    for st in world.rows("pipeline_stages"):
+        if st["id"] == "st_paid":
+            st["name"] = "Pago"
+    make_link(client, shop, world)
+    payload = {"payment_link": {"entity": {"id": "plink_1"}}, "payment": {"entity": {"id": "pay_9", "amount": 149800}}}
+    assert hook(client, shop["conn"]["id"], "payment_link.paid", payload).json()["status"] == "processed"
+    assert world.rows("deals")[0]["stage_id"] == "st_paid"

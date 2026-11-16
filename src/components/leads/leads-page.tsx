@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { fetchAccountMembers, memberLabel } from "@/lib/account/members";
-import { Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-react";
+import { Columns3, Download, MessageSquare, Search, Settings2, UserCheck } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,8 @@ import {
   type LeadTemp,
 } from "@/lib/leads/model";
 import { TempChip } from "./lead-ui";
+import { PipelinesDialog } from "./pipelines-dialog";
+import { moveLeadToStage, usePipelines } from "@/lib/leads/pipelines";
 
 /** The workspace's real teammates (names), for the owner filter and hand-off. */
 function useTeamNames(): string[] {
@@ -86,6 +88,12 @@ export function LeadsPage() {
   const [source, setSource] = useState("all");
   const [owner, setOwner] = useState("all");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [pipelineFilter, setPipelineFilter] = useState("all");
+  const [stageFilter, setStageFilter] = useState("all");
+  const [managing, setManaging] = useState(false);
+  const { pipelines } = usePipelines();
+  const pipelineName = (id?: string) => pipelines.find((p) => p.id === id)?.name;
+  const filterStages = pipelines.find((p) => p.id === pipelineFilter)?.stages ?? [];
 
   const all = leads.map((l) => scored(l, settings)).sort((a, b) => b.lead.capturedAt.localeCompare(a.lead.capturedAt));
   const rows = all.filter(({ lead, temp: tp }) => {
@@ -96,6 +104,8 @@ export function LeadsPage() {
     if (source !== "all" && lead.source !== source) return false;
     if (owner === "ai" && lead.handedOffTo) return false;
     if (owner !== "all" && owner !== "ai" && lead.handedOffTo !== owner) return false;
+    if (pipelineFilter !== "all" && lead.pipelineId !== pipelineFilter) return false;
+    if (stageFilter !== "all" && lead.stageId !== stageFilter) return false;
     return true;
   });
   const count = (tp: LeadTemp) => all.filter((x) => x.temp === tp).length;
@@ -122,7 +132,11 @@ export function LeadsPage() {
           <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <div className="flex gap-2 self-start">
+        <div className="flex flex-wrap gap-2 self-start">
+          <Button variant="outline" onClick={() => setManaging(true)} className="gap-1.5">
+            <Columns3 className="size-4" />
+            {t("pipelines")}
+          </Button>
           <Link href="/agents?tab=leads" className={cn(buttonVariants({ variant: "outline" }), "gap-1.5")}>
             <Settings2 className="size-4" />
             {t("settings")}
@@ -166,7 +180,30 @@ export function LeadsPage() {
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input className="pl-9" value={query} placeholder={t("search")} aria-label={t("search")} onChange={(e) => setQuery(e.target.value)} />
         </div>
-        <div className="grid grid-cols-3 gap-2 lg:ml-auto lg:w-[540px]">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:ml-auto lg:w-[900px] lg:grid-cols-5">
+          <NativeSelect
+            value={pipelineFilter}
+            aria-label={t("colPipeline")}
+            onChange={(e) => {
+              setPipelineFilter(e.target.value);
+              setStageFilter("all");
+            }}
+          >
+            <option value="all">{t("allPipelines")}</option>
+            {pipelines.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </NativeSelect>
+          <NativeSelect value={stageFilter} aria-label={t("colStage")} disabled={pipelineFilter === "all"} onChange={(e) => setStageFilter(e.target.value)}>
+            <option value="all">{pipelineFilter === "all" ? t("pickPipelineFirst") : t("allStages")}</option>
+            {filterStages.map((st) => (
+              <option key={st.id} value={st.id}>
+                {st.name}
+              </option>
+            ))}
+          </NativeSelect>
           <NativeSelect value={status} aria-label={t("colStatus")} onChange={(e) => setStatus(e.target.value as LeadStatus | "all")}>
             <option value="all">{t("allStatuses")}</option>
             {LEAD_STATUSES.map((s) => (
@@ -196,10 +233,11 @@ export function LeadsPage() {
       </div>
 
       <div tabIndex={0} className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-        <table className="w-full min-w-[860px] text-sm">
+        <table className="w-full min-w-[980px] text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted-foreground">
               <th className="px-4 py-3 font-medium">{t("colLead")}</th>
+              <th className="px-4 py-3 font-medium">{t("colStage")}</th>
               <th className="px-4 py-3 font-medium">{t("colScore")}</th>
               <th className="px-4 py-3 font-medium">{t("colStatus")}</th>
               <th className="px-4 py-3 font-medium">{t("colSource")}</th>
@@ -211,7 +249,7 @@ export function LeadsPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                   {t("empty")}
                 </td>
               </tr>
@@ -222,6 +260,17 @@ export function LeadsPage() {
                   <span className="block font-medium text-foreground">{lead.name}</span>
                   <span className="block font-mono text-xs text-muted-foreground">{lead.phone}</span>
                   {lead.title && <span className="block max-w-[16rem] truncate text-xs text-foreground">{lead.title}</span>}
+                </td>
+                <td className="px-4 py-3">
+                  {lead.stageName ? (
+                    <span className="block max-w-[12rem]">
+                      <span className="block truncate text-xs text-muted-foreground">{pipelineName(lead.pipelineId)}</span>
+                      <span className="block truncate font-medium text-foreground">{lead.stageName}</span>
+                      {lead.value ? <span className="block text-xs text-muted-foreground">₹{lead.value.toLocaleString("en-IN")}</span> : null}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <TempChip temp={tp} score={score} />
@@ -257,6 +306,7 @@ export function LeadsPage() {
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
         <DialogContent className="max-h-[88vh] gap-5 overflow-y-auto rounded-3xl p-6 sm:max-w-lg">{open && <LeadDetail {...open} settings={settings} />}</DialogContent>
       </Dialog>
+      <PipelinesDialog open={managing} onOpenChange={setManaging} />
     </div>
   );
 }
@@ -287,6 +337,7 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
             {lead.notes && <p className="mt-1 whitespace-pre-line text-muted-foreground">{lead.notes}</p>}
           </div>
         )}
+        {lead.pipelineId && <StagePicker lead={lead} />}
         <div className="grid grid-cols-2 gap-3">
           <label className="grid gap-1.5 text-sm">
             <span className="text-xs text-muted-foreground">{t("colStatus")}</span>
@@ -391,5 +442,41 @@ function LeadDetail({ lead, score, temp, settings }: { lead: Lead; score: number
         </section>
       </div>
     </>
+  );
+}
+
+/** Moves an order or lead to another stage of its pipeline (e.g. Paid → Shipped). */
+function StagePicker({ lead }: { lead: Lead }) {
+  const t = useTranslations("LeadsPage");
+  const { pipelines } = usePipelines();
+  const pipeline = pipelines.find((p) => p.id === lead.pipelineId);
+  if (!pipeline) return null;
+  const change = (stageId: string) => {
+    const stage = pipeline.stages.find((s) => s.id === stageId);
+    if (!stage || stageId === lead.stageId) return;
+    leadsStore.set((s) => ({
+      leads: s.leads.map((l) =>
+        l.id === lead.id ? { ...l, stageId, stageName: stage.name, status: l.status === "won" || l.status === "lost" ? "new" : l.status, events: [...l.events, { at: new Date().toISOString(), kind: "note", text: t("ev_stage", { stage: stage.name }) }] } : l,
+      ),
+    }));
+    moveLeadToStage(lead.id, stageId).then(
+      () => toast.success(t("movedTo", { stage: stage.name })),
+      (err) => {
+        toast.error(err instanceof Error ? err.message : String(err));
+        void loadLiveLeads(true);
+      },
+    );
+  };
+  return (
+    <label className="grid gap-1.5 text-sm">
+      <span className="text-xs text-muted-foreground">{t("stageIn", { pipeline: pipeline.name })}</span>
+      <NativeSelect value={lead.stageId ?? ""} onChange={(e) => change(e.target.value)} className="min-h-11">
+        {pipeline.stages.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name}
+          </option>
+        ))}
+      </NativeSelect>
+    </label>
   );
 }

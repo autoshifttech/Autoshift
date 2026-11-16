@@ -30,6 +30,8 @@ log = logging.getLogger("autoshift.shop_payments")
 MIN_PAISE = 100  # Razorpay's smallest payment: ₹1
 MAX_PAISE = 50_000_000  # ₹5,00,000 per order: a typo guard
 LINK_HOURS = 24
+# A paid order moves to the stage with one of these names (the "Paid" stage in each app language).
+PAID_STAGE_NAMES = {"paid", "pago", "pagado", "pagada", "결제 완료", "결제완료"}
 
 
 class PaymentLinkError(Exception):
@@ -162,10 +164,11 @@ async def _move_lead_to_paid(sdb: Db, account_id: str, lead_id: str | None) -> b
     deals = await sdb.select("deals", {"id": lead_id, "account_id": account_id}, limit=1)
     if not deals:
         return False
-    stages = await sdb.select("pipeline_stages", {"pipeline_id": deals[0]["pipeline_id"], "name": ("ilike", "paid")}, limit=1)
-    if not stages:
+    stages = await sdb.select("pipeline_stages", {"pipeline_id": deals[0]["pipeline_id"]})
+    stage = next((st for st in stages if str(st.get("name", "")).strip().lower() in PAID_STAGE_NAMES), None)
+    if not stage:
         return False
-    await sdb.update("deals", {"id": lead_id, "account_id": account_id}, {"stage_id": stages[0]["id"]})
+    await sdb.update("deals", {"id": lead_id, "account_id": account_id}, {"stage_id": stage["id"]})
     return True
 
 

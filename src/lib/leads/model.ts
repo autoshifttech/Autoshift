@@ -92,6 +92,11 @@ export interface Lead {
   /** The deal's own title and notes (e.g. a site visit booked by a flow). */
   title?: string
   notes?: string
+  /** Its pipeline and stage (e.g. Orders → Paid), and value in ₹. */
+  pipelineId?: string
+  stageId?: string
+  stageName?: string
+  value?: number
 }
 
 // --- scoring ----------------------------------------------------------------
@@ -359,7 +364,7 @@ async function fetchLiveLeads(): Promise<Lead[]> {
   const sb = createClient()
   const { data: deals, error } = await sb
     .from('deals')
-    .select('id, title, notes, status, stage_id, contact_id, assigned_to, created_at, updated_at, closed_at')
+    .select('id, title, notes, status, value, pipeline_id, stage_id, contact_id, assigned_to, created_at, updated_at, closed_at')
     .order('created_at', { ascending: false })
     .limit(1000)
   if (error) throw error
@@ -395,6 +400,10 @@ async function fetchLiveLeads(): Promise<Lead[]> {
       events,
       title: c?.name && d.title && d.title !== c.name ? d.title : undefined,
       notes: d.notes || undefined,
+      pipelineId: d.pipeline_id ?? undefined,
+      stageId: d.stage_id ?? undefined,
+      stageName: stages.get(d.stage_id),
+      value: Number(d.value) || undefined,
     }
   })
 }
