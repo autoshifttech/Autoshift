@@ -10,10 +10,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, events, platform_settings, wallet
+from .. import ai_runner, audit, events, platform_settings, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import ServiceDb, get_llm
-from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent
+from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
 
 router = APIRouter(prefix="/v1/internal", tags=["internal"], include_in_schema=False)
 LOW_BALANCE_PAISE = 20000  # ₹200: tell the business (and their automations) the wallet is running low
@@ -93,3 +93,13 @@ async def event(body: InternalEvent, _: Internal, sdb: ServiceDb):
         raise HTTPException(422, "Unknown event type")
     await _account(sdb, body.account_id)
     return {"queued": await events.emit(sdb, body.account_id, body.type, body.data)}
+
+
+@router.post("/payment-link", status_code=201)
+async def payment_link(body: InternalPaymentLink, _: Internal, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)]):
+    """A flow's payment-link step: a Razorpay link (and optional UPI QR) on the business's own account."""
+    await _account(sdb, body.account_id)
+    try:
+        return await shop_payments.create_link(sdb, settings, **body.model_dump())
+    except shop_payments.PaymentLinkError as exc:
+        raise HTTPException(exc.status, exc.message) from exc

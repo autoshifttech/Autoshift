@@ -6,6 +6,9 @@
  * show a short note instead.
  */
 
+import { addToCart, findProduct, parseQty, readCart } from "./cart";
+import type { CartProduct } from "./types";
+
 export interface SimNode {
   node_key: string;
   node_type: string;
@@ -21,7 +24,7 @@ export interface SimChoice {
 export type SimMessage =
   | { kind: "bot"; text: string; footer?: string; media?: string; choices?: SimChoice[]; listLabel?: string }
   | { kind: "user"; text: string }
-  | { kind: "note"; code: "tag" | "action" | "lead" | "handoff" | "end" | "stuck" | "loop" | "noEntry"; arg?: string };
+  | { kind: "note"; code: "tag" | "action" | "lead" | "cart" | "cartMissing" | "payLink" | "handoff" | "end" | "stuck" | "loop" | "noEntry"; arg?: string };
 
 export type SimWait =
   | { type: "choice"; nodeKey: string; choices: SimChoice[]; nexts: Record<string, string> }
@@ -127,9 +130,38 @@ export function run(nodes: SimNode[], startKey: string | null, prior: SimState):
         key = next;
         break;
       case "action":
-        messages.push({ kind: "note", code: "action", arg: str(cfg.service) });
+        if (str(cfg.service) === "razorpay_link") {
+          // A pretend link so later messages read naturally; nothing is created in a test.
+          const saveAs = str(cfg.save_as) || "payment_link";
+          vars[saveAs] = "https://rzp.io/i/test-link";
+          vars.payment_amount = fill(str((cfg.params as Record<string, unknown> | undefined)?.amount), vars);
+          messages.push({ kind: "note", code: "payLink", arg: vars.payment_amount });
+        } else {
+          messages.push({ kind: "note", code: "action", arg: str(cfg.service) });
+        }
         key = next;
         break;
+      case "add_to_cart": {
+        const products = Array.isArray(cfg.products) ? (cfg.products as CartProduct[]) : [];
+        const product = findProduct(products, fill(str(cfg.product), vars));
+        if (!product) {
+          messages.push({ kind: "note", code: "cartMissing" });
+          key = str(cfg.not_found_node_key) || null;
+          break;
+        }
+        let prev: unknown = [];
+        try {
+          prev = JSON.parse(vars.cart ?? "[]");
+        } catch {
+          prev = [];
+        }
+        const qty = parseQty(fill(str(cfg.quantity), vars));
+        const { cart, ...rest } = addToCart(readCart(prev), product, qty);
+        Object.assign(vars, rest, { cart: JSON.stringify(cart) });
+        messages.push({ kind: "note", code: "cart", arg: `${qty} × ${product.name} · ₹${rest.cart_total_text}` });
+        key = next;
+        break;
+      }
       case "create_lead":
         messages.push({ kind: "note", code: "lead", arg: fill(str(cfg.title), vars) || undefined });
         key = next;

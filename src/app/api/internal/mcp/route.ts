@@ -28,6 +28,8 @@ import { POST as addKnowledge } from '@/app/api/ai/knowledge/route'
 import { PATCH as patchKnowledge, DELETE as removeKnowledge } from '@/app/api/ai/knowledge/[id]/route'
 import { decrypt } from '@/lib/whatsapp/encryption'
 import { createOtpTemplate, getOtpSettings, senderFor } from '@/lib/auth/phone-otp'
+import { startPaymentReceivedFlow } from '@/lib/flows/engine'
+import { formatRupees } from '@/lib/flows/cart'
 import { getBusinessProfile, MetaApiError, updateBusinessProfile, type BusinessProfile } from '@/lib/whatsapp/meta-api'
 
 export const maxDuration = 60
@@ -190,6 +192,37 @@ export async function POST(request: Request) {
           if (err instanceof MetaApiError) return fail(502, `WhatsApp said: ${err.message}`)
           throw err
         }
+      }
+
+      case 'payment_paid': {
+        // The backend saw a paid Razorpay link from this business's own account (signature checked).
+        const id = str(body.payment_link_id)
+        if (!id) return fail(400, 'payment_link_id is required')
+        const { data: link } = await db.from('payment_links').select('*').eq('id', id).eq('account_id', accountId).maybeSingle()
+        if (!link) return fail(404, 'Payment not found')
+        if (!link.conversation_id || !link.contact_id) return NextResponse.json({ told: false })
+        const amount = formatRupees(Number(link.amount_paise) / 100)
+        const started = await startPaymentReceivedFlow({
+          accountId,
+          contactId: link.contact_id,
+          conversationId: link.conversation_id,
+          vars: {
+            payment_amount: amount,
+            payment_description: String(link.description ?? ''),
+            payment_id: String(link.razorpay_payment_id ?? ''),
+            ...(link.lead_id ? { lead_id: String(link.lead_id) } : {}),
+          },
+        })
+        if (!started) {
+          const what = link.description ? ` for ${String(link.description).split('\n')[0].slice(0, 200)}` : ''
+          await sendMessageToConversation(db, accountId, {
+            conversationId: link.conversation_id,
+            messageType: 'text',
+            contentText: `✅ Payment of ₹${amount} received${what}. Thank you! Your order is confirmed.`,
+            senderId: userId,
+          })
+        }
+        return NextResponse.json({ told: true, flow_started: started })
       }
 
       case 'otp_template_create': {

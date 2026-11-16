@@ -1483,6 +1483,19 @@
           "help": "Use {{vars.name}} para respostas salvas antes neste fluxo e {{contact.name}} ou {{contact.phone}} para o cliente. Sem funil ainda, um funil Vendas é criado.",
           "then": "Depois ir para",
           "contactName": "Salvar como nome do cliente (opcional, ex. {{vars.name}})"
+        },
+        "cart": {
+          "products": "Produtos (código, nome, preço)",
+          "productsHelp": "Cole as linhas da sua planilha Excel: um produto por linha com código, nome e preço em ₹. Uma linha de cabeçalho é ignorada.",
+          "count": "{count, plural, =0 {Nenhum produto ainda} =1 {1 produto} other {# produtos}}",
+          "badLines": "Não foi possível ler a linha {lines}",
+          "product": "Produto escolhido pelo cliente",
+          "productHelp": "Normalmente {{vars.product}}: o código digitado ou o nome do produto escolhido.",
+          "quantity": "Quantidade (opcional)",
+          "quantityHelp": "Normalmente {{vars.qty}}. Vazio ou não numérico conta como 1.",
+          "varsHelp": "As próximas etapas podem usar {{vars.cart_summary}} (a lista), {{vars.cart_total}} (total para o link de pagamento), {{vars.cart_total_text}} (total formatado) e {{vars.cart_count}}.",
+          "then": "Depois ir para",
+          "notFound": "Se o produto não estiver na lista, ir para"
         }
       },
       "categories": {
@@ -1540,6 +1553,10 @@
         "create_lead": {
           "label": "Criar lead",
           "blurb": "Adiciona um lead à página Leads"
+        },
+        "add_to_cart": {
+          "label": "Adicionar ao carrinho",
+          "blurb": "Adiciona um produto da sua lista de preços ao carrinho do cliente"
         }
       },
       "action": {
@@ -1569,7 +1586,11 @@
         },
         "valuesHint": "Um valor por linha; cada linha preenche a próxima coluna.",
         "saveAs": "Salvar o link como",
-        "saveAsHint": "Use em uma mensagem posterior como"
+        "saveAsHint": "Use em uma mensagem posterior como",
+        "razorpayHelp": "O dinheiro vai para a sua própria conta Razorpay. O link abre uma página com UPI, cartões e internet banking e expira em 24 horas. No valor use o total do carrinho, por exemplo {{vars.cart_total}}.",
+        "sendQr": "Também criar um QR code UPI",
+        "sendQrHelp": "Para clientes que pagam com outro telefone. Mostre-o com uma etapa Enviar mídia (imagem) usando o link {var}. Requer QR codes ativados no Razorpay.",
+        "ifFails": "Se o link não puder ser criado, ir para"
       },
       "addMenu": {
         "title": "Adicionar etapa",
@@ -1624,7 +1645,10 @@
             "google_calendar_event": "criar evento no Google Agenda",
             "razorpay_link": "link de pagamento Razorpay"
           },
-          "lead": "Lead criado: {title}"
+          "lead": "Lead criado: {title}",
+          "cart": "Adicionado ao carrinho: {detail}",
+          "cartMissing": "Esse produto não está na lista.",
+          "payLink": "Um link de pagamento Razorpay de ₹{detail} seria enviado aqui."
         }
       },
       "duplicateNode": "Duplicar",
@@ -1672,7 +1696,9 @@
       "action_google_calendar_event": "Criar evento no Google Agenda",
       "action_razorpay_link": "Link de pagamento Razorpay",
       "actionNone": "Escolha um serviço",
-      "leadNone": "Escolha um título para o lead"
+      "leadNone": "Escolha um título para o lead",
+      "cartCount": "{count, plural, =1 {1 produto} other {# produtos}}",
+      "cartNone": "Adicione seus produtos"
     },
     "header": {
       "backToFlows": "Voltar aos fluxos",
@@ -3095,7 +3121,14 @@
       "leadNeedsTitle": "Criar lead precisa de um título.",
       "leadValueNumber": "O valor deve ser um número ou o marcador de uma resposta salva.",
       "leadNeedsNext": "Criar lead deve apontar para um próximo passo.",
-      "leadMissingNext": "Criar lead aponta para um passo inexistente \"{key}\"."
+      "leadMissingNext": "Criar lead aponta para um passo inexistente \"{key}\".",
+      "cartNeedsProducts": "Adicione pelo menos um produto (código, nome, preço).",
+      "cartTooMany": "Até {max} produtos em uma etapa.",
+      "cartDuplicateCode": "O código {code} aparece duas vezes.",
+      "cartNeedsProduct": "Indique qual resposta contém o produto, por exemplo a pergunta do código.",
+      "cartNeedsNext": "Escolha a etapa depois que um produto é adicionado.",
+      "cartMissingNext": "A etapa “{key}” não existe.",
+      "cartNeedsNotFound": "Escolha para onde ir quando o produto não estiver na lista."
     },
     "automations": {
       "needsStep": "automações ativas precisam de pelo menos uma etapa",

@@ -505,8 +505,8 @@ async def create_pipeline(body: PipelineCreate, ctx: AdminMember, sdb: ServiceDb
     return next(p for p in await _pipelines(sdb, ctx.account_id) if p["id"] == pipe["id"])
 
 
-FLOW_NODE_TYPES = {"start", "send_message", "send_buttons", "send_list", "send_media", "collect_input", "condition", "set_tag", "create_lead", "handoff", "end"}
-NEXT_SINGLE = {"start", "send_message", "send_media", "collect_input", "set_tag", "create_lead"}
+FLOW_NODE_TYPES = {"start", "send_message", "send_buttons", "send_list", "send_media", "collect_input", "condition", "set_tag", "create_lead", "add_to_cart", "action", "handoff", "end"}
+NEXT_SINGLE = {"start", "send_message", "send_media", "collect_input", "set_tag", "create_lead", "add_to_cart", "action"}
 
 
 class FlowNodeIn(BaseModel):
@@ -518,7 +518,7 @@ class FlowNodeIn(BaseModel):
 class FlowCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=80)
     description: str | None = Field(None, max_length=300)
-    trigger: Literal["keyword", "first_inbound_message", "manual"] = "keyword"
+    trigger: Literal["keyword", "first_inbound_message", "manual", "payment_received"] = "keyword"
     keywords: list[str] = Field([], max_length=20)
     match_type: Literal["contains", "exact"] = "contains"
     nodes: list[FlowNodeIn] = Field(..., min_length=1, max_length=40)
@@ -591,12 +591,40 @@ def _flow_problems(body: FlowCreate) -> list[str]:
             out.append(f"'{n.key}': assign_to must be a team member's user id (see team_list)")
         if n.type == "set_tag" and not (c.get("tag") or c.get("tag_id")):
             out.append(f"'{n.key}': choose a tag")
+        if n.type == "add_to_cart":
+            products = c.get("products") if isinstance(c.get("products"), list) else []
+            if not 1 <= len(products) <= 200:
+                out.append(f"'{n.key}': add 1 to 200 products as {{code, name, price}}")
+            codes = []
+            for p in products:
+                ok = isinstance(p, dict) and str(p.get("code", "")).strip() and str(p.get("name", "")).strip()
+                try:
+                    ok = ok and float(p.get("price", 0)) > 0
+                except (TypeError, ValueError):
+                    ok = False
+                if not ok:
+                    out.append(f"'{n.key}': every product needs a code, a name and a price above 0 ({p})")
+                    break
+                codes.append(re.sub(r"\s+", "", str(p["code"]).lower()))
+            if len(set(codes)) != len(codes):
+                out.append(f"'{n.key}': product codes must be different")
+            if not str(c.get("product", "")).strip():
+                out.append(f"'{n.key}': 'product' says which answer holds the product, e.g. {{{{vars.product}}}}")
+            need(n, c.get("not_found_node_key"), "the step for a product that isn't in the list (not_found_node_key)")
+        if n.type == "action":
+            if c.get("service") != "razorpay_link":
+                out.append(f"'{n.key}': the only connected step available here is service 'razorpay_link'")
+            if not str((c.get("params") or {}).get("amount", "")).strip():
+                out.append(f"'{n.key}': params.amount is missing (e.g. {{{{vars.cart_total}}}})")
+            if c.get("error_node_key"):
+                need(n, c.get("error_node_key"), "the step for when the link can't be made")
     return out
 
 
 async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
     """Names to ids: a tag name (made if new) and a pipeline/stage name for create_lead."""
     pipes = await _pipelines(sdb, ctx.account_id)
+    razorpay = await sdb.select("flow_connections", {"account_id": ctx.account_id, "kind": "razorpay"}, order="created_at.desc")
     out = []
     for n in body.nodes:
         c = dict(n.config)
@@ -614,6 +642,16 @@ async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
                 raise HTTPException(422, f"'{n.key}': no stage '{want_stage}' in that pipeline")
             c["pipeline_id"] = pipe["id"] if pipe else ""
             c["stage_id"] = stage["id"] if stage else ""
+        if n.type == "action":
+            want = str(c.get("connection_id") or c.pop("connection", "") or "")
+            conn = next((r for r in razorpay if want and (r["id"] == want or r["name"].lower() == want.lower())), None) if want else (razorpay[0] if razorpay else None)
+            if not conn:
+                raise HTTPException(422, f"'{n.key}': connect a Razorpay account first (Flows → Connections)" if not razorpay else f"'{n.key}': no Razorpay connection '{want}'")
+            c["connection_id"] = conn["id"]
+            c.setdefault("save_as", "payment_link")
+            c["params"] = {k: str(v) for k, v in (c.get("params") or {}).items()}
+        if n.type == "add_to_cart":
+            c["products"] = [{"code": str(p["code"]).strip()[:20], "name": str(p["name"]).strip()[:60], "price": round(float(p["price"]), 2)} for p in c.get("products") or []]
         if n.type in ("send_buttons", "send_list"):
             # Reply ids the editor would make; titles stay as given.
             if n.type == "send_buttons":

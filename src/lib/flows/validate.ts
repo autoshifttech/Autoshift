@@ -26,6 +26,7 @@
 import { INTERACTIVE_LIMITS } from "@/lib/whatsapp/meta-api";
 import { getT } from "@/lib/i18n/translate";
 import { isActionService } from "./actions";
+import { MAX_PRODUCTS } from "./cart";
 import { AUTO_ADVANCING_NODE_TYPES } from "./types";
 
 const t = getT("Validation.flows");
@@ -793,12 +794,33 @@ function validateNode(
       break;
     }
 
+    case "add_to_cart": {
+      const cfg = node.config as { products?: Array<{ code?: string; price?: number }>; product?: string; next_node_key?: string; not_found_node_key?: string };
+      const products = Array.isArray(cfg.products) ? cfg.products : [];
+      const push = (field: string, message: string) => issues.push({ severity: "error", scope: "node", node_key: node.node_key, field, message });
+      if (products.length === 0) push("products", t("cartNeedsProducts"));
+      if (products.length > MAX_PRODUCTS) push("products", t("cartTooMany", { max: MAX_PRODUCTS }));
+      const codes = products.map((p) => String(p.code ?? "").toLowerCase().replace(/\s+/g, ""));
+      const dupe = codes.find((c, i) => codes.indexOf(c) !== i);
+      if (dupe) push("products", t("cartDuplicateCode", { code: dupe.toUpperCase() }));
+      if (!cfg.product?.trim()) push("product", t("cartNeedsProduct"));
+      if (!cfg.next_node_key) push("next_node_key", t("cartNeedsNext"));
+      else if (!knownKeys.has(cfg.next_node_key)) push("next_node_key", t("cartMissingNext", { key: cfg.next_node_key }));
+      if (!cfg.not_found_node_key) push("not_found_node_key", t("cartNeedsNotFound"));
+      else if (!knownKeys.has(cfg.not_found_node_key)) push("not_found_node_key", t("cartMissingNext", { key: cfg.not_found_node_key }));
+      break;
+    }
+
     case "action": {
       const cfg = node.config as {
         service?: string;
         connection_id?: string;
         next_node_key?: string;
+        error_node_key?: string;
       };
+      if (cfg.error_node_key && !knownKeys.has(cfg.error_node_key)) {
+        issues.push({ severity: "error", scope: "node", node_key: node.node_key, field: "error_node_key", message: t("actionMissingNext", { key: cfg.error_node_key }) });
+      }
       if (!isActionService(cfg.service)) {
         issues.push({
           severity: "error",
@@ -889,9 +911,10 @@ function outgoingEdges(node: NodeInput): string[] {
     case "collect_input":
     case "set_tag":
     case "action":
-    case "create_lead": {
-      const cfg = node.config as { next_node_key?: string };
-      return cfg.next_node_key ? [cfg.next_node_key] : [];
+    case "create_lead":
+    case "add_to_cart": {
+      const cfg = node.config as { next_node_key?: string; not_found_node_key?: string; error_node_key?: string };
+      return [cfg.next_node_key, cfg.not_found_node_key, cfg.error_node_key].filter((k): k is string => Boolean(k));
     }
     case "condition": {
       const cfg = node.config as {

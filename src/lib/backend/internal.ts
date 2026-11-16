@@ -85,3 +85,54 @@ export async function assistantReply(args: { accountId: string; assistantId: str
     return null
   }
 }
+
+export interface PaymentLinkResult {
+  id: string
+  short_url: string | null
+  qr_image_url: string | null
+  amount_paise: number
+  mode: string | null
+  qr_problem: string | null
+}
+
+/**
+ * A Razorpay payment link (and optional UPI QR picture) on the business's own Razorpay account, for
+ * a flow's payment step. Throws with the backend's reason so the flow can take its "if it fails" exit.
+ */
+export async function createPaymentLink(args: {
+  accountId: string
+  connectionId?: string | null
+  amount: string
+  description: string
+  contactId?: string | null
+  conversationId?: string | null
+  flowRunId?: string | null
+  leadId?: string | null
+  customerName?: string | null
+  customerPhone?: string | null
+  sendQr?: boolean
+}): Promise<PaymentLinkResult> {
+  const c = config()
+  if (!c) throw new Error('The AutoShift API is not connected (AUTOSHIFT_API_URL / AUTOSHIFT_INTERNAL_SECRET)')
+  const res = await fetch(`${c.url}/v1/internal/payment-link`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-AutoShift-Internal': c.secret },
+    body: JSON.stringify({
+      account_id: args.accountId,
+      connection_id: args.connectionId || null,
+      amount: args.amount,
+      description: args.description.slice(0, 2000),
+      contact_id: args.contactId ?? null,
+      conversation_id: args.conversationId ?? null,
+      flow_run_id: args.flowRunId ?? null,
+      lead_id: args.leadId ?? null,
+      customer_name: args.customerName?.slice(0, 120) || null,
+      customer_phone: args.customerPhone?.slice(0, 32) || null,
+      send_qr: Boolean(args.sendQr),
+    }),
+    signal: AbortSignal.timeout(30000),
+  })
+  const data = (await res.json().catch(() => ({}))) as Partial<PaymentLinkResult> & { detail?: unknown }
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : `Payment link refused (${res.status})`)
+  return data as PaymentLinkResult
+}

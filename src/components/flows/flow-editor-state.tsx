@@ -207,6 +207,8 @@ export function defaultConfigFor(type: NodeType): Record<string, unknown> {
       return { service: "google_sheets_append", connection_id: "", params: {}, save_as: "", next_node_key: "" };
     case "create_lead":
       return { pipeline_id: "", stage_id: "", title: "{{contact.name}}", value: "", notes: "", next_node_key: "" };
+    case "add_to_cart":
+      return { products: [], product: "{{vars.product}}", quantity: "{{vars.qty}}", next_node_key: "", not_found_node_key: "" };
     case "handoff":
       return { note: "" };
     case "end":

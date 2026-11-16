@@ -138,3 +138,29 @@ def test_get_update_delete_flow_and_lead(client, world):
     world.store["deals"] = [{"id": "d1", "account_id": world.acct_a, "title": "Test"}, {"id": "d2", "account_id": world.acct_b, "title": "Theirs"}]
     assert client.delete("/v1/ws/leads/d2", headers=admin).status_code == 404
     assert client.delete("/v1/ws/leads/d1", headers=admin).status_code == 204 and [d["id"] for d in world.store["deals"]] == ["d2"]
+
+
+def test_shop_flow_with_cart_and_payment_link(client, world):
+    admin = world.headers("admin_a")
+    flow = {
+        "name": "Place order", "trigger": "keyword", "keywords": ["order"],
+        "nodes": [
+            {"key": "ask", "type": "collect_input", "config": {"prompt_text": "Code?", "var_key": "product", "next_node_key": "cart"}},
+            {"key": "cart", "type": "add_to_cart", "config": {"products": [{"code": "P001", "name": "T-shirt", "price": 499}], "product": "{{vars.product}}", "next_node_key": "pay", "not_found_node_key": "ask"}},
+            {"key": "pay", "type": "action", "config": {"service": "razorpay_link", "params": {"amount": "{{vars.cart_total}}", "send_qr": "yes"}, "next_node_key": "bye", "error_node_key": "bye"}},
+            {"key": "bye", "type": "end", "config": {}},
+        ],
+    }
+    assert client.post("/v1/ws/flows", json={**flow, "dry_run": True}, headers=admin).status_code == 201
+    no_conn = client.post("/v1/ws/flows", json=flow, headers=admin)
+    assert no_conn.status_code == 422 and "Razorpay" in no_conn.json()["detail"]
+    world.rows("flow_connections").append({"id": "c-old", "account_id": world.acct_a, "kind": "razorpay", "name": "Old", "created_at": "2026-01-01T00:00:00Z"})
+    world.rows("flow_connections").append({"id": "c-new", "account_id": world.acct_a, "kind": "razorpay", "name": "Shop", "created_at": "2026-02-01T00:00:00Z"})
+    made = client.post("/v1/ws/flows", json=flow, headers=admin)
+    assert made.status_code == 201, made.text
+    nodes = {n["node_key"]: n for n in world.store["flow_nodes"] if n["flow_id"] == made.json()["id"]}
+    assert nodes["pay"]["config"]["connection_id"] == "c-new" and nodes["pay"]["config"]["save_as"] == "payment_link"
+    dupes = {**flow, "nodes": [flow["nodes"][0], {**flow["nodes"][1], "config": {**flow["nodes"][1]["config"], "products": [{"code": "P1", "name": "A", "price": 1}, {"code": "p1", "name": "B", "price": 2}]}}, *flow["nodes"][2:]]}
+    assert "different" in client.post("/v1/ws/flows", json=dupes, headers=admin).json()["detail"]
+    paid = {"name": "Paid", "trigger": "payment_received", "nodes": [{"key": "thanks", "type": "send_message", "config": {"text": "Got ₹{{vars.payment_amount}}", "next_node_key": "bye"}}, {"key": "bye", "type": "end", "config": {}}]}
+    assert client.post("/v1/ws/flows", json=paid, headers=admin).status_code == 201

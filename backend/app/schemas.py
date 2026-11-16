@@ -343,6 +343,20 @@ class InternalAiReply(BaseModel):
     ref: str = Field(min_length=8, max_length=200)
 
 
+class InternalPaymentLink(BaseModel):
+    account_id: str
+    connection_id: str | None = None
+    amount: str = Field(min_length=1, max_length=40)
+    description: str = Field("", max_length=2000)
+    contact_id: str | None = None
+    conversation_id: str | None = None
+    flow_run_id: str | None = None
+    lead_id: str | None = None
+    customer_name: str | None = Field(None, max_length=120)
+    customer_phone: str | None = Field(None, max_length=32)
+    send_qr: bool = False
+
+
 class InternalEvent(BaseModel):
     account_id: str
     type: str

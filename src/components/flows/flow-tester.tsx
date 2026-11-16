@@ -27,6 +27,8 @@ function NoteLine({ m, t }: { m: Extract<SimMessage, { kind: "note" }>; t: Retur
           ? t("notes.stuck", { key: m.arg ?? "" })
           : m.code === "lead"
             ? t("notes.lead", { title: m.arg ?? "" })
+          : m.code === "cart" || m.code === "payLink"
+            ? t(`notes.${m.code}`, { detail: m.arg ?? "" })
           : m.code === "handoff" && m.arg
             ? `${t("notes.handoff")} ${m.arg}`
             : t(`notes.${m.code}`);

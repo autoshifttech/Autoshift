@@ -2,15 +2,17 @@
 
 import hashlib
 import json
+import uuid
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
-from .. import audit, billing
+from .. import audit, billing, shop_payments
 from ..config import Settings, get_settings
-from ..deps import ServiceDb
+from ..deps import Bridge, ServiceDb
 from ..razorpay import verify_webhook_signature
+from ..security import decrypt
 
 router = APIRouter(prefix="/v1/webhooks", tags=["webhooks"])
 
@@ -98,3 +100,53 @@ async def razorpay_webhook(
 
     await sdb.update("razorpay_events", {"event_id": event_id}, {"status": outcome, "processed_at": datetime.now(timezone.utc).isoformat()})
     return {"status": outcome}
+
+
+@router.post("/razorpay/c/{connection_id}")
+async def business_razorpay_webhook(
+    connection_id: str,
+    request: Request,
+    sdb: ServiceDb,
+    bridge: Bridge,
+    settings: Annotated[Settings, Depends(get_settings)],
+    x_razorpay_signature: Annotated[str | None, Header()] = None,
+    x_razorpay_event_id: Annotated[str | None, Header()] = None,
+):
+    """A business's own Razorpay account: its customers paid a link or QR code a flow sent."""
+    rows = await sdb.select("flow_connections", {"id": connection_id, "kind": "razorpay"}, limit=1) if _uuid(connection_id) else []
+    if not rows:
+        raise HTTPException(404, "Unknown connection")
+    secrets = await sdb.select("flow_connection_secrets", {"connection_id": connection_id}, limit=1)
+    keys = json.loads(decrypt(secrets[0]["ciphertext"], settings)) if secrets else {}
+    raw = await request.body()
+    if not keys.get("webhook_secret"):
+        raise HTTPException(400, "Add the webhook secret to this Razorpay connection")
+    if not verify_webhook_signature(raw, x_razorpay_signature or "", keys["webhook_secret"]):
+        raise HTTPException(400, "Invalid signature")
+    try:
+        payload = json.loads(raw)
+    except ValueError as exc:
+        raise HTTPException(400, "Body is not JSON") from exc
+
+    event = str(payload.get("event", ""))
+    event_id = "c:" + (x_razorpay_event_id or hashlib.sha256(raw).hexdigest())
+    existing = await sdb.select("razorpay_events", {"event_id": event_id}, limit=1)
+    if existing and existing[0]["status"] in ("processed", "ignored"):
+        return {"status": "duplicate"}
+    if not existing:
+        await sdb.insert("razorpay_events", {"event_id": event_id, "event_type": event, "payload": payload})
+    try:
+        outcome = await shop_payments.handle_event(sdb, bridge, rows[0], keys, event, payload)
+    except Exception as exc:  # noqa: BLE001 - recorded, then Razorpay retries
+        await sdb.update("razorpay_events", {"event_id": event_id}, {"status": "failed", "error": str(exc)[:300]})
+        raise HTTPException(500, "Could not process the event") from exc
+    await sdb.update("razorpay_events", {"event_id": event_id}, {"status": outcome, "processed_at": datetime.now(timezone.utc).isoformat()})
+    return {"status": outcome}
+
+
+def _uuid(value: str) -> bool:
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False

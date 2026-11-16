@@ -51,6 +51,7 @@ import { slugify, type BuilderNode } from "../shared";
 import { NextNodeRow, NodeKeySelect, TextRow } from "./fields";
 import { ActionForm, type ActionCfg } from "./action-form";
 import { CreateLeadForm, type CreateLeadCfg } from "./create-lead-form";
+import { AddToCartForm, type AddToCartCfg } from "./add-to-cart-form";
 
 interface NodeConfigFormProps {
   node: BuilderNode;
@@ -210,6 +211,9 @@ export function NodeConfigForm({
 
     case "create_lead":
       return <CreateLeadForm cfg={cfg as CreateLeadCfg} allNodes={allNodes} currentKey={node.node_key} onUpdateConfig={onUpdateConfig} />;
+
+    case "add_to_cart":
+      return <AddToCartForm cfg={cfg as AddToCartCfg} allNodes={allNodes} currentKey={node.node_key} onUpdateConfig={onUpdateConfig} />;
 
     case "handoff":
       return (

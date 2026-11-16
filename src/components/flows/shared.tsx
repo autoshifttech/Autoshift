@@ -28,6 +28,7 @@ import {
   PlayCircle,
   Tag,
   Target,
+  ShoppingCart,
   UserPlus,
   Workflow,
 } from 'lucide-react';
@@ -53,6 +54,7 @@ export type NodeType =
   | 'set_tag'
   | 'action'
   | 'create_lead'
+  | 'add_to_cart'
   | 'handoff'
   | 'end';
 
@@ -155,6 +157,12 @@ export const NODE_META: Record<
     color: 'text-emerald-800 dark:text-emerald-400',
     category: 'logic',
   },
+  add_to_cart: {
+    slugSeed: 'Add to cart',
+    icon: ShoppingCart,
+    color: 'text-amber-800 dark:text-amber-400',
+    category: 'logic',
+  },
   action: {
     slugSeed: 'Use a connection',
     icon: Link2,
@@ -213,6 +221,7 @@ const NODE_HUE: Record<NodeType, { l: number; c: number; h: number }> = {
   set_tag: { l: 0.65, c: 0.15, h: 350 }, // pink
   action: { l: 0.68, c: 0.16, h: 45 }, // orange — talks to another service
   create_lead: { l: 0.6, c: 0.14, h: 150 }, // green — a new lead
+  add_to_cart: { l: 0.7, c: 0.15, h: 80 }, // gold — a sale
   handoff: { l: 0.65, c: 0.17, h: 16 }, // rose — hands off
   end: { l: 0.55, c: 0.01, h: 260 }, // neutral grey — terminal
 };
@@ -431,6 +440,10 @@ export function summarizeNode(
     case 'create_lead': {
       const title = typeof cfg.title === 'string' ? cfg.title : '';
       return title ? truncate(title) : t ? t('leadNone') : null;
+    }
+    case 'add_to_cart': {
+      const count = Array.isArray(cfg.products) ? cfg.products.length : 0;
+      return count ? (t ? t('cartCount', { count }) : `${count} products`) : t ? t('cartNone') : null;
     }
     case 'action': {
       const service = typeof cfg.service === 'string' ? cfg.service : '';

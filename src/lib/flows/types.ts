@@ -189,6 +189,28 @@ export interface CreateLeadNodeConfig {
   next_node_key: string;
 }
 
+/** One product in an add_to_cart step's list (pasted from the business's Excel sheet). */
+export interface CartProduct {
+  code: string;
+  name: string;
+  /** Price in rupees. */
+  price: number;
+}
+
+/**
+ * Adds a product to the customer's cart (kept in the run's vars: cart, cart_total, cart_count,
+ * cart_summary). `product` is usually {{vars.product}}: the code they typed or the name they
+ * picked. When it isn't in the list the run goes to `not_found_node_key`.
+ */
+export interface AddToCartNodeConfig {
+  products: CartProduct[];
+  product: string;
+  /** Usually {{vars.qty}}; empty or not a number = 1. */
+  quantity?: string;
+  next_node_key: string;
+  not_found_node_key: string;
+}
+
 export interface ActionNodeConfig {
   service: "google_sheets_append" | "google_calendar_event" | "razorpay_link";
   /** The connected account (Flows → Connections) this step uses. */
@@ -198,6 +220,8 @@ export interface ActionNodeConfig {
   /** Variable that receives a payment or event link, when the service makes one. */
   save_as: string;
   next_node_key: string;
+  /** Where to go when the link can't be made (optional; empty = carry on to next_node_key). */
+  error_node_key?: string;
 }
 
 // Terminal nodes carry no config — they just stop the run.
@@ -222,6 +246,7 @@ export type FlowNodeConfig =
   | { node_type: "set_tag"; config: SetTagNodeConfig }
   | { node_type: "action"; config: ActionNodeConfig }
   | { node_type: "create_lead"; config: CreateLeadNodeConfig }
+  | { node_type: "add_to_cart"; config: AddToCartNodeConfig }
   | { node_type: "handoff"; config: HandoffNodeConfig }
   | { node_type: "end"; config: EndNodeConfig };
 
@@ -409,6 +434,7 @@ export const AUTO_ADVANCING_NODE_TYPES: ReadonlySet<string> = new Set([
   "set_tag",
   "action",
   "create_lead",
+  "add_to_cart",
 ]);
 
 export function assertNever(x: never): never {

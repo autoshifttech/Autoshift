@@ -24,6 +24,7 @@ export interface ActionCfg {
   params?: Record<string, string>;
   save_as?: string;
   next_node_key?: string;
+  error_node_key?: string;
 }
 
 const label = "mb-1 block text-xs text-muted-foreground";
@@ -136,6 +137,24 @@ export function ActionForm({
         </div>
       )}
 
+      {service === "razorpay_link" && (
+        <>
+          <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">{t.raw("razorpayHelp") as string}</p>
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-4 accent-[var(--primary)]"
+              checked={["yes", "true", "1"].includes(String(params.send_qr ?? "").toLowerCase())}
+              onChange={(e) => setParam("send_qr", e.target.checked ? "yes" : "")}
+            />
+            <span>
+              <span className="block font-medium text-foreground">{t("sendQr")}</span>
+              <span className="block text-xs text-muted-foreground">{t("sendQrHelp", { var: `{{vars.${cfg.save_as || "payment_link"}_qr}}` })}</span>
+            </span>
+          </label>
+        </>
+      )}
+
       <NextNodeRow
         value={cfg.next_node_key ?? ""}
         allNodes={allNodes}
@@ -143,6 +162,15 @@ export function ActionForm({
         onChange={(v) => onUpdateConfig({ next_node_key: v })}
         label={tForm("thenAdvanceTo")}
       />
+      {service === "razorpay_link" && (
+        <NextNodeRow
+          value={cfg.error_node_key ?? ""}
+          allNodes={allNodes}
+          currentKey={currentKey}
+          onChange={(v) => onUpdateConfig({ error_node_key: v })}
+          label={t("ifFails")}
+        />
+      )}
     </>
   );
 }

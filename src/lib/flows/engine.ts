@@ -43,6 +43,8 @@ import { decideFallback, resolveFallbackPolicy } from "./fallback";
 import { addContactTagAndDispatch } from "@/lib/contacts/tag-events";
 import { removeContactTag } from "@/lib/contacts/tag-write";
 import { checkRunTimeout, markRunTimedOut, type RunTimeoutCheck } from "./timeout";
+import { addToCart, findProduct, parseQty, readCart } from "./cart";
+import { createPaymentLink } from "@/lib/backend/internal";
 import {
   type CollectInputNodeConfig,
   type ConditionNodeConfig,
@@ -59,6 +61,7 @@ import {
   type SetTagNodeConfig,
   type CreateLeadNodeConfig,
   type ActionNodeConfig,
+  type AddToCartNodeConfig,
   type StartNodeConfig,
   type KeywordTriggerConfig,
   AUTO_ADVANCING_NODE_TYPES,
@@ -709,6 +712,13 @@ async function createLeadFromFlow(db: AdminClient, run: FlowRunRow, cfg: CreateL
   return { id: deal.id as string, title };
 }
 
+/** Merge into the run's vars, in memory and in the database (for steps that set vars themselves). */
+async function saveVars(db: AdminClient, run: FlowRunRow, patch: Record<string, unknown>): Promise<void> {
+  run.vars = { ...run.vars, ...patch };
+  const { error } = await db.from("flow_runs").update({ vars: run.vars }).eq("id", run.id);
+  if (error) console.error("[flows] saving vars failed:", error.message);
+}
+
 async function endRun(
   db: AdminClient,
   runId: string,
@@ -793,6 +803,14 @@ async function advanceFromNodeKey(
     }
     if (node.node_type === "send_media") {
       const cfg = node.config as unknown as SendMediaNodeConfig;
+      // The link may be a placeholder (e.g. {{vars.payment_link_qr}}); when it comes out empty
+      // (no QR code was made) the picture is skipped and the flow carries on.
+      const mediaUrl = interpolateVars(cfg.media_url, run.vars).trim();
+      if (!mediaUrl) {
+        await logEvent(db, run.id, "node_entered", node.node_key, { skipped: "empty_media_url" });
+        currentKey = cfg.next_node_key;
+        continue;
+      }
       try {
         const { whatsapp_message_id } = await engineSendMedia({
           accountId: run.account_id,
@@ -800,7 +818,7 @@ async function advanceFromNodeKey(
           conversationId: run.conversation_id!,
           contactId: run.contact_id!,
           kind: cfg.media_type,
-          link: cfg.media_url,
+          link: mediaUrl,
           caption: cfg.caption
             ? interpolateVars(cfg.caption, run.vars)
             : undefined,
@@ -929,6 +947,8 @@ async function advanceFromNodeKey(
       const cfg = node.config as unknown as CreateLeadNodeConfig;
       try {
         const lead = await createLeadFromFlow(db, run, cfg);
+        // Later steps (a payment link) attach to this lead, and payment moves it to "Paid".
+        await saveVars(db, run, { lead_id: lead.id, lead_title: lead.title });
         await logEvent(db, run.id, "node_entered", node.node_key, { lead_id: lead.id, title: lead.title });
       } catch (err) {
         // Non-fatal, like set_tag: the customer still gets the rest of the flow.
@@ -940,17 +960,65 @@ async function advanceFromNodeKey(
       currentKey = cfg.next_node_key;
       continue;
     }
-    if (node.node_type === "action") {
-      // The connected-account call (Sheets row, calendar event, payment
-      // link) is made by the backend once it is wired. Until then the
-      // step is recorded and the run moves on, so a flow never stalls here.
-      const cfg = node.config as unknown as ActionNodeConfig;
-      await logEvent(db, run.id, "node_entered", node.node_key, {
-        action: cfg.service,
-        connection_id: cfg.connection_id,
-        executed: false,
-      });
+    if (node.node_type === "add_to_cart") {
+      const cfg = node.config as unknown as AddToCartNodeConfig;
+      const answer = interpolateVars(cfg.product, run.vars);
+      const product = findProduct(cfg.products ?? [], answer);
+      if (!product) {
+        await logEvent(db, run.id, "node_entered", node.node_key, { cart: "not_found", answer: answer.slice(0, 60) });
+        currentKey = cfg.not_found_node_key;
+        continue;
+      }
+      const qty = parseQty(interpolateVars(cfg.quantity ?? "", run.vars));
+      const update = addToCart(readCart(run.vars.cart), product, qty);
+      await saveVars(db, run, update);
+      await logEvent(db, run.id, "node_entered", node.node_key, { cart: "added", code: product.code, qty, total: update.cart_total });
       currentKey = cfg.next_node_key;
+      continue;
+    }
+    if (node.node_type === "action") {
+      const cfg = node.config as unknown as ActionNodeConfig;
+      if (cfg.service !== "razorpay_link") {
+        // Google Sheets / Calendar calls are made by the backend once wired; until then the step
+        // is recorded and the run moves on, so a flow never stalls here.
+        await logEvent(db, run.id, "node_entered", node.node_key, { action: cfg.service, connection_id: cfg.connection_id, executed: false });
+        currentKey = cfg.next_node_key;
+        continue;
+      }
+      const saveAs = /^[a-z][a-z0-9_]{0,39}$/i.test(cfg.save_as ?? "") ? cfg.save_as : "payment_link";
+      try {
+        const { data: contact } = run.contact_id
+          ? await db.from("contacts").select("name, phone").eq("id", run.contact_id).eq("account_id", run.account_id).maybeSingle()
+          : { data: null };
+        const amount = interpolateVars(cfg.params?.amount ?? "", run.vars);
+        const description = interpolateVars(cfg.params?.description ?? "", run.vars) || "Order payment";
+        const link = await createPaymentLink({
+          accountId: run.account_id,
+          connectionId: cfg.connection_id,
+          amount,
+          description,
+          contactId: run.contact_id,
+          conversationId: run.conversation_id ?? null,
+          flowRunId: run.id,
+          leadId: typeof run.vars.lead_id === "string" ? run.vars.lead_id : null,
+          customerName: (contact?.name as string | null) ?? null,
+          customerPhone: (contact?.phone as string | null) ?? null,
+          sendQr: ["yes", "true", "1"].includes(String(cfg.params?.send_qr ?? "").toLowerCase()),
+        });
+        await saveVars(db, run, {
+          [saveAs]: link.short_url ?? "",
+          [`${saveAs}_qr`]: link.qr_image_url ?? "",
+          payment_amount: String(link.amount_paise / 100),
+        });
+        await logEvent(db, run.id, "node_entered", node.node_key, { action: cfg.service, executed: true, payment_link_id: link.id, qr: Boolean(link.qr_image_url), qr_problem: link.qr_problem });
+        currentKey = cfg.next_node_key;
+      } catch (err) {
+        await logEvent(db, run.id, "error", node.node_key, {
+          reason: "payment_link_failed",
+          detail: err instanceof Error ? err.message : String(err),
+        });
+        currentKey = cfg.error_node_key || cfg.next_node_key;
+      }
       continue;
     }
     if (node.node_type === "send_buttons") {
@@ -1420,4 +1488,52 @@ async function startNewRun(
     flow_run_id: run.id,
     outcome: outcome.outcome === "advanced" ? "started" : outcome.outcome,
   };
+}
+
+/**
+ * A customer paid a payment link a flow sent: start the business's "Payment received" flow for them,
+ * with the payment in its vars ({{vars.payment_amount}}, {{vars.payment_description}} ...).
+ * Returns false when there is no such flow or the customer is in the middle of another one; the
+ * caller then sends a plain confirmation instead.
+ */
+export async function startPaymentReceivedFlow(args: {
+  accountId: string;
+  contactId: string;
+  conversationId: string;
+  vars: Record<string, string>;
+}): Promise<boolean> {
+  const db = supabaseAdmin();
+  const { data: flows } = await db
+    .from("flows")
+    .select("*")
+    .eq("account_id", args.accountId)
+    .eq("status", "active")
+    .eq("trigger_type", "payment_received")
+    .order("created_at", { ascending: true })
+    .limit(1);
+  const flow = ((flows ?? []) as FlowRow[])[0];
+  if (!flow?.entry_node_id) return false;
+  if (await loadActiveRunForContact(db, args.accountId, args.contactId)) return false;
+
+  const { data: inserted, error } = await db
+    .from("flow_runs")
+    .insert({
+      flow_id: flow.id,
+      account_id: flow.account_id,
+      user_id: flow.user_id,
+      contact_id: args.contactId,
+      conversation_id: args.conversationId,
+      status: "active",
+      current_node_key: flow.entry_node_id,
+      vars: args.vars,
+    })
+    .select("*")
+    .maybeSingle();
+  if (error || !inserted) return false;
+  const run = inserted as FlowRunRow;
+  await logEvent(db, run.id, "started", flow.entry_node_id, { flow_id: flow.id, trigger_type: "payment_received" });
+  await db.rpc("increment_flow_execution_count", { p_flow_id: flow.id });
+  const nodes = await loadAllNodes(db, flow.id);
+  await advanceFromNodeKey(db, run, flow.entry_node_id, nodes);
+  return true;
 }

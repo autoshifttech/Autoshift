@@ -36,6 +36,7 @@ export const ADD_NODE_TYPES: NodeType[] = [
   "condition",
   "set_tag",
   "create_lead",
+  "add_to_cart",
   "action",
   "handoff",
   "end",

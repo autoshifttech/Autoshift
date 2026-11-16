@@ -37,6 +37,15 @@ export interface CanvasEdge {
   label?: string;
 }
 
+/**
+ * Second exits some steps have besides "next": add_to_cart goes here when the product isn't in its
+ * list, and a payment-link step goes here when the link can't be made.
+ */
+export const SIDE_EXITS: Partial<Record<string, Array<{ id: string; field: string; label: string }>>> = {
+  add_to_cart: [{ id: "missing", field: "not_found_node_key", label: "Not found" }],
+  action: [{ id: "failed", field: "error_node_key", label: "If it fails" }],
+};
+
 export function deriveCanvasEdges(nodes: BuilderNode[]): CanvasEdge[] {
   const knownKeys = new Set(nodes.map((n) => n.node_key));
   const edges: CanvasEdge[] = [];
@@ -50,7 +59,8 @@ export function deriveCanvasEdges(nodes: BuilderNode[]): CanvasEdge[] {
       case "collect_input":
       case "set_tag":
       case "action":
-      case "create_lead": {
+      case "create_lead":
+      case "add_to_cart": {
         const next = (cfg as { next_node_key?: string }).next_node_key;
         if (next && knownKeys.has(next)) {
           edges.push({
@@ -59,6 +69,18 @@ export function deriveCanvasEdges(nodes: BuilderNode[]): CanvasEdge[] {
             target: next,
             sourceHandle: "next",
           });
+        }
+        for (const slot of SIDE_EXITS[node.node_type] ?? []) {
+          const target = (cfg as Record<string, unknown>)[slot.field];
+          if (typeof target === "string" && target && knownKeys.has(target)) {
+            edges.push({
+              id: `${node.node_key}--${slot.id}--${target}`,
+              source: node.node_key,
+              target,
+              sourceHandle: slot.id,
+              label: slot.label,
+            });
+          }
         }
         break;
       }
@@ -183,7 +205,8 @@ export function outgoingSlots(node: BuilderNode): OutgoingSlot[] {
     case "set_tag":
     case "action":
     case "create_lead":
-      return [{ id: "next", label: "Next" }];
+    case "add_to_cart":
+      return [{ id: "next", label: "Next" }, ...(SIDE_EXITS[node.node_type] ?? []).map(({ id, label }) => ({ id, label }))];
 
     case "condition":
       return [
@@ -259,8 +282,11 @@ export function applyEdgeConnection(
     case "set_tag":
     case "action":
     case "create_lead":
+    case "add_to_cart": {
       if (sourceHandle === "next") return { next_node_key: targetKey };
-      return null;
+      const side = (SIDE_EXITS[node.node_type] ?? []).find((x) => x.id === sourceHandle);
+      return side ? { [side.field]: targetKey } : null;
+    }
 
     case "condition":
       if (sourceHandle === "true") return { true_next: targetKey };
@@ -354,10 +380,12 @@ function patchedConfigWithoutKey(
     case "collect_input":
     case "set_tag":
     case "action":
-    case "create_lead": {
-      const next = (cfg as { next_node_key?: string }).next_node_key;
-      if (next !== deletedKey) return null;
-      return { ...cfg, next_node_key: "" };
+    case "create_lead":
+    case "add_to_cart": {
+      const c = cfg as Record<string, unknown>;
+      const fields = ["next_node_key", ...(SIDE_EXITS[node.node_type] ?? []).map((x) => x.field)].filter((f) => c[f] === deletedKey);
+      if (fields.length === 0) return null;
+      return { ...cfg, ...Object.fromEntries(fields.map((f) => [f, ""])) };
     }
 
     case "condition": {

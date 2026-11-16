@@ -1296,7 +1296,8 @@ def build_mcp(get_app) -> MCPServer:
     @mcp.tool()
     async def flow_create(name: str, nodes: list[dict], trigger: str = "keyword", keywords: list[str] | None = None, match_type: str = "contains", entry: str | None = None, description: str | None = None, activate: bool = False, confirm: bool = False) -> dict:
         """Admins: create a chatbot flow. nodes = [{"key": "ask_land", "type": "...", "config": {...}}], run from
-        `entry` (default: the first node). trigger: keyword (with keywords), first_inbound_message or manual.
+        `entry` (default: the first node). trigger: keyword (with keywords), first_inbound_message, manual or
+        payment_received (starts when a customer pays a link a flow sent; {{vars.payment_amount}}, {{vars.payment_description}}).
         Step types and their config:
           send_message  {"text", "next_node_key"}
           collect_input {"prompt_text", "var_key", "next_node_key"}  → the answer is {{vars.<var_key>}}
@@ -1306,6 +1307,12 @@ def build_mcp(get_app) -> MCPServer:
           condition     {"subject": "var"|"tag", "subject_key", "operator": "equals"|"contains"|"present"|"absent", "value", "true_next", "false_next"}
           set_tag       {"tag": "name" (made if new), "mode": "add"|"remove", "next_node_key"}
           create_lead   {"title", "value", "notes", "pipeline": "name", "stage": "name", "next_node_key"}  (adds a lead to the Leads page)
+          add_to_cart   {"products": [{"code", "name", "price"}], "product": "{{vars.product}}", "quantity": "{{vars.qty}}",
+                         "next_node_key", "not_found_node_key"} → {{vars.cart_summary}}, {{vars.cart_total}}, {{vars.cart_total_text}}
+          action        {"service": "razorpay_link", "params": {"amount": "{{vars.cart_total}}", "description", "send_qr": "yes"|""},
+                         "save_as": "payment_link", "next_node_key", "error_node_key"} → {{vars.payment_link}}, {{vars.payment_link_qr}}
+                         (the business's own Razorpay connection; a create_lead before it is moved to "Paid" when paid)
+          send_media    {"media_type": "image", "media_url" (may be {{vars.payment_link_qr}}; skipped when empty), "caption", "next_node_key"}
           handoff       {"note"} (assigns the chat to a person and ends)   end {}
         Texts may use {{vars.x}}; lead fields also {{contact.name}} / {{contact.phone}}.
         Checks everything first and shows a preview; needs confirm=true. activate=true switches it on."""

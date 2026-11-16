@@ -1483,6 +1483,19 @@
           "help": "Use {{vars.name}} for answers saved earlier in this flow, and {{contact.name}} or {{contact.phone}} for the customer. With no pipeline yet, a Sales pipeline is made.",
           "then": "Then go to",
           "contactName": "Save as the customer's name (optional, e.g. {{vars.name}})"
+        },
+        "cart": {
+          "products": "Products (code, name, price)",
+          "productsHelp": "Paste the rows from your Excel sheet: one product per line with the code, name and price in ₹. A header row is skipped.",
+          "count": "{count, plural, =0 {No products yet} =1 {1 product} other {# products}}",
+          "badLines": "Couldn't read line {lines}",
+          "product": "Product the customer chose",
+          "productHelp": "Usually {{vars.product}}: the code they typed or the product name they picked.",
+          "quantity": "Quantity (optional)",
+          "quantityHelp": "Usually {{vars.qty}}. Empty or not a number counts as 1.",
+          "varsHelp": "Later steps can use {{vars.cart_summary}} (the list), {{vars.cart_total}} (total for the payment link), {{vars.cart_total_text}} (total with commas) and {{vars.cart_count}}.",
+          "then": "Then go to",
+          "notFound": "If the product isn't in the list, go to"
         }
       },
       "categories": {
@@ -1540,6 +1553,10 @@
         "create_lead": {
           "label": "Create lead",
           "blurb": "Adds a lead to the Leads page"
+        },
+        "add_to_cart": {
+          "label": "Add to cart",
+          "blurb": "Adds a product from your price list to the customer's cart"
         }
       },
       "action": {
@@ -1569,7 +1586,11 @@
         },
         "valuesHint": "One value per line; each line fills the next column.",
         "saveAs": "Save the link as",
-        "saveAsHint": "Use it in a later message as"
+        "saveAsHint": "Use it in a later message as",
+        "razorpayHelp": "The money goes to your own Razorpay account. The link opens a page with UPI, cards and net banking, and expires after 24 hours. For the amount use the cart total, for example {{vars.cart_total}}.",
+        "sendQr": "Also make a UPI QR code",
+        "sendQrHelp": "For customers who pay from another phone. Show it with a Send media step (image) using the link {var}. Needs QR codes switched on in Razorpay.",
+        "ifFails": "If the link can't be made, go to"
       },
       "addMenu": {
         "title": "Add a step",
@@ -1624,7 +1645,10 @@
             "google_calendar_event": "create a Google Calendar event",
             "razorpay_link": "Razorpay payment link"
           },
-          "lead": "Lead created: {title}"
+          "lead": "Lead created: {title}",
+          "cart": "Added to cart: {detail}",
+          "cartMissing": "That product isn't in the list.",
+          "payLink": "A Razorpay payment link for ₹{detail} would be sent here."
         }
       },
       "duplicateNode": "Duplicate",
@@ -1672,7 +1696,9 @@
       "action_google_calendar_event": "Create a Google Calendar event",
       "action_razorpay_link": "Razorpay payment link",
       "actionNone": "Pick a service",
-      "leadNone": "Pick a lead title"
+      "leadNone": "Pick a lead title",
+      "cartCount": "{count, plural, =1 {1 product} other {# products}}",
+      "cartNone": "Add your products"
     },
     "header": {
       "backToFlows": "Back to Flows",
@@ -3095,7 +3121,14 @@
       "leadNeedsTitle": "Create-lead needs a lead title.",
       "leadValueNumber": "The value must be a number or a saved answer placeholder.",
       "leadNeedsNext": "Create-lead must point to a next node.",
-      "leadMissingNext": "Create-lead points to a missing node \"{key}\"."
+      "leadMissingNext": "Create-lead points to a missing node \"{key}\".",
+      "cartNeedsProducts": "Add at least one product (code, name, price).",
+      "cartTooMany": "Up to {max} products in one step.",
+      "cartDuplicateCode": "Product code {code} is listed twice.",
+      "cartNeedsProduct": "Say which answer holds the product, e.g. the product code question.",
+      "cartNeedsNext": "Choose the step after a product is added.",
+      "cartMissingNext": "The step “{key}” doesn't exist.",
+      "cartNeedsNotFound": "Choose where to go when the product isn't in the list."
     },
     "automations": {
       "needsStep": "active automations need at least one step",
