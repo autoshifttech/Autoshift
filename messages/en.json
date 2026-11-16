@@ -4634,7 +4634,7 @@
     "secret": "Secret",
     "webhookSecret": "Webhook secret",
     "razorpayWebhookPh": "The secret you set in Razorpay → Webhooks",
-    "razorpayWebhookHint": "Needed only for the <b>Payment</b> trigger. Choose any secret, enter it here and in Razorpay when you add the webhook URL.",
+    "razorpayWebhookHint": "Needed to know when a customer has paid (payment links, QR codes and the <b>Payment</b> trigger). Choose any secret, enter it here and in Razorpay when you add the webhook URL.",
     "razorpayKeyIdError": "Enter a key id that starts with rzp_live_ or rzp_test_.",
     "secretError": "Enter the secret (at least 8 characters).",
     "securityNote": "Keys are verified with {provider} first, then encrypted at rest. They are never shown again.",
@@ -4659,7 +4659,12 @@
     "remove": "Remove {name}",
     "removeTitle": "Remove {name}?",
     "removeDesc": "Flows that use this account will stop working until you connect another one.",
-    "removeConfirm": "Remove"
+    "removeConfirm": "Remove",
+    "webhookUrl": "Webhook URL for Razorpay",
+    "webhookCopy": "Copy",
+    "webhookCopied": "Webhook URL copied",
+    "webhookCopyFailed": "Couldn't copy; select the text instead",
+    "webhookEvents": "In Razorpay → Webhooks, add this URL with the same secret and the events payment_link.paid and qr_code.credited."
   },
   "VerifyPhone": {
     "title": "Verify your phone",

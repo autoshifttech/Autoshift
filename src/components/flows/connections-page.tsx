@@ -195,6 +195,29 @@ function RazorpayDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
 
 const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay" };
 
+/** Where this Razorpay account tells AutoShift that a customer paid (copied into Razorpay → Webhooks). */
+function WebhookUrl({ url, t }: { url: string; t: T }) {
+  const copy = () =>
+    navigator.clipboard.writeText(url).then(
+      () => toast.success(t("webhookCopied")),
+      () => toast.error(t("webhookCopyFailed")),
+    );
+  return (
+    <div className="mt-2 rounded-lg bg-muted/60 p-2">
+      <p className="text-xs font-medium text-foreground">{t("webhookUrl")}</p>
+      <div className="mt-1 flex items-center gap-2">
+        <code className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={url}>
+          {url}
+        </code>
+        <Button type="button" variant="outline" size="sm" className="min-h-11 shrink-0 sm:min-h-9" onClick={() => void copy()}>
+          {t("webhookCopy")}
+        </Button>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{t("webhookEvents")}</p>
+    </div>
+  );
+}
+
 function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemove: () => void; t: T; locale: string }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
@@ -208,6 +231,7 @@ function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemov
           {c.mode ? ` · ${t(c.mode)}` : ""} · {c.detail}
         </p>
         <p className="text-xs text-muted-foreground">{t("addedOn", { date: new Date(c.createdAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) })}</p>
+        {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} t={t} />}
       </div>
       <span className="hidden rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline">{t("connected")}</span>
       <Button variant="ghost" size="icon" aria-label={t("remove", { name: c.name })} onClick={onRemove} className="size-10 text-muted-foreground hover:text-destructive">

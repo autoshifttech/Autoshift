@@ -4634,7 +4634,7 @@
     "secret": "Segredo",
     "webhookSecret": "Segredo do webhook",
     "razorpayWebhookPh": "O segredo que você definiu em Razorpay → Webhooks",
-    "razorpayWebhookHint": "Necessário apenas para o gatilho de <b>Pagamento</b>. Escolha um segredo qualquer e informe aqui e no Razorpay ao adicionar a URL do webhook.",
+    "razorpayWebhookHint": "Necessário para saber quando um cliente pagou (links de pagamento, QR codes e o gatilho <b>Pagamento</b>). Escolha qualquer segredo, insira aqui e no Razorpay ao adicionar o URL do webhook.",
     "razorpayKeyIdError": "Informe um key id que comece com rzp_live_ ou rzp_test_.",
     "secretError": "Informe o segredo (mínimo 8 caracteres).",
     "securityNote": "As chaves são verificadas primeiro com o {provider} e depois criptografadas. Nunca são exibidas novamente.",
@@ -4659,7 +4659,12 @@
     "remove": "Remover {name}",
     "removeTitle": "Remover {name}?",
     "removeDesc": "Os fluxos que usam esta conta deixam de funcionar até você conectar outra.",
-    "removeConfirm": "Remover"
+    "removeConfirm": "Remover",
+    "webhookUrl": "URL do webhook para o Razorpay",
+    "webhookCopy": "Copiar",
+    "webhookCopied": "URL do webhook copiado",
+    "webhookCopyFailed": "Não foi possível copiar; selecione o texto",
+    "webhookEvents": "No Razorpay → Webhooks, adicione este URL com o mesmo segredo e os eventos payment_link.paid e qr_code.credited."
   },
   "VerifyPhone": {
     "title": "Verifique seu telefone",
