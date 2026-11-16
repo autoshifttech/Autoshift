@@ -98,6 +98,8 @@ export function FilesPage() {
         <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx,.csv,text/csv,text/comma-separated-values,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(e) => add(e.target.files)} />
       </div>
 
+      {isLive() && <ProductListPanel />}
+
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <div className="flex justify-between text-sm">

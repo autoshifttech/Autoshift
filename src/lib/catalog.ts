@@ -69,16 +69,20 @@ async function toBase64(blob: Blob): Promise<string> {
   return btoa(bin)
 }
 
-/** Reads a file from the Files page. dryRun only checks it and returns what was found. */
+/** Reads a file from the Files page (by its link). dryRun only checks it and returns what was found. */
 export async function importCatalog(file: { name: string; url: string }, dryRun: boolean): Promise<ImportSummary> {
-  if (!backendUrl()) throw new Error('The AutoShift API is not connected')
   const res = await fetch(file.url)
   if (!res.ok) throw new Error(`Could not open the file (${res.status})`)
-  const blob = await res.blob()
-  if (blob.size > 2 * 1024 * 1024) throw new Error('The file is larger than 2 MB')
+  return importCatalogBlob({ name: file.name, blob: await res.blob(), url: file.url }, dryRun)
+}
+
+/** Reads a file picked on this device and sends it straight to AutoShift (it is not stored on the Files page). */
+export async function importCatalogBlob(file: { name: string; blob: Blob; url?: string }, dryRun: boolean): Promise<ImportSummary> {
+  if (!backendUrl()) throw new Error('The AutoShift API is not connected')
+  if (file.blob.size > 2 * 1024 * 1024) throw new Error('The file is larger than 2 MB')
   const summary = await backend<ImportSummary>('/v1/catalog/import', {
     method: 'POST',
-    body: { file_name: file.name, file_url: file.url, content_base64: await toBase64(blob), dry_run: dryRun },
+    body: { file_name: file.name, file_url: file.url ?? null, content_base64: await toBase64(file.blob), dry_run: dryRun },
   })
   if (!dryRun) await loadCatalog(true)
   return summary

@@ -4835,6 +4835,9 @@
     "assistantNone": "Ainda não há lista de produtos. Envie um arquivo Excel na página Arquivos e toque em “Usar como lista de produtos”.",
     "loading": "Carregando…",
     "manageFile": "Gerenciar na página Arquivos",
-    "uploadFile": "Enviar um arquivo de produtos"
+    "uploadFile": "Enviar um arquivo de produtos",
+    "import": "Importar lista de produtos (Excel ou CSV)",
+    "importNew": "Importar nova lista de produtos",
+    "currentNamed": "Sua lista de produtos: “{name}”, {count, plural, =1 {1 produto} other {# produtos}}, atualizada em {date}."
   }
 }

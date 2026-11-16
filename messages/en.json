@@ -4835,6 +4835,9 @@
     "assistantNone": "No product list yet. Upload an Excel file on the Files page and tap “Use as product list”.",
     "loading": "Loading…",
     "manageFile": "Manage on the Files page",
-    "uploadFile": "Upload a product file"
+    "uploadFile": "Upload a product file",
+    "import": "Import product list (Excel or CSV)",
+    "importNew": "Import a new product list",
+    "currentNamed": "Your product list: “{name}”, {count, plural, =1 {1 product} other {# products}}, updated {date}."
   }
 }

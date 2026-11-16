@@ -1,37 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { CheckCircle2, Loader2, PackageSearch } from "lucide-react";
+import { CheckCircle2, FileUp, Loader2, PackageSearch } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
-import { importCatalog, useCatalog, type ImportSummary } from "@/lib/catalog";
+import { importCatalog, importCatalogBlob, useCatalog, type ImportSummary } from "@/lib/catalog";
 
 /**
  * On an Excel or CSV file: make it the business's product list. The file is checked first
  * (how many products, which columns, which rows were skipped) and only saved after "Use it".
  */
-export function ProductListPanel({ file }: { file: { name: string; url: string } }) {
+export function ProductListPanel({ file }: { file?: { name: string; url: string } }) {
   const t = useTranslations("ProductList");
   const locale = useLocale();
   const { catalog } = useCatalog();
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<ImportSummary | null>(null);
-  const isCurrent = catalog?.file_name === file.name;
+  const [error, setError] = useState("");
+  // Without a stored file: the person picks one on their device and it goes straight to AutoShift.
+  const [picked, setPicked] = useState<File | null>(null);
+  const pick = useRef<HTMLInputElement>(null);
+  const name = file?.name ?? picked?.name ?? "";
+  const isCurrent = Boolean(name) && catalog?.file_name === name;
 
-  const run = async (dryRun: boolean) => {
+  const run = async (dryRun: boolean, chosen: File | null = picked) => {
     setBusy(true);
+    setError("");
     try {
-      const summary = await importCatalog(file, dryRun);
+      const summary = file ? await importCatalog(file, dryRun) : await importCatalogBlob({ name: chosen!.name, blob: chosen! }, dryRun);
       if (dryRun) setPreview(summary);
       else {
         setPreview(null);
+        setPicked(null);
         toast.success(t("saved", { count: summary.count }));
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
@@ -42,7 +49,13 @@ export function ProductListPanel({ file }: { file: { name: string; url: string }
       <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <PackageSearch className="size-4 text-primary" aria-hidden /> {t("title")}
       </p>
-      {isCurrent && catalog ? (
+      {!file && catalog && !preview && (
+        <p className="mt-2 flex items-start gap-2 text-sm text-foreground">
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <span>{t("currentNamed", { name: catalog.file_name, count: catalog.products.length, date: new Date(catalog.updated_at).toLocaleDateString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) })}</span>
+        </p>
+      )}
+      {!file ? null : isCurrent && catalog ? (
         <p className="mt-2 flex items-start gap-2 text-sm text-foreground">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
           <span>{t("current", { count: catalog.products.length, date: new Date(catalog.updated_at).toLocaleDateString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) })}</span>
@@ -75,11 +88,36 @@ export function ProductListPanel({ file }: { file: { name: string; url: string }
             </Button>
           </div>
         </div>
-      ) : (
+      ) : file ? (
         <Button variant={isCurrent ? "outline" : "default"} className="mt-3 min-h-11 w-full gap-1.5" disabled={busy} onClick={() => void run(true)}>
           {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}
           {isCurrent ? t("update") : t("use")}
         </Button>
+      ) : (
+        <>
+          <Button className="mt-3 min-h-11 w-full gap-1.5" disabled={busy} onClick={() => pick.current?.click()}>
+            {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <FileUp className="size-4" aria-hidden />}
+            {catalog ? t("importNew") : t("import")}
+          </Button>
+          {/* No accept filter: some phones hide spreadsheets behind one. The server checks the file. */}
+          <input
+            ref={pick}
+            type="file"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              e.target.value = "";
+              if (!f) return;
+              setPicked(f);
+              void run(true, f);
+            }}
+          />
+        </>
+      )}
+      {error && (
+        <p className="mt-2 rounded-lg bg-destructive/10 p-2 text-sm text-rose-800 dark:text-rose-300" role="alert">
+          {error}
+        </p>
       )}
       <p className="mt-2 text-xs text-muted-foreground">
         {t("format")}{" "}
