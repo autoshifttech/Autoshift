@@ -62,6 +62,7 @@ import {
   type CreateLeadNodeConfig,
   type ActionNodeConfig,
   type AddToCartNodeConfig,
+  type CartProduct,
   type StartNodeConfig,
   type KeywordTriggerConfig,
   AUTO_ADVANCING_NODE_TYPES,
@@ -712,6 +713,15 @@ async function createLeadFromFlow(db: AdminClient, run: FlowRunRow, cfg: CreateL
   return { id: deal.id as string, title };
 }
 
+/** The business's product list (Files page) as cart products. */
+async function catalogProducts(db: AdminClient, accountId: string): Promise<CartProduct[]> {
+  const { data } = await db.from("product_catalog").select("products").eq("account_id", accountId).maybeSingle();
+  const rows = Array.isArray(data?.products) ? (data.products as Array<{ code?: unknown; name?: unknown; price?: unknown }>) : [];
+  return rows
+    .filter((p) => typeof p.code === "string" && typeof p.name === "string" && Number(p.price) > 0)
+    .map((p) => ({ code: p.code as string, name: p.name as string, price: Number(p.price) }));
+}
+
 /** Merge into the run's vars, in memory and in the database (for steps that set vars themselves). */
 async function saveVars(db: AdminClient, run: FlowRunRow, patch: Record<string, unknown>): Promise<void> {
   run.vars = { ...run.vars, ...patch };
@@ -963,7 +973,7 @@ async function advanceFromNodeKey(
     if (node.node_type === "add_to_cart") {
       const cfg = node.config as unknown as AddToCartNodeConfig;
       const answer = interpolateVars(cfg.product, run.vars);
-      const product = findProduct(cfg.products ?? [], answer);
+      const product = findProduct(cfg.source === "catalog" ? await catalogProducts(db, run.account_id) : (cfg.products ?? []), answer);
       if (!product) {
         await logEvent(db, run.id, "node_entered", node.node_key, { cart: "not_found", answer: answer.slice(0, 60) });
         currentKey = cfg.not_found_node_key;

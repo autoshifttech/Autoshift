@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Bubble, WhatsAppPreview } from "@/components/ui/whatsapp-preview";
 import { begin, choose, reply, type SimChoice, type SimMessage, type SimNode, type SimState } from "@/lib/flows/simulate";
 import { useFlowEditor } from "./flow-editor-state";
+import { useCatalog } from "@/lib/catalog";
 
 function NoteLine({ m, t }: { m: Extract<SimMessage, { kind: "note" }>; t: ReturnType<typeof useTranslations> }) {
   const text =
@@ -38,7 +39,17 @@ function NoteLine({ m, t }: { m: Extract<SimMessage, { kind: "note" }>; t: Retur
 export function FlowTester() {
   const { state, testOpen, setTestOpen } = useFlowEditor();
   const t = useTranslations("Flows.builder.test");
-  const nodes = useMemo<SimNode[]>(() => state.nodes.map((n) => ({ node_key: n.node_key, node_type: n.node_type, config: n.config })), [state.nodes]);
+  const { catalog } = useCatalog();
+  // An Add to cart step that uses the product list (Files page) is tested with that list.
+  const nodes = useMemo<SimNode[]>(
+    () =>
+      state.nodes.map((n) => ({
+        node_key: n.node_key,
+        node_type: n.node_type,
+        config: n.node_type === "add_to_cart" && n.config.source === "catalog" ? { ...n.config, products: catalog?.products ?? [] } : n.config,
+      })),
+    [state.nodes, catalog],
+  );
   const [sim, setSim] = useState<SimState | null>(null);
   const [draft, setDraft] = useState("");
   const [listOpen, setListOpen] = useState(false);

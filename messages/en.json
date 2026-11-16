@@ -1495,7 +1495,14 @@
           "quantityHelp": "Usually {{vars.qty}}. Empty or not a number counts as 1.",
           "varsHelp": "Later steps can use {{vars.cart_summary}} (the list), {{vars.cart_total}} (total for the payment link), {{vars.cart_total_text}} (total with commas) and {{vars.cart_count}}.",
           "then": "Then go to",
-          "notFound": "If the product isn't in the list, go to"
+          "notFound": "If the product isn't in the list, go to",
+          "source": "Where are the products?",
+          "source_catalog": "Product list (Files page)",
+          "source_list": "Paste a list here",
+          "catalogHas": "“{name}”: {count, plural, =1 {1 product} other {# products}}. Updating the file updates this step.",
+          "catalogNone": "No product list yet: upload an Excel file on the Files page and tap “Use as product list”.",
+          "listHelp": "Only for this step: code, name and price, one per line.",
+          "openFiles": "Open the Files page"
         },
         "mediaLinkLabel": "Or use a link",
         "mediaLinkHelp": "An https link or a placeholder such as the payment QR code from an earlier step. Press Tab to save it."
@@ -4807,5 +4814,27 @@
     "problem_stageDuplicate": "Two stages have the same name.",
     "save": "Save changes",
     "create": "Create pipeline"
+  },
+  "ProductList": {
+    "title": "Product list",
+    "hint": "Make this file your product list. The AI assistant answers from it, and order flows take prices from it.",
+    "replaceHint": "Your product list is “{name}”. Using this file replaces it.",
+    "current": "This is your product list: {count, plural, =1 {1 product} other {# products}}, updated {date}.",
+    "found": "{count, plural, =1 {Found 1 product} other {Found # products}}",
+    "extraColumns": "Also read: {columns}",
+    "skipped": "Skipped rows {rows} (each needs a code, a name and a price, and codes must be different).",
+    "cancel": "Cancel",
+    "useIt": "Use it",
+    "use": "Use as product list",
+    "update": "Update from this file",
+    "saved": "Product list saved: {count, plural, =1 {1 product} other {# products}}",
+    "format": "The first row needs the columns Code, Name and Price. Other columns (Sizes, Colours, Stock…) are used too.",
+    "toAssistant": "Open AI assistants",
+    "assistantSwitch": "Answer from the product list",
+    "assistantHas": "“{name}”: {count, plural, =1 {1 product} other {# products}}, updated {date}. Changes when you update the file.",
+    "assistantNone": "No product list yet. Upload an Excel file on the Files page and tap “Use as product list”.",
+    "loading": "Loading…",
+    "manageFile": "Manage on the Files page",
+    "uploadFile": "Upload a product file"
   }
 }

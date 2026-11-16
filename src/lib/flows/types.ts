@@ -203,6 +203,8 @@ export interface CartProduct {
  * picked. When it isn't in the list the run goes to `not_found_node_key`.
  */
 export interface AddToCartNodeConfig {
+  /** "catalog" = the product list from the Files page; otherwise the products pasted here. */
+  source?: "list" | "catalog";
   products: CartProduct[];
   product: string;
   /** Usually {{vars.qty}}; empty or not a number = 1. */

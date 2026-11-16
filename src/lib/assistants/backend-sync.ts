@@ -23,6 +23,7 @@ export interface AssistantRow {
   provider: string
   model_id: string
   knowledge: Assistant['knowledge']
+  use_catalog?: boolean
   tool_ids: string[]
   capture_leads: boolean
   audience: Assistant['audience']
@@ -61,6 +62,7 @@ export function toBody(a: Assistant): RowBody {
     provider: a.provider && VENDORS.includes(a.provider) ? a.provider : 'openai',
     model_id: (a.modelId ?? '').slice(0, 120),
     knowledge: a.knowledge.map((f) => ({ q: f.q.slice(0, 300), a: f.a.slice(0, 4000) })),
+    use_catalog: Boolean(a.useCatalog),
     tool_ids: a.toolIds,
     capture_leads: a.captureLeads,
     audience: a.audience,
@@ -83,6 +85,7 @@ export function fromRow(row: AssistantRow, local?: Assistant): Assistant {
     provider: row.provider as Assistant['provider'],
     modelId: row.model_id,
     knowledge: row.knowledge,
+    useCatalog: row.use_catalog ?? false,
     toolIds: row.tool_ids,
     captureLeads: row.capture_leads,
     audience: row.audience,

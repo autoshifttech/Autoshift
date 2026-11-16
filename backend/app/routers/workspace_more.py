@@ -591,7 +591,7 @@ def _flow_problems(body: FlowCreate) -> list[str]:
             out.append(f"'{n.key}': assign_to must be a team member's user id (see team_list)")
         if n.type == "set_tag" and not (c.get("tag") or c.get("tag_id")):
             out.append(f"'{n.key}': choose a tag")
-        if n.type == "add_to_cart":
+        if n.type == "add_to_cart" and c.get("source") != "catalog":
             products = c.get("products") if isinstance(c.get("products"), list) else []
             if not 1 <= len(products) <= 200:
                 out.append(f"'{n.key}': add 1 to 200 products as {{code, name, price}}")
@@ -608,6 +608,7 @@ def _flow_problems(body: FlowCreate) -> list[str]:
                 codes.append(re.sub(r"\s+", "", str(p["code"]).lower()))
             if len(set(codes)) != len(codes):
                 out.append(f"'{n.key}': product codes must be different")
+        if n.type == "add_to_cart":
             if not str(c.get("product", "")).strip():
                 out.append(f"'{n.key}': 'product' says which answer holds the product, e.g. {{{{vars.product}}}}")
             need(n, c.get("not_found_node_key"), "the step for a product that isn't in the list (not_found_node_key)")
@@ -650,7 +651,9 @@ async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
             c["connection_id"] = conn["id"]
             c.setdefault("save_as", "payment_link")
             c["params"] = {k: str(v) for k, v in (c.get("params") or {}).items()}
-        if n.type == "add_to_cart":
+        if n.type == "add_to_cart" and c.get("source") == "catalog":
+            c["products"] = []
+        elif n.type == "add_to_cart":
             c["products"] = [{"code": str(p["code"]).strip()[:20], "name": str(p["name"]).strip()[:60], "price": round(float(p["price"]), 2)} for p in c.get("products") or []]
         if n.type in ("send_buttons", "send_list"):
             # Reply ids the editor would make; titles stay as given.

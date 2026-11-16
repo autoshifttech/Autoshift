@@ -49,7 +49,7 @@ TOOL_GROUPS: dict[str, list[str]] = {
     "leads": ["leads_list", "lead_update", "lead_create", "lead_delete", "pipelines_list", "pipeline_create"],
     "campaigns": ["templates_list", "templates_create", "templates_sync", "templates_delete", "broadcasts_list", "broadcast_get", "broadcast_create", "broadcast_cancel", "broadcast_delete"],
     "automation": ["automations_list", "automation_toggle", "automation_logs", "flows_list", "flow_get", "flow_toggle", "flow_create", "flow_update", "flow_delete", "flow_runs", "quick_replies_list", "quick_reply_save"],
-    "ai": ["assistants_list", "assistants_get", "assistants_create", "assistants_update", "assistants_delete", "assistants_test_reply", "knowledge_list", "knowledge_add", "knowledge_update", "knowledge_delete", "tools_list", "tools_set_enabled", "ai_models_available"],
+    "ai": ["assistants_list", "assistants_get", "assistants_create", "assistants_update", "assistants_delete", "assistants_test_reply", "knowledge_list", "knowledge_add", "knowledge_update", "knowledge_delete", "tools_list", "tools_set_enabled", "ai_models_available", "product_list_get"],
     "whatsapp": ["whatsapp_status", "whatsapp_profile_get", "whatsapp_profile_update"],
     "team": ["team_list", "team_set_role", "team_remove", "team_invite", "team_activity"],
     "integrations": ["hooks_list", "hooks_create", "hooks_update", "hooks_delete", "hooks_ping", "hooks_deliveries", "connections_list", "connections_delete", "custom_tools_list", "custom_tool_run"],
@@ -1250,6 +1250,12 @@ def build_mcp(get_app) -> MCPServer:
         return await call("POST", f"/v1/ws/contacts/{contact_id}/opt-in", json_body={"source": source, "proof": proof})
 
     @mcp.tool()
+    async def product_list_get() -> dict:
+        """The product list (imported from an Excel/CSV file on the Files page): file name, columns and every
+        product's code, name, price and details. The AI assistant and Add to cart steps with source "catalog" use it."""
+        return await call("GET", "/v1/catalog") or {"products": [], "note": "No product list yet. Upload an Excel file on the Files page and tap 'Use as product list'."}
+
+    @mcp.tool()
     async def tags_list() -> list:
         """All tags with their id, colour and how many contacts have each."""
         return await call("GET", "/v1/ws/tags")
@@ -1307,7 +1313,8 @@ def build_mcp(get_app) -> MCPServer:
           condition     {"subject": "var"|"tag", "subject_key", "operator": "equals"|"contains"|"present"|"absent", "value", "true_next", "false_next"}
           set_tag       {"tag": "name" (made if new), "mode": "add"|"remove", "next_node_key"}
           create_lead   {"title", "value", "notes", "pipeline": "name", "stage": "name", "next_node_key"}  (adds a lead to the Leads page)
-          add_to_cart   {"products": [{"code", "name", "price"}], "product": "{{vars.product}}", "quantity": "{{vars.qty}}",
+          add_to_cart   {"source": "catalog" (the product list from the Files page) or "products": [{"code", "name", "price"}],
+                         "product": "{{vars.product}}", "quantity": "{{vars.qty}}",
                          "next_node_key", "not_found_node_key"} → {{vars.cart_summary}}, {{vars.cart_total}}, {{vars.cart_total_text}}
           action        {"service": "razorpay_link", "params": {"amount": "{{vars.cart_total}}", "description", "send_qr": "yes"|""},
                          "save_as": "payment_link", "next_node_key", "error_node_key"} → {{vars.payment_link}}, {{vars.payment_link_qr}}

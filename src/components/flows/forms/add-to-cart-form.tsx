@@ -6,11 +6,14 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { parseProducts, productsToText } from "@/lib/flows/cart";
+import { useCatalog } from "@/lib/catalog";
+import Link from "next/link";
 import type { CartProduct } from "@/lib/flows/types";
 import type { BuilderNode } from "../shared";
 import { NextNodeRow } from "./fields";
 
 export interface AddToCartCfg {
+  source?: "list" | "catalog";
   products?: CartProduct[];
   product?: string;
   quantity?: string;
@@ -40,6 +43,8 @@ export function AddToCartForm({
   const [text, setText] = useState(() => productsToText(cfg.products ?? []));
   const [bad, setBad] = useState<number[]>([]);
   const count = cfg.products?.length ?? 0;
+  const fromFile = cfg.source === "catalog";
+  const { catalog } = useCatalog();
 
   const onText = (value: string) => {
     setText(value);
@@ -50,6 +55,27 @@ export function AddToCartForm({
 
   return (
     <>
+      <fieldset className="space-y-2">
+        <legend className={label}>{t("source")}</legend>
+        {(["catalog", "list"] as const).map((v) => (
+          <label key={v} className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+            <input type="radio" name={`${currentKey}-source`} className="mt-0.5 size-4 accent-[var(--primary)]" checked={(v === "catalog") === fromFile} onChange={() => onUpdateConfig({ source: v })} />
+            <span>
+              <span className="block font-medium text-foreground">{t(`source_${v}`)}</span>
+              <span className="block text-xs text-muted-foreground">
+                {v === "catalog" ? (catalog ? t("catalogHas", { name: catalog.file_name, count: catalog.products.length }) : t("catalogNone")) : t("listHelp")}
+              </span>
+            </span>
+          </label>
+        ))}
+        {fromFile && (
+          <Link href="/files" className="inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">
+            {t("openFiles")}
+          </Link>
+        )}
+      </fieldset>
+
+      {!fromFile && (
       <div>
         <label htmlFor={`${currentKey}-products`} className={label}>
           {t("products")}
@@ -71,6 +97,7 @@ export function AddToCartForm({
           {bad.length > 0 && <span className="ml-2 text-rose-700 dark:text-rose-400">{t("badLines", { lines: bad.slice(0, 5).join(", ") })}</span>}
         </p>
       </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>

@@ -111,6 +111,12 @@ class FakeDb:
         return [dict(g) for g in gone]
 
     async def upsert(self, table, row, on_conflict):
+        # Like PostgREST's merge-duplicates: update the row with the same conflict keys, else insert.
+        keys = [k.strip() for k in on_conflict.split(",")]
+        for existing in self.store.get(table, []):
+            if all(str(existing.get(k)) == str(row.get(k)) for k in keys):
+                existing.update(row)
+                return dict(existing)
         return await self.insert(table, row)
 
     async def count(self, table, filters=None, *, since=None):

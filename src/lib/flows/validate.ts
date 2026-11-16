@@ -795,10 +795,11 @@ function validateNode(
     }
 
     case "add_to_cart": {
-      const cfg = node.config as { products?: Array<{ code?: string; price?: number }>; product?: string; next_node_key?: string; not_found_node_key?: string };
-      const products = Array.isArray(cfg.products) ? cfg.products : [];
+      const cfg = node.config as { source?: string; products?: Array<{ code?: string; price?: number }>; product?: string; next_node_key?: string; not_found_node_key?: string };
+      const fromFile = cfg.source === "catalog";
+      const products = fromFile || !Array.isArray(cfg.products) ? [] : cfg.products;
       const push = (field: string, message: string) => issues.push({ severity: "error", scope: "node", node_key: node.node_key, field, message });
-      if (products.length === 0) push("products", t("cartNeedsProducts"));
+      if (!fromFile && products.length === 0) push("products", t("cartNeedsProducts"));
       if (products.length > MAX_PRODUCTS) push("products", t("cartTooMany", { max: MAX_PRODUCTS }));
       const codes = products.map((p) => String(p.code ?? "").toLowerCase().replace(/\s+/g, ""));
       const dupe = codes.find((c, i) => codes.indexOf(c) !== i);

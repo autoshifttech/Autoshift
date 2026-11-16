@@ -32,6 +32,7 @@ class AssistantCreate(BaseModel):
     provider: Vendor = "openai"
     model_id: str = Field("", max_length=120)
     knowledge: list[Faq] = []
+    use_catalog: bool = False
     tool_ids: list[str] = []
     capture_leads: bool = False
     audience: Audience = "all"
@@ -49,6 +50,7 @@ class AssistantPatch(BaseModel):
     provider: Vendor | None = None
     model_id: str | None = Field(None, max_length=120)
     knowledge: list[Faq] | None = None
+    use_catalog: bool | None = None
     tool_ids: list[str] | None = None
     capture_leads: bool | None = None
     audience: Audience | None = None

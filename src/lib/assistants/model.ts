@@ -31,6 +31,8 @@ export interface Assistant {
   provider?: import('@/lib/ai/catalog').VendorId
   modelId?: string
   knowledge: Faq[]
+  /** Also answer from the product list (an Excel file on the Files page). */
+  useCatalog?: boolean
   toolIds: string[]
   captureLeads: boolean
   audience: Audience

@@ -1495,7 +1495,14 @@
           "quantityHelp": "Normalmente {{vars.qty}}. Vacío o no numérico cuenta como 1.",
           "varsHelp": "Los pasos siguientes pueden usar {{vars.cart_summary}} (la lista), {{vars.cart_total}} (total para el enlace de pago), {{vars.cart_total_text}} (total con formato) y {{vars.cart_count}}.",
           "then": "Luego ir a",
-          "notFound": "Si el producto no está en la lista, ir a"
+          "notFound": "Si el producto no está en la lista, ir a",
+          "source": "¿Dónde están los productos?",
+          "source_catalog": "Lista de productos (página Archivos)",
+          "source_list": "Pegar una lista aquí",
+          "catalogHas": "“{name}”: {count, plural, =1 {1 producto} other {# productos}}. Actualizar el archivo actualiza este paso.",
+          "catalogNone": "Aún no hay lista: sube un archivo Excel en la página Archivos y toca “Usar como lista de productos”.",
+          "listHelp": "Solo para este paso: código, nombre y precio, uno por línea.",
+          "openFiles": "Abrir la página Archivos"
         },
         "mediaLinkLabel": "O usa un enlace",
         "mediaLinkHelp": "Un enlace https o un marcador, como el código QR de pago de un paso anterior. Pulsa Tab para guardarlo."
@@ -4807,5 +4814,27 @@
     "problem_stageDuplicate": "Dos etapas tienen el mismo nombre.",
     "save": "Guardar cambios",
     "create": "Crear embudo"
+  },
+  "ProductList": {
+    "title": "Lista de productos",
+    "hint": "Convierte este archivo en tu lista de productos. El asistente de IA responde con ella y los flujos de pedidos toman sus precios.",
+    "replaceHint": "Tu lista de productos es “{name}”. Usar este archivo la reemplaza.",
+    "current": "Esta es tu lista de productos: {count, plural, =1 {1 producto} other {# productos}}, actualizada el {date}.",
+    "found": "{count, plural, =1 {1 producto encontrado} other {# productos encontrados}}",
+    "extraColumns": "También leído: {columns}",
+    "skipped": "Filas omitidas: {rows} (cada una necesita código, nombre y precio, y los códigos deben ser distintos).",
+    "cancel": "Cancelar",
+    "useIt": "Usar",
+    "use": "Usar como lista de productos",
+    "update": "Actualizar con este archivo",
+    "saved": "Lista de productos guardada: {count, plural, =1 {1 producto} other {# productos}}",
+    "format": "La primera fila necesita las columnas Code, Name y Price. Otras columnas (tallas, colores, stock…) también se usan.",
+    "toAssistant": "Abrir asistentes de IA",
+    "assistantSwitch": "Responder con la lista de productos",
+    "assistantHas": "“{name}”: {count, plural, =1 {1 producto} other {# productos}}, actualizada el {date}. Cambia cuando actualizas el archivo.",
+    "assistantNone": "Aún no hay lista de productos. Sube un archivo Excel en la página Archivos y toca “Usar como lista de productos”.",
+    "loading": "Cargando…",
+    "manageFile": "Gestionar en la página Archivos",
+    "uploadFile": "Subir un archivo de productos"
   }
 }

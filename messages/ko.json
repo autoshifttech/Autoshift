@@ -1495,7 +1495,14 @@
           "quantityHelp": "보통 {{vars.qty}}. 비어 있거나 숫자가 아니면 1로 계산합니다.",
           "varsHelp": "다음 단계에서 {{vars.cart_summary}}(목록), {{vars.cart_total}}(결제 링크용 합계), {{vars.cart_total_text}}(쉼표가 있는 합계), {{vars.cart_count}}를 쓸 수 있습니다.",
           "then": "다음 단계",
-          "notFound": "목록에 없는 상품이면 이동할 단계"
+          "notFound": "목록에 없는 상품이면 이동할 단계",
+          "source": "상품은 어디에 있나요?",
+          "source_catalog": "상품 목록 (파일 페이지)",
+          "source_list": "여기에 목록 붙여넣기",
+          "catalogHas": "“{name}”: 상품 {count}개. 파일을 업데이트하면 이 단계도 바뀝니다.",
+          "catalogNone": "아직 상품 목록이 없습니다: 파일 페이지에 엑셀 파일을 올리고 “상품 목록으로 사용”을 누르세요.",
+          "listHelp": "이 단계에서만 사용: 한 줄에 코드, 이름, 가격.",
+          "openFiles": "파일 페이지 열기"
         },
         "mediaLinkLabel": "또는 링크 사용",
         "mediaLinkHelp": "https 링크 또는 앞 단계의 결제 QR 코드 같은 자리 표시자입니다. Tab 키를 눌러 저장하세요."
@@ -4807,5 +4814,27 @@
     "problem_stageDuplicate": "이름이 같은 단계가 두 개 있습니다.",
     "save": "변경 사항 저장",
     "create": "파이프라인 만들기"
+  },
+  "ProductList": {
+    "title": "상품 목록",
+    "hint": "이 파일을 상품 목록으로 사용합니다. AI 어시스턴트가 이 목록으로 답하고, 주문 플로우가 여기서 가격을 가져옵니다.",
+    "replaceHint": "현재 상품 목록은 “{name}”입니다. 이 파일을 사용하면 교체됩니다.",
+    "current": "현재 상품 목록입니다: 상품 {count}개, {date} 업데이트.",
+    "found": "상품 {count}개를 찾았습니다",
+    "extraColumns": "함께 읽은 열: {columns}",
+    "skipped": "건너뛴 행: {rows} (각 행에 코드, 이름, 가격이 필요하며 코드는 서로 달라야 합니다).",
+    "cancel": "취소",
+    "useIt": "사용",
+    "use": "상품 목록으로 사용",
+    "update": "이 파일로 업데이트",
+    "saved": "상품 목록을 저장했습니다: 상품 {count}개",
+    "format": "첫 행에 Code, Name, Price 열이 있어야 합니다. 다른 열(사이즈, 색상, 재고…)도 사용됩니다.",
+    "toAssistant": "AI 어시스턴트 열기",
+    "assistantSwitch": "상품 목록으로 답하기",
+    "assistantHas": "“{name}”: 상품 {count}개, {date} 업데이트. 파일을 업데이트하면 바뀝니다.",
+    "assistantNone": "아직 상품 목록이 없습니다. 파일 페이지에 엑셀 파일을 올리고 “상품 목록으로 사용”을 누르세요.",
+    "loading": "불러오는 중…",
+    "manageFile": "파일 페이지에서 관리",
+    "uploadFile": "상품 파일 올리기"
   }
 }

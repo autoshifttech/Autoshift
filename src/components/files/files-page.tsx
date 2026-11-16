@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { FILE_KINDS, MAX_SIZE, MEDIA_BUCKET, STORAGE_LIMIT, deleteLiveFile, filesStore, formatSize, kindOf, loadLiveFiles, useFiles, type FileKind, type LibraryFile } from "@/lib/files/model";
 import { uploadAccountMedia } from "@/lib/storage/upload-media";
 import { isLive } from "@/lib/workspace/live";
+import { isCatalogFile } from "@/lib/catalog";
+import { ProductListPanel } from "./product-list-panel";
 
 const KIND_ICON: Record<FileKind, LucideIcon> = { image: ImageIcon, pdf: FileText, video: Film, other: Paperclip };
 
@@ -93,7 +95,7 @@ export function FilesPage() {
           <Upload className="size-4" />
           {t("upload")}
         </Button>
-        <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx" onChange={(e) => add(e.target.files)} />
+        <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => add(e.target.files)} />
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
@@ -179,6 +181,7 @@ export function FilesPage() {
                   </label>
                   <Input id="file-name" value={open.name} onChange={(e) => filesStore.set((s) => ({ files: s.files.map((x) => (x.id === open.id ? { ...x, name: e.target.value } : x)) }))} />
                 </div>
+                {open.url && isCatalogFile(open.name) && <ProductListPanel file={{ name: open.name, url: open.url }} />}
                 <section>
                   <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("usedIn")}</p>
                   {open.usedIn.length === 0 ? (

@@ -21,6 +21,7 @@ import { startAssistantsSync, useAssistantsSyncStatus } from "@/lib/assistants/b
 import { AiKnowledgeCard } from "@/components/settings/ai-knowledge";
 import { useAuth } from "@/hooks/use-auth";
 import { canEditSettings } from "@/lib/auth/roles";
+import { useCatalog } from "@/lib/catalog";
 import { AssistantAvatar, TestChat, toolIcon } from "./assistant-ui";
 import { AssistantModelPicker } from "./assistant-model-picker";
 
@@ -230,6 +231,7 @@ function KnowledgeTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) =
           {t("addFaq")}
         </Button>
       </div>
+      <ProductListSwitch on={Boolean(a.useCatalog)} onChange={(v) => set({ useCatalog: v })} />
       {a.knowledge.length === 0 && <p className="rounded-xl bg-muted/60 p-6 text-center text-sm text-muted-foreground">{t("knowledgeEmpty")}</p>}
       <div className="space-y-3">
         {a.knowledge.map((f, i) => (
@@ -248,6 +250,33 @@ function KnowledgeTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>) =
         <AiKnowledgeCard accountId={accountId} canEdit={canEdit} hasEmbeddingsKey />
       </div>
     </section>
+  );
+}
+
+/** Answer from the product list (an Excel or CSV file on the Files page) as well as the questions below. */
+function ProductListSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  const t = useTranslations("ProductList");
+  const locale = useLocale();
+  const { catalog, loaded } = useCatalog();
+  return (
+    <div className="mb-4 rounded-xl border border-border p-3">
+      <label className="flex min-h-11 cursor-pointer items-start gap-3">
+        <input type="checkbox" className="mt-1 size-4 accent-[var(--primary)]" checked={on} onChange={(e) => onChange(e.target.checked)} />
+        <span className="min-w-0">
+          <span className="block text-sm font-medium text-foreground">{t("assistantSwitch")}</span>
+          <span className="block text-xs text-muted-foreground">
+            {catalog
+              ? t("assistantHas", { name: catalog.file_name, count: catalog.products.length, date: new Date(catalog.updated_at).toLocaleDateString(locale, { day: "numeric", month: "short" }) })
+              : loaded
+                ? t("assistantNone")
+                : t("loading")}
+          </span>
+        </span>
+      </label>
+      <Link href="/files" className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">
+        {catalog ? t("manageFile") : t("uploadFile")}
+      </Link>
+    </div>
   );
 }
 

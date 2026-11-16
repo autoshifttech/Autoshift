@@ -142,3 +142,23 @@ describe("editor checks and test chat", () => {
     expect(s.messages.some((m) => m.kind === "note" && m.code === "cart")).toBe(true);
   });
 });
+
+describe("Add to cart from the product list (Files page)", () => {
+  it("takes prices from product_catalog", async () => {
+    setup();
+    h.tables.product_catalog = [{ account_id: "acct-1", products: [{ code: "X9", name: "Silk Scarf", price: 750, details: { Colour: "Red" } }] }];
+    h.tables.flow_nodes = h.tables.flow_nodes.map((n) => (n.node_key === "cart" ? { ...n, config: { ...(n.config as object), source: "catalog", products: [] } } : n));
+    await say("order");
+    await say("x9");
+    await say("2");
+    expect(h.tables.deals[0]).toMatchObject({ value: 1500, notes: "2 × Silk Scarf (X9) – ₹1,500" });
+  });
+
+  it("needs no pasted products when it uses the list", () => {
+    const issues = validateFlowForActivation({ name: "Shop", trigger_type: "keyword", trigger_config: { keywords: ["order"] }, entry_node_id: "cart" }, [
+      { node_key: "cart", node_type: "add_to_cart", config: { source: "catalog", products: [], product: "{{vars.product}}", next_node_key: "done", not_found_node_key: "done" } },
+      { node_key: "done", node_type: "end", config: {} },
+    ]);
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+});
