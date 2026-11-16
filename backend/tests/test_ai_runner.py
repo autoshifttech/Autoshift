@@ -120,3 +120,18 @@ async def test_uses_another_model_when_the_default_provider_is_off(client, world
     aid = _assistant(client, world)
     out = _test(client, world, aid).json()
     assert out["status"] == "reply" and llm.calls[0]["vendor"] == "google"
+
+
+async def test_reply_limit_counts_recent_replies_when_given():
+    from app import ai_runner
+
+    history = [{"role": "assistant", "content": "x"}] * 20
+    assistant = {"id": "a1", "account_id": "acct", "name": "Shop", "enabled": True, "handoff": {"maxReplies": 15}}
+    out = await ai_runner.reply(None, None, None, assistant, history, "hello", "ref-12345678")
+    assert out.status == "handoff" and "limit" in out.reason
+    # Only 3 AI replies in the last 24 hours: not handed off for the limit (it goes on to pick a model).
+    try:
+        out = await ai_runner.reply(None, None, None, assistant, history, "hello", "ref-12345678", recent_ai_replies=3)
+    except AttributeError:
+        out = None  # reached the model lookup with no database: past the limit check
+    assert out is None or "limit" not in out.reason

@@ -343,6 +343,8 @@ class InternalAiReply(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     history: list[dict] = Field(default_factory=list, max_length=40)
     ref: str = Field(min_length=8, max_length=200)
+    # AI replies in this chat in the last 24 hours (the reply limit counts these); None = count the history.
+    recent_ai_replies: int | None = Field(None, ge=0, le=10000)
 
 
 class InternalPaymentLink(BaseModel):

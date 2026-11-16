@@ -80,7 +80,7 @@ async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None
     return (chosen["vendor"], chosen["model_id"], providers[chosen["vendor"]]["key_ciphertext"]) if chosen else None
 
 
-async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict], message: str, ref: str, *, live: bool = True) -> Reply:
+async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict], message: str, ref: str, *, live: bool = True, recent_ai_replies: int | None = None) -> Reply:
     """history: earlier turns [{"role": "user"|"assistant", "content": str}].
     live=False is the preview in the app: it ignores the on/off switch."""
     if live and not assistant.get("enabled"):
@@ -88,7 +88,10 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     handoff = assistant.get("handoff") or {}
     if handoff.get("onRequest", True) and HUMAN_WORDS.search(message):
         return Reply("handoff", reason="The customer asked for a person")
-    if sum(1 for h in history if h["role"] == "assistant") >= handoff.get("maxReplies", 15):
+    # The limit stops endless loops in one conversation: it counts the AI's replies in the last 24
+    # hours when the web app says how many, so a customer who comes back another day starts fresh.
+    replies = recent_ai_replies if recent_ai_replies is not None else sum(1 for h in history if h["role"] == "assistant")
+    if replies >= handoff.get("maxReplies", 15):
         return Reply("handoff", reason="Reached the reply limit for this chat")
 
     picked = await resolve_model(sdb, assistant)

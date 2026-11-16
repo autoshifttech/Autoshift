@@ -306,8 +306,17 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
   const lastUser = messages.map((m) => m.role).lastIndexOf('user')
   const history = messages.slice(0, lastUser).map((m) => ({ role: m.role === 'user' ? ('user' as const) : ('assistant' as const), content: m.content }))
 
+  // The reply limit counts only the last 24 hours, so a returning customer isn't handed off for old chats.
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
+  const { count: recentAiReplies } = await db
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('conversation_id', conversationId)
+    .eq('ai_generated', true)
+    .gte('created_at', since)
+
   if (inboundMessageId) await showTypingIndicator(db, accountId, inboundMessageId)
-  const out = await assistantReply({ accountId, assistantId: assistant.id as string, message, history, ref: inboundMessageId || `${conversationId}:${messages.length}` })
+  const out = await assistantReply({ accountId, assistantId: assistant.id as string, message, history, ref: inboundMessageId || `${conversationId}:${messages.length}`, recentAiReplies: recentAiReplies ?? undefined })
   if (!out) return
 
   if (out.status === 'handoff') {

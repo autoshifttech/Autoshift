@@ -80,7 +80,7 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, settings:
     if not rows:
         raise HTTPException(404, "Assistant not found")
     history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
-    out = await ai_runner.reply(sdb, llm, settings, rows[0], history, body.message, ref=f"live:{body.ref}")
+    out = await ai_runner.reply(sdb, llm, settings, rows[0], history, body.message, ref=f"live:{body.ref}", recent_ai_replies=body.recent_ai_replies)
     if out.status == "handoff":
         await events.emit(sdb, body.account_id, "conversation.handoff", {"assistant_id": body.assistant_id, "reason": out.reason, "ref": body.ref})
     return asdict(out)
