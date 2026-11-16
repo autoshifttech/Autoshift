@@ -1049,6 +1049,23 @@ function SendMediaForm({
             e.target.value = "";
           }}
         />
+        {!cfg.media_url && (
+          <div className="mt-2">
+            <label htmlFor="media-link" className="mb-1 block text-xs text-muted-foreground">
+              {t("mediaLinkLabel")}
+            </label>
+            <Input
+              id="media-link"
+              placeholder="{{vars.payment_link_qr}}"
+              className="bg-muted font-mono text-xs"
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v) onUpdateConfig({ media_url: v, filename: "" });
+              }}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">{t("mediaLinkHelp")}</p>
+          </div>
+        )}
       </div>
 
       <TextRow

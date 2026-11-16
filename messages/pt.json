@@ -1496,7 +1496,9 @@
           "varsHelp": "As próximas etapas podem usar {{vars.cart_summary}} (a lista), {{vars.cart_total}} (total para o link de pagamento), {{vars.cart_total_text}} (total formatado) e {{vars.cart_count}}.",
           "then": "Depois ir para",
           "notFound": "Se o produto não estiver na lista, ir para"
-        }
+        },
+        "mediaLinkLabel": "Ou use um link",
+        "mediaLinkHelp": "Um link https ou um marcador, como o QR code de pagamento de uma etapa anterior. Pressione Tab para salvar."
       },
       "categories": {
         "messaging": "Mensagens",

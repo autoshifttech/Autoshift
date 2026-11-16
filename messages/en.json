@@ -1496,7 +1496,9 @@
           "varsHelp": "Later steps can use {{vars.cart_summary}} (the list), {{vars.cart_total}} (total for the payment link), {{vars.cart_total_text}} (total with commas) and {{vars.cart_count}}.",
           "then": "Then go to",
           "notFound": "If the product isn't in the list, go to"
-        }
+        },
+        "mediaLinkLabel": "Or use a link",
+        "mediaLinkHelp": "An https link or a placeholder such as the payment QR code from an earlier step. Press Tab to save it."
       },
       "categories": {
         "messaging": "Messaging",

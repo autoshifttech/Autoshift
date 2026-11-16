@@ -1496,7 +1496,9 @@
           "varsHelp": "다음 단계에서 {{vars.cart_summary}}(목록), {{vars.cart_total}}(결제 링크용 합계), {{vars.cart_total_text}}(쉼표가 있는 합계), {{vars.cart_count}}를 쓸 수 있습니다.",
           "then": "다음 단계",
           "notFound": "목록에 없는 상품이면 이동할 단계"
-        }
+        },
+        "mediaLinkLabel": "또는 링크 사용",
+        "mediaLinkHelp": "https 링크 또는 앞 단계의 결제 QR 코드 같은 자리 표시자입니다. Tab 키를 눌러 저장하세요."
       },
       "categories": {
         "messaging": "메시징",
