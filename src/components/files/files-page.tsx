@@ -95,7 +95,7 @@ export function FilesPage() {
           <Upload className="size-4" />
           {t("upload")}
         </Button>
-        <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => add(e.target.files)} />
+        <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx,.csv,text/csv,text/comma-separated-values,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(e) => add(e.target.files)} />
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">

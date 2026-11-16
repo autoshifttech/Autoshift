@@ -124,7 +124,7 @@ export async function uploadAccountMedia(
   const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
     cacheControl: "3600",
     upsert: false,
-    contentType: file.type,
+    contentType: storageContentType(file),
   });
   if (upErr) throw new Error(upErr.message);
 
@@ -152,4 +152,19 @@ export async function deleteAccountMedia(
   const supabase = createClient();
   const { error } = await supabase.storage.from(bucket).remove([path]);
   if (error) throw new Error(error.message);
+}
+
+const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+/**
+ * The type the file is stored with. Phones often label a spreadsheet badly: .xlsx as a zip or
+ * "octet-stream", .csv as text/csv or "comma-separated-values", which the bucket's allow-list
+ * (migration 039) refuses. CSV is plain text, so it is stored as text/plain.
+ */
+export function storageContentType(file: { name: string; type: string }): string {
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".csv")) return "text/plain";
+  if (name.endsWith(".xlsx")) return XLSX_TYPE;
+  if (name.endsWith(".xls")) return "application/vnd.ms-excel";
+  return file.type;
 }
