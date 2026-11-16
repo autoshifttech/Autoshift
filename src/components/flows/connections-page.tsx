@@ -203,40 +203,40 @@ function WebhookUrl({ url, t }: { url: string; t: T }) {
       () => toast.error(t("webhookCopyFailed")),
     );
   return (
-    <div className="mt-2 rounded-lg bg-muted/60 p-2">
+    <div className="mt-3 rounded-xl bg-muted/60 p-3">
       <p className="text-xs font-medium text-foreground">{t("webhookUrl")}</p>
-      <div className="mt-1 flex items-center gap-2">
-        <code className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={url}>
-          {url}
-        </code>
-        <Button type="button" variant="outline" size="sm" className="min-h-11 shrink-0 sm:min-h-9" onClick={() => void copy()}>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <code className="block min-w-0 flex-1 rounded-md bg-background px-2 py-1.5 font-mono text-xs break-all text-foreground select-all">{url}</code>
+        <Button type="button" variant="outline" size="sm" className="min-h-11 w-full shrink-0 sm:w-auto" onClick={() => void copy()}>
           {t("webhookCopy")}
         </Button>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{t("webhookEvents")}</p>
+      <p className="mt-2 text-xs break-words text-muted-foreground">{t("webhookEvents")}</p>
     </div>
   );
 }
 
 function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemove: () => void; t: T; locale: string }) {
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted/60">
-        <ConnectionLogo kind={c.kind} className="size-6" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-foreground">{c.name}</p>
-        <p className="truncate text-sm text-muted-foreground">
-          {t(KIND_LABEL[c.kind])}
-          {c.mode ? ` · ${t(c.mode)}` : ""} · {c.detail}
-        </p>
-        <p className="text-xs text-muted-foreground">{t("addedOn", { date: new Date(c.createdAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) })}</p>
-        {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} t={t} />}
+    <li className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+      <div className="flex items-center gap-3">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted/60">
+          <ConnectionLogo kind={c.kind} className="size-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-foreground">{c.name}</p>
+          <p className="truncate text-sm text-muted-foreground">
+            {t(KIND_LABEL[c.kind])}
+            {c.mode ? ` · ${t(c.mode)}` : ""} · {c.detail}
+          </p>
+          <p className="text-xs text-muted-foreground">{t("addedOn", { date: new Date(c.createdAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) })}</p>
+        </div>
+        <span className="hidden rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline">{t("connected")}</span>
+        <Button variant="ghost" size="icon" aria-label={t("remove", { name: c.name })} onClick={onRemove} className="size-11 shrink-0 text-muted-foreground hover:text-destructive">
+          <Trash2 className="size-4" />
+        </Button>
       </div>
-      <span className="hidden rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline">{t("connected")}</span>
-      <Button variant="ghost" size="icon" aria-label={t("remove", { name: c.name })} onClick={onRemove} className="size-10 text-muted-foreground hover:text-destructive">
-        <Trash2 className="size-4" />
-      </Button>
+      {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} t={t} />}
     </li>
   );
 }
@@ -294,7 +294,7 @@ export function ConnectionsPage() {
       {connections.length === 0 ? (
         <EmptyPanel icon={Table2} title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-3xl border border-dashed border-border py-14" />
       ) : (
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-3">
           {connections.map((c) => (
             <ConnectionCard key={c.id} c={c} t={t} locale={locale} onRemove={() => setRemoving(c)} />
           ))}
