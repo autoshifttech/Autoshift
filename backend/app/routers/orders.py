@@ -5,6 +5,7 @@ fresh payment link, and the customer is told on WhatsApp in the shop's language.
 blocked or who sent STOP are never messaged.
 """
 
+import uuid
 from datetime import datetime, timezone
 from typing import Annotated, Literal
 
@@ -52,8 +53,8 @@ async def list_orders(
 
 
 @router.get("/{order_id}")
-async def get_order(order_id: str, ctx: Member, sdb: ServiceDb):
-    return await _order(sdb, ctx.account_id, order_id)
+async def get_order(order_id: uuid.UUID, ctx: Member, sdb: ServiceDb):
+    return await _order(sdb, ctx.account_id, str(order_id))
 
 
 async def _may_message(sdb, account_id: str, order: dict) -> str | None:
@@ -85,7 +86,8 @@ async def _shop_of(sdb, order: dict) -> dict:
 
 
 @router.patch("/{order_id}")
-async def update_order(order_id: str, body: OrderAction, ctx: AgentMember, sdb: ServiceDb, bridge: Bridge, settings: Annotated[Settings, Depends(get_settings)]):
+async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember, sdb: ServiceDb, bridge: Bridge, settings: Annotated[Settings, Depends(get_settings)]):
+    order_id = str(order_id)  # a malformed id is refused (422) before it reaches the database
     order = await _order(sdb, ctx.account_id, order_id)
     try:
         patch = shop_orders.next_state(order, body.action)

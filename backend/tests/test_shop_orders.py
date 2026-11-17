@@ -255,3 +255,8 @@ async def test_whatsapp_refusal_is_reported_not_raised(client, world, shop):
     shop["bridge"].fail = "Outside the 24-hour window"
     r = patch(client, world, world.rows("shop_orders")[0]["id"], action="packed").json()
     assert r["order"]["status"] == "packed" and r["notified"] is False and "24-hour" in r["not_notified_reason"]
+
+
+def test_a_malformed_order_id_is_refused(client, world):
+    assert client.get("/v1/orders/not-an-id", headers=world.headers("agent_a")).status_code == 422
+    assert client.patch("/v1/orders/not-an-id", json={"action": "packed"}, headers=world.headers("agent_a")).status_code == 422
