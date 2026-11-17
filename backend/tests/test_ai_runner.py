@@ -135,3 +135,23 @@ async def test_reply_limit_counts_recent_replies_when_given():
     except AttributeError:
         out = None  # reached the model lookup with no database: past the limit check
     assert out is None or "limit" not in out.reason
+
+
+async def test_a_busy_model_falls_back_to_another_switched_on_model(client, world, settings, llm, monkeypatch):
+    _enable_openai(world, settings)
+    g = next(p for p in world.rows("platform_ai_providers") if p["vendor"] == "anthropic")
+    g.update(enabled=True, key_ciphertext=encrypt("g-key-1234", settings), key_tail="1234")
+    await _fund(world)
+    real = llm.complete
+
+    async def busy_openai(vendor, api_key, model, system, messages):
+        from app.llm import LlmError
+        if vendor == "openai":
+            llm.calls.append({"vendor": vendor, "model": model})
+            raise LlmError("The provider refused the request (503) high demand")
+        return await real(vendor, api_key, model, system, messages)
+
+    monkeypatch.setattr(llm, "complete", busy_openai)
+    out = _test(client, world, _assistant(client, world)).json()
+    assert out["status"] == "reply" and out["text"] == "We open at 9am."
+    assert [c["vendor"] for c in llm.calls] == ["openai", "anthropic"]  # tried the chosen model first, then another provider

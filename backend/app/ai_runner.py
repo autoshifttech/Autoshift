@@ -73,8 +73,9 @@ def build_system(assistant: dict, message: str) -> str:
     return "\n\n".join(p for p in parts if p)
 
 
-async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None:
-    """(vendor, model_id, api_key) the assistant may use, else the platform default, else None."""
+async def candidate_models(sdb: Db, assistant: dict) -> list[tuple[str, str, str]]:
+    """(vendor, model_id, key) to try in order: the assistant's model, else the platform default, then
+    up to two switched-on backups (other providers first), so a busy provider doesn't leave the customer unanswered."""
     providers = {p["vendor"]: p for p in await sdb.select("platform_ai_providers", {"enabled": "true"}) if p.get("key_ciphertext")}
     models = [m for m in await sdb.select("platform_ai_models", {"enabled": "true"}) if m["vendor"] in providers]
     chosen = next((m for m in models if m["vendor"] == assistant.get("provider") and m["model_id"] == assistant.get("model_id")), None)
@@ -82,8 +83,19 @@ async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None
     # The default's provider may be switched off: use a switched-on model rather than none,
     # preferring fast, stable ones over previews.
     rank = {"fast": 0, "value": 1, "balanced": 2, "newest": 3}
-    chosen = chosen or (sorted(models, key=lambda m: (rank.get(m.get("tier") or "", 5), "preview" in str(m["model_id"])))[0] if models else None)
-    return (chosen["vendor"], chosen["model_id"], providers[chosen["vendor"]]["key_ciphertext"]) if chosen else None
+    ranked = sorted(models, key=lambda m: (rank.get(m.get("tier") or "", 5), "preview" in str(m["model_id"])))
+    chosen = chosen or (ranked[0] if ranked else None)
+    if not chosen:
+        return []
+    backups = [m for m in ranked if m is not chosen]
+    backups.sort(key=lambda m: m["vendor"] == chosen["vendor"])  # another provider is likelier to be up
+    return [(m["vendor"], m["model_id"], providers[m["vendor"]]["key_ciphertext"]) for m in [chosen, *backups[:2]]]
+
+
+async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None:
+    """(vendor, model_id, api_key) the assistant may use, else the platform default, else None."""
+    models = await candidate_models(sdb, assistant)
+    return models[0] if models else None
 
 
 async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict], message: str, ref: str, *, live: bool = True, recent_ai_replies: int | None = None, contact_id: str | None = None) -> Reply:
@@ -100,10 +112,9 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     if replies >= handoff.get("maxReplies", 15):
         return Reply("handoff", reason="Reached the reply limit for this chat")
 
-    picked = await resolve_model(sdb, assistant)
-    if not picked:
+    candidates = await candidate_models(sdb, assistant)
+    if not candidates:
         return Reply("no_model", reason="No AI model is switched on")
-    vendor, model_id, ciphertext = picked
 
     account_id = assistant["account_id"]
     allowed = (await usage.plan_for(sdb, account_id)).get("ai_replies")
@@ -113,18 +124,25 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     if have < (await wallet.rates(sdb))["charge_ai"]:
         return Reply("no_funds", reason="The wallet is empty", balance_paise=have)
 
-    try:
-        shop = shop_orders.shop_on(assistant)
-        if assistant.get("use_catalog") or shop:  # a shop needs the product list
-            rows = await sdb.select("product_catalog", {"account_id": account_id}, limit=1)
-            products = (rows[0].get("products") or []) if rows else []
-            assistant = {**assistant, "_catalog": catalog.as_facts(products), "_products": products}
-        if shop and contact_id:
-            assistant = {**assistant, "_orders": await shop_orders.recent_orders(sdb, account_id, contact_id)}
-        result = await llm.complete(vendor, decrypt(ciphertext, settings), model_id, build_system(assistant, message), [*history, {"role": "user", "content": message}])
-    except LlmError as exc:
-        log.warning("AI reply failed for %s with %s/%s: %s", account_id, vendor, model_id, exc)
-        return Reply("failed", reason=str(exc))
+    shop = shop_orders.shop_on(assistant)
+    if assistant.get("use_catalog") or shop:  # a shop needs the product list
+        rows = await sdb.select("product_catalog", {"account_id": account_id}, limit=1)
+        products = (rows[0].get("products") or []) if rows else []
+        assistant = {**assistant, "_catalog": catalog.as_facts(products), "_products": products}
+    if shop and contact_id:
+        assistant = {**assistant, "_orders": await shop_orders.recent_orders(sdb, account_id, contact_id)}
+    system, turns = build_system(assistant, message), [*history, {"role": "user", "content": message}]
+    result, problem = None, ""
+    for vendor, model_id, ciphertext in candidates:
+        try:
+            result = await llm.complete(vendor, decrypt(ciphertext, settings), model_id, system, turns)
+            break
+        except LlmError as exc:
+            # Busy, down or refusing: try the next switched-on model before giving up.
+            log.warning("AI reply failed for %s with %s/%s: %s", account_id, vendor, model_id, exc)
+            problem = str(exc)
+    if result is None:
+        return Reply("failed", reason=problem)
 
     text = result.text.strip()
     order = None
