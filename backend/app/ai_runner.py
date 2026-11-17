@@ -29,8 +29,11 @@ log = logging.getLogger("autoshift.ai")
 # The web app waits about 50 seconds for a reply. The first model gets part of that and the backups
 # share the rest, so a slow provider can't use up the whole wait.
 TOTAL_SECONDS = 42.0
-FIRST_SECONDS = 22.0
+FIRST_SECONDS = 18.0
+BACKUP_SECONDS = 12.0
 MIN_TRY_SECONDS = 6.0
+# Backups go lightest first: under load they answer while bigger models stall.
+SPEED = {"value": 0, "fast": 1, "balanced": 2, "flagship": 3, "newest": 4, "reasoning": 5, "preview": 6}
 
 
 @dataclass(frozen=True)
@@ -94,8 +97,9 @@ async def candidate_models(sdb: Db, assistant: dict) -> list[tuple[str, str, str
     chosen = chosen or (ranked[0] if ranked else None)
     if not chosen:
         return []
-    backups = [m for m in ranked if m is not chosen]
-    backups.sort(key=lambda m: m["vendor"] == chosen["vendor"])  # another provider is likelier to be up
+    backups = [m for m in models if m is not chosen]
+    # Another provider first (likelier to be up), then the lightest, quickest models.
+    backups.sort(key=lambda m: (m["vendor"] == chosen["vendor"], SPEED.get(m.get("tier") or "", 7), "preview" in str(m["model_id"])))
     return [(m["vendor"], m["model_id"], providers[m["vendor"]]["key_ciphertext"]) for m in [chosen, *backups[:2]]]
 
 
@@ -145,7 +149,8 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         left = deadline - time.monotonic()
         if left < MIN_TRY_SECONDS:
             break
-        limit = min(left, FIRST_SECONDS) if i == 0 and len(candidates) > 1 else left
+        last = i == len(candidates) - 1
+        limit = left if last else min(left, FIRST_SECONDS if i == 0 else BACKUP_SECONDS)
         try:
             result = await asyncio.wait_for(llm.complete(vendor, decrypt(ciphertext, settings), model_id, system, turns), timeout=limit)
             break

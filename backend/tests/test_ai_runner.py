@@ -165,6 +165,7 @@ async def test_a_slow_model_leaves_time_for_the_backup(client, world, settings, 
     a.update(enabled=True, key_ciphertext=encrypt("a-key-1234", settings), key_tail="1234")
     await _fund(world)
     monkeypatch.setattr(ai_runner, "FIRST_SECONDS", 0.05)
+    monkeypatch.setattr(ai_runner, "BACKUP_SECONDS", 0.05)
     monkeypatch.setattr(ai_runner, "MIN_TRY_SECONDS", 0.01)
     real = llm.complete
 
@@ -176,3 +177,15 @@ async def test_a_slow_model_leaves_time_for_the_backup(client, world, settings, 
     monkeypatch.setattr(llm, "complete", slow_openai)
     out = _test(client, world, _assistant(client, world)).json()
     assert out["status"] == "reply" and [c["vendor"] for c in llm.calls] == ["anthropic"]
+
+
+async def test_backups_are_the_lightest_models_first(world):
+    world.rows("platform_ai_providers")[:] = [{"vendor": "google", "enabled": True, "key_ciphertext": "x"}]
+    world.rows("platform_ai_models")[:] = [
+        {"vendor": "google", "model_id": "gemini-3.8-flash", "tier": "newest", "enabled": True, "is_default": False},
+        {"vendor": "google", "model_id": "gemini-3.6-flash", "tier": "balanced", "enabled": True, "is_default": False},
+        {"vendor": "google", "model_id": "gemini-3.5-flash", "tier": "fast", "enabled": True, "is_default": False},
+        {"vendor": "google", "model_id": "gemini-3.5-flash-lite", "tier": "value", "enabled": True, "is_default": False},
+    ]
+    got = await ai_runner.candidate_models(world.service, {"provider": "google", "model_id": "gemini-3.6-flash"})
+    assert [m for _, m, _ in got] == ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash"]
