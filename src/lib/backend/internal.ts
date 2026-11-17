@@ -58,20 +58,22 @@ export interface AssistantReply {
   status: 'reply' | 'handoff' | 'no_model' | 'no_funds' | 'failed' | 'off' | 'plan_limit'
   text: string
   reason: string
+  /** Set when the shop assistant placed an order in this reply. */
+  order?: { id: string; number: number } | null
 }
 
 /**
  * One reply from the business's AI assistant (platform AI, charged to the wallet, plan limit and
  * hand-off rules applied by the backend). Null when the backend isn't reachable.
  */
-export async function assistantReply(args: { accountId: string; assistantId: string; message: string; history: { role: 'user' | 'assistant'; content: string }[]; ref: string; recentAiReplies?: number }): Promise<AssistantReply | null> {
+export async function assistantReply(args: { accountId: string; assistantId: string; message: string; history: { role: 'user' | 'assistant'; content: string }[]; ref: string; recentAiReplies?: number; conversationId?: string; contactId?: string; customerPhone?: string | null }): Promise<AssistantReply | null> {
   const c = config()
   if (!c) return null
   try {
     const res = await fetch(`${c.url}/v1/internal/ai-reply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-AutoShift-Internal': c.secret },
-      body: JSON.stringify({ account_id: args.accountId, assistant_id: args.assistantId, message: args.message.slice(0, 4000), history: args.history.slice(-40), ref: args.ref, recent_ai_replies: args.recentAiReplies ?? null }),
+      body: JSON.stringify({ account_id: args.accountId, assistant_id: args.assistantId, message: args.message.slice(0, 4000), history: args.history.slice(-40), ref: args.ref, recent_ai_replies: args.recentAiReplies ?? null, conversation_id: args.conversationId ?? null, contact_id: args.contactId ?? null, customer_phone: args.customerPhone?.slice(0, 32) ?? null }),
       // A model call: give it longer than the bookkeeping calls above.
       signal: AbortSignal.timeout(50000),
     })

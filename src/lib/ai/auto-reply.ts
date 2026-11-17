@@ -315,8 +315,21 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
     .eq('ai_generated', true)
     .gte('created_at', since)
 
+  // The customer's number, so a shop order's payment link is made out to them.
+  const { data: contact } = await db.from('contacts').select('phone').eq('id', contactId).maybeSingle()
+
   if (inboundMessageId) await showTypingIndicator(db, accountId, inboundMessageId)
-  const out = await assistantReply({ accountId, assistantId: assistant.id as string, message, history, ref: inboundMessageId || `${conversationId}:${messages.length}`, recentAiReplies: recentAiReplies ?? undefined })
+  const out = await assistantReply({
+    accountId,
+    assistantId: assistant.id as string,
+    message,
+    history,
+    ref: inboundMessageId || `${conversationId}:${messages.length}`,
+    recentAiReplies: recentAiReplies ?? undefined,
+    conversationId,
+    contactId,
+    customerPhone: (contact?.phone as string | null) ?? null,
+  })
   if (!out) return
 
   if (out.status === 'handoff') {
@@ -328,6 +341,7 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
     if (out.status !== 'off') console.warn(`[ai auto-reply] assistant gave no reply for ${accountId}: ${out.status} ${out.reason}`)
     return
   }
-  if (inboundMessageId && (await hasNewerInbound(db, conversationId, inboundMessageId))) return
+  // A newer message will get its own reply, except when this one placed an order: its summary and payment link must arrive.
+  if (!out.order && inboundMessageId && (await hasNewerInbound(db, conversationId, inboundMessageId))) return
   await engineSendText({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, aiGenerated: true })
 }

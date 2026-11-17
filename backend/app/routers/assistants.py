@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from .. import ai_runner
+from .. import ai_runner, shop_orders
 from ..config import Settings, get_settings
 from ..deps import AdminMember, Member, ServiceDb, UserDb, get_llm
 from ..schemas import AssistantCreate, AssistantPatch, ReplyTest
@@ -70,4 +70,16 @@ async def test_reply(assistant_id: str, body: ReplyTest, ctx: AdminMember, db: U
     out = await ai_runner.reply(sdb, llm, settings, assistant, body.history, body.message, ref=f"test:{ctx.account_id}:{body.idempotency_key}", live=False)
     await key_limits.consume(sdb, ctx.user, "ai_replies")
     await audit.record(sdb, scope="account", action="assistant.test_reply", actor_id=ctx.user.id, account_id=ctx.account_id, target=assistant_id, details={"status": out.status})
-    return asdict(out)
+    result = asdict(out)
+    if out.order is not None:
+        # A test never saves an order or makes a payment link: show what the customer would get.
+        cat = await sdb.select("product_catalog", {"account_id": ctx.account_id}, limit=1)
+        shop = assistant.get("shop") or {}
+        try:
+            priced = shop_orders.price((cat[0].get("products") or []) if cat else [], shop, out.order)
+            added = summary_preview = shop_orders.summary(shop, {**priced, "number": "TEST", "payment_url": "https://rzp.io/i/test-link" if priced["payment_method"] == "online" else None})
+        except shop_orders.OrderProblem as exc:
+            added = summary_preview = shop_orders.problem_text(shop, exc)
+        result["text"] = "\n\n".join(t for t in (out.text, added) if t)
+        result["order"] = {"preview": summary_preview}
+    return result

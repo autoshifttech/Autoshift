@@ -19,7 +19,7 @@ from typing import Any
 
 import httpx
 
-from . import audit, events
+from . import audit, events, shop_orders
 from .config import Settings
 from .db import Db
 from .razorpay import API, RazorpayError
@@ -186,6 +186,7 @@ async def mark_paid(sdb: Db, bridge, row: dict, payment: dict, keys: dict) -> st
         await sdb.update("payment_links", {"id": row["id"]}, {"status": "paid", "paid_at": now, "razorpay_payment_id": payment.get("id")})
         row = {**row, "status": "paid", "paid_at": now, "razorpay_payment_id": payment.get("id")}
         moved = await _move_lead_to_paid(sdb, account_id, row.get("lead_id"))
+        await shop_orders.payment_received(sdb, row.get("order_id"))
         await audit.record(sdb, scope="account", action="shop_payment.paid", actor_id=None, account_id=account_id, target=row["id"], details={"amount_paise": row["amount_paise"], "payment_id": payment.get("id"), "lead_moved": moved})
         await events.emit(sdb, account_id, "payment.received", {
             "payment_link_id": row["id"], "amount_paise": row["amount_paise"], "description": row.get("description"),
@@ -234,6 +235,7 @@ async def handle_event(sdb: Db, bridge, connection: dict, keys: dict, event: str
         if not rows or rows[0]["status"] != "created":
             return "ignored"
         await sdb.update("payment_links", {"id": rows[0]["id"]}, {"status": "expired" if event.endswith("expired") else "cancelled"})
+        await shop_orders.payment_expired(sdb, rows[0].get("order_id"))
         return "processed"
 
     return "ignored"

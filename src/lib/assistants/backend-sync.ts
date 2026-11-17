@@ -6,7 +6,7 @@
  * written back: created, changed (after a short pause so typing isn't one request per key) and deleted.
  * Fields the backend doesn't hold (model tier, reply counters) stay in the browser.
  */
-import { assistantsStore, registerAssistantAlias, type Assistant, type AssistantRole, type AssistantsState, type Tool } from './model'
+import { assistantsStore, registerAssistantAlias, DEFAULT_SHOP, type ShopSettings, type Assistant, type AssistantRole, type AssistantsState, type Tool } from './model'
 import { createStore, useStore, type Store } from '@/lib/workspace/store'
 import { backend, backendUrl } from '@/lib/backend/client'
 import { toast } from '@/lib/toast'
@@ -24,6 +24,7 @@ export interface AssistantRow {
   model_id: string
   knowledge: Assistant['knowledge']
   use_catalog?: boolean
+  shop?: Partial<ShopSettings>
   tool_ids: string[]
   capture_leads: boolean
   audience: Assistant['audience']
@@ -48,6 +49,24 @@ export const httpApi: AssistantsApi = {
   remove: (id) => backend<void>(`/v1/assistants/${id}`, { method: 'DELETE' }),
 }
 
+const money = (v: unknown, max: number) => Math.min(max, Math.max(0, Math.round((Number(v) || 0) * 100) / 100))
+
+/** The shop settings the backend accepts. */
+export function cleanShop(shop?: Partial<ShopSettings>): ShopSettings {
+  const s = { ...DEFAULT_SHOP, ...(shop ?? {}) }
+  return {
+    enabled: Boolean(s.enabled),
+    online: Boolean(s.online),
+    cod: Boolean(s.cod),
+    delivery_fee: money(s.delivery_fee, 100_000),
+    free_above: money(s.free_above, 10_000_000),
+    min_order: money(s.min_order, 10_000_000),
+    cod_max: money(s.cod_max, 10_000_000),
+    language: (['en', 'pt', 'es', 'ko'] as const).includes(s.language) ? s.language : 'en',
+    delivery_note: String(s.delivery_note ?? '').slice(0, 300),
+  }
+}
+
 const VENDORS = ['openai', 'google', 'anthropic', 'deepseek', 'deepinfra']
 
 export function toBody(a: Assistant): RowBody {
@@ -63,6 +82,7 @@ export function toBody(a: Assistant): RowBody {
     model_id: (a.modelId ?? '').slice(0, 120),
     knowledge: a.knowledge.map((f) => ({ q: f.q.slice(0, 300), a: f.a.slice(0, 4000) })),
     use_catalog: Boolean(a.useCatalog),
+    shop: cleanShop(a.shop),
     tool_ids: a.toolIds,
     capture_leads: a.captureLeads,
     audience: a.audience,
@@ -86,6 +106,7 @@ export function fromRow(row: AssistantRow, local?: Assistant): Assistant {
     modelId: row.model_id,
     knowledge: row.knowledge,
     useCatalog: row.use_catalog ?? false,
+    shop: { ...DEFAULT_SHOP, ...(row.shop ?? {}) },
     toolIds: row.tool_ids,
     captureLeads: row.capture_leads,
     audience: row.audience,

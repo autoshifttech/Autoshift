@@ -16,6 +16,19 @@ class Handoff(BaseModel):
     maxReplies: int = Field(15, ge=1, le=50)
 
 
+class ShopSettings(BaseModel):
+    """An assistant that takes orders: payment options and delivery charge (in rupees)."""
+    enabled: bool = False
+    online: bool = True  # Razorpay payment link (needs a Razorpay connection)
+    cod: bool = True  # cash on delivery
+    delivery_fee: float = Field(0, ge=0, le=100_000)
+    free_above: float = Field(0, ge=0, le=10_000_000)  # 0: delivery is never free
+    min_order: float = Field(0, ge=0, le=10_000_000)
+    cod_max: float = Field(0, ge=0, le=10_000_000)  # 0: no limit for cash on delivery
+    language: Literal["en", "pt", "es", "ko"] = "en"  # of the order summary AutoShift adds
+    delivery_note: str = Field("", max_length=300)  # e.g. "Delivery in 3-5 days across India"
+
+
 class Faq(BaseModel):
     q: str = Field("", max_length=300)
     a: str = Field("", max_length=4000)
@@ -33,6 +46,7 @@ class AssistantCreate(BaseModel):
     model_id: str = Field("", max_length=120)
     knowledge: list[Faq] = []
     use_catalog: bool = False
+    shop: ShopSettings = ShopSettings()
     tool_ids: list[str] = []
     capture_leads: bool = False
     audience: Audience = "all"
@@ -51,6 +65,7 @@ class AssistantPatch(BaseModel):
     model_id: str | None = Field(None, max_length=120)
     knowledge: list[Faq] | None = None
     use_catalog: bool | None = None
+    shop: ShopSettings | None = None
     tool_ids: list[str] | None = None
     capture_leads: bool | None = None
     audience: Audience | None = None
@@ -345,6 +360,10 @@ class InternalAiReply(BaseModel):
     ref: str = Field(min_length=8, max_length=200)
     # AI replies in this chat in the last 24 hours (the reply limit counts these); None = count the history.
     recent_ai_replies: int | None = Field(None, ge=0, le=10000)
+    # The chat, so a shop assistant can place orders and answer "where is my order?".
+    conversation_id: str | None = None
+    contact_id: str | None = None
+    customer_phone: str | None = Field(None, max_length=32)
 
 
 class InternalPaymentLink(BaseModel):

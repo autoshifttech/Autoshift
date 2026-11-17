@@ -33,6 +33,8 @@ export interface Assistant {
   knowledge: Faq[]
   /** Also answer from the product list (an Excel file on the Files page). */
   useCatalog?: boolean
+  /** Take orders in the chat: payment options and delivery charge. */
+  shop?: ShopSettings
   toolIds: string[]
   captureLeads: boolean
   audience: Audience
@@ -41,6 +43,26 @@ export interface Assistant {
   stats: { replies: number; handoffs: number; leads: number }
   createdAt: string
 }
+
+export interface ShopSettings {
+  enabled: boolean
+  /** Razorpay payment link (needs a Razorpay connection). */
+  online: boolean
+  /** Cash on delivery. */
+  cod: boolean
+  /** In rupees. */
+  delivery_fee: number
+  /** Delivery is free from this order total; 0 = never. */
+  free_above: number
+  min_order: number
+  /** Cash on delivery only up to this total; 0 = no limit. */
+  cod_max: number
+  /** Language of the order summary and status messages AutoShift sends. */
+  language: 'en' | 'pt' | 'es' | 'ko'
+  delivery_note: string
+}
+
+export const DEFAULT_SHOP: ShopSettings = { enabled: false, online: true, cod: true, delivery_fee: 0, free_above: 0, min_order: 0, cod_max: 0, language: 'en', delivery_note: '' }
 
 export const TOOL_CATEGORIES = ['leads', 'messaging', 'team', 'custom'] as const
 export type ToolCategory = (typeof TOOL_CATEGORIES)[number]

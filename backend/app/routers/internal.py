@@ -10,7 +10,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, events, platform_settings, shop_payments, wallet
+from .. import ai_runner, audit, events, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import ServiceDb, get_llm
 from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
@@ -80,10 +80,18 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, settings:
     if not rows:
         raise HTTPException(404, "Assistant not found")
     history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
-    out = await ai_runner.reply(sdb, llm, settings, rows[0], history, body.message, ref=f"live:{body.ref}", recent_ai_replies=body.recent_ai_replies)
+    out = await ai_runner.reply(sdb, llm, settings, rows[0], history, body.message, ref=f"live:{body.ref}", recent_ai_replies=body.recent_ai_replies, contact_id=body.contact_id)
     if out.status == "handoff":
         await events.emit(sdb, body.account_id, "conversation.handoff", {"assistant_id": body.assistant_id, "reason": out.reason, "ref": body.ref})
-    return asdict(out)
+    result = asdict(out)
+    if out.status == "reply" and out.order is not None:
+        # The customer confirmed an order: AutoShift prices it from the product list and adds the summary and payment link.
+        cat = await sdb.select("product_catalog", {"account_id": body.account_id}, limit=1)
+        products = (cat[0].get("products") or []) if cat else []
+        added, order = await shop_orders.place(sdb, settings, assistant=rows[0], products=products, req=out.order, conversation_id=body.conversation_id, contact_id=body.contact_id, customer_phone=body.customer_phone)
+        result["text"] = "\n\n".join(t for t in (out.text, added) if t)
+        result["order"] = {"id": order["id"], "number": order["number"]} if order else None
+    return result
 
 
 @router.post("/events", status_code=202)
