@@ -18,6 +18,8 @@ import { BrowserNotificationsListener } from "@/components/notifications/browser
 import { SkipLink } from "@/components/layout/skip-link";
 import { AccountNotices } from "@/components/layout/account-notices";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { ShiftyCompanion } from "@/components/shifty/shifty-companion";
+import { ShiftyWatcher } from "@/components/shifty/shifty-watcher";
 
 // Auth-gated dashboard shell. Extracted from the layout so the layout
 // itself can stay a server component and export metadata (noindex) —
@@ -107,6 +109,8 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
+      <ShiftyCompanion area="business" />
+      <ShiftyWatcher />
     </div>
   );
 }

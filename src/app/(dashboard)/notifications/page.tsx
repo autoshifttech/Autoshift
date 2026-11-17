@@ -189,7 +189,7 @@ export default function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <EmptyPanel icon={Bell} title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-14" />
+        <EmptyPanel icon={Bell} mascot="sleep" title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-14" />
       ) : (
         <ul className="stack-in space-y-2">
           {notifications.map((n) => {

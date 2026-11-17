@@ -32,6 +32,7 @@
  * implicit-delete affordance that's easier to trip accidentally.
  */
 
+import { shiftySays } from "@/lib/shifty/events";
 import {
   createContext,
   useCallback,
@@ -475,6 +476,8 @@ export function FlowEditorProvider({
           throw new Error(json.error ?? t("statusUpdateFailedStatus", { status: res.status }));
         }
         commit((s) => ({ ...s, status: next }), { dirty: false, track: false });
+        // Going live is a big moment: Shifty counts down and launches with it.
+        if (next === "active") shiftySays("flow-live");
         toast.success(
           next === "active"
             ? t("statusActivated")

@@ -161,7 +161,7 @@ export function FilesPage() {
           </button>
         ))}
       </div>
-      {shown.length === 0 && <EmptyPanel icon={FileText} title={t("empty")} />}
+      {shown.length === 0 && <EmptyPanel icon={FileText} mascot="sleep" title={t("empty")} />}
 
       <Sheet open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">

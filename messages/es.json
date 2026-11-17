@@ -4839,5 +4839,174 @@
     "import": "Importar lista de productos (Excel o CSV)",
     "importNew": "Importar una nueva lista de productos",
     "currentNamed": "Tu lista de productos: “{name}”, {count, plural, =1 {1 producto} other {# productos}}, actualizada el {date}."
+  },
+  "Shifty": {
+    "lines": {
+      "yay": "¡Bien! 🎉",
+      "aha": "¡Ajá! ¡Ya lo tengo!",
+      "searching": "Buscando…",
+      "yawn": "Aaaah…",
+      "hello": "¡Oh! ¡Hola!",
+      "phew": "¡Uf! Todo arreglado.",
+      "thanks": "¡Gracias! ♥",
+      "goLive": "¡En vivo! 🚀",
+      "live": "¡Tu flujo está en vivo! ✨",
+      "tap": "¡Jeje!|¡Cosquillas!|¡Hola!"
+    },
+    "ui": {
+      "open": "Shifty, tu ayudante. Abrir consejos y opciones",
+      "tipTitle": "Consejo de Shifty",
+      "close": "Cerrar",
+      "gotIt": "Entendido",
+      "replayTour": "Repetir el recorrido",
+      "settings": "Ajustes de Shifty",
+      "hide": "Ocultar a Shifty",
+      "notNow": "Ahora no",
+      "start": "Empezar",
+      "step": "Paso {n} de {total}",
+      "skip": "Saltar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "finish": "Terminar"
+    },
+    "events": {
+      "paid": "¡Llegó un pago! 🎉",
+      "lead": "¡Un nuevo lead!",
+      "saved": "¡Guardado! ✓",
+      "error": "Algo necesita revisión.",
+      "walletLow": "Tu saldo se está acabando.",
+      "done": "¡Listo!",
+      "paidAmount": "¡₹{amount} pagados! 🎉",
+      "leadNamed": "Nuevo lead: {title}"
+    },
+    "tips": {
+      "general": "Soy Shifty. Tócame cuando quieras para un consejo o para repetir el recorrido.",
+      "business": {
+        "dashboard": "Tu día de un vistazo: pedidos, chats y lo que te necesita.",
+        "inbox": "Todos los chats de WhatsApp llegan aquí. La IA responde; toma el control cuando quieras.",
+        "leads": "Aquí viven los leads y pedidos. Abre uno para pasarlo a la siguiente etapa.",
+        "contacts": "Todos tus clientes. Las etiquetas ayudan a enviar el mensaje correcto a las personas correctas.",
+        "insights": "Mira qué funciona: respuestas, leads y ventas con el tiempo.",
+        "agents": "Tus asistentes de IA. Dale a uno tu lista de productos y atiende 24×7.",
+        "ai-tools": "Las herramientas permiten a tu IA hacer cosas, como reservar o consultar un pedido.",
+        "broadcasts": "Envía un mensaje a muchos clientes. Solo lo recibe quien aceptó.",
+        "drips": "Las secuencias envían varios mensajes a lo largo de días, automáticamente.",
+        "segments": "Los segmentos son grupos guardados de contactos, como \"compraron en los últimos 30 días\".",
+        "automations": "Las automatizaciones reaccionan a eventos: un chat nuevo, una etiqueta, una palabra clave.",
+        "flows": "Los flujos son chatbots paso a paso. ¡Activa uno y salimos en vivo juntos!",
+        "templates": "Las plantillas son mensajes aprobados por WhatsApp para iniciar un chat.",
+        "settings": "Ajustes: tu negocio, WhatsApp, tu equipo y cuánto me muevo."
+      },
+      "admin": {
+        "overview": "Toda la plataforma de un vistazo. Me preocuparé si algo falla.",
+        "businesses": "Cada negocio en AutoShift. Abre uno para ver su plan, saldo y WhatsApp.",
+        "payments": "Cada pago y reembolso. Razorpay es la fuente de verdad.",
+        "wallet": "Tarifas y costes: lo que cuesta cada mensaje y respuesta de IA.",
+        "plans": "Tus planes y precios. Los cambios aplican a nuevas compras.",
+        "whatsapp": "El estado de WhatsApp de cada número conectado.",
+        "ai": "Uso de IA: respuestas, coste y traspasos por negocio.",
+        "ai-models": "Activa o desactiva modelos de IA y elige el predeterminado.",
+        "system": "Estado del sistema: la API, la base de datos y las tareas en segundo plano.",
+        "support": "Tickets de soporte de los negocios. Responde aquí.",
+        "announcements": "Mensajes que ve cada negocio en su panel.",
+        "team": "El equipo de AutoShift y sus roles.",
+        "audit": "Cada acción importante, quién la hizo y cuándo.",
+        "settings": "Ajustes de la plataforma: alertas, códigos por teléfono y datos del negocio.",
+        "emails": "Correos enviados a los dueños de negocios."
+      }
+    },
+    "tour": {
+      "business": {
+        "offerTitle": "¿Eres nuevo? Déjame enseñarte todo.",
+        "offerText": "Un recorrido de 1 minuto por AutoShift con Shifty.",
+        "welcome": {
+          "title": "¡Hola, soy Shifty!",
+          "text": "Soy tu ayudante de AutoShift. Aquí tienes un recorrido rápido por los sitios importantes. Viajo contigo en cada página."
+        },
+        "inbox": {
+          "title": "Bandeja de entrada",
+          "text": "Todos los chats de WhatsApp llegan aquí. Tu IA responde y puedes tomar el control cuando quieras."
+        },
+        "leads": {
+          "title": "Leads",
+          "text": "Aquí llegan los nuevos leads y pedidos. Avánzalos: Pagado, Enviado, Entregado."
+        },
+        "agents": {
+          "title": "Asistentes de IA",
+          "text": "Dale a un asistente tu lista de productos y atenderá a tus clientes día y noche."
+        },
+        "flows": {
+          "title": "Flujos",
+          "text": "Crea chatbots paso a paso para pedidos y reservas. ¡Cuando uno esté listo, lo lanzamos juntos!"
+        },
+        "broadcasts": {
+          "title": "Difusiones",
+          "text": "Envía ofertas y novedades a muchos clientes a la vez, solo a quien aceptó."
+        },
+        "settings": {
+          "title": "Ajustes",
+          "text": "Conecta WhatsApp, invita a tu equipo y cambia cuánto me muevo, o apágame."
+        },
+        "done": {
+          "title": "¡Todo listo!",
+          "text": "Tócame en la esquina cuando quieras para un consejo o para repetir este recorrido."
+        }
+      },
+      "admin": {
+        "offerTitle": "Bienvenido al panel de administración.",
+        "offerText": "Un recorrido rápido por la sala de control de AutoShift.",
+        "welcome": {
+          "title": "¡Hola, admin!",
+          "text": "Vigilaré contigo. Así está organizado todo."
+        },
+        "businesses": {
+          "title": "Negocios",
+          "text": "Cada negocio, su plan, saldo y número de WhatsApp."
+        },
+        "payments": {
+          "title": "Pagos",
+          "text": "Recargas, suscripciones y reembolsos, directamente de Razorpay."
+        },
+        "aiModels": {
+          "title": "Modelos de IA",
+          "text": "Elige qué modelos de IA pueden usar los negocios y el predeterminado."
+        },
+        "support": {
+          "title": "Soporte",
+          "text": "Aquí llegan las preguntas de los negocios. Responde rápido para tenerlos contentos."
+        },
+        "settings": {
+          "title": "Ajustes",
+          "text": "Alertas, códigos por teléfono y los datos del negocio que aparecen en tus páginas legales."
+        },
+        "done": {
+          "title": "¡Todo listo!",
+          "text": "Tócame cuando quieras para un consejo sobre la página en la que estás."
+        }
+      }
+    },
+    "settings": {
+      "title": "Shifty, tu ayudante",
+      "desc": "Shifty es el pequeño ayudante que da consejos, guía el recorrido y celebra tus logros.",
+      "mode": "Cuánto se mueve",
+      "lively": "Animado",
+      "livelyDesc": "Saluda, mira alrededor y salta contigo.",
+      "calm": "Tranquilo",
+      "calmDesc": "Parpadea y observa; solo se mueve por novedades reales.",
+      "off": "Apagado",
+      "offDesc": "Ocultar a Shifty en todas partes.",
+      "sound": "Sonidos",
+      "soundDesc": "Pequeños pops y celebraciones. Desactivados por defecto.",
+      "replay": "Repetir el recorrido de bienvenida",
+      "resetTips": "Mostrar de nuevo los consejos de las páginas",
+      "tipsReset": "Los consejos de las páginas volverán a aparecer."
+    }
+  },
+  "NotFound": {
+    "title": "Esta página no está aquí",
+    "desc": "Shifty buscó por todas partes. El enlace puede ser antiguo o la página se movió.",
+    "shifty": "Mmm… ¿adónde fue?",
+    "dashboard": "Ir al panel",
+    "home": "Página de inicio"
   }
 }

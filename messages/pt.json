@@ -4839,5 +4839,174 @@
     "import": "Importar lista de produtos (Excel ou CSV)",
     "importNew": "Importar nova lista de produtos",
     "currentNamed": "Sua lista de produtos: “{name}”, {count, plural, =1 {1 produto} other {# produtos}}, atualizada em {date}."
+  },
+  "Shifty": {
+    "lines": {
+      "yay": "Eba! 🎉",
+      "aha": "Aha! Já sei!",
+      "searching": "Procurando…",
+      "yawn": "Aaaah…",
+      "hello": "Oh! Olá!",
+      "phew": "Ufa! Tudo resolvido.",
+      "thanks": "Obrigado! ♥",
+      "goLive": "No ar! 🚀",
+      "live": "Seu fluxo está no ar! ✨",
+      "tap": "Hehe!|Que cócegas!|Olá!"
+    },
+    "ui": {
+      "open": "Shifty, seu ajudante. Abrir dicas e opções",
+      "tipTitle": "Dica do Shifty",
+      "close": "Fechar",
+      "gotIt": "Entendi",
+      "replayTour": "Rever o tour",
+      "settings": "Configurações do Shifty",
+      "hide": "Esconder o Shifty",
+      "notNow": "Agora não",
+      "start": "Começar",
+      "step": "Passo {n} de {total}",
+      "skip": "Pular",
+      "back": "Voltar",
+      "next": "Próximo",
+      "finish": "Concluir"
+    },
+    "events": {
+      "paid": "Chegou um pagamento! 🎉",
+      "lead": "Um novo lead!",
+      "saved": "Salvo! ✓",
+      "error": "Algo precisa de atenção.",
+      "walletLow": "Sua carteira está acabando.",
+      "done": "Pronto!",
+      "paidAmount": "₹{amount} pagos! 🎉",
+      "leadNamed": "Novo lead: {title}"
+    },
+    "tips": {
+      "general": "Eu sou o Shifty. Toque em mim a qualquer momento para uma dica ou para rever o tour.",
+      "business": {
+        "dashboard": "Seu dia de relance: pedidos, conversas e o que precisa de você.",
+        "inbox": "Todas as conversas do WhatsApp chegam aqui. A IA responde; assuma quando quiser.",
+        "leads": "Leads e pedidos ficam aqui. Abra um para movê-lo para a próxima etapa.",
+        "contacts": "Todos os seus clientes. Tags ajudam a enviar a mensagem certa às pessoas certas.",
+        "insights": "Veja o que funciona: respostas, leads e vendas ao longo do tempo.",
+        "agents": "Seus assistentes de IA. Dê a um deles sua lista de produtos e ele atende 24×7.",
+        "ai-tools": "Ferramentas deixam a IA fazer coisas, como agendar ou consultar um pedido.",
+        "broadcasts": "Envie uma mensagem para muitos clientes. Só recebe quem concordou.",
+        "drips": "Sequências enviam várias mensagens ao longo de dias, automaticamente.",
+        "segments": "Segmentos são grupos salvos de contatos, como \"compraram nos últimos 30 dias\".",
+        "automations": "Automações reagem a eventos: nova conversa, uma tag, uma palavra-chave.",
+        "flows": "Fluxos são chatbots passo a passo. Ative um e vamos ao ar juntos!",
+        "templates": "Modelos são mensagens aprovadas pelo WhatsApp para iniciar uma conversa.",
+        "settings": "Configurações: sua empresa, WhatsApp, equipe e o quanto eu me mexo."
+      },
+      "admin": {
+        "overview": "A plataforma inteira de relance. Eu fico preocupado se algo quebrar.",
+        "businesses": "Todas as empresas no AutoShift. Abra uma para ver plano, carteira e WhatsApp.",
+        "payments": "Todos os pagamentos e reembolsos. O Razorpay é a fonte da verdade.",
+        "wallet": "Tarifas e custos: quanto custa cada mensagem e resposta de IA.",
+        "plans": "Seus planos e preços. Mudanças valem para novas compras.",
+        "whatsapp": "A saúde do WhatsApp de cada número conectado.",
+        "ai": "Uso de IA: respostas, custo e transferências por empresa.",
+        "ai-models": "Ative ou desative modelos de IA e escolha o padrão.",
+        "system": "Status do sistema: a API, o banco de dados e as tarefas em segundo plano.",
+        "support": "Chamados de suporte das empresas. Responda aqui.",
+        "announcements": "Mensagens exibidas a todas as empresas no painel.",
+        "team": "A equipe AutoShift e suas funções.",
+        "audit": "Cada ação importante, quem fez e quando.",
+        "settings": "Configurações da plataforma: alertas, códigos por telefone e dados da empresa.",
+        "emails": "E-mails enviados aos donos das empresas."
+      }
+    },
+    "tour": {
+      "business": {
+        "offerTitle": "É novo por aqui? Deixe-me mostrar tudo.",
+        "offerText": "Um tour de 1 minuto pelo AutoShift com o Shifty.",
+        "welcome": {
+          "title": "Oi, eu sou o Shifty!",
+          "text": "Sou seu ajudante no AutoShift. Aqui vai um tour rápido pelos lugares importantes. Eu viajo com você em todas as páginas."
+        },
+        "inbox": {
+          "title": "Caixa de entrada",
+          "text": "Todas as conversas do WhatsApp chegam aqui. A IA responde, e você pode assumir a qualquer momento."
+        },
+        "leads": {
+          "title": "Leads",
+          "text": "Novos leads e pedidos chegam aqui. Avance-os: Pago, Enviado, Entregue."
+        },
+        "agents": {
+          "title": "Assistentes de IA",
+          "text": "Dê a um assistente sua lista de produtos e ele atende clientes dia e noite."
+        },
+        "flows": {
+          "title": "Fluxos",
+          "text": "Crie chatbots passo a passo para pedidos e agendamentos. Quando um estiver pronto, lançamos juntos!"
+        },
+        "broadcasts": {
+          "title": "Transmissões",
+          "text": "Envie ofertas e novidades para muitos clientes de uma vez, só para quem concordou."
+        },
+        "settings": {
+          "title": "Configurações",
+          "text": "Conecte o WhatsApp, convide sua equipe e mude o quanto eu me mexo, ou me desligue."
+        },
+        "done": {
+          "title": "Tudo pronto!",
+          "text": "Toque em mim no canto a qualquer momento para uma dica ou para rever este tour."
+        }
+      },
+      "admin": {
+        "offerTitle": "Bem-vindo ao painel de administração.",
+        "offerText": "Um tour rápido pela sala de controle do AutoShift.",
+        "welcome": {
+          "title": "Oi, admin!",
+          "text": "Vou vigiar junto com você. Veja onde fica cada coisa."
+        },
+        "businesses": {
+          "title": "Empresas",
+          "text": "Cada empresa, seu plano, carteira e número de WhatsApp."
+        },
+        "payments": {
+          "title": "Pagamentos",
+          "text": "Recargas, assinaturas e reembolsos, direto do Razorpay."
+        },
+        "aiModels": {
+          "title": "Modelos de IA",
+          "text": "Escolha quais modelos de IA as empresas podem usar e o padrão."
+        },
+        "support": {
+          "title": "Suporte",
+          "text": "Dúvidas das empresas chegam aqui. Responda rápido para mantê-las felizes."
+        },
+        "settings": {
+          "title": "Configurações",
+          "text": "Alertas, códigos por telefone e os dados da empresa exibidos nas páginas legais."
+        },
+        "done": {
+          "title": "Tudo pronto!",
+          "text": "Toque em mim a qualquer momento para uma dica sobre a página em que você está."
+        }
+      }
+    },
+    "settings": {
+      "title": "Shifty, seu ajudante",
+      "desc": "O Shifty é o pequeno ajudante que dá dicas, conduz o tour e comemora suas vitórias.",
+      "mode": "Quanto ele se mexe",
+      "lively": "Animado",
+      "livelyDesc": "Acena, olha em volta e pula junto com você.",
+      "calm": "Calmo",
+      "calmDesc": "Pisca e observa; só se mexe para novidades reais.",
+      "off": "Desligado",
+      "offDesc": "Esconder o Shifty em todo lugar.",
+      "sound": "Sons",
+      "soundDesc": "Pequenos estalos e comemorações. Desligado por padrão.",
+      "replay": "Rever o tour de boas-vindas",
+      "resetTips": "Mostrar as dicas das páginas de novo",
+      "tipsReset": "As dicas das páginas aparecerão de novo."
+    }
+  },
+  "NotFound": {
+    "title": "Esta página não está aqui",
+    "desc": "O Shifty procurou em todo lugar. O link pode ser antigo ou a página mudou de lugar.",
+    "shifty": "Hmm… para onde foi?",
+    "dashboard": "Ir para o painel",
+    "home": "Página inicial"
   }
 }

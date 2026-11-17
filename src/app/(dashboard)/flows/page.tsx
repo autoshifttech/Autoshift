@@ -483,7 +483,7 @@ function EmptyState({
   const tGate = useTranslations("GatedButton");
   return (
     <div className="space-y-6">
-      <EmptyPanel icon={Workflow} title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-12">
+      <EmptyPanel icon={Workflow} mascot="point" title={t("emptyTitle")} description={t("emptyDesc")} className="rounded-2xl border border-border bg-card py-12">
         <GatedButton canAct={canCreate} gateReason={tGate("reasons.createFlows")} onClick={onCreate}>
           <Plus className="h-4 w-4" />
           {t("createFirst")}

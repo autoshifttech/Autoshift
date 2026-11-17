@@ -4839,5 +4839,174 @@
     "import": "Import product list (Excel or CSV)",
     "importNew": "Import a new product list",
     "currentNamed": "Your product list: “{name}”, {count, plural, =1 {1 product} other {# products}}, updated {date}."
+  },
+  "Shifty": {
+    "lines": {
+      "yay": "Yay! 🎉",
+      "aha": "Aha! I've got it!",
+      "searching": "Searching…",
+      "yawn": "Yaaawn…",
+      "hello": "Oh! Hello!",
+      "phew": "Phew! All fixed.",
+      "thanks": "Thank you! ♥",
+      "goLive": "Go live! 🚀",
+      "live": "Your flow is live! ✨",
+      "tap": "Hehe!|That tickles!|Hi there!"
+    },
+    "ui": {
+      "open": "Shifty, your helper. Open tips and options",
+      "tipTitle": "Tip from Shifty",
+      "close": "Close",
+      "gotIt": "Got it",
+      "replayTour": "Replay the tour",
+      "settings": "Shifty settings",
+      "hide": "Hide Shifty",
+      "notNow": "Not now",
+      "start": "Start",
+      "step": "Step {n} of {total}",
+      "skip": "Skip",
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish"
+    },
+    "events": {
+      "paid": "A payment came in! 🎉",
+      "lead": "A new lead!",
+      "saved": "Saved! ✓",
+      "error": "Something needs a look.",
+      "walletLow": "Your wallet is running low.",
+      "done": "Done!",
+      "paidAmount": "₹{amount} paid! 🎉",
+      "leadNamed": "New lead: {title}"
+    },
+    "tips": {
+      "general": "I'm Shifty. Tap me any time for a tip or to replay the tour.",
+      "business": {
+        "dashboard": "Your day at a glance: orders, chats and what needs you next.",
+        "inbox": "Every WhatsApp chat lands here. The AI replies; take over any time.",
+        "leads": "Leads and orders live here. Open one to move it to the next stage.",
+        "contacts": "All your customers. Tags help you send the right message to the right people.",
+        "insights": "See what's working: replies, leads and sales over time.",
+        "agents": "Your AI assistants. Give one your product list and it answers customers 24×7.",
+        "ai-tools": "Tools let your AI do things, like booking or checking an order.",
+        "broadcasts": "Send one message to many customers. Only people who agreed get it.",
+        "drips": "Drips send a series of messages over days, automatically.",
+        "segments": "Segments are saved groups of contacts, like \"bought in the last 30 days\".",
+        "automations": "Automations react to events: a new chat, a tag, a keyword.",
+        "flows": "Flows are step-by-step chatbots. Activate one and we go live together!",
+        "templates": "Templates are messages WhatsApp approves for starting a chat.",
+        "settings": "Settings: your business, WhatsApp, team, and how lively I am."
+      },
+      "admin": {
+        "overview": "The whole platform at a glance. I'll worry if something breaks.",
+        "businesses": "Every business on AutoShift. Open one for its plan, wallet and WhatsApp.",
+        "payments": "Every payment and refund. Razorpay is the source of truth.",
+        "wallet": "Wallet rates and costs: what each message and AI reply costs.",
+        "plans": "Your plans and prices. Changes apply to new purchases.",
+        "whatsapp": "WhatsApp health for every connected number.",
+        "ai": "AI usage: replies, cost and hand-offs per business.",
+        "ai-models": "Switch AI models on or off and pick the default.",
+        "system": "System status: the API, the database and background jobs.",
+        "support": "Support tickets from businesses. Reply here.",
+        "announcements": "Messages shown to every business in their dashboard.",
+        "team": "The AutoShift team and their roles.",
+        "audit": "Every important action, who did it and when.",
+        "settings": "Platform settings: alerts, phone codes and business details.",
+        "emails": "Emails sent to business owners."
+      }
+    },
+    "tour": {
+      "business": {
+        "offerTitle": "New here? Let me show you around.",
+        "offerText": "A 1-minute tour of AutoShift with Shifty.",
+        "welcome": {
+          "title": "Hi, I'm Shifty!",
+          "text": "I'm your AutoShift helper. Here's a quick tour of the important places. I'll travel with you on every page."
+        },
+        "inbox": {
+          "title": "Inbox",
+          "text": "Every WhatsApp chat comes here. Your AI answers, and you can take over any time."
+        },
+        "leads": {
+          "title": "Leads",
+          "text": "New leads and orders land here. Move them along: Paid, Shipped, Delivered."
+        },
+        "agents": {
+          "title": "AI assistants",
+          "text": "Give an assistant your product list and it answers customers day and night."
+        },
+        "flows": {
+          "title": "Flows",
+          "text": "Build step-by-step chatbots for orders and bookings. When one's ready, we launch it together!"
+        },
+        "broadcasts": {
+          "title": "Broadcasts",
+          "text": "Send offers and updates to many customers at once, only to people who agreed."
+        },
+        "settings": {
+          "title": "Settings",
+          "text": "Connect WhatsApp, invite your team, and change how lively I am, or turn me off."
+        },
+        "done": {
+          "title": "You're all set!",
+          "text": "Tap me in the corner any time for a tip or to replay this tour."
+        }
+      },
+      "admin": {
+        "offerTitle": "Welcome to the admin panel.",
+        "offerText": "A quick tour of the AutoShift control room.",
+        "welcome": {
+          "title": "Hi, admin!",
+          "text": "I'll keep watch with you. Here's where everything is."
+        },
+        "businesses": {
+          "title": "Businesses",
+          "text": "Every business, its plan, wallet and WhatsApp number."
+        },
+        "payments": {
+          "title": "Payments",
+          "text": "Top-ups, subscriptions and refunds, straight from Razorpay."
+        },
+        "aiModels": {
+          "title": "AI models",
+          "text": "Choose which AI models businesses can use, and the default."
+        },
+        "support": {
+          "title": "Support",
+          "text": "Questions from businesses arrive here. Reply quickly to keep them happy."
+        },
+        "settings": {
+          "title": "Settings",
+          "text": "Alerts, phone codes and the business details shown on your legal pages."
+        },
+        "done": {
+          "title": "All set!",
+          "text": "Tap me any time for a tip about the page you're on."
+        }
+      }
+    },
+    "settings": {
+      "title": "Shifty, your helper",
+      "desc": "Shifty is the little helper who gives tips, runs the tour and cheers for your wins.",
+      "mode": "How lively",
+      "lively": "Lively",
+      "livelyDesc": "Waves, looks around and hops with you.",
+      "calm": "Calm",
+      "calmDesc": "Blinks and watches; moves only for real news.",
+      "off": "Off",
+      "offDesc": "Hide Shifty everywhere.",
+      "sound": "Sounds",
+      "soundDesc": "Tiny pops and cheers. Off by default.",
+      "replay": "Replay the welcome tour",
+      "resetTips": "Show page tips again",
+      "tipsReset": "Page tips will show again."
+    }
+  },
+  "NotFound": {
+    "title": "This page isn't here",
+    "desc": "Shifty looked everywhere. The link may be old, or the page was moved.",
+    "shifty": "Hmm… where did it go?",
+    "dashboard": "Go to the dashboard",
+    "home": "Home page"
   }
 }

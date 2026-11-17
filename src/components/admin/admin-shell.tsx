@@ -47,6 +47,7 @@ import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import { ShiftyCompanion } from "@/components/shifty/shifty-companion";
 
 interface NavItem {
   href: string;
@@ -388,6 +389,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </main>
       </div>
       <AdminMobileNav />
+      <ShiftyCompanion area="admin" />
     </div>
   );
 }

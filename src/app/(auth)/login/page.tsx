@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { LogoMark } from "@/components/brand/logo-mark";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { ShiftyFigure, type ShiftyApi } from "@/components/shifty/shifty";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -51,6 +51,9 @@ function LoginPageInner() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Shifty covers his eyes while you type your password, and shakes his head at a failed sign-in.
+  const shifty = useRef<ShiftyApi | null>(null);
+  useEffect(() => { if (error) void shifty.current?.uncover().then(() => shifty.current?.shake()); }, [error]);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -88,13 +91,15 @@ function LoginPageInner() {
     <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
       <Card className="liquid-glass lg-frost relative w-full max-w-md rounded-3xl border-0 bg-transparent px-2 py-6 ring-0 sm:px-4">
         <CardHeader className="items-center text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            {inviteToken ? (
+          {inviteToken ? (
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <UsersRound className="h-6 w-6 text-primary" />
-            ) : (
-              <LogoMark className="size-12" />
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="mx-auto mb-1 w-20" aria-hidden>
+              <ShiftyFigure level="calm" onReady={(a) => { shifty.current = a; void a.wave(); }} />
+            </div>
+          )}
           <CardTitle className="text-2xl font-extrabold tracking-tight text-foreground">
             {inviteToken ? t('titleAccept') : t('titleWelcome')}
           </CardTitle>
@@ -127,6 +132,8 @@ function LoginPageInner() {
                 placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={(e) => { void shifty.current?.uncover(); shifty.current?.look(e.currentTarget); }}
+                onBlur={() => shifty.current?.look(null)}
                 required
                 className="border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
@@ -150,6 +157,8 @@ function LoginPageInner() {
                 placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => void shifty.current?.cover()}
+                onBlur={() => void shifty.current?.uncover()}
                 required
                 className="border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
