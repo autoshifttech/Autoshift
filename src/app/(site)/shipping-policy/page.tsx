@@ -31,7 +31,7 @@ export default async function Page() {
     {
       id: "delays",
       title: "If something doesn't arrive",
-      body: <p>If your plan or credits don't show within 30 minutes of a successful payment, email <a href={`mailto:${d.email}`}>{d.email}</a> with the payment ID and we'll fix it the same working day.</p>,
+      body: <p>If your plan or credits don&apos;t show within 30 minutes of a successful payment, email <a href={`mailto:${d.email}`}>{d.email}</a> with the payment ID and we&apos;ll fix it the same working day.</p>,
     },
     {
       id: "merchants",
