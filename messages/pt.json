@@ -5008,5 +5008,29 @@
     "shifty": "Hmm… para onde foi?",
     "dashboard": "Ir para o painel",
     "home": "Página inicial"
+  },
+  "BusinessDetails": {
+    "title": "Dados da empresa para as páginas legais",
+    "desc": "Exibidos nas páginas de Contato, Reembolso e cancelamento e Envio e entrega, que o Razorpay verifica. Use seus dados registrados.",
+    "loading": "Carregando…",
+    "saved": "Dados da empresa salvos",
+    "failed": "Não foi possível salvar",
+    "save": "Salvar dados",
+    "pages": "Páginas: /contact, /refund-policy, /shipping-policy. As mudanças aparecem em alguns minutos.",
+    "f": {
+      "company": "Nome da empresa ou razão social",
+      "address": "Endereço registrado",
+      "email": "E-mail de suporte",
+      "whatsapp": "Telefone / WhatsApp de suporte",
+      "gstin": "GSTIN (opcional)",
+      "grievanceOfficer": "Responsável por reclamações",
+      "supportHours": "Horário de suporte",
+      "refundDays": "Prazo de reembolso (dias úteis)"
+    },
+    "bad": {
+      "email": "Digite um e-mail válido.",
+      "gstin": "Um GSTIN tem 15 caracteres, como 29ABCDE1234F1Z5.",
+      "refundDays": "Use um número de 1 a 30."
+    }
   }
 }

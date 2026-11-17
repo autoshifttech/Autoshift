@@ -2,11 +2,16 @@ import { AlertSettingsPage } from "@/components/admin/alert-settings-page";
 import { CustomToolsPanel } from "@/components/admin/custom-tools-panel";
 import { PhoneOtpPanel } from "@/components/admin/phone-otp-panel";
 import { ApiKeysPanel } from "@/components/settings/api-keys-panel";
+import { BusinessDetailsPanel } from "@/components/admin/business-details-panel";
 
 export default function Page() {
   return (
     <>
       <AlertSettingsPage />
+      {/* Business details shown on the Contact, Refund, Shipping and other legal pages. */}
+      <div className="mx-auto mt-10 max-w-3xl">
+        <BusinessDetailsPanel />
+      </div>
       {/* Platform keys reach the platform_* MCP tools (super admins only; hidden without the backend). */}
       <div className="mx-auto mt-10 max-w-3xl">
         <ApiKeysPanel platform />

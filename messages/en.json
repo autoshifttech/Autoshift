@@ -5008,5 +5008,29 @@
     "shifty": "Hmm… where did it go?",
     "dashboard": "Go to the dashboard",
     "home": "Home page"
+  },
+  "BusinessDetails": {
+    "title": "Business details for the legal pages",
+    "desc": "Shown on the Contact, Refund & cancellation and Shipping & delivery pages, which Razorpay checks. Use your registered details.",
+    "loading": "Loading…",
+    "saved": "Business details saved",
+    "failed": "Couldn't save",
+    "save": "Save details",
+    "pages": "Pages: /contact, /refund-policy, /shipping-policy. Changes show within a few minutes.",
+    "f": {
+      "company": "Business or legal name",
+      "address": "Registered address",
+      "email": "Support email",
+      "whatsapp": "Support phone / WhatsApp",
+      "gstin": "GSTIN (optional)",
+      "grievanceOfficer": "Grievance officer",
+      "supportHours": "Support hours",
+      "refundDays": "Refund processing (working days)"
+    },
+    "bad": {
+      "email": "Enter a valid email address.",
+      "gstin": "A GSTIN has 15 characters, like 29ABCDE1234F1Z5.",
+      "refundDays": "Use a number from 1 to 30."
+    }
   }
 }

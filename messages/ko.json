@@ -5008,5 +5008,29 @@
     "shifty": "음… 어디 갔지?",
     "dashboard": "대시보드로 가기",
     "home": "홈페이지"
+  },
+  "BusinessDetails": {
+    "title": "법적 페이지용 사업자 정보",
+    "desc": "Razorpay가 확인하는 연락처, 환불 및 취소, 배송 및 제공 페이지에 표시돼요. 등록된 정보를 사용하세요.",
+    "loading": "불러오는 중…",
+    "saved": "사업자 정보를 저장했어요",
+    "failed": "저장하지 못했어요",
+    "save": "정보 저장",
+    "pages": "페이지: /contact, /refund-policy, /shipping-policy. 변경 사항은 몇 분 안에 반영돼요.",
+    "f": {
+      "company": "상호 또는 법인명",
+      "address": "등록 주소",
+      "email": "고객지원 이메일",
+      "whatsapp": "고객지원 전화 / WhatsApp",
+      "gstin": "GSTIN (선택)",
+      "grievanceOfficer": "고충 처리 담당자",
+      "supportHours": "고객지원 시간",
+      "refundDays": "환불 처리 기간 (영업일)"
+    },
+    "bad": {
+      "email": "올바른 이메일을 입력하세요.",
+      "gstin": "GSTIN은 29ABCDE1234F1Z5처럼 15자예요.",
+      "refundDays": "1에서 30 사이 숫자를 입력하세요."
+    }
   }
 }
