@@ -217,7 +217,7 @@ function AdminMobileNav() {
   const [open, setOpen] = useState(false);
   const inMore = !current || !BAR_HREFS.includes(current.href);
   return (
-    <nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
+    <nav data-mobile-nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
       {BAR_HREFS.map((href) => {
         const item = itemFor(href);
         const active = current?.href === href;

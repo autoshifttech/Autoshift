@@ -20,6 +20,9 @@ const SPRING = "transform .7s cubic-bezier(.34,1.3,.64,1)";
 const isLite = () => typeof document !== "undefined" && document.documentElement.dataset.lite === "1";
 const still = () => typeof window !== "undefined" && (document.documentElement.dataset.shifty === "still" || matchMedia("(prefers-reduced-motion: reduce)").matches);
 
+/** Shifty is 200×208; his feet sit at 95% of his height. */
+const FEET = 0.95, RATIO = 200 / 208;
+
 /**
  * Shifty, the companion who travels with the person through the app: he hops along when they change
  * page, gives a tip the first time they open each page, runs the welcome tour, and reacts to real
@@ -49,18 +52,30 @@ export function ShiftyCompanion({ area }: { area: Area }) {
   useEffect(() => { api.current?.level(isLite() ? "calm" : prefs.mode === "off" ? "off" : prefs.mode); }, [prefs.mode]);
 
   // ---------------------------------------------------------- corner position
+  // Shifty's drawing is 208 wide and 200 tall; his feet (and shadow) sit at 95% of the height.
+  /** Phones: standing on top of the bottom menu bar, at its right end. Computers: the bottom-right corner. */
   const corner = useCallback(() => {
-    const phone = innerWidth < 1024;
-    const w = phone ? 62 : 76;
+    const bar = [...document.querySelectorAll<HTMLElement>("[data-mobile-nav]")].find((n) => n.getBoundingClientRect().height > 0);
+    if (bar) {
+      const r = bar.getBoundingClientRect(), w = 56;
+      setSize(w);
+      return { x: r.right - w - 14, y: r.top - w * RATIO * FEET + 3 };
+    }
+    const w = 76;
     setSize(w);
-    return { x: innerWidth - w - (phone ? 10 : 22), y: innerHeight - w * 1.08 - (phone ? 92 : 22) };
+    return { x: innerWidth - w - 22, y: innerHeight - w * RATIO * FEET - 14 };
   }, []);
+  const barTop = () => {
+    const bar = [...document.querySelectorAll<HTMLElement>("[data-mobile-nav]")].find((n) => n.getBoundingClientRect().height > 0);
+    return bar ? bar.getBoundingClientRect().top : innerHeight;
+  };
   useEffect(() => {
     const onResize = () => { if (!tour) setPos(corner()); };
     onResize();
+    const late = setTimeout(onResize, 400); // the bar can mount after Shifty
     addEventListener("resize", onResize);
-    return () => removeEventListener("resize", onResize);
-  }, [corner, tour]);
+    return () => { clearTimeout(late); removeEventListener("resize", onResize); };
+  }, [corner, tour, pathname]);
 
   // ---------------------------------------------------------- travel with the person
   useEffect(() => {
@@ -71,7 +86,7 @@ export function ShiftyCompanion({ area }: { area: Area }) {
       // a hop along: crouch, arc in from the side, squash on landing
       void a.pose({ sy: 0.82, sx: 1.12, y: 5 }, 120).then(() => a.pose({ sy: 1.1, sx: 0.92, y: 0, armR: "up", armL: "up" }, 160));
       wrap.current.animate(
-        [{ translate: "-80px 0" }, { translate: "-40px -56px", offset: 0.5 }, { translate: "0 0" }],
+        [{ translate: "-70px 0" }, { translate: "-35px -46px", offset: 0.5 }, { translate: "0 0" }],
         { duration: 640, easing: "cubic-bezier(.45,.05,.35,1)" },
       ).finished.then(async () => { await a.pose({ sy: 0.84, sx: 1.14, y: 4 }, 90); await a.pose({ sy: 1, sx: 1, y: 0, armR: "down", armL: "down" }, 280); }).catch(() => {});
     }
@@ -173,7 +188,7 @@ export function ShiftyCompanion({ area }: { area: Area }) {
     <>
       {/* The companion */}
       <div
-        className="fixed top-0 left-0 z-[60]"
+        className={cn("fixed top-0 left-0", tour ? "z-[60]" : "z-[45]")}
         style={{ transform: `translate(${Math.round(pos.x)}px, ${Math.round(pos.y)}px)`, transition: still() ? "none" : SPRING, width: size }}
       >
         <div ref={wrap}>
@@ -194,8 +209,8 @@ export function ShiftyCompanion({ area }: { area: Area }) {
         <div
           role="dialog"
           aria-label={t("ui.tipTitle")}
-          className="liquid-glass lg-floating fixed z-[61] w-[min(300px,calc(100vw-24px))] rounded-3xl p-4"
-          style={{ right: innerWidth < 1024 ? 10 : 22, bottom: (innerWidth < 1024 ? 92 : 22) + size * 1.15 }}
+          className="liquid-glass lg-floating fixed z-[46] w-[min(300px,calc(100vw-24px))] rounded-3xl p-4"
+          style={{ right: 12, bottom: innerHeight - Math.min(barTop(), pos.y + size * RATIO * FEET) + size * RATIO + 10 }}
         >
           <div className="flex items-start gap-2">
             <p className="flex-1 text-sm font-medium">{tipText}</p>
@@ -223,7 +238,7 @@ export function ShiftyCompanion({ area }: { area: Area }) {
 
       {/* Welcome offer */}
       {welcome && !tour && (
-        <div role="dialog" aria-labelledby="shifty-welcome" className="liquid-glass lg-frost fixed inset-x-3 bottom-24 z-[61] mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-3xl p-4 lg:bottom-6">
+        <div role="dialog" aria-labelledby="shifty-welcome" className="liquid-glass lg-frost fixed inset-x-3 bottom-32 z-[46] mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-3xl p-4 lg:bottom-6">
           <div className="min-w-0 flex-1">
             <p id="shifty-welcome" className="font-semibold">{t(`tour.${tourKey}.offerTitle`)}</p>
             <p className="text-sm opacity-80">{t(`tour.${tourKey}.offerText`)}</p>
