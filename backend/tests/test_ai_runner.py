@@ -155,3 +155,24 @@ async def test_a_busy_model_falls_back_to_another_switched_on_model(client, worl
     out = _test(client, world, _assistant(client, world)).json()
     assert out["status"] == "reply" and out["text"] == "We open at 9am."
     assert [c["vendor"] for c in llm.calls] == ["openai", "anthropic"]  # tried the chosen model first, then another provider
+
+
+async def test_a_slow_model_leaves_time_for_the_backup(client, world, settings, llm, monkeypatch):
+    import asyncio
+
+    _enable_openai(world, settings)
+    a = next(p for p in world.rows("platform_ai_providers") if p["vendor"] == "anthropic")
+    a.update(enabled=True, key_ciphertext=encrypt("a-key-1234", settings), key_tail="1234")
+    await _fund(world)
+    monkeypatch.setattr(ai_runner, "FIRST_SECONDS", 0.05)
+    monkeypatch.setattr(ai_runner, "MIN_TRY_SECONDS", 0.01)
+    real = llm.complete
+
+    async def slow_openai(vendor, api_key, model, system, messages):
+        if vendor == "openai":
+            await asyncio.sleep(5)
+        return await real(vendor, api_key, model, system, messages)
+
+    monkeypatch.setattr(llm, "complete", slow_openai)
+    out = _test(client, world, _assistant(client, world)).json()
+    assert out["status"] == "reply" and [c["vendor"] for c in llm.calls] == ["anthropic"]

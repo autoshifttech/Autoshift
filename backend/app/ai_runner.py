@@ -5,8 +5,10 @@ Order matters: nothing is charged unless a reply was actually produced, and a
 retry with the same `ref` is never charged twice (wallet idempotency).
 """
 
+import asyncio
 import logging
 import re
+import time
 from dataclasses import dataclass
 from typing import Literal
 
@@ -24,6 +26,11 @@ TONES = {
 }
 
 log = logging.getLogger("autoshift.ai")
+# The web app waits about 50 seconds for a reply. The first model gets part of that and the backups
+# share the rest, so a slow provider can't use up the whole wait.
+TOTAL_SECONDS = 42.0
+FIRST_SECONDS = 22.0
+MIN_TRY_SECONDS = 6.0
 
 
 @dataclass(frozen=True)
@@ -133,14 +140,19 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         assistant = {**assistant, "_orders": await shop_orders.recent_orders(sdb, account_id, contact_id)}
     system, turns = build_system(assistant, message), [*history, {"role": "user", "content": message}]
     result, problem = None, ""
-    for vendor, model_id, ciphertext in candidates:
-        try:
-            result = await llm.complete(vendor, decrypt(ciphertext, settings), model_id, system, turns)
+    deadline = time.monotonic() + TOTAL_SECONDS
+    for i, (vendor, model_id, ciphertext) in enumerate(candidates):
+        left = deadline - time.monotonic()
+        if left < MIN_TRY_SECONDS:
             break
-        except LlmError as exc:
-            # Busy, down or refusing: try the next switched-on model before giving up.
-            log.warning("AI reply failed for %s with %s/%s: %s", account_id, vendor, model_id, exc)
-            problem = str(exc)
+        limit = min(left, FIRST_SECONDS) if i == 0 and len(candidates) > 1 else left
+        try:
+            result = await asyncio.wait_for(llm.complete(vendor, decrypt(ciphertext, settings), model_id, system, turns), timeout=limit)
+            break
+        except (LlmError, asyncio.TimeoutError) as exc:
+            # Busy, slow, down or refusing: try the next switched-on model before giving up.
+            problem = str(exc) or f"{vendor} took too long to answer"
+            log.warning("AI reply failed for %s with %s/%s: %s", account_id, vendor, model_id, problem)
     if result is None:
         return Reply("failed", reason=problem)
 
