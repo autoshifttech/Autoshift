@@ -22,6 +22,8 @@ import { derivePresence } from '@/lib/presence'
 
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { BusinessTypeCard } from '@/components/dashboard/business-type-card'
+import { OrdersTodayCard } from '@/components/dashboard/orders-today-card'
+import { isOn, usePages } from '@/lib/workspace/pages'
 import { AttentionRow } from '@/components/dashboard/attention-row'
 import { CampaignsCard } from '@/components/dashboard/campaigns-card'
 import { KpiRow } from '@/components/dashboard/kpi-row'
@@ -33,7 +35,7 @@ import { SetupChecklist } from '@/components/dashboard/setup-checklist'
 import { TeamCard } from '@/components/dashboard/team-card'
 import { WorkspaceSummary } from '@/components/dashboard/workspace-summary'
 
-import { FULL_WIDTH, useDashboardLayout } from '@/lib/dashboard/layout'
+import { FULL_WIDTH, SECTION_PAGE, useDashboardLayout } from '@/lib/dashboard/layout'
 
 const POLL_MS = 60_000
 const REALTIME_DEBOUNCE_MS = 2_000
@@ -53,6 +55,7 @@ function DashboardPageInner() {
   const range = parseOverviewRange(searchParams.get('range'))
   const { profile } = useAuth()
   const layout = useDashboardLayout()
+  const pages = usePages()
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [failed, setFailed] = useState(false)
@@ -169,10 +172,11 @@ function DashboardPageInner() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {layout.order
-              .filter((id) => !layout.hidden.includes(id))
+              .filter((id) => !layout.hidden.includes(id) && isOn(pages, SECTION_PAGE[id] ?? null))
               .map((id, i) => (
                 <div key={id} style={{ order: i }} className={FULL_WIDTH.includes(id) ? 'min-w-0 lg:col-span-2' : 'min-w-0'}>
                   {id === 'nextSteps' && <NextSteps data={data} />}
+                  {id === 'orders' && <OrdersTodayCard />}
                   {id === 'summary' && <WorkspaceSummary />}
                   {id === 'attention' && <AttentionRow data={data} now={now} onlineCount={onlineCount} />}
                   {id === 'kpis' && <KpiRow data={data} />}

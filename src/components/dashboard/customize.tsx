@@ -6,12 +6,16 @@ import { useTranslations } from "next-intl"
 import { buttonVariants } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { useDashboardLayout } from "@/lib/dashboard/layout"
+import { SECTION_PAGE, useDashboardLayout } from "@/lib/dashboard/layout"
+import { isOn, usePages } from "@/lib/workspace/pages"
 
 /** "Customise": show, hide and reorder the overview's sections. Saved on this device. */
 export function DashboardCustomize() {
   const t = useTranslations("Dashboard.customize")
-  const { order, hidden, toggle, move, reset } = useDashboardLayout()
+  const { order: all, hidden, toggle, move, reset } = useDashboardLayout()
+  const pages = usePages()
+  // Only sections for pages this business has.
+  const order = all.filter((s) => isOn(pages, SECTION_PAGE[s] ?? null))
   return (
     <Popover>
       <PopoverTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>

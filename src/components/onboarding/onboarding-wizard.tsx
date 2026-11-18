@@ -30,6 +30,7 @@ import { NativeSelect } from "@/components/ui/native-select"
 import { toast } from "@/lib/toast";
 import { BackendError, backendUrl } from "@/lib/backend/client";
 import { chooseBusinessType, isShopType, SHOP_SOURCES } from "@/lib/workspace/pages";
+import { applyStarterKit, STARTER_PIPELINE } from "@/lib/workspace/starter-kit";
 
 const STEPS = ["business", "plan", "whatsapp", "features"] as const;
 
@@ -37,6 +38,7 @@ const selectClass = "w-full";
 
 export function OnboardingWizard() {
   const t = useTranslations("Onboarding");
+  const tp = useTranslations("Pipelines");
   const setup = useSetup();
   // Resume where the user left off; 4 = finished.
   const [step, setStep] = useState(() => Math.min(setup.step, 4));
@@ -76,6 +78,17 @@ export function OnboardingWizard() {
             onNext={() => {
               setupStore.set((s) => ({ ...s, completedAt: new Date().toISOString() }));
               go(4);
+              // A starter assistant and pipeline that suit the business type (skipped if they already exist).
+              const kind = setup.business.industry || "other";
+              const pipeline = STARTER_PIPELINE[kind];
+              void applyStarterKit(kind, {
+                ai: setup.features.includes("ai_support"),
+                leads: setup.features.includes("lead_capture"),
+                shopSource: setup.business.shopSource ?? null,
+                text: { assistantName: t(`starterAssistant_${kind}`), pipelineName: tp(`preset_${pipeline}`), stages: tp.raw(`presetStages_${pipeline}`) as string[] },
+              }).then((r) => {
+                if (r.assistant === "made" || r.pipeline === "made") toast.success(t("starterMade"));
+              });
             }}
           />
         )}

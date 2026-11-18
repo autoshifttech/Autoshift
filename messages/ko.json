@@ -152,7 +152,8 @@
         "queue": "답장 대기열",
         "team": "팀",
         "campaigns": "캠페인",
-        "activity": "최근 활동"
+        "activity": "최근 활동",
+        "orders": "오늘의 주문"
       }
     },
     "nextSteps": {
@@ -384,6 +385,14 @@
         "replies": "답장",
         "noReplies": "이 기간에는 아직 답장이 없어요."
       }
+    },
+    "orders": {
+      "title": "오늘의 주문",
+      "open": "주문 열기",
+      "today": "오늘 주문",
+      "toShip": "발송 대기",
+      "awaiting": "결제 대기",
+      "takings": "오늘 매출"
     }
   },
   "Inbox": {
@@ -3528,7 +3537,16 @@
     "shopSource_shopify_help": "주문은 계속 내 스토어에서 관리합니다.",
     "shopSource_website": "자체 웹사이트",
     "shopSource_website_help": "직접 만든 웹사이트나 앱.",
-    "typeLocked": "업종이 이미 설정되어 있습니다. 변경하려면 AutoShift 지원팀에 요청하세요."
+    "typeLocked": "업종이 이미 설정되어 있습니다. 변경하려면 AutoShift 지원팀에 요청하세요.",
+    "starterAssistant_retail": "쇼핑 어시스턴트",
+    "starterAssistant_restaurant": "주문 어시스턴트",
+    "starterAssistant_clinic": "병원 접수 담당",
+    "starterAssistant_salon": "살롱 접수 담당",
+    "starterAssistant_real_estate": "부동산 상담사",
+    "starterAssistant_education": "입학 상담 어시스턴트",
+    "starterAssistant_services": "문의 어시스턴트",
+    "starterAssistant_other": "WhatsApp 어시스턴트",
+    "starterMade": "기본 어시스턴트와 파이프라인이 준비되었습니다. AI 에이전트에서 어시스턴트를 확인하고 켜세요."
   },
   "Countries": {
     "IN": "인도",

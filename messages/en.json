@@ -152,7 +152,8 @@
         "queue": "Reply queue",
         "team": "Team",
         "campaigns": "Campaigns",
-        "activity": "Recent activity"
+        "activity": "Recent activity",
+        "orders": "Today's orders"
       }
     },
     "nextSteps": {
@@ -384,6 +385,14 @@
         "replies": "replies",
         "noReplies": "No replies in this period yet."
       }
+    },
+    "orders": {
+      "title": "Today's orders",
+      "open": "Open Orders",
+      "today": "Orders today",
+      "toShip": "To ship",
+      "awaiting": "Awaiting payment",
+      "takings": "Taken today"
     }
   },
   "Inbox": {
@@ -3528,7 +3537,16 @@
     "shopSource_shopify_help": "Your store stays the main place for orders.",
     "shopSource_website": "My own website",
     "shopSource_website_help": "A custom-built website or app.",
-    "typeLocked": "Your business type is already set. Ask AutoShift support to change it."
+    "typeLocked": "Your business type is already set. Ask AutoShift support to change it.",
+    "starterAssistant_retail": "Shop Assistant",
+    "starterAssistant_restaurant": "Order Assistant",
+    "starterAssistant_clinic": "Clinic Receptionist",
+    "starterAssistant_salon": "Salon Receptionist",
+    "starterAssistant_real_estate": "Property Advisor",
+    "starterAssistant_education": "Admissions Assistant",
+    "starterAssistant_services": "Enquiry Assistant",
+    "starterAssistant_other": "WhatsApp Assistant",
+    "starterMade": "Your starter assistant and pipeline are ready. Review the assistant in AI Agents and switch it on."
   },
   "Countries": {
     "IN": "India",

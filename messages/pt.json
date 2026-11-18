@@ -152,7 +152,8 @@
         "queue": "Fila de respostas",
         "team": "Equipe",
         "campaigns": "Campanhas",
-        "activity": "Atividade recente"
+        "activity": "Atividade recente",
+        "orders": "Pedidos de hoje"
       }
     },
     "nextSteps": {
@@ -384,6 +385,14 @@
         "replies": "respostas",
         "noReplies": "Ainda não há respostas neste período."
       }
+    },
+    "orders": {
+      "title": "Pedidos de hoje",
+      "open": "Abrir Pedidos",
+      "today": "Pedidos hoje",
+      "toShip": "Para enviar",
+      "awaiting": "Aguardando pagamento",
+      "takings": "Recebido hoje"
     }
   },
   "Inbox": {
@@ -3528,7 +3537,16 @@
     "shopSource_shopify_help": "Sua loja continua sendo o lugar principal dos pedidos.",
     "shopSource_website": "Meu próprio site",
     "shopSource_website_help": "Um site ou app feito sob medida.",
-    "typeLocked": "O tipo do seu negócio já foi definido. Peça ao suporte da AutoShift para alterar."
+    "typeLocked": "O tipo do seu negócio já foi definido. Peça ao suporte da AutoShift para alterar.",
+    "starterAssistant_retail": "Assistente da Loja",
+    "starterAssistant_restaurant": "Assistente de Pedidos",
+    "starterAssistant_clinic": "Recepcionista da Clínica",
+    "starterAssistant_salon": "Recepcionista do Salão",
+    "starterAssistant_real_estate": "Consultor de Imóveis",
+    "starterAssistant_education": "Assistente de Matrículas",
+    "starterAssistant_services": "Assistente de Atendimento",
+    "starterAssistant_other": "Assistente do WhatsApp",
+    "starterMade": "Seu assistente e funil iniciais estão prontos. Revise o assistente em Agentes de IA e ative-o."
   },
   "Countries": {
     "IN": "Índia",
