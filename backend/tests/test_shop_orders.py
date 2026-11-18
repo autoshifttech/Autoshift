@@ -348,3 +348,8 @@ async def test_check_payment_from_the_orders_page_and_the_background_check(clien
     world.rows("shop_orders").clear()
     ask(client, world, shop, "wamid.shop.cp2")
     assert patch(client, world, world.rows("shop_orders")[0]["id"], action="check_payment").status_code == 409  # cash on delivery has no link
+
+
+async def test_a_shop_customer_is_told_when_a_person_takes_over(client, world, shop):
+    out = ask(client, world, shop, "wamid.shop.h", "Let me talk to a human")
+    assert out["status"] == "handoff" and "A member of our team will reply" in out["text"]

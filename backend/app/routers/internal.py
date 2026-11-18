@@ -92,6 +92,9 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
     if out.status == "handoff":
         await events.emit(sdb, body.account_id, "conversation.handoff", {"assistant_id": body.assistant_id, "reason": out.reason, "ref": body.ref})
     result = asdict(out)
+    if out.status == "handoff" and shop_orders.shop_on(rows[0]):
+        # A shop customer is never left in silence: tell them a person will reply.
+        result["text"] = shop_orders.words(rows[0].get("shop") or {})["handoff"]
     if out.status == "reply" and out.order is not None:
         # The customer confirmed an order: AutoShift prices it from the product list and adds the summary and payment link.
         cat = await sdb.select("product_catalog", {"account_id": body.account_id}, limit=1)

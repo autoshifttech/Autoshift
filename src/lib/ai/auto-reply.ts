@@ -306,8 +306,17 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
   const lastUser = messages.map((m) => m.role).lastIndexOf('user')
   const history = messages.slice(0, lastUser).map((m) => ({ role: m.role === 'user' ? ('user' as const) : ('assistant' as const), content: m.content }))
 
-  // The reply limit counts only the last 24 hours, so a returning customer isn't handed off for old chats.
-  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
+  // The reply limit counts only the last 24 hours, so a returning customer isn't handed off for old chats,
+  // and starts again after each order the shop assistant placed, so a customer can order again the same day.
+  const { data: lastOrder } = await db
+    .from('shop_orders')
+    .select('created_at')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
+  const since = lastOrder?.created_at && String(lastOrder.created_at) > dayAgo ? String(lastOrder.created_at) : dayAgo
   const { count: recentAiReplies } = await db
     .from('messages')
     .select('id', { count: 'exact', head: true })
@@ -335,6 +344,8 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
   if (out.status === 'handoff') {
     const summary = buildHandoffSummary({ messages, replyCount: conv.ai_reply_count ?? 0 })
     await db.from('conversations').update({ ai_autoreply_disabled: true, ai_handoff_summary: summary }).eq('id', conversationId)
+    // A shop assistant tells the customer a person will reply, rather than going quiet.
+    if (out.text) await engineSendText({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, aiGenerated: true })
     return
   }
   if (out.status !== 'reply' || !out.text) {

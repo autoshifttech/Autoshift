@@ -57,6 +57,7 @@ TEXT: dict[str, dict[str, str]] = {
         "shipped": "🚚 Your order #{n} has been shipped.", "tracking": "Track it here: {t}",
         "delivered": "✅ Your order #{n} has been delivered. Thank you for shopping with us!",
         "cancelled": "Your order #{n} has been cancelled.", "cancelled_paid": "We'll contact you about your refund.",
+        "handoff": "Thanks for your message! A member of our team will reply to you here shortly.",
         "new_link": "💳 Here is a new payment link for order #{n} (₹{total}): {url}\nThe link works for 24 hours.",
     },
     "pt": {
@@ -73,6 +74,7 @@ TEXT: dict[str, dict[str, str]] = {
         "shipped": "🚚 Seu pedido nº {n} foi enviado.", "tracking": "Acompanhe aqui: {t}",
         "delivered": "✅ Seu pedido nº {n} foi entregue. Obrigado pela compra!",
         "cancelled": "Seu pedido nº {n} foi cancelado.", "cancelled_paid": "Vamos entrar em contato sobre o reembolso.",
+        "handoff": "Obrigado pela mensagem! Uma pessoa da nossa equipe vai responder aqui em breve.",
         "new_link": "💳 Aqui está um novo link de pagamento do pedido nº {n} (₹{total}): {url}\nO link vale por 24 horas.",
     },
     "es": {
@@ -89,6 +91,7 @@ TEXT: dict[str, dict[str, str]] = {
         "shipped": "🚚 Tu pedido n.º {n} fue enviado.", "tracking": "Síguelo aquí: {t}",
         "delivered": "✅ Tu pedido n.º {n} fue entregado. ¡Gracias por tu compra!",
         "cancelled": "Tu pedido n.º {n} fue cancelado.", "cancelled_paid": "Te contactaremos por el reembolso.",
+        "handoff": "¡Gracias por tu mensaje! Una persona de nuestro equipo te responderá aquí pronto.",
         "new_link": "💳 Aquí tienes un nuevo enlace de pago del pedido n.º {n} (₹{total}): {url}\nEl enlace vale 24 horas.",
     },
     "ko": {
@@ -105,6 +108,7 @@ TEXT: dict[str, dict[str, str]] = {
         "shipped": "🚚 주문 #{n}이(가) 발송되었습니다.", "tracking": "배송 조회: {t}",
         "delivered": "✅ 주문 #{n}이(가) 배송 완료되었습니다. 구매해 주셔서 감사합니다!",
         "cancelled": "주문 #{n}이(가) 취소되었습니다.", "cancelled_paid": "환불에 대해 연락드리겠습니다.",
+        "handoff": "메시지 감사합니다! 곧 담당자가 여기에서 답변드리겠습니다.",
         "new_link": "💳 주문 #{n}의 새 결제 링크입니다 (₹{total}): {url}\n링크는 24시간 동안 유효합니다.",
     },
 }
@@ -160,6 +164,7 @@ def instructions(shop: dict) -> str:
         "3. Ask for their full name and full delivery address with PIN code.",
         "4. Ask how they want to pay: " + "; or ".join(options) + ".",
         "5. Read the whole order back (items, quantities, total, name, address, payment) and ask them to confirm.",
+        "If the customer asks for all products, give a short list grouped by type (at most about 25 lines) and ask what they are looking for.",
         "6. Only after they clearly confirm, end your reply with one line in exactly this form, and nothing after it:",
         '[ORDER]{"items":[{"code":"P001","qty":2,"option":"M"},{"code":"P007","qty":1,"option":"Black"}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',
         'Put the chosen size or colour in "option" ("" when the product has none). One item per code and option.',
