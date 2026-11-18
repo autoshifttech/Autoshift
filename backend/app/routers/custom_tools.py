@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .. import audit, events
 from ..config import Settings, get_settings
-from ..deps import ROLE_ORDER, AccountCtx, Member, PlatformAdmin, ServiceDb, get_platform_admin, require_platform_role
+from ..deps import ROLE_ORDER, AccountCtx, Member, PlatformAdmin, ServiceDb, get_platform_admin, require_platform_role, PageAccess
 from ..security import decrypt, encrypt
 
 router = APIRouter(tags=["custom-tools"])
@@ -243,12 +243,12 @@ def _allowed(tool: dict, ctx: AccountCtx) -> bool:
     return tool["audience"] == "business" and ROLE_ORDER.get(ctx.role, -1) >= ROLE_ORDER[tool["min_role"]]
 
 
-@router.get("/v1/custom-tools")
+@router.get("/v1/custom-tools", dependencies=[PageAccess])
 async def workspace_available(ctx: Member, sdb: ServiceDb):
     return [_for_ai(r) for r in await sdb.select("custom_mcp_tools", {"enabled": "true", "audience": "business"}, order="name.asc") if _allowed(r, ctx)]
 
 
-@router.post("/v1/custom-tools/run/{name}")
+@router.post("/v1/custom-tools/run/{name}", dependencies=[PageAccess])
 async def workspace_run(name: str, body: RunIn, ctx: Member, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)], post: Post):
     tool = await _by_name(sdb, name)
     if tool["audience"] != "business":

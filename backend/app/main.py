@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .mcp_server import mount_mcp
-from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders
+from .deps import PageAccess
+from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders, pages
 
 
 class McpPathFix:
@@ -80,7 +81,10 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     for r in (me.router, internal.router, support.router, tools.router, team.router, billing_details.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router, workspace_more.router, workspace_ops.router, platform_ops.router, platform_more.router, custom_tools.router, catalog.router, orders.router):
-        app.include_router(r)
+        # Areas that belong to an optional page answer 403 while it's switched off for the business.
+        guarded = r in (workspace_more.router, workspace_ops.router, orders.router, tools.router)
+        app.include_router(r, dependencies=[PageAccess] if guarded else [])
+    app.include_router(pages.router)
 
     mcp = mount_mcp(app)
     return app

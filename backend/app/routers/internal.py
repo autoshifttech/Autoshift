@@ -12,7 +12,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, events, platform_settings, shop_orders, shop_payments, wallet
+from .. import ai_runner, audit, events, pages, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import Bridge, ServiceDb, get_llm
 from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
@@ -82,6 +82,8 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
     if not rows:
         raise HTTPException(404, "Assistant not found")
     history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
+    if shop_orders.shop_on(rows[0]) and "orders" not in pages.enabled(acct):
+        rows[0] = {**rows[0], "shop": {**(rows[0].get("shop") or {}), "enabled": False}}  # Orders is switched off: no order taking
     if shop_orders.shop_on(rows[0]) and body.contact_id:
         # "I paid": ask Razorpay about this customer's open links first, so the answer is the real status.
         try:

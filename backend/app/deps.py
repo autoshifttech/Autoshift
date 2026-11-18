@@ -173,6 +173,15 @@ def require_platform_role(*allowed: str):
     return check
 
 
+async def page_access(request: Request, ctx: Annotated[AccountCtx, Depends(get_account)], sdb: Annotated[Db, Depends(get_service_db)]) -> None:
+    """Blocks an API area whose page is switched off for this business (see pages.py)."""
+    from . import pages
+
+    await pages.guard(request, sdb, ctx.account_id)
+
+
+PageAccess = Depends(page_access)
+
 Rzp = Annotated[RazorpayClient, Depends(get_razorpay)]
 Bridge = Annotated[WebBridge, Depends(get_web_bridge)]
 AgentMember = Annotated[AccountCtx, Depends(require_role("agent"))]
