@@ -169,7 +169,10 @@ def instructions(shop: dict) -> str:
         '[ORDER]{"items":[{"code":"P001","qty":2,"option":"M"},{"code":"P007","qty":1,"option":"Black"}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',
         'Put the chosen size or colour in "option" ("" when the product has none). One item per code and option.',
         "Use only codes from the product list. Never change a price, never give a discount, never write a payment link "
-        "yourself: AutoShift adds the order summary and the payment link to your reply. Keep your own text short when you place the order.",
+        "yourself: AutoShift adds the order summary and the payment link to your reply. When you place the order, write one short "
+        "sentence only (no list of items, no totals): the summary follows it.",
+        "Payments are confirmed automatically: never say a person will check a payment. If an order is not paid yet, say it is confirmed "
+        "automatically a minute or two after paying, and that the payment link is in the chat.",
         "If they ask about an order they already placed, answer from their orders listed below; for anything else about it, say a person from the team will help.",
     ]
     if shop.get("delivery_note"):
@@ -177,11 +180,18 @@ def instructions(shop: dict) -> str:
     return "\n".join(lines)
 
 
+# How an order's state is described to the assistant (it words it for the customer, never the codes).
+PAYMENT_WORDS = {"awaiting": "not paid yet (confirmed automatically a minute or two after paying)", "paid": "paid and confirmed", "cod": "cash on delivery", "expired": "payment link expired, not paid", "refunded": "refunded"}
+STATUS_WORDS = {"new": "being prepared", "packed": "packed, shipping soon", "shipped": "shipped", "delivered": "delivered", "cancelled": "cancelled"}
+
+
 def describe_orders(orders: list[dict]) -> str:
     out = []
     for o in orders:
         items = ", ".join(f"{i['qty']} × {item_label(i)}" for i in o.get("items") or [])
-        line = f"- Order #{o['number']} ({str(o.get('created_at', ''))[:10]}): {items}; total ₹{rs(int(o['total_paise']))}; payment: {o['payment_status']}; status: {o['status']}"
+        pay = PAYMENT_WORDS.get(o["payment_status"], o["payment_status"])
+        state = STATUS_WORDS.get(o["status"], o["status"])
+        line = f"- Order #{o['number']} ({str(o.get('created_at', ''))[:10]}): {items}; total ₹{rs(int(o['total_paise']))}; payment: {pay}; status: {state}"
         if o.get("tracking"):
             line += f"; tracking: {o['tracking']}"
         if o.get("payment_status") == "awaiting" and o.get("payment_url"):

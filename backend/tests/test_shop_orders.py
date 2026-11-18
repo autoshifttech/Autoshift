@@ -161,7 +161,7 @@ async def test_confirmed_online_order_gets_a_payment_link(client, world, shop):
     # next time the assistant knows about the order
     shop["llm"].answer = "It is on its way."
     ask(client, world, shop, "wamid.shop.3", "where is my order?")
-    assert "Order #1001" in shop["llm"].calls[-1]["system"] and "payment: awaiting" in shop["llm"].calls[-1]["system"]
+    assert "Order #1001" in shop["llm"].calls[-1]["system"] and "payment: not paid yet" in shop["llm"].calls[-1]["system"] and "status: being prepared" in shop["llm"].calls[-1]["system"]
 
 
 async def test_paying_the_link_marks_the_order_paid(client, world, shop):
@@ -327,7 +327,7 @@ async def test_the_customer_saying_they_paid_gets_the_real_status(client, world,
     shop["llm"].answer = "Thank you!"
     ask(client, world, shop, "wamid.shop.ip2", "I paid")
     assert world.rows("shop_orders")[0]["payment_status"] == "paid"
-    assert "payment: paid" in shop["llm"].calls[-1]["system"]
+    assert "payment: paid and confirmed" in shop["llm"].calls[-1]["system"]
 
 
 async def test_check_payment_from_the_orders_page_and_the_background_check(client, world, shop, settings):
