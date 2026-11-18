@@ -4,7 +4,9 @@ Protected by a shared secret (INTERNAL_SECRET), never by a user login: these act
 so they must never be reachable from a browser. With no secret set, they are switched off.
 """
 
+import asyncio
 import hmac
+import logging
 from dataclasses import asdict
 from typing import Annotated
 
@@ -12,7 +14,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 
 from .. import ai_runner, audit, events, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
-from ..deps import ServiceDb, get_llm
+from ..deps import Bridge, ServiceDb, get_llm
 from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
 
 router = APIRouter(prefix="/v1/internal", tags=["internal"], include_in_schema=False)
@@ -71,7 +73,7 @@ async def charge(body: InternalCharge, _: Internal, sdb: ServiceDb):
 
 
 @router.post("/ai-reply")
-async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)], llm: Annotated[object, Depends(get_llm)]):
+async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: Bridge, settings: Annotated[Settings, Depends(get_settings)], llm: Annotated[object, Depends(get_llm)]):
     """One assistant reply for a live chat: platform keys, plan limit, wallet charge, hand-off rules."""
     acct = await _account(sdb, body.account_id)
     if acct.get("status") == "suspended":
@@ -80,6 +82,12 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, settings:
     if not rows:
         raise HTTPException(404, "Assistant not found")
     history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
+    if shop_orders.shop_on(rows[0]) and body.contact_id:
+        # "I paid": ask Razorpay about this customer's open links first, so the answer is the real status.
+        try:
+            await asyncio.wait_for(shop_payments.reconcile_pending(sdb, settings, bridge, account_id=body.account_id, contact_id=body.contact_id, limit=3), timeout=8)
+        except Exception as exc:  # noqa: BLE001 - never block the reply on this
+            logging.getLogger("autoshift.shop").warning("payment check before reply failed: %s", exc)
     out = await ai_runner.reply(sdb, llm, settings, rows[0], history, body.message, ref=f"live:{body.ref}", recent_ai_replies=body.recent_ai_replies, contact_id=body.contact_id)
     if out.status == "handoff":
         await events.emit(sdb, body.account_id, "conversation.handoff", {"assistant_id": body.assistant_id, "reason": out.reason, "ref": body.ref})

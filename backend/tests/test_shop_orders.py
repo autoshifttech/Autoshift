@@ -51,6 +51,12 @@ async def shop(client, world, settings, monkeypatch, llm):
         return {}
 
     monkeypatch.setattr(shop_payments, "rzp_post", fake_post)
+    remote = {}  # Razorpay's view of each link: link id -> its status reply
+
+    async def fake_get(key_id, key_secret, path):
+        return remote.get(path.rsplit("/", 1)[-1], {"status": "created"})
+
+    monkeypatch.setattr(shop_payments, "rzp_get", fake_get)
     conn = {"id": "4f9b2c1e-1111-4222-8333-944455556666", "account_id": world.acct_a, "kind": "razorpay", "name": "Shop", "detail": "x", "mode": "test", "created_at": "2026-01-01T00:00:00Z"}
     world.rows("flow_connections").append(conn)
     keys = {"key_id": "rzp_test_Shop123456", "key_secret": "shopsecret", "webhook_secret": HOOK}
@@ -70,7 +76,7 @@ async def shop(client, world, settings, monkeypatch, llm):
     p.update(enabled=True, key_ciphertext=encrypt("sk-live-1234", s), key_tail="1234")
     await wallet.apply(world.service, world.acct_a, 5000, "topup", "t", "fund-shop")
     aid = client.post("/v1/assistants", json={"name": "Shop", "provider": "openai", "model_id": "gpt-5.5", "enabled": True, "shop": SHOP}, headers=world.headers("admin_a")).json()["id"]
-    return {"h": {"X-AutoShift-Internal": SECRET}, "aid": aid, "bridge": bridge, "links": links, "conn": conn, "llm": llm}
+    return {"h": {"X-AutoShift-Internal": SECRET}, "aid": aid, "bridge": bridge, "links": links, "conn": conn, "llm": llm, "remote": remote, "settings": s}
 
 
 def ask(client, world, shop, ref, message="yes, confirm"):
@@ -279,3 +285,66 @@ def test_the_whole_product_list_is_shown_and_unclear_details_are_asked_not_hande
     system = ai_runner.build_system(assistant, "Hi")
     assert "P017" in system and "P060" in system
     assert "ask the customer: never hand over" in system
+
+
+def fresh(world):
+    """The fake database's clock is fixed in the past; make the links look just made."""
+    from datetime import datetime, timezone
+    for row in world.rows("payment_links"):
+        row["created_at"] = datetime.now(timezone.utc).isoformat()
+        row.setdefault("notified_at", None)
+
+
+PAID = {"status": "paid", "amount_paid": 104800, "payments": [{"payment_id": "pay_77", "amount": 104800, "status": "captured"}]}
+
+
+def platform_hook(client, settings, event, link_id, event_id="evt_platform_1"):
+    from tests.conftest import RZP_WEBHOOK_SECRET
+
+    raw = json.dumps({"event": event, "payload": {"payment_link": {"entity": {"id": link_id, "status": "paid"}}}}).encode()
+    sig = hmac.new(settings.razorpay_webhook_secret.encode() if settings.razorpay_webhook_secret else RZP_WEBHOOK_SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    return client.post("/v1/webhooks/razorpay", content=raw, headers={"X-Razorpay-Signature": sig, "X-Razorpay-Event-Id": event_id})
+
+
+async def test_a_shop_link_paid_event_on_the_platform_webhook_is_checked_with_razorpay(client, world, shop):
+    shop["llm"].answer = order_line()
+    ask(client, world, shop, "wamid.shop.pw")
+    # the payload alone is not trusted: while Razorpay says "created", nothing changes
+    assert platform_hook(client, shop["settings"], "payment_link.paid", "plink_1").json()["status"] == "ignored"
+    assert world.rows("shop_orders")[0]["payment_status"] == "awaiting"
+    shop["remote"]["plink_1"] = PAID
+    assert platform_hook(client, shop["settings"], "payment_link.paid", "plink_1", "evt_platform_2").json()["status"] == "processed"
+    order = world.rows("shop_orders")[0]
+    assert order["payment_status"] == "paid"
+    assert ("payment_paid", world.acct_a, {"payment_link_id": world.rows("payment_links")[0]["id"]}) in [(a, acct, f) for a, acct, f in [(c[0], world.acct_a, c[1]) for c in shop["bridge"].calls]]
+
+
+async def test_the_customer_saying_they_paid_gets_the_real_status(client, world, shop):
+    shop["llm"].answer = order_line()
+    ask(client, world, shop, "wamid.shop.ip")
+    fresh(world)
+    shop["remote"]["plink_1"] = PAID
+    shop["llm"].answer = "Thank you!"
+    ask(client, world, shop, "wamid.shop.ip2", "I paid")
+    assert world.rows("shop_orders")[0]["payment_status"] == "paid"
+    assert "payment: paid" in shop["llm"].calls[-1]["system"]
+
+
+async def test_check_payment_from_the_orders_page_and_the_background_check(client, world, shop, settings):
+    shop["llm"].answer = order_line()
+    ask(client, world, shop, "wamid.shop.cp")
+    oid = world.rows("shop_orders")[0]["id"]
+    r = patch(client, world, oid, action="check_payment").json()
+    assert r["payment"] == "unpaid" and r["order"]["payment_status"] == "awaiting"
+    shop["remote"]["plink_1"] = {"status": "expired"}
+    fresh(world)
+    assert await shop_payments.reconcile_pending(world.service, shop["settings"], shop["bridge"]) == 0
+    assert world.rows("shop_orders")[0]["payment_status"] == "expired"
+    shop["remote"]["plink_1"] = PAID
+    world.rows("payment_links")[0]["status"] = "created"
+    r = patch(client, world, oid, action="check_payment").json()
+    assert r["payment"] == "paid" and r["order"]["payment_status"] == "paid"
+    shop["llm"].answer = order_line(pay="cod")
+    world.rows("shop_orders").clear()
+    ask(client, world, shop, "wamid.shop.cp2")
+    assert patch(client, world, world.rows("shop_orders")[0]["id"], action="check_payment").status_code == 409  # cash on delivery has no link

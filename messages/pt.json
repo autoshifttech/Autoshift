@@ -5144,6 +5144,12 @@
     "cancelTitle": "Cancelar o pedido nº {n}?",
     "cancelHelp": "O link de pagamento deixa de funcionar e o pedido não pode ser reaberto.",
     "cancelPaid": "Este pedido está pago. Depois de cancelar, faça o reembolso no painel da Razorpay.",
-    "refundHint": "Este pedido foi pago online. Faça o reembolso no painel da Razorpay (Payments → o pagamento → Refund)."
+    "refundHint": "Este pedido foi pago online. Faça o reembolso no painel da Razorpay (Payments → o pagamento → Refund).",
+    "action_check_payment": "Verificar pagamento",
+    "done_check_payment": "Pagamento verificado",
+    "checked_paid": "Pago. O pedido foi marcado como pago e o cliente foi avisado.",
+    "checked_unpaid": "Ainda não pago. A Razorpay não recebeu este pagamento.",
+    "checked_expired": "O link de pagamento expirou sem pagamento. Envie um novo link se o cliente ainda quiser o pedido.",
+    "checked_error": "Não foi possível falar com a Razorpay. Verifique a conexão Razorpay e tente de novo."
   }
 }

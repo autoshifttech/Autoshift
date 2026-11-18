@@ -469,7 +469,7 @@ async def payment_expired(sdb: Db, order_id: str | None) -> None:
 
 
 # ------------------------------------------------------------------ the business moves an order on
-ACTIONS = ("packed", "shipped", "delivered", "cancelled", "resend_link")
+ACTIONS = ("packed", "shipped", "delivered", "cancelled", "resend_link", "check_payment")
 
 
 class ActionRefused(Exception):
@@ -486,6 +486,10 @@ def next_state(order: dict, action: str) -> dict:
         if status == "delivered":
             raise ActionRefused("A delivered order can't be cancelled")
         return {"status": "cancelled"}
+    if action == "check_payment":
+        if order["payment_method"] != "online" or not order.get("payment_link_id"):
+            raise ActionRefused("This order has no payment link to check")
+        return {}
     if action == "resend_link":
         if order["payment_method"] != "online" or paid not in ("awaiting", "expired"):
             raise ActionRefused("Only an unpaid online order needs a new payment link")
@@ -508,6 +512,10 @@ def update_text(shop: dict, order: dict, action: str) -> str:
         return w["shipped"].format(n=n) + (f"\n{w['tracking'].format(t=order['tracking'])}" if order.get("tracking") else "")
     if action == "cancelled":
         return w["cancelled"].format(n=n) + (f" {w['cancelled_paid']}" if order["payment_status"] == "paid" else "")
+    if action == "check_payment":
+        if order["payment_method"] != "online" or not order.get("payment_link_id"):
+            raise ActionRefused("This order has no payment link to check")
+        return {}
     if action == "resend_link":
         return w["new_link"].format(n=n, total=total, url=order.get("payment_url") or "")
     return w[action].format(n=n)

@@ -64,6 +64,15 @@ async def rzp_post(key_id: str, key_secret: str, path: str, body: dict[str, Any]
     return res.json()
 
 
+async def rzp_get(key_id: str, key_secret: str, path: str) -> dict[str, Any]:
+    """Read from Razorpay with the business's own keys. Replaced in tests."""
+    async with httpx.AsyncClient(timeout=10) as client:
+        res = await client.get(f"{API}{path}", auth=(key_id, key_secret))
+    if res.status_code >= 400:
+        raise RazorpayError(res.status_code, res.text[:300])
+    return res.json()
+
+
 async def connection_keys(sdb: Db, settings: Settings, account_id: str, connection_id: str | None) -> tuple[dict, dict]:
     """The business's Razorpay connection and its decrypted keys. Picks the newest one when no id is given."""
     filters = {"account_id": account_id, "kind": "razorpay"}
@@ -239,3 +248,53 @@ async def handle_event(sdb: Db, bridge, connection: dict, keys: dict, event: str
         return "processed"
 
     return "ignored"
+
+
+# ------------------------------------------------------------------ asking Razorpay directly
+# Webhooks can be missing or point elsewhere (one Razorpay account may also be AutoShift's own), so
+# a payment is also confirmed by asking Razorpay about the link: after a webhook to any of our
+# addresses, every couple of minutes, when the customer writes, and from the Orders page.
+RECHECK_HOURS = LINK_HOURS + 1
+
+
+async def reconcile(sdb: Db, settings: Settings, bridge, row: dict) -> str:
+    """'paid', 'unpaid', 'expired' or 'error'. Records a payment Razorpay confirms (safe to repeat)."""
+    if row["status"] == "paid" and row.get("notified_at"):
+        return "paid"
+    if not row.get("razorpay_link_id"):
+        return "error"
+    try:
+        _, keys = await connection_keys(sdb, settings, row["account_id"], row.get("connection_id"))
+        link = await rzp_get(keys["key_id"], keys["key_secret"], f"/payment_links/{row['razorpay_link_id']}")
+    except (PaymentLinkError, RazorpayError, httpx.HTTPError, KeyError, ValueError) as exc:
+        log.warning("could not check payment link %s: %s", row["id"], exc)
+        return "error"
+    status = str(link.get("status") or "")
+    if status == "paid":
+        payments = link.get("payments") or []
+        pay = next((p for p in payments if p.get("status") == "captured"), payments[0] if payments else {})
+        amount = int(link.get("amount_paid") or pay.get("amount") or 0)
+        await mark_paid(sdb, bridge, row, {"id": pay.get("payment_id") or pay.get("id"), "amount": amount, "_via": "link"}, keys)
+        return "paid"
+    if status in ("expired", "cancelled") and row["status"] == "created":
+        await sdb.update("payment_links", {"id": row["id"]}, {"status": status})
+        await shop_orders.payment_expired(sdb, row.get("order_id"))
+        return "expired"
+    return "unpaid"
+
+
+async def reconcile_pending(sdb: Db, settings: Settings, bridge, *, account_id: str | None = None, contact_id: str | None = None, limit: int = 50) -> int:
+    """Check the recent links that aren't settled yet. Returns how many turned out paid."""
+    since = (datetime.now(timezone.utc) - timedelta(hours=RECHECK_HOURS)).isoformat()
+    filters: dict[str, Any] = {"status": ("in", ["created", "paid"]), "notified_at": ("is", "null"), "created_at": ("gte", since)}
+    if account_id:
+        filters["account_id"] = account_id
+    if contact_id:
+        filters["contact_id"] = contact_id
+    paid = 0
+    for row in await sdb.select("payment_links", filters, order="created_at.desc", limit=limit):
+        try:
+            paid += await reconcile(sdb, settings, bridge, row) == "paid"
+        except Exception as exc:  # noqa: BLE001 - one bad link must not stop the others
+            log.warning("payment check failed for %s: %s", row["id"], exc)
+    return paid

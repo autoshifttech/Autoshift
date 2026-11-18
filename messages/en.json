@@ -5144,6 +5144,12 @@
     "cancelTitle": "Cancel order #{n}?",
     "cancelHelp": "The payment link stops working and the order can't be reopened.",
     "cancelPaid": "This order is paid. After cancelling, refund it from your Razorpay dashboard.",
-    "refundHint": "This order was paid online. Refund it from your Razorpay dashboard (Payments → the payment → Refund)."
+    "refundHint": "This order was paid online. Refund it from your Razorpay dashboard (Payments → the payment → Refund).",
+    "action_check_payment": "Check payment",
+    "done_check_payment": "Payment checked",
+    "checked_paid": "Paid. The order is marked paid and the customer was told.",
+    "checked_unpaid": "Not paid yet. Razorpay hasn't received this payment.",
+    "checked_expired": "The payment link expired without payment. Send a new link if the customer still wants the order.",
+    "checked_error": "Couldn't reach Razorpay. Check the Razorpay connection and try again."
   }
 }

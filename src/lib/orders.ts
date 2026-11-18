@@ -21,7 +21,7 @@ export interface OrderItem {
 
 export type OrderStatus = 'new' | 'packed' | 'shipped' | 'delivered' | 'cancelled'
 export type PaymentStatus = 'awaiting' | 'paid' | 'cod' | 'expired' | 'refunded'
-export type OrderAction = 'packed' | 'shipped' | 'delivered' | 'cancelled' | 'resend_link'
+export type OrderAction = 'packed' | 'shipped' | 'delivered' | 'cancelled' | 'resend_link' | 'check_payment'
 
 export interface ShopOrder {
   id: string
@@ -76,7 +76,7 @@ export function nextActions(o: ShopOrder): OrderAction[] {
     if (o.status === 'new' || o.status === 'packed') out.push('shipped')
     out.push('delivered')
   } else if (o.payment_method === 'online') {
-    out.push('resend_link')
+    out.push('check_payment', 'resend_link')
   }
   out.push('cancelled')
   return out
@@ -138,6 +138,8 @@ export function useOrders() {
 
 export interface ActionResult {
   order: ShopOrder
+  /** Only for check_payment: what Razorpay said. */
+  payment?: 'paid' | 'unpaid' | 'expired' | 'error'
   notified: boolean
   not_notified_reason: string | null
 }

@@ -39,6 +39,14 @@ def create_app() -> FastAPI:
                 await events.deliver_pending(sdb, settings)
             except Exception:  # noqa: BLE001 - keep the loop alive
                 logging.getLogger("autoshift").exception("webhook delivery pass failed")
+            if tick % 4 == 0:  # every two minutes: shop payments Razorpay confirms but no webhook reported
+                try:
+                    from . import shop_payments
+                    from .web_bridge import HttpWebBridge
+
+                    await shop_payments.reconcile_pending(sdb, settings, HttpWebBridge(settings))
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("shop payment check failed")
             if tick % 120 == 0:  # about once an hour: close businesses whose grace period has ended
                 try:
                     await closing.close_due(sdb, RazorpayClient(settings))

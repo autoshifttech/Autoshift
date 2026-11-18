@@ -21,8 +21,16 @@ def _entity(payload: dict[str, Any], name: str) -> dict[str, Any]:
     return (payload.get("payload", {}).get(name) or {}).get("entity") or {}
 
 
-async def _handle(event: str, payload: dict[str, Any], sdb, settings: Settings) -> str:
+async def _handle(event: str, payload: dict[str, Any], sdb, settings: Settings, bridge=None) -> str:
     """Returns 'processed' or 'ignored'. Every branch is idempotent."""
+    if event.startswith("payment_link.") and bridge is not None:
+        # A business's shop link whose webhook points here (the same Razorpay account can be both).
+        # The payload isn't trusted: Razorpay is asked about the link with the business's own keys.
+        link = _entity(payload, "payment_link")
+        rows = await sdb.select("payment_links", {"razorpay_link_id": link.get("id", "")}, limit=1) if link.get("id") else []
+        if not rows:
+            return "ignored"
+        return "processed" if await shop_payments.reconcile(sdb, settings, bridge, rows[0]) in ("paid", "expired") else "ignored"
     if event == "order.paid":
         payment, order = _entity(payload, "payment"), _entity(payload, "order")
         rows = await sdb.select("payment_orders", {"razorpay_order_id": order.get("id", "")}, limit=1)
@@ -71,6 +79,7 @@ async def _handle(event: str, payload: dict[str, Any], sdb, settings: Settings) 
 async def razorpay_webhook(
     request: Request,
     sdb: ServiceDb,
+    bridge: Bridge,
     settings: Annotated[Settings, Depends(get_settings)],
     x_razorpay_signature: Annotated[str | None, Header()] = None,
     x_razorpay_event_id: Annotated[str | None, Header()] = None,
@@ -93,7 +102,7 @@ async def razorpay_webhook(
         await sdb.insert("razorpay_events", {"event_id": event_id, "event_type": event, "payload": payload})
 
     try:
-        outcome = await _handle(event, payload, sdb, settings)
+        outcome = await _handle(event, payload, sdb, settings, bridge)
     except Exception as exc:  # noqa: BLE001 - recorded, then Razorpay retries
         await sdb.update("razorpay_events", {"event_id": event_id}, {"status": "failed", "error": str(exc)[:300]})
         raise HTTPException(500, "Could not process the event") from exc

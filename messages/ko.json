@@ -5144,6 +5144,12 @@
     "cancelTitle": "주문 #{n}을(를) 취소할까요?",
     "cancelHelp": "결제 링크가 더 이상 작동하지 않으며 주문을 다시 열 수 없습니다.",
     "cancelPaid": "결제가 완료된 주문입니다. 취소한 뒤 Razorpay 대시보드에서 환불하세요.",
-    "refundHint": "온라인으로 결제된 주문입니다. Razorpay 대시보드에서 환불하세요 (Payments → 해당 결제 → Refund)."
+    "refundHint": "온라인으로 결제된 주문입니다. Razorpay 대시보드에서 환불하세요 (Payments → 해당 결제 → Refund).",
+    "action_check_payment": "결제 확인",
+    "done_check_payment": "결제를 확인했습니다",
+    "checked_paid": "결제 완료. 주문을 결제 완료로 표시하고 고객에게 알렸습니다.",
+    "checked_unpaid": "아직 결제되지 않았습니다. Razorpay가 이 결제를 받지 못했습니다.",
+    "checked_expired": "결제 없이 결제 링크가 만료되었습니다. 고객이 아직 원하면 새 링크를 보내세요.",
+    "checked_error": "Razorpay에 연결할 수 없습니다. Razorpay 연결을 확인하고 다시 시도하세요."
   }
 }

@@ -22,7 +22,7 @@ router = APIRouter(prefix="/v1/orders", tags=["orders"])
 
 
 class OrderAction(BaseModel):
-    action: Literal["packed", "shipped", "delivered", "cancelled", "resend_link"]
+    action: Literal["packed", "shipped", "delivered", "cancelled", "resend_link", "check_payment"]
     tracking: str | None = Field(None, max_length=500)
     notify: bool = True
 
@@ -95,6 +95,12 @@ async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember,
         raise HTTPException(409, str(exc)) from exc
     now = datetime.now(timezone.utc).isoformat()
 
+    if body.action == "check_payment":
+        # Ask Razorpay; a confirmed payment is recorded and the customer is told by the usual payment message.
+        links = await sdb.select("payment_links", {"id": order["payment_link_id"], "account_id": ctx.account_id}, limit=1)
+        result = await shop_payments.reconcile(sdb, settings, bridge, links[0]) if links else "error"
+        order = await _order(sdb, ctx.account_id, order_id)
+        return {"order": order, "payment": result, "notified": result == "paid", "not_notified_reason": None}
     if body.action == "resend_link":
         try:
             order = await shop_orders.attach_link(sdb, settings, order)

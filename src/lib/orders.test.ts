@@ -19,7 +19,7 @@ describe('orders', () => {
   })
 
   it('offers only the steps that make sense', () => {
-    expect(nextActions(order())).toEqual(['resend_link', 'cancelled'])
+    expect(nextActions(order())).toEqual(['check_payment', 'resend_link', 'cancelled'])
     expect(nextActions(order({ payment_status: 'paid' }))).toEqual(['packed', 'shipped', 'delivered', 'cancelled'])
     expect(nextActions(order({ payment_status: 'paid', status: 'shipped' }))).toEqual(['delivered', 'cancelled'])
     expect(nextActions(order({ status: 'delivered', payment_status: 'paid' }))).toEqual([])
