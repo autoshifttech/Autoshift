@@ -41,10 +41,12 @@ import { backendUrl } from "@/lib/backend/client";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { BusinessFormDialog } from "./business-form-dialog";
+import { useTranslations } from "next-intl";
 import { BusinessTeam } from "./business-team";
+import { BusinessPages } from "./business-pages";
 import { DataTable, EmptyState, Initials, Kpi, NUMBER_META, Panel, Pill, QualityPill, Segmented, StatusPill, td } from "./admin-ui";
 
-type Tab = "overview" | "team" | "usage" | "payments" | "notes" | "activity";
+type Tab = "overview" | "pages" | "team" | "usage" | "payments" | "notes" | "activity";
 type DialogKind = "trial" | "plan" | "credits" | "block" | null;
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -78,6 +80,7 @@ export function BusinessDetail({ id }: { id: string }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [note, setNote] = useState("");
+  const tPages = useTranslations("AdminPages");
 
   if (!base && backendUrl() && !remote.loaded) return <p role="status" className="text-sm text-muted-foreground">Loading…</p>;
 
@@ -192,6 +195,7 @@ export function BusinessDetail({ id }: { id: string }) {
           onChange={setTab}
           options={[
             { value: "overview", label: "Overview" },
+            { value: "pages", label: tPages("tab") },
             { value: "team", label: `Team · ${b.team}` },
             { value: "usage", label: "Usage & costs" },
             { value: "payments", label: `Payments · ${mine.length}` },
@@ -278,6 +282,7 @@ export function BusinessDetail({ id }: { id: string }) {
         </div>
       )}
 
+      {tab === "pages" && <BusinessPages businessId={b.id} />}
       {tab === "team" && <BusinessTeam business={b} />}
 
       {tab === "usage" && (
