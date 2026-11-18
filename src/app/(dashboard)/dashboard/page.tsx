@@ -21,6 +21,7 @@ import {
 import { derivePresence } from '@/lib/presence'
 
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
+import { BusinessTypeCard } from '@/components/dashboard/business-type-card'
 import { AttentionRow } from '@/components/dashboard/attention-row'
 import { CampaignsCard } from '@/components/dashboard/campaigns-card'
 import { KpiRow } from '@/components/dashboard/kpi-row'
@@ -154,6 +155,8 @@ function DashboardPageInner() {
         range={range}
         onRangeChange={handleRangeChange}
       />
+
+      <BusinessTypeCard />
 
       {data && needsSetup(data.setup) ? (
         <>

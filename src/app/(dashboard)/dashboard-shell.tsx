@@ -18,6 +18,7 @@ import { BrowserNotificationsListener } from "@/components/notifications/browser
 import { SkipLink } from "@/components/layout/skip-link";
 import { AccountNotices } from "@/components/layout/account-notices";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { PageGate } from "@/components/layout/page-gate";
 import { ShiftyCompanion } from "@/components/shifty/shifty-companion";
 import { ShiftyWatcher } from "@/components/shifty/shifty-watcher";
 
@@ -104,7 +105,9 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
             {/* Above every page: writes are being rejected and here's why.
                 Renders nothing unless the account/role failed to resolve. */}
             <AccountAccessAlert />
-            <PageMotion>{children}</PageMotion>
+            <PageMotion>
+              <PageGate>{children}</PageGate>
+            </PageMotion>
             <ScrollReveal rootId="app-scroll" />
           </main>
         </div>

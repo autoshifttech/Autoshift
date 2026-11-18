@@ -17,6 +17,8 @@ export interface BusinessDetails {
   currency: string
   displayName: string
   website: string
+  /** Shops: where products and orders are managed today. */
+  shopSource?: 'whatsapp' | 'shopify' | 'website'
 }
 
 export interface ConnectedNumber {

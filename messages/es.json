@@ -3519,7 +3519,16 @@
     "doneConnect": "Conectar tu número de WhatsApp",
     "doneAi": "Entrenar a tu asistente de IA",
     "doneLeads": "Revisar tus preguntas para leads",
-    "doneGo": "Ir al panel"
+    "doneGo": "Ir al panel",
+    "industryPagesHint": "Mostraremos las páginas que encajan con este tipo de negocio. AutoShift puede activarte más páginas cuando quieras.",
+    "shopSourceQ": "¿Dónde gestionas hoy tus productos y pedidos?",
+    "shopSource_whatsapp": "Solo en WhatsApp",
+    "shopSource_whatsapp_help": "Sin sitio web: AutoShift guarda tus productos y pedidos.",
+    "shopSource_shopify": "Shopify o WooCommerce",
+    "shopSource_shopify_help": "Tu tienda sigue siendo el lugar principal de los pedidos.",
+    "shopSource_website": "Mi propio sitio web",
+    "shopSource_website_help": "Un sitio o app hecho a medida.",
+    "typeLocked": "El tipo de tu negocio ya está definido. Pide al soporte de AutoShift que lo cambie."
   },
   "Countries": {
     "IN": "India",
@@ -5151,5 +5160,30 @@
     "checked_unpaid": "Aún no pagado. Razorpay no ha recibido este pago.",
     "checked_expired": "El enlace de pago venció sin pago. Envía un enlace nuevo si el cliente aún quiere el pedido.",
     "checked_error": "No se pudo contactar con Razorpay. Revisa la conexión de Razorpay e inténtalo de nuevo."
+  },
+  "PageAccess": {
+    "title": "{page} no está activado para tu negocio",
+    "help": "Tus páginas se eligen según el tipo de tu negocio. Cuéntanos por qué quieres {page} y el equipo de AutoShift lo activará.",
+    "noteLabel": "¿Para qué te gustaría usarlo? (opcional)",
+    "notePlaceholder": "p. ej.: También vendemos productos en línea",
+    "request": "Solicitar acceso",
+    "sending": "Enviando…",
+    "requested": "Solicitud enviada al equipo de AutoShift.",
+    "alreadyRequested": "Ya lo pediste; el equipo de AutoShift responderá pronto.",
+    "failed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+    "sentTitle": "Solicitud enviada",
+    "sentHelp": "El equipo de AutoShift responderá en Soporte y activará la página para ti.",
+    "openSupport": "Abrir Soporte",
+    "back": "Volver al panel"
+  },
+  "BusinessType": {
+    "title": "¿Para qué usas AutoShift?",
+    "help": "Elige el tipo de tu negocio y te mostraremos las páginas adecuadas. No se borra nada, y AutoShift puede activar más páginas cuando quieras.",
+    "save": "Mostrar mis páginas",
+    "saving": "Guardando…",
+    "saved": "Listo. Tu menú ahora muestra las páginas de tu negocio.",
+    "failed": "No se guardó. Inténtalo de nuevo.",
+    "later": "Ahora no",
+    "note": "Tus páginas actuales se mantienen hasta que elijas."
   }
 }

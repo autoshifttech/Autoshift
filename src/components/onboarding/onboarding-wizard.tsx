@@ -27,6 +27,9 @@ import {
   type Feature,
 } from "@/lib/workspace/setup";
 import { NativeSelect } from "@/components/ui/native-select"
+import { toast } from "@/lib/toast";
+import { BackendError, backendUrl } from "@/lib/backend/client";
+import { chooseBusinessType, isShopType, SHOP_SOURCES } from "@/lib/workspace/pages";
 
 const STEPS = ["business", "plan", "whatsapp", "features"] as const;
 
@@ -157,6 +160,13 @@ function BusinessStep({ onNext }: { onNext: () => void }) {
     setTouched(true);
     if (businessErrors(b).length) return;
     setupStore.set((s) => ({ ...s, business: b }));
+    // The business type sets which pages this business gets (saved on the account, once).
+    if (b.industry && backendUrl()) {
+      chooseBusinessType(b.industry, isShopType(b.industry) ? (b.shopSource ?? "whatsapp") : null).catch((e) => {
+        if (e instanceof BackendError && e.status === 409) toast.info(t("typeLocked"));
+        else console.error("[onboarding] business type not saved", e);
+      });
+    }
     onNext();
   };
 
@@ -220,7 +230,31 @@ function BusinessStep({ onNext }: { onNext: () => void }) {
               ))}
             </div>
             {errors.includes("industry") && <p className="mt-1.5 text-xs text-destructive">{t("err_industry")}</p>}
+            <p className="mt-1.5 text-xs text-muted-foreground">{t("industryPagesHint")}</p>
           </div>
+          {isShopType(b.industry) && (
+            <div className="sm:col-span-2">
+              <p id="shop-source-label" className="mb-2 text-sm font-medium text-foreground">{t("shopSourceQ")}</p>
+              <div role="radiogroup" aria-labelledby="shop-source-label" className="grid gap-2 sm:grid-cols-3">
+                {SHOP_SOURCES.map((id) => {
+                  const on = (b.shopSource ?? "whatsapp") === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => update({ shopSource: id })}
+                      className={cn("min-h-11 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors", on ? "border-primary bg-primary/5" : "border-border hover:bg-muted")}
+                    >
+                      <span className={cn("block font-medium", on ? "text-primary" : "text-foreground")}>{t(`shopSource_${id}`)}</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">{t(`shopSource_${id}_help`)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {field(
             "country",
             t("fieldCountry"),

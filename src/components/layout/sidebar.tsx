@@ -30,6 +30,7 @@ import {
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ModeToggle } from "@/components/layout/mode-toggle";
+import { isOn, pageForPath, usePages } from "@/lib/workspace/pages";
 
 interface NavItem {
   href: string;
@@ -84,6 +85,12 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
 /** The phone bar keeps to four destinations plus "More", so each is easy to tap. */
 const BAR_HREFS = ["/dashboard", "/inbox", "/broadcasts", "/contacts"];
 
+/** The menu without the pages switched off for this business (the AutoShift team decides which). */
+export function useVisibleNavGroups() {
+  const pages = usePages();
+  return navGroups.map((g) => ({ ...g, items: g.items.filter((i) => isOn(pages, pageForPath(i.href))) })).filter((g) => g.items.length > 0);
+}
+
 const allItems = navGroups.flatMap((g) => g.items);
 const itemFor = (href: string) => allItems.find((i) => i.href === href)!;
 
@@ -116,9 +123,10 @@ function NavBadges({ href, active, counts }: { href: string; active: boolean; co
 /** Every page not on the rail, grouped as in the old sidebar. */
 function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; exclude: string[]; onPick?: () => void; counts: NavCounts }) {
   const t = useTranslations("Sidebar");
+  const groups = useVisibleNavGroups();
   return (
     <>
-      {navGroups.map((group) => {
+      {groups.map((group) => {
         const items = group.items.filter((i) => !exclude.includes(i.href));
         if (!items.length) return null;
         return (
@@ -162,6 +170,7 @@ const railActive = "rail-active opacity-100";
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
+  const groups = useVisibleNavGroups();
 
   return (
     <aside
@@ -172,7 +181,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
         <LogoMark className="logo-in size-8" />
       </Link>
       <nav className="flex flex-col items-center gap-0.5">
-        {navGroups.map((group, gi) => (
+        {groups.map((group, gi) => (
           <div key={group.labelKey} className="flex flex-col items-center gap-0.5">
             {gi > 0 && <span aria-hidden className="my-1 h-px w-5 shrink-0 bg-foreground/15" />}
             {group.items
@@ -204,7 +213,9 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
   const [open, setOpen] = useState(false);
-  const inMore = !BAR_HREFS.some((h) => isActiveHref(pathname, h));
+  const pages = usePages();
+  const bar = BAR_HREFS.filter((h) => isOn(pages, pageForPath(h)));
+  const inMore = !bar.some((h) => isActiveHref(pathname, h));
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -213,7 +224,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
 
   return (
     <nav data-mobile-nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
-      {BAR_HREFS.map((href) => {
+      {bar.map((href) => {
         const item = itemFor(href);
         const active = isActiveHref(pathname, href);
         return (
@@ -233,7 +244,7 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
         </SheetTrigger>
         <SheetContent side="bottom" className="max-h-[82vh] gap-0 overflow-y-auto rounded-t-3xl px-3 pt-4 pb-6">
           <SheetTitle className="px-2.5 pb-1 text-base">{t("morePages")}</SheetTitle>
-          <MorePages pathname={pathname} exclude={BAR_HREFS} onPick={() => setOpen(false)} counts={counts} />
+          <MorePages pathname={pathname} exclude={bar} onPick={() => setOpen(false)} counts={counts} />
           <div className="mt-2 flex items-center gap-3 border-t border-border px-2.5 pt-3">
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary-soft text-sm font-bold text-primary">
               {profile?.full_name?.charAt(0)?.toUpperCase() ?? profile?.email?.charAt(0)?.toUpperCase() ?? "U"}

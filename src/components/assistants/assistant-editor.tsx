@@ -25,6 +25,7 @@ import { useCatalog } from "@/lib/catalog";
 import { AssistantAvatar, TestChat, toolIcon } from "./assistant-ui";
 import { AssistantModelPicker } from "./assistant-model-picker";
 import { ShopTab } from "./shop-tab";
+import { isOn, usePages } from "@/lib/workspace/pages";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
 const AUDIENCES: Audience[] = ["all", "new_contacts", "tagged", "after_hours"];
@@ -37,6 +38,7 @@ export function AssistantEditor({ id }: { id: string }) {
   const wizard = useSearchParams().get("new") === "1";
   const [step, setStep] = useState(0);
   const syncStatus = useAssistantsSyncStatus();
+  const pages = usePages();
   const realId = resolveAssistantId(id);
   const a = assistants.find((x) => x.id === realId);
   useEffect(() => startAssistantsSync(), []);
@@ -59,6 +61,7 @@ export function AssistantEditor({ id }: { id: string }) {
   }
 
   const set = (patch: Partial<Assistant>) => updateAssistant(a.id, patch);
+  const ordersOn = isOn(pages, "orders");
 
   return (
     <div className="space-y-5">
@@ -122,10 +125,12 @@ export function AssistantEditor({ id }: { id: string }) {
                 <BookOpen className="mr-1.5 h-4 w-4" />
                 {t("tabKnowledge")}
               </TabsTrigger>
-              <TabsTrigger value="shop">
-                <ShoppingBag className="mr-1.5 h-4 w-4" />
-                {t("tabShop")}
-              </TabsTrigger>
+              {ordersOn && (
+                <TabsTrigger value="shop">
+                  <ShoppingBag className="mr-1.5 h-4 w-4" />
+                  {t("tabShop")}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="tools">
                 <Wrench className="mr-1.5 h-4 w-4" />
                 {t("tabTools")}
@@ -141,9 +146,11 @@ export function AssistantEditor({ id }: { id: string }) {
             <TabsContent value="knowledge" className="mt-4">
               <KnowledgeTab a={a} set={set} />
             </TabsContent>
-            <TabsContent value="shop" className="mt-4">
-              <ShopTab a={a} set={set} />
-            </TabsContent>
+            {ordersOn && (
+              <TabsContent value="shop" className="mt-4">
+                <ShopTab a={a} set={set} />
+              </TabsContent>
+            )}
             <TabsContent value="tools" className="mt-4">
               <ToolsTab a={a} set={set} />
             </TabsContent>

@@ -12,7 +12,8 @@ import { useAssistants } from "@/lib/assistants/model";
 import { useDrips } from "@/lib/drips/model";
 import { useLeads } from "@/lib/leads/model";
 import { useSegments } from "@/lib/segments/model";
-import { navGroups } from "./sidebar";
+import { useVisibleNavGroups } from "./sidebar";
+import { isOn, pageForPath, usePages } from "@/lib/workspace/pages";
 
 /** Open state shared by the header search button and the Ctrl+K shortcut. */
 export const paletteStore = createStore(() => ({ open: false }));
@@ -33,6 +34,8 @@ export function CommandPalette() {
   const { assistants } = useAssistants();
   const drips = useDrips();
   const segments = useSegments();
+  const navGroups = useVisibleNavGroups();
+  const pages = usePages();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -55,8 +58,10 @@ export function CommandPalette() {
     ...drips.map((d) => ({ id: `d${d.id}`, group: t("groupDrips"), label: d.name || "—", href: `/drips/${d.id}`, icon: Repeat })),
     ...segments.map((s) => ({ id: `s${s.id}`, group: t("groupSegments"), label: s.name, href: "/segments", icon: Filter })),
   ];
+  // Nothing from a page that's switched off for this business.
+  const allowed = all.filter((i) => isOn(pages, pageForPath(i.href)));
   const q = query.trim().toLowerCase();
-  const results = (q ? all.filter((i) => `${i.label} ${i.hint ?? ""}`.toLowerCase().includes(q)) : all.filter((i) => i.group === t("groupPages") || i.group === t("groupActions"))).slice(0, 40);
+  const results = (q ? allowed.filter((i) => `${i.label} ${i.hint ?? ""}`.toLowerCase().includes(q)) : allowed.filter((i) => i.group === t("groupPages") || i.group === t("groupActions"))).slice(0, 40);
   const current = Math.min(active, Math.max(0, results.length - 1));
 
   const go = (item: Item | undefined) => {

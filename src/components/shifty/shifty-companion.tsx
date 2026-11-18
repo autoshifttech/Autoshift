@@ -12,6 +12,7 @@ import { SHIFTY_EVENT, type ShiftyEvent } from "@/lib/shifty/events";
 import { markSeen, saveShiftyPrefs, useShiftyPrefs } from "@/lib/shifty/prefs";
 import { ADMIN_TIPS, ADMIN_TOUR, BUSINESS_TIPS, BUSINESS_TOUR, pageKey, placeCard, type TourStep } from "@/lib/shifty/tours";
 import { cn } from "@/lib/utils";
+import { isOn, pageForPath, usePages } from "@/lib/workspace/pages";
 
 type Area = "business" | "admin";
 type Box = { x: number; y: number; w: number; h: number };
@@ -128,7 +129,9 @@ export function ShiftyCompanion({ area }: { area: Area }) {
   }, [off, t]);
 
   // ---------------------------------------------------------- tour
-  const steps = area === "admin" ? ADMIN_TOUR : BUSINESS_TOUR;
+  const pages = usePages();
+  // The tour only visits pages this business has (the AutoShift team switches pages per business).
+  const steps = area === "admin" ? ADMIN_TOUR : BUSINESS_TOUR.filter((s) => !s.target || isOn(pages, pageForPath(s.target.replace(/^a\[href="|"\]$/g, ""))));
   const tourKey = area === "admin" ? "admin" : "business";
   const layout = useCallback(() => {
     if (!tour || !card.current) return;

@@ -3519,7 +3519,16 @@
     "doneConnect": "Connect your WhatsApp number",
     "doneAi": "Train your AI assistant",
     "doneLeads": "Review your lead questions",
-    "doneGo": "Go to dashboard"
+    "doneGo": "Go to dashboard",
+    "industryPagesHint": "We'll show the pages that suit this type of business. AutoShift can switch on more pages for you any time.",
+    "shopSourceQ": "Where do you manage your products and orders today?",
+    "shopSource_whatsapp": "Only on WhatsApp",
+    "shopSource_whatsapp_help": "No website: AutoShift keeps your products and orders.",
+    "shopSource_shopify": "Shopify or WooCommerce",
+    "shopSource_shopify_help": "Your store stays the main place for orders.",
+    "shopSource_website": "My own website",
+    "shopSource_website_help": "A custom-built website or app.",
+    "typeLocked": "Your business type is already set. Ask AutoShift support to change it."
   },
   "Countries": {
     "IN": "India",
@@ -5151,5 +5160,30 @@
     "checked_unpaid": "Not paid yet. Razorpay hasn't received this payment.",
     "checked_expired": "The payment link expired without payment. Send a new link if the customer still wants the order.",
     "checked_error": "Couldn't reach Razorpay. Check the Razorpay connection and try again."
+  },
+  "PageAccess": {
+    "title": "{page} isn't switched on for your business",
+    "help": "Your pages are chosen to suit your type of business. Tell us why you'd like {page} and the AutoShift team will switch it on.",
+    "noteLabel": "What would you like to use it for? (optional)",
+    "notePlaceholder": "e.g. We also sell products online",
+    "request": "Request access",
+    "sending": "Sending…",
+    "requested": "Request sent to the AutoShift team.",
+    "alreadyRequested": "You've already asked; the AutoShift team will reply soon.",
+    "failed": "The request couldn't be sent. Try again.",
+    "sentTitle": "Request sent",
+    "sentHelp": "The AutoShift team will reply in Support and switch the page on for you.",
+    "openSupport": "Open Support",
+    "back": "Back to the dashboard"
+  },
+  "BusinessType": {
+    "title": "What do you use AutoShift for?",
+    "help": "Pick your type of business and we'll show the pages that suit it. Nothing is deleted, and AutoShift can switch on more pages any time.",
+    "save": "Show my pages",
+    "saving": "Saving…",
+    "saved": "Done. Your menu now shows the pages for your business.",
+    "failed": "That didn't save. Try again.",
+    "later": "Not now",
+    "note": "Your current pages stay until you choose."
   }
 }
