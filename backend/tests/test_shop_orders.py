@@ -81,7 +81,7 @@ def ask(client, world, shop, ref, message="yes, confirm"):
 # ------------------------------------------------------------------ pricing
 def test_price_takes_prices_from_the_list_and_adds_delivery():
     out = shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": " p001 ", "qty": 1}, {"code": "P001", "qty": "2"}], "name": "A", "address": "12 MG Road 560001", "pay": "cash"})
-    assert out["items"] == [{"code": "P001", "name": "Cotton T-shirt", "qty": 3, "price_paise": 49900, "total_paise": 149700}]
+    assert out["items"] == [{"code": "P001", "name": "Cotton T-shirt", "option": "", "qty": 3, "price_paise": 49900, "total_paise": 149700}]
     assert (out["delivery_paise"], out["total_paise"], out["payment_method"]) == (5000, 154700, "cod")
     free = shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P002", "qty": 2}], "name": "A", "address": "12 MG Road 560001", "pay": "online"})
     assert free["delivery_paise"] == 0 and free["total_paise"] == 259800
@@ -260,3 +260,22 @@ async def test_whatsapp_refusal_is_reported_not_raised(client, world, shop):
 def test_a_malformed_order_id_is_refused(client, world):
     assert client.get("/v1/orders/not-an-id", headers=world.headers("agent_a")).status_code == 422
     assert client.patch("/v1/orders/not-an-id", json={"action": "packed"}, headers=world.headers("agent_a")).status_code == 422
+
+
+def test_sizes_are_kept_per_item_and_shown():
+    out = shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P001", "qty": 1, "option": "M"}, {"code": "P001", "qty": 2, "size": " l "}, {"code": "p001", "qty": 1, "option": "m"}], "name": "A", "address": "12 MG Road 560001", "pay": "cod"})
+    assert [(i["option"], i["qty"]) for i in out["items"]] == [("M", 2), ("l", 2)]
+    text = shop_orders.summary(SHOP, {**out, "number": 1001})
+    assert "2 × Cotton T-shirt (M) (P001)" in text and "2 × Cotton T-shirt (l) (P001)" in text
+    with pytest.raises(shop_orders.OrderProblem):  # stock counts every size of the product
+        shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P002", "qty": 2, "option": "30"}, {"code": "P002", "qty": 2, "option": "32"}], "name": "A", "address": "12 MG Road 560001", "pay": "cod"})
+
+
+def test_the_whole_product_list_is_shown_and_unclear_details_are_asked_not_handed_over():
+    from app import ai_runner, catalog
+
+    products = [{"code": f"P{n:03d}", "name": f"Item {n}", "price": 100 + n, "details": {}} for n in range(1, 61)]
+    assistant = {"name": "Shop", "shop": SHOP, "_catalog": catalog.as_facts(products), "handoff": {"onUnknown": True}}
+    system = ai_runner.build_system(assistant, "Hi")
+    assert "P017" in system and "P060" in system
+    assert "ask the customer: never hand over" in system

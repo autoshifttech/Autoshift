@@ -14,7 +14,7 @@ import { EmptyPanel } from "@/components/ui/empty-panel";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { BackendError } from "@/lib/backend/client";
-import { ORDER_VIEWS, inView, matches, nextActions, rupees, updateOrder, useOrders, type OrderAction, type OrderView, type PaymentStatus, type OrderStatus, type ShopOrder } from "@/lib/orders";
+import { ORDER_VIEWS, inView, itemLabel, matches, nextActions, rupees, updateOrder, useOrders, type OrderAction, type OrderView, type PaymentStatus, type OrderStatus, type ShopOrder } from "@/lib/orders";
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
   new: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
@@ -111,7 +111,7 @@ export function OrdersPage() {
                       <span className="truncate text-sm text-foreground">{o.customer_name}</span>
                     </span>
                     <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                      {o.items.map((i) => `${i.qty} × ${i.name}`).join(", ")} · {date(o.created_at)}
+                      {o.items.map((i) => `${i.qty} × ${itemLabel(i)}`).join(", ")} · {date(o.created_at)}
                     </span>
                   </span>
                   <span className="flex flex-wrap items-center gap-2">
@@ -177,9 +177,9 @@ function OrderDialog({ order, onClose, onChanged, date }: { order: ShopOrder | n
               <caption className="sr-only">{t("items")}</caption>
               <tbody className="divide-y divide-border">
                 {order.items.map((i) => (
-                  <tr key={i.code}>
+                  <tr key={`${i.code}|${i.option ?? ""}`}>
                     <td className="py-2 pr-2 text-foreground">
-                      {i.qty} × {i.name} <span className="text-xs text-muted-foreground">({i.code})</span>
+                      {i.qty} × {itemLabel(i)} <span className="text-xs text-muted-foreground">({i.code})</span>
                     </td>
                     <td className="py-2 text-right tabular-nums text-foreground">{rupees(i.total_paise, locale)}</td>
                   </tr>

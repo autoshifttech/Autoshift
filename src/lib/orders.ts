@@ -12,6 +12,8 @@ import { backend } from '@/lib/backend/client'
 export interface OrderItem {
   code: string
   name: string
+  /** The size or colour the customer chose, when the product has one. */
+  option?: string
   qty: number
   price_paise: number
   total_paise: number
@@ -78,6 +80,10 @@ export function nextActions(o: ShopOrder): OrderAction[] {
   }
   out.push('cancelled')
   return out
+}
+
+export function itemLabel(i: OrderItem): string {
+  return i.option ? `${i.name} (${i.option})` : i.name
 }
 
 export function rupees(paise: number, locale = 'en-IN'): string {

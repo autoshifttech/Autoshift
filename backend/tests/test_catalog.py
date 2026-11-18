@@ -61,6 +61,8 @@ def test_assistant_prompt_includes_the_product_list():
     facts = catalog.as_facts(products)
     system = ai_runner.build_system({"name": "Shop", "_catalog": facts}, "jeans price?")
     assert "Code P002, Slim Fit Denim Jeans, ₹1,299. Sizes: 30, 32, 34, 36" in system and "P010" in system
-    many = [{"q": f"C{i} Item {i}", "a": f"Code C{i}, Item {i}, ₹{i}."} for i in range(100)] + [{"q": "Z9 Denim jeans", "a": "Code Z9, Denim jeans, ₹999."}]
-    narrowed = ai_runner.build_system({"name": "Shop", "_catalog": many}, "denim jeans")
-    assert "Z9" in narrowed and "We sell 101 products" in narrowed and "C55" not in narrowed
+    whole = [{"q": f"C{i} Item {i}", "a": f"Code C{i}, Item {i}, ₹{i}."} for i in range(100)]
+    assert "C99" in ai_runner.build_system({"name": "Shop", "_catalog": whole}, "hi")  # up to 150 products are shown whole
+    many = [{"q": f"C{i} Item {i}", "a": f"Code C{i}, Item {i}, ₹{i}."} for i in range(200)] + [{"q": "Z9 Denim jeans", "a": "Code Z9, Denim jeans, ₹999."}]
+    narrowed = ai_runner.build_system({"name": "Shop", "_catalog": many}, "denim jeans", context="I want C155 too")
+    assert "Z9" in narrowed and "We sell 201 products" in narrowed and "Code C155," in narrowed and "Code C55," not in narrowed

@@ -156,11 +156,13 @@ def instructions(shop: dict) -> str:
         "You also take orders in this chat. Follow these steps:",
         "1. Help the customer choose products from the product list and the quantity of each.",
         f"2. Tell them the price of each item and the total; {delivery}." + (f" The minimum order is ₹{rs(min_order)}." if min_order else ""),
+        "   For a product with sizes or colours, ask which size or colour for each item (they can differ per item).",
         "3. Ask for their full name and full delivery address with PIN code.",
         "4. Ask how they want to pay: " + "; or ".join(options) + ".",
         "5. Read the whole order back (items, quantities, total, name, address, payment) and ask them to confirm.",
         "6. Only after they clearly confirm, end your reply with one line in exactly this form, and nothing after it:",
-        '[ORDER]{"items":[{"code":"P001","qty":2}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',
+        '[ORDER]{"items":[{"code":"P001","qty":2,"option":"M"},{"code":"P007","qty":1,"option":"Black"}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',
+        'Put the chosen size or colour in "option" ("" when the product has none). One item per code and option.',
         "Use only codes from the product list. Never change a price, never give a discount, never write a payment link "
         "yourself: AutoShift adds the order summary and the payment link to your reply. Keep your own text short when you place the order.",
         "If they ask about an order they already placed, answer from their orders listed below; for anything else about it, say a person from the team will help.",
@@ -173,7 +175,7 @@ def instructions(shop: dict) -> str:
 def describe_orders(orders: list[dict]) -> str:
     out = []
     for o in orders:
-        items = ", ".join(f"{i['qty']} × {i['name']}" for i in o.get("items") or [])
+        items = ", ".join(f"{i['qty']} × {item_label(i)}" for i in o.get("items") or [])
         line = f"- Order #{o['number']} ({str(o.get('created_at', ''))[:10]}): {items}; total ₹{rs(int(o['total_paise']))}; payment: {o['payment_status']}; status: {o['status']}"
         if o.get("tracking"):
             line += f"; tracking: {o['tracking']}"
@@ -237,13 +239,15 @@ def price(products: list[dict], shop: dict, req: dict) -> dict:
         except (TypeError, ValueError):
             qty = 1
         qty = max(1, min(MAX_QTY, qty))
-        key = _norm(product["code"])
+        option = re.sub(r"\s+", " ", str(item.get("option") or item.get("size") or item.get("colour") or item.get("color") or "")).strip()[:40]
+        key = f"{_norm(product['code'])}|{option.lower()}"
         if key in lines:
             lines[key]["qty"] = min(MAX_QTY, lines[key]["qty"] + qty)
         else:
-            lines[key] = {"code": product["code"], "name": product["name"], "qty": qty, "price_paise": paise(product["price"])}
+            lines[key] = {"code": product["code"], "name": product["name"], "option": option, "qty": qty, "price_paise": paise(product["price"])}
         stock = _stock(product)
-        if stock is not None and lines[key]["qty"] > stock:
+        same_code = sum(line["qty"] for line in lines.values() if line["code"] == product["code"])
+        if stock is not None and same_code > stock:
             raise OrderProblem("out_of_stock", name=product["name"])
     if not lines:
         raise OrderProblem("no_items")
@@ -289,7 +293,7 @@ def summary(shop: dict, order: dict, *, link_failed: bool = False) -> str:
     w = words(shop)
     lines = [w["order"].format(n=order.get("number", "—"))]
     for i in order["items"]:
-        lines.append(f"{i['qty']} × {i['name']} ({i['code']}) — ₹{rs(i['total_paise'])}")
+        lines.append(f"{i['qty']} × {item_label(i)} ({i['code']}) — ₹{rs(i['total_paise'])}")
     lines.append(f"{w['delivery']} — " + (f"₹{rs(order['delivery_paise'])}" if order["delivery_paise"] else w["free"]))
     lines.append(f"*{w['total']}: ₹{rs(order['total_paise'])}*")
     lines.append(f"{w['deliver_to']}: {order['customer_name']}, {order['address']}")
@@ -304,8 +308,12 @@ def summary(shop: dict, order: dict, *, link_failed: bool = False) -> str:
 
 
 # ------------------------------------------------------------------ placing it
+def item_label(item: dict) -> str:
+    return f"{item['name']} ({item['option']})" if item.get("option") else item["name"]
+
+
 def _description(number: int, items: list[dict]) -> str:
-    return f"Order #{number}: " + ", ".join(f"{i['qty']} × {i['name']}" for i in items)
+    return f"Order #{number}: " + ", ".join(f"{i['qty']} × {item_label(i)}" for i in items)
 
 
 async def _next_number(sdb: Db, account_id: str) -> int:
@@ -383,7 +391,7 @@ async def _duplicate(sdb: Db, account_id: str, conversation_id: str | None, pric
         return None
     since = (datetime.now(timezone.utc) - timedelta(minutes=DUPLICATE_MINUTES)).isoformat()
     rows = await sdb.select("shop_orders", {"account_id": account_id, "conversation_id": conversation_id, "status": "new", "created_at": ("gte", since)}, order="created_at.desc", limit=5)
-    key = lambda items: sorted((i["code"], i["qty"]) for i in items)
+    key = lambda items: sorted((i["code"], str(i.get("option") or "").lower(), i["qty"]) for i in items)
     for row in rows:
         if key(row.get("items") or []) == key(priced["items"]) and row["payment_method"] == priced["payment_method"] and int(row["total_paise"]) == priced["total_paise"]:
             return row
