@@ -48,6 +48,13 @@ def create_app() -> FastAPI:
                     await shop_payments.reconcile_pending(sdb, settings, HttpWebBridge(settings))
                 except Exception:  # noqa: BLE001
                     logging.getLogger("autoshift").exception("shop payment check failed")
+            if tick % 120 == 60:  # about once an hour: product lists from businesses' own websites
+                try:
+                    from . import catalog_feed
+
+                    await catalog_feed.sync_all(sdb)
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("product feed pass failed")
             if tick % 120 == 0:  # about once an hour: close businesses whose grace period has ended
                 try:
                     await closing.close_due(sdb, RazorpayClient(settings))

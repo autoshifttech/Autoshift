@@ -5243,5 +5243,21 @@
     "defaultsSaved": "Starting pages saved. New businesses get them from now on.",
     "defaultsNote": "Existing businesses keep their pages. Super admins only.",
     "cellLabel": "{page} for {type}"
+  },
+  "WebsiteSync": {
+    "title": "Sync from your website",
+    "help": "Paste a link to your product list on your website (CSV, Excel or JSON). AutoShift reads it now and again every hour, so prices and stock stay up to date. A product marked inactive or draft is left out; one marked out of stock stays but the AI won't sell it.",
+    "urlLabel": "Product feed link",
+    "connect": "Connect and sync",
+    "linkedTo": "Synced from",
+    "lastSync": "Last synced {when}. Syncs every hour.",
+    "lastError": "The last sync didn't work, so the previous list is still in use: {error}",
+    "syncNow": "Sync now",
+    "stop": "Stop syncing",
+    "connected": "Connected. {count} products synced from your website.",
+    "synced": "{count} products synced.",
+    "stopped": "Website sync stopped. Your product list stays.",
+    "failed": "That didn't work. Check the link and try again.",
+    "apiNote": "Uploading a file by hand stops the website sync. Your web developer can also send products and order updates through the AutoShift API."
   }
 }

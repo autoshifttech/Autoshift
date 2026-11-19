@@ -9,6 +9,7 @@ shared strings are all we need).
 
 import csv
 import io
+import json
 import re
 import zipfile
 from xml.etree import ElementTree as ET
@@ -21,7 +22,13 @@ REL_NS = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}i
 # Header names we recognise (lower-case, ₹ and brackets removed).
 CODE_NAMES = {"code", "product code", "item code", "sku", "id", "product id"}
 NAME_NAMES = {"name", "product", "product name", "item", "item name", "title"}
-PRICE_NAMES = {"price", "mrp", "rate", "amount", "selling price", "price rs", "price inr", "cost"}
+PRICE_NAMES = {"price", "mrp", "rate", "amount", "selling price", "price rs", "price inr", "cost", "sale price"}
+# A status column from the business's own website. "Hidden" kinds take the product off the list;
+# "availability" kinds keep it but mark it out of stock, so the assistant says so instead of selling it.
+HIDE_NAMES = {"status", "active", "visible", "published", "enabled", "is active", "is visible"}
+AVAILABILITY_NAMES = {"available", "availability", "in stock", "stock status", "is available"}
+HIDDEN_VALUES = {"inactive", "hidden", "draft", "disabled", "archived", "deleted", "no", "false", "0", "off", "unpublished", "discontinued", "private"}
+OUT_VALUES = {"out of stock", "sold out", "out_of_stock", "outofstock", "unavailable", "no", "false", "0", "n"}
 
 
 class CatalogError(Exception):
@@ -113,10 +120,11 @@ def to_products(rows: list[list[str]]) -> tuple[list[dict], list[str], list[int]
     header = [_key(h) for h in rows[0]]
     find = lambda wanted: next((i for i, h in enumerate(header) if h in wanted), None)
     code_i, name_i, price_i = find(CODE_NAMES), find(NAME_NAMES), find(PRICE_NAMES)
+    hide_i, avail_i = find(HIDE_NAMES), find(AVAILABILITY_NAMES)
     missing = [n for n, i in (("Code", code_i), ("Name", name_i), ("Price", price_i)) if i is None]
     if missing:
         raise CatalogError(f"The first row needs the column{'s' if len(missing) > 1 else ''} {', '.join(missing)}")
-    extra = [(i, rows[0][i].strip()) for i in range(len(rows[0])) if i not in (code_i, name_i, price_i) and rows[0][i].strip()]
+    extra = [(i, rows[0][i].strip()) for i in range(len(rows[0])) if i not in (code_i, name_i, price_i, hide_i, avail_i) and rows[0][i].strip()]
 
     products: list[dict] = []
     skipped: list[int] = []
@@ -128,14 +136,40 @@ def to_products(rows: list[list[str]]) -> tuple[list[dict], list[str], list[int]
         if not code or not name or price is None or squashed in seen:
             skipped.append(n)
             continue
+        status = cell(hide_i).lower()
+        if status in HIDDEN_VALUES:
+            continue  # switched off on the website: not on the list (not an error)
         seen.add(squashed)
         details = {label[:40]: cell(i)[:200] for i, label in extra if cell(i)}
+        if status in OUT_VALUES or cell(avail_i).lower() in OUT_VALUES:
+            details["Stock"] = "0"
         products.append({"code": code[:20], "name": name[:80], "price": price, "details": details})
         if len(products) >= MAX_PRODUCTS:
             break
     if not products:
         raise CatalogError("No product rows could be read (each needs a code, a name and a price above 0)")
     return products, [label for _, label in extra], skipped
+
+
+def read_json(data: bytes | list | dict) -> list[list[str]]:
+    """A JSON list of products (or {"products": [...]}) as rows: a header of every field, then values."""
+    if isinstance(data, (bytes, str)):
+        try:
+            data = json.loads(data)
+        except ValueError as exc:
+            raise CatalogError("This isn't valid JSON") from exc
+    if isinstance(data, dict):
+        data = next((data[k] for k in ("products", "items", "data") if isinstance(data.get(k), list)), None)
+    if not isinstance(data, list):
+        raise CatalogError("The JSON must be a list of products")
+    items = [d for d in data if isinstance(d, dict)][:MAX_PRODUCTS]
+    header: list[str] = []
+    for d in items:
+        for k, v in d.items():
+            if k not in header and (v is None or isinstance(v, (str, int, float, bool))):
+                header.append(str(k))
+    text = lambda v: "" if v is None else ("true" if v is True else "false" if v is False else str(v))
+    return [header] + [[text(d.get(k)) for k in header] for d in items]
 
 
 def parse_file(file_name: str, data: bytes) -> tuple[list[dict], list[str], list[int]]:
@@ -146,10 +180,12 @@ def parse_file(file_name: str, data: bytes) -> tuple[list[dict], list[str], list
         rows = read_xlsx(data)
     elif lower.endswith(".csv"):
         rows = read_csv(data)
+    elif lower.endswith(".json"):
+        rows = read_json(data)
     elif lower.endswith(".xls"):
         raise CatalogError("Old .xls files can't be read; save it as .xlsx or .csv")
     else:
-        raise CatalogError("Use an Excel (.xlsx) or CSV file")
+        raise CatalogError("Use an Excel (.xlsx), CSV or JSON file")
     return to_products(rows)
 
 

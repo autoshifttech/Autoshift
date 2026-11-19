@@ -8,6 +8,7 @@ import { CheckCircle2, FileUp, Loader2, PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { importCatalog, importCatalogBlob, useCatalog, type ImportSummary } from "@/lib/catalog";
+import { WebsiteSyncPanel } from "./website-sync-panel";
 
 /**
  * On an Excel or CSV file: make it the business's product list. The file is checked first
@@ -119,6 +120,7 @@ export function ProductListPanel({ file }: { file?: { name: string; url: string 
           {error}
         </p>
       )}
+      {!file && <WebsiteSyncPanel />}
       <p className="mt-2 text-xs text-muted-foreground">
         {t("format")}{" "}
         <Link href="/agents" className="font-medium text-primary hover:underline">

@@ -23,6 +23,11 @@ export interface Catalog {
   products: CatalogProduct[]
   columns: string[]
   updated_at: string
+  /** Where the list came from: a file, the website's feed link, or the website's API. */
+  source?: 'file' | 'feed' | 'api'
+  feed_url?: string | null
+  feed_synced_at?: string | null
+  feed_error?: string | null
 }
 
 export interface ImportSummary {
@@ -34,7 +39,7 @@ export interface ImportSummary {
 }
 
 /** Files the product list can be read from. */
-export const isCatalogFile = (name: string) => /\.(xlsx|csv)$/i.test(name)
+export const isCatalogFile = (name: string) => /\.(xlsx|csv|json)$/i.test(name)
 
 const store = createStore<{ catalog: Catalog | null; loaded: boolean }>(() => ({ catalog: null, loaded: false }))
 const SERVER = { catalog: null, loaded: false }
@@ -44,7 +49,7 @@ export function loadCatalog(force = false): Promise<void> {
   if (!isLive()) return Promise.resolve()
   if (!loading || force) {
     loading = (async () => {
-      const { data, error } = await createClient().from('product_catalog').select('file_name, file_url, products, columns, updated_at').maybeSingle()
+      const { data, error } = await createClient().from('product_catalog').select('file_name, file_url, products, columns, updated_at, source, feed_url, feed_synced_at, feed_error').maybeSingle()
       if (error) throw error
       store.set({ catalog: (data as Catalog | null) ?? null, loaded: true })
     })().catch((err) => {
@@ -86,4 +91,24 @@ export async function importCatalogBlob(file: { name: string; blob: Blob; url?: 
   })
   if (!dryRun) await loadCatalog(true)
   return summary
+}
+
+/** Keep the product list in step with a feed link on the business's website (read now, then every hour). */
+export async function setFeed(url: string): Promise<ImportSummary> {
+  const summary = await backend<ImportSummary>('/v1/catalog/feed', { method: 'PUT', body: { url: url.trim() } })
+  await loadCatalog(true)
+  return summary
+}
+
+export async function syncFeed(): Promise<ImportSummary> {
+  try {
+    return await backend<ImportSummary>('/v1/catalog/feed/sync', { method: 'POST' })
+  } finally {
+    await loadCatalog(true)
+  }
+}
+
+export async function stopFeed(): Promise<void> {
+  await backend<void>('/v1/catalog/feed', { method: 'DELETE' })
+  await loadCatalog(true)
 }

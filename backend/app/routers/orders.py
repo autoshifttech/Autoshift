@@ -38,9 +38,11 @@ async def _order(sdb, account_id: str, order_id: str) -> dict:
 async def list_orders(
     ctx: Member, sdb: ServiceDb,
     status: str | None = Query(None, max_length=20), payment: str | None = Query(None, max_length=20),
-    limit: int = Query(100, ge=1, le=200),
+    number: int | None = Query(None, ge=1), limit: int = Query(100, ge=1, le=200),
 ):
     filters: dict = {"account_id": ctx.account_id}
+    if number is not None:
+        filters["number"] = str(number)  # a website finds an order by the number the customer was given
     if status:
         if status not in shop_orders.STATUSES:
             raise HTTPException(422, "Unknown status")

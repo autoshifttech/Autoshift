@@ -5243,5 +5243,21 @@
     "defaultsSaved": "Páginas iniciais salvas. Novos negócios as recebem a partir de agora.",
     "defaultsNote": "Negócios existentes mantêm suas páginas. Só superadmins.",
     "cellLabel": "{page} para {type}"
+  },
+  "WebsiteSync": {
+    "title": "Sincronizar com seu site",
+    "help": "Cole o link da lista de produtos do seu site (CSV, Excel ou JSON). A AutoShift lê agora e de novo a cada hora, para preços e estoque ficarem atualizados. Produto marcado como inativo ou rascunho fica de fora; marcado como esgotado continua, mas a IA não o vende.",
+    "urlLabel": "Link do feed de produtos",
+    "connect": "Conectar e sincronizar",
+    "linkedTo": "Sincronizado de",
+    "lastSync": "Última sincronização {when}. Sincroniza a cada hora.",
+    "lastError": "A última sincronização falhou, então a lista anterior continua em uso: {error}",
+    "syncNow": "Sincronizar agora",
+    "stop": "Parar sincronização",
+    "connected": "Conectado. {count} produtos sincronizados do seu site.",
+    "synced": "{count} produtos sincronizados.",
+    "stopped": "Sincronização parada. Sua lista de produtos continua.",
+    "failed": "Não deu certo. Verifique o link e tente de novo.",
+    "apiNote": "Enviar um arquivo manualmente para a sincronização com o site. Seu desenvolvedor também pode enviar produtos e atualizações de pedidos pela API da AutoShift."
   }
 }
