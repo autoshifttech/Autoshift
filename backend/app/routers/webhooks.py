@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from .. import audit, billing, shop_payments
 from ..config import Settings, get_settings
 from ..deps import Bridge, ServiceDb
+from .. import cashfree
 from ..razorpay import verify_webhook_signature
 from ..security import decrypt
 
@@ -150,6 +151,44 @@ async def business_razorpay_webhook(
         await sdb.update("razorpay_events", {"event_id": event_id}, {"status": "failed", "error": str(exc)[:300]})
         raise HTTPException(500, "Could not process the event") from exc
     await sdb.update("razorpay_events", {"event_id": event_id}, {"status": outcome, "processed_at": datetime.now(timezone.utc).isoformat()})
+    return {"status": outcome}
+
+
+@router.post("/cashfree/c/{connection_id}")
+async def business_cashfree_webhook(
+    connection_id: str,
+    request: Request,
+    sdb: ServiceDb,
+    bridge: Bridge,
+    settings: Annotated[Settings, Depends(get_settings)],
+    x_webhook_signature: Annotated[str | None, Header()] = None,
+    x_webhook_timestamp: Annotated[str | None, Header()] = None,
+):
+    """A business's own Cashfree account: a payment link changed. The payload only tells us which
+    link; whether it was paid is then asked of Cashfree itself, so a webhook can't fake a payment."""
+    rows = await sdb.select("flow_connections", {"id": connection_id, "kind": "cashfree"}, limit=1) if _uuid(connection_id) else []
+    if not rows:
+        raise HTTPException(404, "Unknown connection")
+    secrets = await sdb.select("flow_connection_secrets", {"connection_id": connection_id}, limit=1)
+    keys = json.loads(decrypt(secrets[0]["ciphertext"], settings)) if secrets else {}
+    raw = await request.body()
+    if not cashfree.verify_webhook_signature(raw, x_webhook_timestamp or "", x_webhook_signature or "", keys.get("secret_key", "")):
+        raise HTTPException(400, "Invalid signature")
+    try:
+        payload = json.loads(raw)
+    except ValueError as exc:
+        raise HTTPException(400, "Body is not JSON") from exc
+    data = payload.get("data") or {}
+    link_id = str(data.get("link_id") or (data.get("order") or {}).get("order_tags", {}).get("link_id") or "")
+    if not link_id:
+        return {"status": "ignored"}
+    links = await sdb.select("payment_links", {"razorpay_link_id": link_id, "connection_id": connection_id}, limit=1)
+    if not links:
+        return {"status": "ignored"}
+    try:
+        outcome = await shop_payments.cashfree_status(sdb, settings, bridge, links[0], rows[0], keys)
+    except Exception as exc:  # noqa: BLE001 - Cashfree retries
+        raise HTTPException(500, "Could not process the event") from exc
     return {"status": outcome}
 
 

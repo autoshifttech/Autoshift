@@ -12,10 +12,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, booking, events, pages, platform_settings, shop_orders, shop_payments, wallet
+from .. import ai_runner, audit, booking, events, google_api, pages, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import Bridge, ServiceDb, get_llm
-from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
+from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalGoogleAction, InternalPaymentLink
 
 router = APIRouter(prefix="/v1/internal", tags=["internal"], include_in_schema=False)
 LOW_BALANCE_PAISE = 20000  # ₹200: tell the business (and their automations) the wallet is running low
@@ -130,3 +130,32 @@ async def payment_link(body: InternalPaymentLink, _: Internal, sdb: ServiceDb, s
         return await shop_payments.create_link(sdb, settings, **body.model_dump())
     except shop_payments.PaymentLinkError as exc:
         raise HTTPException(exc.status, exc.message) from exc
+
+
+@router.post("/google-action")
+async def google_action(body: InternalGoogleAction, _: Internal, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)]):
+    """A flow's Google step: add a row to a sheet, or an event to a calendar, with the business's own Google account."""
+    import json
+
+    from ..security import decrypt
+
+    await _account(sdb, body.account_id)
+    filters = {"account_id": body.account_id, "kind": "google"}
+    if body.connection_id:
+        filters["id"] = body.connection_id
+    rows = await sdb.select("flow_connections", filters, order="created_at.desc", limit=1)
+    if not rows:
+        raise HTTPException(409, "Connect a Google account first (Flows → Connections)")
+    secrets = await sdb.select("flow_connection_secrets", {"connection_id": rows[0]["id"]}, limit=1)
+    if not secrets:
+        raise HTTPException(409, "The Google connection has no key; add it again")
+    p = body.params
+    try:
+        token = await google_api.access_token(settings, rows[0]["id"], json.loads(decrypt(secrets[0]["ciphertext"], settings)))
+        if body.service == "google_sheets_append":
+            return await google_api.sheets_append(token, p.get("spreadsheet", ""), p.get("sheet", ""), p.get("values", ""))
+        return await google_api.calendar_event(token, p.get("calendar", ""), p.get("title", ""), p.get("start", ""), p.get("minutes", "30"),
+                                               p.get("timezone") or "Asia/Kolkata", p.get("description", ""))
+    except google_api.GoogleError as exc:
+        status = exc.status if exc.status in (409, 422) else 502
+        raise HTTPException(status, f"Google: {exc.message}") from exc

@@ -1598,12 +1598,13 @@
         "openConnections": "연결 열기",
         "noAccount": {
           "google": "아직 연결된 Google 계정이 없습니다.",
-          "razorpay": "아직 연결된 Razorpay 계정이 없습니다."
+          "razorpay": "아직 연결된 Razorpay 또는 Cashfree 계정이 없습니다.",
+          "cashfree": "아직 연결된 Razorpay 또는 Cashfree 계정이 없습니다."
         },
         "service": {
           "google_sheets_append": "Google 스프레드시트에 행 추가",
           "google_calendar_event": "Google 캘린더 일정 만들기",
-          "razorpay_link": "Razorpay 결제 링크"
+          "razorpay_link": "결제 링크 (Razorpay 또는 Cashfree)"
         },
         "field": {
           "spreadsheet": "스프레드시트(링크 또는 ID)",
@@ -1619,7 +1620,7 @@
         "valuesHint": "한 줄에 값 하나씩, 각 줄이 다음 열을 채웁니다.",
         "saveAs": "링크를 다음 이름으로 저장",
         "saveAsHint": "이후 메시지에서 다음과 같이 사용:",
-        "razorpayHelp": "돈은 내 Razorpay 계정으로 들어갑니다. 링크를 열면 UPI, 카드, 인터넷 뱅킹 결제 페이지가 나오며 24시간 후 만료됩니다. 금액에는 장바구니 합계(예: {{vars.cart_total}})를 쓰세요.",
+        "razorpayHelp": "대금은 내 Razorpay 또는 Cashfree 계정으로 들어갑니다. 링크는 UPI, 카드, 넷뱅킹 결제 페이지를 열며 24시간 후 만료됩니다. 금액에는 장바구니 합계(예: {{vars.cart_total}})를 쓰세요.",
         "sendQr": "UPI QR 코드도 만들기",
         "sendQrHelp": "다른 휴대폰으로 결제하는 고객용입니다. 미디어 보내기(이미지) 단계에서 링크 {var}로 보여 주세요. Razorpay에서 QR 코드 기능을 켜야 합니다.",
         "ifFails": "링크를 만들 수 없으면 이동할 단계"
@@ -1675,12 +1676,12 @@
           "service": {
             "google_sheets_append": "Google 스프레드시트에 행 추가",
             "google_calendar_event": "Google 캘린더 일정 만들기",
-            "razorpay_link": "Razorpay 결제 링크"
+            "razorpay_link": "결제 링크 (Razorpay 또는 Cashfree)"
           },
           "lead": "리드가 만들어졌습니다: {title}",
           "cart": "장바구니에 담김: {detail}",
           "cartMissing": "목록에 없는 상품입니다.",
-          "payLink": "여기서 ₹{detail} Razorpay 결제 링크가 전송됩니다."
+          "payLink": "₹{detail} 결제 링크가 여기서 전송됩니다."
         }
       },
       "duplicateNode": "복제",
@@ -1726,7 +1727,7 @@
       "tagNone": "태그 {mode} (선택된 태그 없음)",
       "action_google_sheets_append": "Google 스프레드시트에 행 추가",
       "action_google_calendar_event": "Google 캘린더 일정 만들기",
-      "action_razorpay_link": "Razorpay 결제 링크",
+      "action_razorpay_link": "결제 링크 (Razorpay 또는 Cashfree)",
       "actionNone": "서비스를 선택하세요",
       "leadNone": "리드 제목을 정하세요",
       "cartCount": "{count, plural, other {상품 #개}}",
@@ -2986,7 +2987,7 @@
     },
     "order_payment": {
       "name": "결제가 포함된 주문",
-      "description": "채팅으로 주문을 받고 확인한 뒤 Razorpay 결제 링크를 보냅니다. 착불과 상담원 연결이 포함되어 있습니다.",
+      "description": "채팅에서 주문을 받아 확인하고 결제 링크(Razorpay 또는 Cashfree)를 보냅니다. 착불과 상담원 연결이 포함되어 있습니다.",
       "keywords": "주문,구매,쇼핑",
       "askItem": "무엇을 주문하시겠어요? 상품과 수량을 알려 주세요.",
       "askAddress": "감사합니다! 배송 주소를 알려 주세요.",
@@ -3011,7 +3012,7 @@
     },
     "payment_confirmed": {
       "name": "결제 확인",
-      "description": "Razorpay 결제 링크가 결제되는 즉시 감사 메시지를 보냅니다. 고객 태그 지정이나 팀 알림 단계를 추가할 수 있습니다.",
+      "description": "결제 링크가 결제되는 즉시 감사 메시지를 보냅니다. 고객 태그나 팀 알림 단계를 추가하세요.",
       "message": "결제가 완료되었습니다. 감사합니다! 주문이 확정되었습니다."
     }
   },
@@ -4673,13 +4674,12 @@
     "title": "연결",
     "breadcrumb": "이동 경로",
     "bannerTitle": "플로우에서 사용할 수 있는 계정",
-    "bannerDesc": "스프레드시트와 캘린더용 Google, 결제 링크용 Razorpay. 한 번 연결하면 워크스페이스의 모든 플로우에서 사용할 수 있고, 담당자가 떠나도 계속 작동합니다. 각각 둘 이상 연결할 수 있습니다.",
+    "bannerDesc": "시트와 캘린더는 Google, 결제 링크는 Razorpay 또는 Cashfree를 사용합니다. 한 번 연결하면 워크스페이스의 모든 플로우가 사용할 수 있고, 담당자가 바뀌어도 계속 작동합니다. 종류별로 여러 개를 연결할 수 있습니다.",
     "connectGoogle": "Google 연결",
     "addAnother": "다른 계정 추가",
     "googleServiceAccount": "Google 서비스 계정",
-    "googleSoon": "Google 로그인은 백엔드와 함께 열립니다. 지금은 “다른 계정 추가”에서 서비스 계정을 추가하세요.",
     "emptyTitle": "아직 연결이 없습니다",
-    "emptyDesc": "Google 계정을 연결하거나 “다른 계정 추가”에서 Razorpay 키를 추가한 뒤 모든 플로우에서 사용하세요.",
+    "emptyDesc": "Google 계정을 연결하거나 “다른 계정 추가”에서 Razorpay 또는 Cashfree 키를 추가한 뒤 어느 플로우에서나 사용하세요.",
     "googleTitle": "Google 서비스 계정 추가",
     "googleStep1": "Google Cloud에서 <b>서비스 계정</b>을 만들고 <code>JSON</code> 키를 다운로드하세요.",
     "googleStep2": "해당 프로젝트에서 <b>Google Sheets API</b>와 <b>Google Calendar API</b>를 사용 설정하세요 (목록에서 시트를 고르려면 Drive API도).",
@@ -4719,7 +4719,7 @@
     "hideSecret": "시크릿 숨기기",
     "added": "계정이 연결되었습니다",
     "removed": "연결이 삭제되었습니다",
-    "kindGoogle": "Google 서비스 계정",
+    "kindGoogle": "Google",
     "kindRazorpay": "Razorpay",
     "connected": "연결됨",
     "addedOn": "{date} 추가",
@@ -4727,11 +4727,25 @@
     "removeTitle": "{name}을(를) 삭제할까요?",
     "removeDesc": "이 계정을 사용하는 플로우는 다른 계정을 연결할 때까지 작동하지 않습니다.",
     "removeConfirm": "삭제",
-    "webhookUrl": "Razorpay용 웹훅 URL",
+    "webhookUrl": "{provider} 웹훅 URL",
     "webhookCopy": "복사",
     "webhookCopied": "웹훅 URL을 복사했습니다",
     "webhookCopyFailed": "복사하지 못했습니다. 텍스트를 직접 선택하세요",
-    "webhookEvents": "Razorpay → Webhooks에서 같은 시크릿과 payment_link.paid, qr_code.credited 이벤트로 이 URL을 추가하세요."
+    "webhookEvents": "Razorpay → Webhooks에서 같은 시크릿과 payment_link.paid, qr_code.credited 이벤트로 이 URL을 추가하세요.",
+    "kindGoogleSa": "Google 서비스 계정",
+    "kindCashfree": "Cashfree",
+    "googleConnected": "Google 계정을 연결했습니다",
+    "googleCancelled": "Google 로그인이 취소되었습니다. 연결된 것은 없습니다.",
+    "googleFailed": "Google을 연결하지 못했습니다. {reason}",
+    "googleUseKey": "AutoShift에서 아직 Google 로그인이 켜져 있지 않습니다. 대신 서비스 계정 키를 추가할 수 있습니다.",
+    "cashfreeTitle": "Cashfree 추가",
+    "cashfreeIntro": "Cashfree 대시보드 → <b>Developers</b> → <b>API Keys</b>에서 <b>App ID</b>와 <b>Secret Key</b>를 복사하세요. 테스트(샌드박스) 키는 테스트 링크를, 프로덕션 키는 실제 링크를 만듭니다.",
+    "cashfreeNamePh": "예: Cashfree — 본점",
+    "cashfreeAppId": "App ID",
+    "cashfreeSecret": "Secret Key",
+    "securityNoteSaved": "키는 암호화되어 저장되며 다시 표시되지 않습니다. 이 키로 만든 첫 결제 링크에서 {provider}가 키를 받아들이는지 확인할 수 있습니다.",
+    "saveFailed": "키를 저장하지 못했습니다. 확인 후 다시 시도하세요.",
+    "webhookEventsCashfree": "Cashfree → Developers → Webhooks에서 이 URL을 추가하고 Payment Link 이벤트를 선택하세요. Cashfree가 Secret Key로 서명하므로 따로 입력할 것은 없습니다."
   },
   "VerifyPhone": {
     "title": "전화번호 인증",
@@ -5096,8 +5110,8 @@
     "checkProducts": "상품 목록: {count}개 상품",
     "checkNoProducts": "아직 상품 목록이 없습니다. Excel 또는 CSV 파일을 올려 주세요.",
     "openFiles": "파일 열기",
-    "checkRazorpay": "온라인 결제용 Razorpay가 연결되어 있습니다",
-    "checkNoRazorpay": "온라인 결제를 받으려면 Razorpay 계정을 연결하세요.",
+    "checkRazorpay": "온라인 결제용 결제 계정(Razorpay 또는 Cashfree)이 연결되어 있습니다",
+    "checkNoRazorpay": "온라인 결제를 받으려면 Razorpay 또는 Cashfree 계정을 연결하세요.",
     "checkOnlineOff": "온라인 결제가 꺼져 있습니다",
     "openConnections": "연결 열기",
     "checkOn": "이 어시스턴트가 켜져 있습니다",

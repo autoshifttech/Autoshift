@@ -104,11 +104,18 @@ class RazorpaySecret(BaseModel):
     webhook_secret: str | None = None
 
 
+class CashfreeSecret(BaseModel):
+    app_id: str = Field(min_length=6, max_length=120, pattern=r"^[A-Za-z0-9_\-]+$")
+    secret_key: str = Field(min_length=8, max_length=300)
+    mode: Literal["test", "live"] | None = None
+
+
 class ConnectionCreate(BaseModel):
-    kind: Literal["google", "razorpay"]
+    kind: Literal["google", "razorpay", "cashfree"]
     name: str = Field("", max_length=80)
     google: GoogleSecret | None = None
     razorpay: RazorpaySecret | None = None
+    cashfree: CashfreeSecret | None = None
 
 
 class ProviderUpdate(BaseModel):
@@ -385,6 +392,13 @@ class InternalPaymentLink(BaseModel):
     customer_name: str | None = Field(None, max_length=120)
     customer_phone: str | None = Field(None, max_length=32)
     send_qr: bool = False
+
+
+class InternalGoogleAction(BaseModel):
+    account_id: str
+    connection_id: str | None = None
+    service: Literal["google_sheets_append", "google_calendar_event"]
+    params: dict[str, str] = Field(default_factory=dict)
 
 
 class InternalEvent(BaseModel):

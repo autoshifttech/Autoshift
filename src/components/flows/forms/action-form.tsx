@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ACTION_SERVICES, ACTION_SERVICE_IDS, isActionService, type ActionService } from "@/lib/flows/actions";
-import { useConnections } from "@/lib/flows/connections";
+import { kindFits, useConnections } from "@/lib/flows/connections";
 import { ConnectionLogo } from "../connection-logos";
 import type { BuilderNode } from "../shared";
 import { NextNodeRow } from "./fields";
@@ -46,7 +46,7 @@ export function ActionForm({
 
   const service: ActionService = isActionService(cfg.service) ? cfg.service : "google_sheets_append";
   const def = ACTION_SERVICES[service];
-  const options = connections.filter((c) => c.kind === def.kind);
+  const options = connections.filter((c) => kindFits(def.kind, c.kind));
   const params = cfg.params ?? {};
   const selected = options.find((c) => c.id === cfg.connection_id);
 
@@ -61,7 +61,7 @@ export function ActionForm({
           onValueChange={(v) => {
             const next = v as ActionService;
             // A different kind of account can't be reused, so clear the pick.
-            const keep = ACTION_SERVICES[next].kind === def.kind;
+            const keep = kindFits(ACTION_SERVICES[next].kind, def.kind);
             onUpdateConfig({ service: next, params: {}, connection_id: keep ? cfg.connection_id ?? "" : "", save_as: "" });
           }}
         >

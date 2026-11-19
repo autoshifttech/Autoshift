@@ -138,3 +138,26 @@ export async function createPaymentLink(args: {
   if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : `Payment link refused (${res.status})`)
   return data as PaymentLinkResult
 }
+
+/**
+ * A flow's Google step, run with the business's own Google account: adds a row to a sheet or an
+ * event to a calendar. Throws with the backend's reason so the flow can take its "if it fails" exit.
+ */
+export async function runGoogleAction(args: {
+  accountId: string
+  connectionId?: string | null
+  service: 'google_sheets_append' | 'google_calendar_event'
+  params: Record<string, string>
+}): Promise<{ link?: string }> {
+  const c = config()
+  if (!c) throw new Error('The AutoShift API is not connected (AUTOSHIFT_API_URL / AUTOSHIFT_INTERNAL_SECRET)')
+  const res = await fetch(`${c.url}/v1/internal/google-action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-AutoShift-Internal': c.secret },
+    body: JSON.stringify({ account_id: args.accountId, connection_id: args.connectionId || null, service: args.service, params: args.params }),
+    signal: AbortSignal.timeout(30000),
+  })
+  const data = (await res.json().catch(() => ({}))) as { link?: string; detail?: unknown }
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : `Google step refused (${res.status})`)
+  return data
+}

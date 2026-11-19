@@ -11,7 +11,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_SHOP, type Assistant, type ShopSettings } from "@/lib/assistants/model";
 import { useCatalog } from "@/lib/catalog";
-import { useConnections } from "@/lib/flows/connections";
+import { isPaymentKind, useConnections } from "@/lib/flows/connections";
 import { SystemTemplateCard } from "@/components/templates/system-template-card";
 
 const LANGS = ["en", "pt", "es", "ko"] as const;
@@ -25,7 +25,7 @@ export function ShopTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>)
   const shop: ShopSettings = { ...DEFAULT_SHOP, ...(a.shop ?? {}) };
   const put = (patch: Partial<ShopSettings>) => set({ shop: { ...shop, ...patch } });
   const { catalog, loaded } = useCatalog();
-  const razorpay = useConnections().some((c) => c.kind === "razorpay");
+  const razorpay = useConnections().some((c) => isPaymentKind(c.kind));
   const num = (v: string) => (v === "" ? 0 : Math.max(0, Number(v) || 0));
 
   const checks = [

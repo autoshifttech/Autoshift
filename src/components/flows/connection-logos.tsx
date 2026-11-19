@@ -20,6 +20,18 @@ export function RazorpayLogo({ className = "size-5" }: { className?: string }) {
   );
 }
 
+/** A plain mark for Cashfree (not its trademark artwork): a rounded square with a "cf". */
+export function CashfreeLogo({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect width="24" height="24" rx="6" fill="#5B3FD6" />
+      <text x="12" y="16.2" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="11" fontWeight="700" fill="#FFFFFF">cf</text>
+    </svg>
+  );
+}
+
 export function ConnectionLogo({ kind, className }: { kind: ConnectionKind; className?: string }) {
-  return kind === "google" ? <GoogleLogo className={className} /> : <RazorpayLogo className={className} />;
+  if (kind === "google") return <GoogleLogo className={className} />;
+  if (kind === "cashfree") return <CashfreeLogo className={className} />;
+  return <RazorpayLogo className={className} />;
 }

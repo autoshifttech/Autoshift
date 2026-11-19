@@ -19,7 +19,8 @@ from typing import Any
 
 import httpx
 
-from . import audit, events, shop_orders
+from . import audit, cashfree, events, shop_orders
+from .cashfree import CashfreeError
 from .config import Settings
 from .db import Db
 from .razorpay import API, RazorpayError
@@ -30,6 +31,7 @@ log = logging.getLogger("autoshift.shop_payments")
 MIN_PAISE = 100  # Razorpay's smallest payment: ₹1
 MAX_PAISE = 50_000_000  # ₹5,00,000 per order: a typo guard
 LINK_HOURS = 24
+PAYMENT_KINDS = ("razorpay", "cashfree")
 # A paid order moves to the stage with one of these names (the "Paid" stage in each app language).
 PAID_STAGE_NAMES = {"paid", "pago", "pagado", "pagada", "결제 완료", "결제완료"}
 
@@ -74,16 +76,17 @@ async def rzp_get(key_id: str, key_secret: str, path: str) -> dict[str, Any]:
 
 
 async def connection_keys(sdb: Db, settings: Settings, account_id: str, connection_id: str | None) -> tuple[dict, dict]:
-    """The business's Razorpay connection and its decrypted keys. Picks the newest one when no id is given."""
-    filters = {"account_id": account_id, "kind": "razorpay"}
+    """The business's payment connection (Razorpay or Cashfree) and its decrypted keys.
+    Picks the newest one when no id is given."""
+    filters: dict[str, Any] = {"account_id": account_id, "kind": ("in", list(PAYMENT_KINDS))}
     if connection_id:
         filters["id"] = connection_id
     rows = await sdb.select("flow_connections", filters, order="created_at.desc", limit=1)
     if not rows:
-        raise PaymentLinkError(409, "Connect your Razorpay account first (Flows → Connections)")
+        raise PaymentLinkError(409, "Connect your Razorpay or Cashfree account first (Flows → Connections)")
     secret_rows = await sdb.select("flow_connection_secrets", {"connection_id": rows[0]["id"]}, limit=1)
     if not secret_rows:
-        raise PaymentLinkError(409, "The Razorpay connection has no keys; add it again")
+        raise PaymentLinkError(409, "The payment connection has no keys; add it again")
     return rows[0], json.loads(decrypt(secret_rows[0]["ciphertext"], settings))
 
 
@@ -109,6 +112,11 @@ async def create_link(
     description = (description or "Order payment").strip()[:2000]
     expire = datetime.now(timezone.utc) + timedelta(hours=LINK_HOURS)
     notes = {"autoshift_account": account_id, "autoshift_payment": row_id}
+
+    if conn.get("kind") == "cashfree":
+        return await _cashfree_link(sdb, conn, keys, row_id=row_id, paise=paise, description=description, expire=expire, notes=notes,
+                                    customer_name=customer_name, customer_phone=customer_phone, contact_id=contact_id,
+                                    conversation_id=conversation_id, flow_run_id=flow_run_id, lead_id=lead_id)
 
     customer: dict[str, str] = {}
     if customer_name:
@@ -162,6 +170,57 @@ async def create_link(
     }
 
 
+async def _cashfree_link(sdb: Db, conn: dict, keys: dict, *, row_id: str, paise: int, description: str, expire: datetime,
+                         notes: dict, customer_name: str | None, customer_phone: str | None, **ids: Any) -> dict:
+    """A Cashfree payment link. Its link_id is our own row id, so webhooks and checks find it directly."""
+    body: dict[str, Any] = {
+        "link_id": row_id.replace("-", "")[:50],
+        "link_amount": paise / 100,
+        "link_currency": "INR",
+        "link_purpose": description[:500],
+        "customer_details": {"customer_phone": cashfree.customer_phone(customer_phone), **({"customer_name": customer_name[:100]} if customer_name else {})},
+        "link_expiry_time": expire.replace(microsecond=0).isoformat(),
+        "link_partial_payments": False,
+        "link_notify": {"send_sms": False, "send_email": False},  # the customer gets the link on WhatsApp
+        "link_notes": notes,
+    }
+    try:
+        link = await cashfree.cf_post(keys["app_id"], keys["secret_key"], conn.get("mode"), "/links", body)
+    except CashfreeError as exc:
+        raise PaymentLinkError(502, f"Cashfree refused the payment link ({exc.status})") from exc
+    except httpx.HTTPError as exc:
+        raise PaymentLinkError(502, "Cashfree could not be reached") from exc
+    await sdb.insert("payment_links", {
+        "id": row_id, "account_id": conn["account_id"], "connection_id": conn["id"], **ids,
+        "description": description, "amount_paise": paise, "currency": "INR",
+        # The provider's link id; the column name predates Cashfree.
+        "razorpay_link_id": body["link_id"], "short_url": link.get("link_url"), "status": "created",
+    })
+    return {"id": row_id, "short_url": link.get("link_url"), "qr_image_url": None, "amount_paise": paise, "mode": conn.get("mode"), "qr_problem": None}
+
+
+async def cashfree_status(sdb: Db, settings: Settings, bridge, row: dict, conn: dict, keys: dict) -> str:
+    """Ask Cashfree about one link: 'paid', 'unpaid', 'expired' or 'error'."""
+    try:
+        link = await cashfree.cf_get(keys["app_id"], keys["secret_key"], conn.get("mode"), f"/links/{row['razorpay_link_id']}")
+    except (CashfreeError, httpx.HTTPError) as exc:
+        log.warning("could not check cashfree link %s: %s", row["id"], exc)
+        return "error"
+    status = str(link.get("link_status") or "").upper()
+    if status == "PAID":
+        try:
+            paid = int((Decimal(str(link.get("link_amount_paid") or 0)) * 100).quantize(Decimal(1)))
+        except InvalidOperation:
+            paid = 0
+        await mark_paid(sdb, bridge, row, {"id": str(link.get("cf_link_id") or link.get("link_id") or ""), "amount": paid, "_via": "link"}, keys)
+        return "paid"
+    if status in ("EXPIRED", "CANCELLED") and row["status"] == "created":
+        await sdb.update("payment_links", {"id": row["id"]}, {"status": status.lower()})
+        await shop_orders.payment_expired(sdb, row.get("order_id"))
+        return "expired"
+    return "unpaid"
+
+
 def rupees(paise: int) -> str:
     whole, part = divmod(int(paise), 100)
     return f"{whole:,}" if not part else f"{whole:,}.{part:02d}"
@@ -201,12 +260,16 @@ async def mark_paid(sdb: Db, bridge, row: dict, payment: dict, keys: dict) -> st
             "payment_link_id": row["id"], "amount_paise": row["amount_paise"], "description": row.get("description"),
             "razorpay_payment_id": payment.get("id"), "contact_id": row.get("contact_id"), "lead_id": row.get("lead_id"),
         })
-        # The customer paid one way; close the other so they can't pay twice.
+        # The customer paid one way; close the other so they can't pay twice (Razorpay only).
         try:
+            if "key_id" not in keys:
+                raise LookupError
             if payment.get("_via") == "link" and row.get("razorpay_qr_id"):
                 await rzp_post(keys["key_id"], keys["key_secret"], f"/payments/qr_codes/{row['razorpay_qr_id']}/close", {})
             elif payment.get("_via") == "qr" and row.get("razorpay_link_id"):
                 await rzp_post(keys["key_id"], keys["key_secret"], f"/payment_links/{row['razorpay_link_id']}/cancel", {})
+        except LookupError:
+            pass
         except (RazorpayError, httpx.HTTPError) as exc:
             log.warning("could not close the other payment option for %s: %s", row["id"], exc)
 
@@ -264,7 +327,9 @@ async def reconcile(sdb: Db, settings: Settings, bridge, row: dict) -> str:
     if not row.get("razorpay_link_id"):
         return "error"
     try:
-        _, keys = await connection_keys(sdb, settings, row["account_id"], row.get("connection_id"))
+        conn, keys = await connection_keys(sdb, settings, row["account_id"], row.get("connection_id"))
+        if conn.get("kind") == "cashfree":
+            return await cashfree_status(sdb, settings, bridge, row, conn, keys)
         link = await rzp_get(keys["key_id"], keys["key_secret"], f"/payment_links/{row['razorpay_link_id']}")
     except (PaymentLinkError, RazorpayError, httpx.HTTPError, KeyError, ValueError) as exc:
         log.warning("could not check payment link %s: %s", row["id"], exc)

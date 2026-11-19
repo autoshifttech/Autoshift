@@ -44,7 +44,7 @@ import { addContactTagAndDispatch } from "@/lib/contacts/tag-events";
 import { removeContactTag } from "@/lib/contacts/tag-write";
 import { checkRunTimeout, markRunTimedOut, type RunTimeoutCheck } from "./timeout";
 import { addToCart, findProduct, parseQty, readCart } from "./cart";
-import { createPaymentLink } from "@/lib/backend/internal";
+import { createPaymentLink, runGoogleAction } from "@/lib/backend/internal";
 import {
   type CollectInputNodeConfig,
   type ConditionNodeConfig,
@@ -989,10 +989,28 @@ async function advanceFromNodeKey(
     if (node.node_type === "action") {
       const cfg = node.config as unknown as ActionNodeConfig;
       if (cfg.service !== "razorpay_link") {
-        // Google Sheets / Calendar calls are made by the backend once wired; until then the step
-        // is recorded and the run moves on, so a flow never stalls here.
-        await logEvent(db, run.id, "node_entered", node.node_key, { action: cfg.service, connection_id: cfg.connection_id, executed: false });
-        currentKey = cfg.next_node_key;
+        // Google Sheets / Calendar: the backend calls Google with the business's own account.
+        try {
+          const { data: who } = run.contact_id
+            ? await db.from("contacts").select("name, phone").eq("id", run.contact_id).eq("account_id", run.account_id).maybeSingle()
+            : { data: null };
+          const fill = (v: unknown) =>
+            interpolateVars(String(v ?? ""), run.vars)
+              .replace(/\{\{contact\.name\}\}/g, String(who?.name ?? ""))
+              .replace(/\{\{contact\.phone\}\}/g, String(who?.phone ?? ""));
+          const params = Object.fromEntries(Object.entries(cfg.params ?? {}).map(([k, v]) => [k, fill(v)]));
+          const out = await runGoogleAction({ accountId: run.account_id, connectionId: cfg.connection_id, service: cfg.service, params });
+          const saveAs = /^[a-z][a-z0-9_]{0,39}$/i.test(cfg.save_as ?? "") ? cfg.save_as : "";
+          if (saveAs && out.link) await saveVars(db, run, { [saveAs]: out.link });
+          await logEvent(db, run.id, "node_entered", node.node_key, { action: cfg.service, connection_id: cfg.connection_id, executed: true });
+          currentKey = cfg.next_node_key;
+        } catch (err) {
+          await logEvent(db, run.id, "error", node.node_key, {
+            reason: "google_action_failed",
+            detail: err instanceof Error ? err.message : String(err),
+          });
+          currentKey = cfg.error_node_key || cfg.next_node_key;
+        }
         continue;
       }
       const saveAs = /^[a-z][a-z0-9_]{0,39}$/i.test(cfg.save_as ?? "") ? cfg.save_as : "payment_link";

@@ -2,19 +2,26 @@ import { createStore, useStore } from '@/lib/workspace/store'
 import { backend, backendUrl } from '@/lib/backend/client'
 
 /**
- * Accounts a flow can use: Google (Sheets, Calendar) and Razorpay (payment links).
+ * Accounts a flow can use: Google (Sheets, Calendar), and Razorpay or Cashfree (payment links).
  * Secrets are never kept here — only what is safe to show (an email, a masked key id).
  * Connected to the backend, the secret is sent once and stored there, encrypted.
  */
-export type ConnectionKind = 'google' | 'razorpay'
+export type ConnectionKind = 'google' | 'razorpay' | 'cashfree'
+
+/** Payment providers: a payment-link step or the shop assistant can use any of them. */
+export const PAYMENT_KINDS: readonly ConnectionKind[] = ['razorpay', 'cashfree']
+export const isPaymentKind = (k: ConnectionKind) => PAYMENT_KINDS.includes(k)
+
+/** Whether an account of kind `have` can serve a step that asks for `want`. */
+export const kindFits = (want: ConnectionKind, have: ConnectionKind) => want === have || (isPaymentKind(want) && isPaymentKind(have))
 
 export interface FlowConnection {
   id: string
   kind: ConnectionKind
   name: string
-  /** Service-account email or Razorpay key id (masked). */
+  /** Google email (or service-account email), or the provider's key / app id (masked). */
   detail: string
-  /** "test" / "live" for Razorpay. */
+  /** "test" / "live" for Razorpay and Cashfree. */
   mode?: string
   createdAt: string
 }
@@ -80,13 +87,16 @@ export async function loadConnections(): Promise<void> {
 export type ConnectionSecret =
   | { kind: 'google'; name: string; serviceAccountJson: string }
   | { kind: 'razorpay'; name: string; keyId: string; keySecret: string; webhookSecret?: string }
+  | { kind: 'cashfree'; name: string; appId: string; secretKey: string; mode: 'test' | 'live' }
 
 /** Saves a connection with its secret on the server (encrypted there). Only used when connected. */
 export async function createConnection(c: ConnectionSecret): Promise<void> {
   const body =
     c.kind === 'google'
       ? { kind: 'google', name: c.name, google: { service_account_json: c.serviceAccountJson } }
-      : { kind: 'razorpay', name: c.name, razorpay: { key_id: c.keyId.trim(), key_secret: c.keySecret.trim(), webhook_secret: c.webhookSecret?.trim() || null } }
+      : c.kind === 'cashfree'
+        ? { kind: 'cashfree', name: c.name, cashfree: { app_id: c.appId.trim(), secret_key: c.secretKey.trim(), mode: c.mode } }
+        : { kind: 'razorpay', name: c.name, razorpay: { key_id: c.keyId.trim(), key_secret: c.keySecret.trim(), webhook_secret: c.webhookSecret?.trim() || null } }
   await backend('/v1/connections', { method: 'POST', body })
   await loadConnections()
 }
@@ -99,3 +109,25 @@ export async function deleteConnection(id: string): Promise<void> {
   }
   removeConnection(id)
 }
+
+// ------------------------------------------------------------- Connect Google (sign in)
+
+/** Whether "Connect Google" can sign in on this AutoShift (the platform set up a Google OAuth client). */
+export async function googleSignInAvailable(): Promise<boolean> {
+  if (!backendUrl()) return false
+  try {
+    return (await backend<{ oauth: boolean }>('/v1/connections/google/available')).oauth
+  } catch {
+    return false
+  }
+}
+
+/** The Google sign-in page. Google sends the browser back to /flows/connections?google=… */
+export async function startGoogleSignIn(name = ''): Promise<string> {
+  const out = await backend<{ url: string }>(`/v1/connections/google/start?name=${encodeURIComponent(name.slice(0, 80))}`, { method: 'POST' })
+  return out.url
+}
+
+/** Cashfree: test keys start with TEST (app id) or carry _test_ (secret key). */
+export const cashfreeMode = (appId: string, secret: string): 'test' | 'live' =>
+  appId.trim().toUpperCase().startsWith('TEST') || secret.includes('_test_') ? 'test' : 'live'

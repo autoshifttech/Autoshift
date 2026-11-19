@@ -1598,12 +1598,13 @@
         "openConnections": "Abrir Conexões",
         "noAccount": {
           "google": "Nenhuma conta Google conectada ainda.",
-          "razorpay": "Nenhuma conta Razorpay conectada ainda."
+          "razorpay": "Nenhuma conta Razorpay ou Cashfree conectada ainda.",
+          "cashfree": "Nenhuma conta Razorpay ou Cashfree conectada ainda."
         },
         "service": {
           "google_sheets_append": "Adicionar linha no Google Planilhas",
           "google_calendar_event": "Criar evento no Google Agenda",
-          "razorpay_link": "Link de pagamento Razorpay"
+          "razorpay_link": "Link de pagamento (Razorpay ou Cashfree)"
         },
         "field": {
           "spreadsheet": "Planilha (link ou ID)",
@@ -1619,7 +1620,7 @@
         "valuesHint": "Um valor por linha; cada linha preenche a próxima coluna.",
         "saveAs": "Salvar o link como",
         "saveAsHint": "Use em uma mensagem posterior como",
-        "razorpayHelp": "O dinheiro vai para a sua própria conta Razorpay. O link abre uma página com UPI, cartões e internet banking e expira em 24 horas. No valor use o total do carrinho, por exemplo {{vars.cart_total}}.",
+        "razorpayHelp": "O dinheiro vai para a sua própria conta Razorpay ou Cashfree. O link abre uma página com UPI, cartões e net banking, e expira em 24 horas. Para o valor, use o total do carrinho, por exemplo {{vars.cart_total}}.",
         "sendQr": "Também criar um QR code UPI",
         "sendQrHelp": "Para clientes que pagam com outro telefone. Mostre-o com uma etapa Enviar mídia (imagem) usando o link {var}. Requer QR codes ativados no Razorpay.",
         "ifFails": "Se o link não puder ser criado, ir para"
@@ -1675,12 +1676,12 @@
           "service": {
             "google_sheets_append": "adicionar linha no Google Planilhas",
             "google_calendar_event": "criar evento no Google Agenda",
-            "razorpay_link": "link de pagamento Razorpay"
+            "razorpay_link": "Link de pagamento (Razorpay ou Cashfree)"
           },
           "lead": "Lead criado: {title}",
           "cart": "Adicionado ao carrinho: {detail}",
           "cartMissing": "Esse produto não está na lista.",
-          "payLink": "Um link de pagamento Razorpay de ₹{detail} seria enviado aqui."
+          "payLink": "Um link de pagamento de ₹{detail} seria enviado aqui."
         }
       },
       "duplicateNode": "Duplicar",
@@ -1726,7 +1727,7 @@
       "tagNone": "{mode} tag (nenhuma escolhida)",
       "action_google_sheets_append": "Adicionar linha no Google Planilhas",
       "action_google_calendar_event": "Criar evento no Google Agenda",
-      "action_razorpay_link": "Link de pagamento Razorpay",
+      "action_razorpay_link": "Link de pagamento (Razorpay ou Cashfree)",
       "actionNone": "Escolha um serviço",
       "leadNone": "Escolha um título para o lead",
       "cartCount": "{count, plural, =1 {1 produto} other {# produtos}}",
@@ -2986,7 +2987,7 @@
     },
     "order_payment": {
       "name": "Pedido com pagamento",
-      "description": "Receba um pedido no chat, confirme e envie um link de pagamento Razorpay. Pagamento na entrega e atendimento humano já incluídos.",
+      "description": "Receba um pedido no chat, confirme e envie um link de pagamento (Razorpay ou Cashfree). Pagamento na entrega e transferência para uma pessoa já incluídos.",
       "keywords": "pedido,comprar,loja",
       "askItem": "O que você gostaria de pedir? Diga o item e a quantidade.",
       "askAddress": "Obrigado! Qual é o endereço de entrega?",
@@ -3011,7 +3012,7 @@
     },
     "payment_confirmed": {
       "name": "Pagamento confirmado",
-      "description": "Envia um agradecimento assim que um link de pagamento Razorpay é pago. Adicione etapas para etiquetar o cliente ou avisar sua equipe.",
+      "description": "Envia um agradecimento assim que um link de pagamento é pago. Adicione etapas para marcar o cliente ou avisar sua equipe.",
       "message": "Pagamento recebido — obrigado! Seu pedido está confirmado."
     }
   },
@@ -4673,13 +4674,12 @@
     "title": "Conexões",
     "breadcrumb": "Caminho de navegação",
     "bannerTitle": "Contas que seus fluxos podem usar",
-    "bannerDesc": "Google para Planilhas e Agenda, Razorpay para links de pagamento. Conecte uma vez; todos os fluxos do espaço de trabalho podem usar, e continua funcionando quando alguém sai. Você pode conectar mais de uma de cada.",
+    "bannerDesc": "Google para Planilhas e Agenda; Razorpay ou Cashfree para links de pagamento. Conecte uma vez; todos os fluxos do workspace podem usar, e continua funcionando quando alguém sai. Você pode conectar mais de um de cada.",
     "connectGoogle": "Conectar Google",
     "addAnother": "Adicionar outra",
     "googleServiceAccount": "Conta de serviço do Google",
-    "googleSoon": "O login com Google entra no ar com o backend. Por enquanto, adicione uma conta de serviço em “Adicionar outra”.",
     "emptyTitle": "Nenhuma conexão ainda",
-    "emptyDesc": "Conecte uma conta Google ou adicione chaves do Razorpay em “Adicionar outra” e use-as em qualquer fluxo.",
+    "emptyDesc": "Conecte uma conta Google, ou adicione chaves Razorpay ou Cashfree em “Adicionar outra”, e use em qualquer fluxo.",
     "googleTitle": "Adicionar conta de serviço do Google",
     "googleStep1": "No Google Cloud, crie uma <b>conta de serviço</b> e baixe a chave <code>JSON</code>.",
     "googleStep2": "Ative a <b>Google Sheets API</b> e a <b>Google Calendar API</b> nesse projeto (e a Drive API, para escolher planilhas em uma lista).",
@@ -4719,7 +4719,7 @@
     "hideSecret": "Ocultar segredo",
     "added": "Conta conectada",
     "removed": "Conexão removida",
-    "kindGoogle": "Conta de serviço do Google",
+    "kindGoogle": "Google",
     "kindRazorpay": "Razorpay",
     "connected": "Conectada",
     "addedOn": "Adicionada em {date}",
@@ -4727,11 +4727,25 @@
     "removeTitle": "Remover {name}?",
     "removeDesc": "Os fluxos que usam esta conta deixam de funcionar até você conectar outra.",
     "removeConfirm": "Remover",
-    "webhookUrl": "URL do webhook para o Razorpay",
+    "webhookUrl": "URL do webhook para {provider}",
     "webhookCopy": "Copiar",
     "webhookCopied": "URL do webhook copiado",
     "webhookCopyFailed": "Não foi possível copiar; selecione o texto",
-    "webhookEvents": "No Razorpay → Webhooks, adicione este URL com o mesmo segredo e os eventos payment_link.paid e qr_code.credited."
+    "webhookEvents": "No Razorpay → Webhooks, adicione este URL com o mesmo segredo e os eventos payment_link.paid e qr_code.credited.",
+    "kindGoogleSa": "Conta de serviço Google",
+    "kindCashfree": "Cashfree",
+    "googleConnected": "Conta Google conectada",
+    "googleCancelled": "O login com Google foi cancelado. Nada foi conectado.",
+    "googleFailed": "Não foi possível conectar o Google. {reason}",
+    "googleUseKey": "O login com Google ainda não está ativado no AutoShift. Você pode adicionar uma chave de conta de serviço.",
+    "cashfreeTitle": "Adicionar Cashfree",
+    "cashfreeIntro": "Painel Cashfree → <b>Developers</b> → <b>API Keys</b>. Copie o <b>App ID</b> e a <b>Secret Key</b>. Chaves de teste (sandbox) criam links de teste; chaves de produção criam links reais.",
+    "cashfreeNamePh": "ex.: Cashfree — loja principal",
+    "cashfreeAppId": "App ID",
+    "cashfreeSecret": "Secret Key",
+    "securityNoteSaved": "As chaves são criptografadas e nunca mais mostradas. O primeiro link de pagamento feito com elas mostra se a {provider} as aceita.",
+    "saveFailed": "Não foi possível salvar as chaves. Confira e tente de novo.",
+    "webhookEventsCashfree": "Na Cashfree → Developers → Webhooks, adicione esta URL e escolha os eventos de Payment Link. A Cashfree assina com a sua Secret Key, então não há mais nada a preencher."
   },
   "VerifyPhone": {
     "title": "Verifique seu telefone",
@@ -5096,8 +5110,8 @@
     "checkProducts": "Lista de produtos: {count} produtos",
     "checkNoProducts": "Ainda não há lista de produtos. Envie seu arquivo Excel ou CSV.",
     "openFiles": "Abrir Arquivos",
-    "checkRazorpay": "Razorpay conectado para pagamentos online",
-    "checkNoRazorpay": "Conecte sua conta Razorpay para pagamentos online.",
+    "checkRazorpay": "Uma conta de pagamento (Razorpay ou Cashfree) está conectada para pagamentos online",
+    "checkNoRazorpay": "Conecte sua conta Razorpay ou Cashfree para pagamentos online.",
     "checkOnlineOff": "Pagamentos online desligados",
     "openConnections": "Abrir Conexões",
     "checkOn": "Este assistente está ligado",

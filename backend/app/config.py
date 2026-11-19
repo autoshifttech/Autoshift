@@ -44,6 +44,14 @@ class Settings(BaseSettings):
     seller_state_code: str = "29"
     gst_rate: float = 0.18
 
+    # Google sign-in for Flows → Connections ("Connect Google": Sheets and Calendar). A Web OAuth client
+    # in Google Cloud whose redirect URI is <public_api_url>/v1/connections/google/callback. Empty = off
+    # (businesses can still add a service-account key).
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
+    # This API's public address, e.g. https://autoshift-mddo.onrender.com
+    public_api_url: str = ""
+
     # Browser origins allowed to call the API, comma separated.
     cors_origins: str = "http://localhost:3000"
     # Hosts the MCP endpoint answers to (DNS-rebinding protection). Add your API domain in production.

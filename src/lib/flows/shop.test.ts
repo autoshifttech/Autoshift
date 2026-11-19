@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({
   sendText: vi.fn(async (_args: { text: string }) => ({ whatsapp_message_id: "wamid.text" })),
   sendMedia: vi.fn(async (_args: { link: string }) => ({ whatsapp_message_id: "wamid.media" })),
   link: vi.fn(async (_args: Record<string, unknown>) => ({ id: "pl-1", short_url: "https://rzp.io/i/abc", qr_image_url: "https://rzp.io/qr.png", amount_paise: 199800, mode: "test", qr_problem: null })),
+  google: vi.fn(async (_args: { service: string; params: Record<string, string> }) => ({ link: "https://calendar.google.com/event?eid=1" } as { link?: string })),
 }));
 
 vi.mock("./admin-client", async () => {
@@ -21,7 +22,7 @@ vi.mock("./meta-send", () => ({
   engineSendInteractiveButtons: vi.fn(async () => ({ whatsapp_message_id: "wamid.buttons" })),
   engineSendInteractiveList: vi.fn(async () => ({ whatsapp_message_id: "wamid.list" })),
 }));
-vi.mock("@/lib/backend/internal", () => ({ createPaymentLink: h.link }));
+vi.mock("@/lib/backend/internal", () => ({ createPaymentLink: h.link, runGoogleAction: h.google }));
 
 import { dispatchInboundToFlows } from "./engine";
 
@@ -160,5 +161,40 @@ describe("Add to cart from the product list (Files page)", () => {
       { node_key: "done", node_type: "end", config: {} },
     ]);
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+});
+
+describe("Google steps", () => {
+  const GNODES = [
+    { node_key: "ask", node_type: "collect_input", config: { prompt_text: "When?", var_key: "when", next_node_key: "sheet" } },
+    { node_key: "sheet", node_type: "action", config: { service: "google_sheets_append", connection_id: "g-1", params: { spreadsheet: "1AbCdEfGhIj", sheet: "Leads", values: "{{contact.name}}\n{{contact.phone}}\n{{vars.when}}" }, save_as: "", next_node_key: "cal", error_node_key: "oops" } },
+    { node_key: "cal", node_type: "action", config: { service: "google_calendar_event", connection_id: "g-1", params: { calendar: "primary", title: "Visit: {{contact.name}}", start: "{{vars.when}}", minutes: "30" }, save_as: "event_link", next_node_key: "ok", error_node_key: "oops" } },
+    { node_key: "ok", node_type: "send_message", config: { text: "Booked: {{vars.event_link}}", next_node_key: "done" } },
+    { node_key: "oops", node_type: "send_message", config: { text: "Google failed", next_node_key: "done" } },
+    { node_key: "done", node_type: "end", config: {} },
+  ];
+  const useGoogleFlow = () => {
+    setup();
+    h.tables.flows = [{ ...FLOW, entry_node_id: "ask" }];
+    h.tables.flow_nodes = GNODES.map((x) => ({ flow_id: "flow-shop", ...x }));
+    h.google.mockClear();
+  };
+
+  it("adds the sheet row and calendar event with filled-in values", async () => {
+    useGoogleFlow();
+    await say("order");
+    await say("2026-11-20 15:30");
+    expect(h.google).toHaveBeenNthCalledWith(1, expect.objectContaining({ connectionId: "g-1", service: "google_sheets_append", params: expect.objectContaining({ values: "Ravi\n+919800000000\n2026-11-20 15:30" }) }));
+    expect(h.google.mock.calls[1][0].params).toMatchObject({ title: "Visit: Ravi", start: "2026-11-20 15:30" });
+    expect(h.sendText.mock.calls.map((c) => c[0].text)).toContain("Booked: https://calendar.google.com/event?eid=1");
+  });
+
+  it("takes the 'if it fails' exit when Google refuses", async () => {
+    useGoogleFlow();
+    h.google.mockRejectedValueOnce(new Error("Google: The caller does not have permission"));
+    await say("order");
+    await say("tomorrow");
+    expect(h.sendText.mock.calls.map((c) => c[0].text)).toContain("Google failed");
+    expect(h.tables.flow_run_events.some((e) => (e as { payload?: { reason?: string } }).payload?.reason === "google_action_failed")).toBe(true);
   });
 });

@@ -16,9 +16,9 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addConnection, createConnection, deleteConnection, loadConnections, maskKey, parseServiceAccount, useConnections, type ConnectionKind, type FlowConnection } from "@/lib/flows/connections";
+import { addConnection, cashfreeMode, createConnection, deleteConnection, googleSignInAvailable, loadConnections, maskKey, parseServiceAccount, startGoogleSignIn, useConnections, type ConnectionKind, type FlowConnection } from "@/lib/flows/connections";
 import { backendUrl } from "@/lib/backend/client";
-import { ConnectionLogo, GoogleLogo, RazorpayLogo } from "./connection-logos";
+import { CashfreeLogo, ConnectionLogo, GoogleLogo, RazorpayLogo } from "./connection-logos";
 
 type T = ReturnType<typeof useTranslations>;
 
@@ -193,10 +193,80 @@ function RazorpayDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
   );
 }
 
-const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay" };
+function CashfreeDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
+  const [name, setName] = useState("");
+  const [appId, setAppId] = useState("");
+  const [secret, setSecret] = useState("");
+  const [mode, setMode] = useState<"test" | "live" | "">("");
+  const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-/** Where this Razorpay account tells AutoShift that a customer paid (copied into Razorpay → Webhooks). */
-function WebhookUrl({ url, t }: { url: string; t: T }) {
+  const idOk = /^[A-Za-z0-9_-]{6,120}$/.test(appId.trim());
+  const secretOk = secret.trim().length >= 8;
+  // Guessed from the keys until the person picks one.
+  const chosen = mode || (appId || secret ? cashfreeMode(appId, secret) : "test");
+  const reset = () => { setName(""); setAppId(""); setSecret(""); setMode(""); setTried(false); };
+  const submit = () => {
+    setTried(true);
+    if (!idOk || !secretOk) return;
+    const label = name.trim() || `Cashfree — ${chosen === "live" ? t("live") : t("test")}`;
+    if (!backendUrl()) {
+      addConnection({ kind: "cashfree", name: label, detail: maskKey(appId), mode: chosen });
+      toast.success(t("added"));
+      reset();
+      onOpenChange(false);
+      return;
+    }
+    setBusy(true);
+    createConnection({ kind: "cashfree", name: label, appId, secretKey: secret, mode: chosen }).then(
+      () => {
+        toast.success(t("added"));
+        reset();
+        onOpenChange(false);
+      },
+      (e) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
+    ).finally(() => setBusy(false));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><CashfreeLogo className="size-5" /> {t("cashfreeTitle")}</DialogTitle>
+          <DialogDescription>{t.rich("cashfreeIntro", { b: bold, code })}</DialogDescription>
+        </DialogHeader>
+        <Field id="cf-name" label={t("nameOptional")}>
+          <Input id="cf-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("cashfreeNamePh")} />
+        </Field>
+        <Field id="cf-mode" label={t("environment")}>
+          <NativeSelect id="cf-mode" value={chosen} onChange={(e) => setMode(e.target.value as "test" | "live")}>
+            <option value="test">{t("sandbox")}</option>
+            <option value="live">{t("production")}</option>
+          </NativeSelect>
+        </Field>
+        <Field id="cf-id" label={t("cashfreeAppId")} required error={tried && !idOk ? t("clientIdError") : undefined}>
+          <Input id="cf-id" value={appId} onChange={(e) => setAppId(e.target.value)} placeholder={t("clientIdPh")} autoComplete="off" aria-invalid={tried && !idOk} />
+        </Field>
+        <Field id="cf-secret" label={t("cashfreeSecret")} required error={tried && !secretOk ? t("secretError") : undefined}>
+          <SecretInput id="cf-secret" value={secret} onChange={setSecret} placeholder={t("secret")} invalid={tried && !secretOk} t={t} />
+        </Field>
+        <SecurityNote>{t("securityNoteSaved", { provider: "Cashfree" })}</SecurityNote>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t("cancel")}</Button>
+          <Button onClick={submit} disabled={busy || !appId.trim() || !secret.trim()}>
+            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("addAccount")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay", cashfree: "kindCashfree" };
+const kindLabel = (c: FlowConnection) => (c.kind === "google" && c.detail.endsWith(".gserviceaccount.com") ? "kindGoogleSa" : KIND_LABEL[c.kind]);
+
+/** Where the payment provider tells AutoShift that a customer paid (copied into its Webhooks settings). */
+function WebhookUrl({ url, provider, events, t }: { url: string; provider: string; events: string; t: T }) {
   const copy = () =>
     navigator.clipboard.writeText(url).then(
       () => toast.success(t("webhookCopied")),
@@ -204,14 +274,14 @@ function WebhookUrl({ url, t }: { url: string; t: T }) {
     );
   return (
     <div className="mt-3 rounded-xl bg-muted/60 p-3">
-      <p className="text-xs font-medium text-foreground">{t("webhookUrl")}</p>
+      <p className="text-xs font-medium text-foreground">{t("webhookUrl", { provider })}</p>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
         <code className="block min-w-0 flex-1 rounded-md bg-background px-2 py-1.5 font-mono text-xs break-all text-foreground select-all">{url}</code>
         <Button type="button" variant="outline" size="sm" className="min-h-11 w-full shrink-0 sm:w-auto" onClick={() => void copy()}>
           {t("webhookCopy")}
         </Button>
       </div>
-      <p className="mt-2 text-xs break-words text-muted-foreground">{t("webhookEvents")}</p>
+      <p className="mt-2 text-xs break-words text-muted-foreground">{events}</p>
     </div>
   );
 }
@@ -226,7 +296,7 @@ function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemov
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-foreground">{c.name}</p>
           <p className="truncate text-sm text-muted-foreground">
-            {t(KIND_LABEL[c.kind])}
+            {t(kindLabel(c))}
             {c.mode ? ` · ${t(c.mode)}` : ""} · {c.detail}
           </p>
           <p className="text-xs text-muted-foreground">{t("addedOn", { date: new Date(c.createdAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) })}</p>
@@ -236,7 +306,8 @@ function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemov
           <Trash2 className="size-4" />
         </Button>
       </div>
-      {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} t={t} />}
+      {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} provider="Razorpay" events={t("webhookEvents")} t={t} />}
+      {c.kind === "cashfree" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/cashfree/c/${c.id}`} provider="Cashfree" events={t("webhookEventsCashfree")} t={t} />}
     </li>
   );
 }
@@ -251,6 +322,36 @@ export function ConnectionsPage() {
   }, []);
   const [dialog, setDialog] = useState<ConnectionKind | null>(null);
   const [removing, setRemoving] = useState<FlowConnection | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
+
+  // Back from Google's sign-in page: say how it went, then tidy the address bar.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const result = q.get("google");
+    if (!result) return;
+    if (result === "connected") {
+      toast.success(t("googleConnected"));
+      void loadConnections().catch(() => {});
+    } else if (result === "cancelled") toast.info(t("googleCancelled"));
+    else toast.error(t("googleFailed", { reason: q.get("reason") || "" }));
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [t]);
+
+  /** Signs in with Google when the platform has it set up; otherwise offers the service-account key. */
+  const connectGoogle = async () => {
+    setSigningIn(true);
+    try {
+      if (await googleSignInAvailable()) {
+        window.location.assign(await startGoogleSignIn());
+        return;
+      }
+      toast.info(t("googleUseKey"));
+      setDialog("google");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("googleFailed", { reason: "" }));
+    }
+    setSigningIn(false);
+  };
 
   const closeDialog = (o: boolean) => { if (!o) setDialog(null); };
 
@@ -269,6 +370,7 @@ export function ConnectionsPage() {
           <span className="flex shrink-0 items-center gap-2 rounded-2xl bg-background px-3 py-3 shadow-[var(--shadow-card)]">
             <GoogleLogo className="size-6" />
             <RazorpayLogo className="size-6" />
+            <CashfreeLogo className="size-6" />
           </span>
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-foreground">{t("bannerTitle")}</h2>
@@ -276,16 +378,17 @@ export function ConnectionsPage() {
           </div>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button className="h-10" onClick={() => toast.info(t("googleSoon"))}>
-            <Plus className="mr-1.5 size-4" /> {t("connectGoogle")}
+          <Button className="min-h-11" disabled={signingIn} aria-busy={signingIn} onClick={() => void connectGoogle()}>
+            {signingIn ? <Loader2 className="mr-1.5 size-4 animate-spin" aria-hidden /> : <Plus className="mr-1.5 size-4" aria-hidden />} {t("connectGoogle")}
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger className={cn(buttonVariants({ variant: "outline" }), "h-10")}>
+            <DropdownMenuTrigger className={cn(buttonVariants({ variant: "outline" }), "min-h-11")}>
               <Link2 className="mr-1.5 size-4" /> {t("addAnother")}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-56">
               <DropdownMenuItem onClick={() => setDialog("google")}><Table2 className="size-4" /> {t("googleServiceAccount")}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDialog("razorpay")}><RazorpayLogo className="size-4" /> Razorpay</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDialog("cashfree")}><CashfreeLogo className="size-4" /> Cashfree</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -303,6 +406,7 @@ export function ConnectionsPage() {
 
       <GoogleDialog open={dialog === "google"} onOpenChange={closeDialog} t={t} />
       <RazorpayDialog open={dialog === "razorpay"} onOpenChange={closeDialog} t={t} />
+      <CashfreeDialog open={dialog === "cashfree"} onOpenChange={closeDialog} t={t} />
 
       <ConfirmDialog
         open={removing !== null}
