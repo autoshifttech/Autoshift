@@ -15,7 +15,7 @@ from typing import Literal
 from .db import Db
 from .llm import Llm, LlmError
 from .security import decrypt
-from . import catalog, shop_orders, usage, wallet
+from . import booking, catalog, shop_orders, usage, wallet
 
 HUMAN_WORDS = re.compile(r"\b(human|agent|person|representative|manager|someone real|talk to (a )?(person|human))\b", re.I)
 UNSURE_MARKER = "[HANDOFF]"
@@ -44,6 +44,8 @@ class Reply:
     balance_paise: int | None = None
     # A shop assistant's confirmed order (its [ORDER] line), for the caller to place.
     order: dict | None = None
+    # A booking assistant's confirmed appointment (its [BOOK] line), for the caller to place.
+    booking: dict | None = None
 
 
 def _words(text: str) -> set[str]:
@@ -87,9 +89,13 @@ def build_system(assistant: dict, message: str, context: str = "") -> str:
         parts.append(shop_orders.instructions(assistant.get("shop") or {}))
         if "_orders" in assistant:
             parts.append(shop_orders.describe_orders(assistant["_orders"]))
+    if booking.booking_on(assistant) and "_booking" in assistant:
+        b = assistant["_booking"]
+        parts.append(booking.instructions(b["settings"], b["slots"], b["settings"]["language"]))
+        parts.append(booking.describe_appointments(b["upcoming"], b["settings"]))
     if (assistant.get("handoff") or {}).get("onUnknown", True):
-        if shop_orders.shop_on(assistant) and products:
-            parts.append(f"When something in an order is unclear (which item a size is for, a missing detail), ask the customer: never hand over for that. Only when the customer asks about something the product list, facts and instructions don't cover (a complaint, a return, a problem with a delivery), reply with exactly {UNSURE_MARKER} and nothing else.")
+        if (shop_orders.shop_on(assistant) and products) or booking.booking_on(assistant):
+            parts.append(f"When something in an order or a booking is unclear (which item a size is for, a missing detail), ask the customer: never hand over for that. Only when the customer asks about something the product list, facts and instructions don't cover (a complaint, a return, a problem with a delivery), reply with exactly {UNSURE_MARKER} and nothing else.")
         else:
             parts.append(f"If you cannot answer from the facts and instructions, reply with exactly {UNSURE_MARKER} and nothing else.")
     parts.append("Reply only with your message to the customer, never with notes to yourself.")
@@ -156,6 +162,18 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         assistant = {**assistant, "_catalog": catalog.as_facts(products), "_products": products}
     if shop and contact_id:
         assistant = {**assistant, "_orders": await shop_orders.recent_orders(sdb, account_id, contact_id)}
+    if booking.booking_on(assistant):
+        from datetime import datetime, timedelta, timezone
+
+        settings_b = await booking.load_settings(sdb, account_id)
+        now_b = datetime.now(timezone.utc)
+        shortest = min([int(x.get("minutes") or settings_b["slot_minutes"]) for x in settings_b["services"]] or [int(settings_b["slot_minutes"])])
+        busy = await booking.booked_between(sdb, account_id, now_b, now_b + timedelta(days=booking.PROMPT_DAYS + 1))
+        assistant = {**assistant, "_booking": {
+            "settings": settings_b,
+            "slots": booking.free_slots(settings_b, busy, now_b, shortest, days=booking.PROMPT_DAYS),
+            "upcoming": await booking.upcoming_for(sdb, account_id, contact_id, now_b),
+        }}
     context = " ".join(h["content"] for h in history[-8:] if h["role"] == "user")[-2000:]
     system, turns = build_system(assistant, message, context), [*history, {"role": "user", "content": message}]
     result, problem = None, ""
@@ -177,10 +195,12 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         return Reply("failed", reason=problem)
 
     text = result.text.strip()
-    order = None
+    order = book = None
     if shop_orders.shop_on(assistant) and assistant.get("_products"):
         text, order = shop_orders.extract(text)
-    if not text and order is None:
+    if booking.booking_on(assistant):
+        text, book = booking.extract(text)
+    if not text and order is None and book is None:
         return Reply("failed", reason="The model sent an empty reply")
     if UNSURE_MARKER in text:
         return Reply("handoff", reason="The assistant could not answer")
@@ -189,4 +209,4 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         paid = await wallet.charge(sdb, account_id, "charge_ai", 1, ref=ref, idem_key=f"ai:{ref}")
     except wallet.InsufficientFunds:
         return Reply("no_funds", reason="The wallet ran out", balance_paise=await wallet.balance(sdb, account_id))
-    return Reply("reply", text=text, balance_paise=paid.balance_paise if paid else have, order=order)
+    return Reply("reply", text=text, balance_paise=paid.balance_paise if paid else have, order=order, booking=book)

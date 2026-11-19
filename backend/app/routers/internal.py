@@ -12,7 +12,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from .. import ai_runner, audit, events, pages, platform_settings, shop_orders, shop_payments, wallet
+from .. import ai_runner, audit, booking, events, pages, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import Bridge, ServiceDb, get_llm
 from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalPaymentLink
@@ -82,6 +82,8 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
     if not rows:
         raise HTTPException(404, "Assistant not found")
     history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
+    if booking.booking_on(rows[0]) and "appointments" not in pages.enabled(acct):
+        rows[0] = {**rows[0], "booking": {"enabled": False}}  # Appointments is switched off: no booking
     if shop_orders.shop_on(rows[0]) and "orders" not in pages.enabled(acct):
         rows[0] = {**rows[0], "shop": {**(rows[0].get("shop") or {}), "enabled": False}}  # Orders is switched off: no order taking
     if shop_orders.shop_on(rows[0]) and body.contact_id:
@@ -97,12 +99,16 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
     if out.status == "handoff" and shop_orders.shop_on(rows[0]):
         # A shop customer is never left in silence: tell them a person will reply.
         result["text"] = shop_orders.words(rows[0].get("shop") or {})["handoff"]
+    if out.status == "reply" and out.booking is not None:
+        added, appt = await booking.place(sdb, assistant=rows[0], req=out.booking, conversation_id=body.conversation_id, contact_id=body.contact_id, customer_phone=body.customer_phone)
+        result["text"] = "\n\n".join(t for t in (result["text"], added) if t)
+        result["appointment"] = {"id": appt["id"], "number": appt["number"]} if appt else None
     if out.status == "reply" and out.order is not None:
         # The customer confirmed an order: AutoShift prices it from the product list and adds the summary and payment link.
         cat = await sdb.select("product_catalog", {"account_id": body.account_id}, limit=1)
         products = (cat[0].get("products") or []) if cat else []
         added, order = await shop_orders.place(sdb, settings, assistant=rows[0], products=products, req=out.order, conversation_id=body.conversation_id, contact_id=body.contact_id, customer_phone=body.customer_phone)
-        result["text"] = "\n\n".join(t for t in (out.text, added) if t)
+        result["text"] = "\n\n".join(t for t in (result["text"], added) if t)
         result["order"] = {"id": order["id"], "number": order["number"]} if order else None
     return result
 

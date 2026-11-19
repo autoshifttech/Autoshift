@@ -82,4 +82,15 @@ async def test_reply(assistant_id: str, body: ReplyTest, ctx: AdminMember, db: U
             added = summary_preview = shop_orders.problem_text(shop, exc)
         result["text"] = "\n\n".join(t for t in (out.text, added) if t)
         result["order"] = {"preview": summary_preview}
+    if out.booking is not None:
+        # A test never books: show what the customer would be told.
+        from .. import booking
+
+        settings_b = await booking.load_settings(sdb, ctx.account_id)
+        svc = booking.service_by_name(settings_b, out.booking.get("service", "")) if not out.booking.get("_bad") else None
+        start = booking.parse_start(out.booking.get("start", ""), settings_b) if svc else None
+        w = booking.words(settings_b["language"])
+        added = w["booked"].format(service=svc["name"], when=booking.when_text(start, settings_b["language"])) if svc and start and out.booking.get("name") else w["bad"]
+        result["text"] = "\n\n".join(t for t in (result["text"], added) if t)
+        result["booking"] = {"preview": added}
     return result

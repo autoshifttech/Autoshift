@@ -29,6 +29,11 @@ class ShopSettings(BaseModel):
     delivery_note: str = Field("", max_length=300)  # e.g. "Delivery in 3-5 days across India"
 
 
+class BookingToggle(BaseModel):
+    """An assistant that books appointments in the chat (services and hours are on the Appointments page)."""
+    enabled: bool = False
+
+
 class Faq(BaseModel):
     q: str = Field("", max_length=300)
     a: str = Field("", max_length=4000)
@@ -47,6 +52,7 @@ class AssistantCreate(BaseModel):
     knowledge: list[Faq] = []
     use_catalog: bool = False
     shop: ShopSettings = ShopSettings()
+    booking: BookingToggle = BookingToggle()
     tool_ids: list[str] = []
     capture_leads: bool = False
     audience: Audience = "all"
@@ -66,6 +72,7 @@ class AssistantPatch(BaseModel):
     knowledge: list[Faq] | None = None
     use_catalog: bool | None = None
     shop: ShopSettings | None = None
+    booking: BookingToggle | None = None
     tool_ids: list[str] | None = None
     capture_leads: bool | None = None
     audience: Audience | None = None

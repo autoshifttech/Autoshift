@@ -16,13 +16,13 @@ TYPES = ("retail", "restaurant", "clinic", "salon", "real_estate", "education", 
 SHOP_SOURCES = ("whatsapp", "shopify", "website")
 # Always on, so nobody is ever locked out of their workspace.
 CORE = ("dashboard", "inbox", "contacts", "agents", "settings", "wallet", "support", "notifications", "opt_ins", "files")
-OPTIONAL = ("leads", "orders", "insights", "broadcasts", "templates", "drips", "segments", "automations", "flows", "ai_tools")
+OPTIONAL = ("leads", "orders", "appointments", "insights", "broadcasts", "templates", "drips", "segments", "automations", "flows", "ai_tools")
 
 BUILTIN_DEFAULTS: dict[str, list[str]] = {
     "retail": ["leads", "orders", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
     "restaurant": ["orders", "insights", "broadcasts", "templates", "segments"],
-    "clinic": ["leads", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
-    "salon": ["leads", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
+    "clinic": ["leads", "appointments", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
+    "salon": ["leads", "appointments", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
     "real_estate": ["leads", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
     "education": ["leads", "insights", "broadcasts", "templates", "drips", "segments", "flows"],
     "services": ["leads", "insights", "broadcasts", "templates", "drips", "automations", "flows"],
@@ -33,6 +33,7 @@ SETTING_KEY = "page_defaults"
 # API areas that belong to an optional page: switched off, they answer 403.
 API_PAGES: tuple[tuple[str, str], ...] = (
     ("/v1/orders", "orders"),
+    ("/v1/appointments", "appointments"),
     ("/v1/ws/leads", "leads"), ("/v1/ws/pipelines", "leads"),
     ("/v1/ws/broadcasts", "broadcasts"),
     ("/v1/ws/templates", "templates"),

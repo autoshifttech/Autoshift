@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .mcp_server import mount_mcp
 from .deps import PageAccess
-from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders, pages, system_templates
+from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders, pages, system_templates, appointments
 
 
 class McpPathFix:
@@ -48,6 +48,14 @@ def create_app() -> FastAPI:
                     await shop_payments.reconcile_pending(sdb, settings, HttpWebBridge(settings))
                 except Exception:  # noqa: BLE001
                     logging.getLogger("autoshift").exception("shop payment check failed")
+            if tick % 4 == 2:  # every two minutes: appointment reminders about a day before
+                try:
+                    from .routers.appointments import send_reminders
+                    from .web_bridge import HttpWebBridge
+
+                    await send_reminders(sdb, HttpWebBridge(settings))
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("appointment reminder pass failed")
             if tick % 120 == 60:  # about once an hour: product lists from businesses' own websites
                 try:
                     from . import catalog_feed
@@ -87,9 +95,9 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
-    for r in (me.router, internal.router, support.router, tools.router, team.router, billing_details.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router, workspace_more.router, workspace_ops.router, platform_ops.router, platform_more.router, custom_tools.router, catalog.router, orders.router):
+    for r in (me.router, internal.router, support.router, tools.router, team.router, billing_details.router, hooks.router, reports.router, businesses.router, assistants.router, connections.router, ai_models.router, platform.router, platform_money.router, keys.router, wallet.router, plans.router, webhooks.router, workspace_more.router, workspace_ops.router, platform_ops.router, platform_more.router, custom_tools.router, catalog.router, orders.router, appointments.router):
         # Areas that belong to an optional page answer 403 while it's switched off for the business.
-        guarded = r in (workspace_more.router, workspace_ops.router, orders.router, tools.router)
+        guarded = r in (workspace_more.router, workspace_ops.router, orders.router, tools.router, appointments.router)
         app.include_router(r, dependencies=[PageAccess] if guarded else [])
     app.include_router(pages.router)
     app.include_router(system_templates.router)
