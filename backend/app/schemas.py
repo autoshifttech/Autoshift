@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 Tone = Literal["friendly", "professional", "concise"]
 Audience = Literal["all", "new_contacts", "tagged", "after_hours"]
@@ -110,12 +110,39 @@ class CashfreeSecret(BaseModel):
     mode: Literal["test", "live"] | None = None
 
 
+class ShopifySecret(BaseModel):
+    shop: str = Field(min_length=3, max_length=200)
+    # Either an Admin API access token (shpat_…) or the app's client ID and secret.
+    access_token: str | None = Field(None, min_length=10, max_length=300)
+    client_id: str | None = Field(None, min_length=6, max_length=200)
+    client_secret: str | None = Field(None, min_length=6, max_length=300)
+
+    @model_validator(mode="after")
+    def _one_way(self):
+        if not self.access_token and not (self.client_id and self.client_secret):
+            raise ValueError("Enter the Admin API access token, or the app's client ID and secret")
+        return self
+
+
+class WooSecret(BaseModel):
+    url: str = Field(min_length=4, max_length=300)
+    consumer_key: str = Field(pattern=r"^ck_[A-Za-z0-9]{20,80}$")
+    consumer_secret: str = Field(pattern=r"^cs_[A-Za-z0-9]{20,80}$")
+
+
 class ConnectionCreate(BaseModel):
-    kind: Literal["google", "razorpay", "cashfree"]
+    kind: Literal["google", "razorpay", "cashfree", "shopify", "woocommerce"]
     name: str = Field("", max_length=80)
     google: GoogleSecret | None = None
     razorpay: RazorpaySecret | None = None
     cashfree: CashfreeSecret | None = None
+    shopify: ShopifySecret | None = None
+    woocommerce: WooSecret | None = None
+
+
+class StoreOptions(BaseModel):
+    sync_products: bool | None = None
+    push_orders: bool | None = None
 
 
 class ProviderUpdate(BaseModel):

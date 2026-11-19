@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ChevronRight, Eye, EyeOff, Link2, Loader2, Plus, ShieldCheck, Table2, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronRight, Eye, EyeOff, Link2, Loader2, Plus, RefreshCw, ShieldCheck, Table2, Trash2 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -16,9 +16,10 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addConnection, cashfreeMode, createConnection, deleteConnection, googleSignInAvailable, loadConnections, maskKey, parseServiceAccount, startGoogleSignIn, useConnections, type ConnectionKind, type FlowConnection } from "@/lib/flows/connections";
+import { addConnection, cashfreeMode, createConnection, deleteConnection, googleSignInAvailable, isStoreKind, loadConnections, maskKey, parseServiceAccount, setStoreOptions, startGoogleSignIn, storeStatus, syncStore, useConnections, type ConnectionKind, type FlowConnection, type StoreStatus } from "@/lib/flows/connections";
 import { backendUrl } from "@/lib/backend/client";
-import { CashfreeLogo, ConnectionLogo, GoogleLogo, RazorpayLogo } from "./connection-logos";
+import { CashfreeLogo, ConnectionLogo, GoogleLogo, RazorpayLogo, ShopifyLogo, WooLogo } from "./connection-logos";
+import { Switch } from "@/components/ui/switch";
 
 type T = ReturnType<typeof useTranslations>;
 
@@ -262,7 +263,223 @@ function CashfreeDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
   );
 }
 
-const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay", cashfree: "kindCashfree" };
+/** After a store is added: bring its products in straight away and say how many. */
+async function firstSync(id: string, t: T) {
+  try {
+    const out = await syncStore(id);
+    toast.success(t("storeSynced", { count: out.products?.count ?? 0 }));
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : t("storeSyncFailed"));
+  }
+}
+
+function ShopifyDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
+  const [shop, setShop] = useState("");
+  const [useClient, setUseClient] = useState(false);
+  const [token, setToken] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const shopOk = shop.trim().length >= 3;
+  const keysOk = useClient ? clientId.trim().length >= 6 && clientSecret.trim().length >= 6 : token.trim().length >= 10;
+  const reset = () => { setShop(""); setToken(""); setClientId(""); setClientSecret(""); setUseClient(false); setTried(false); };
+  const submit = () => {
+    setTried(true);
+    if (!shopOk || !keysOk) return;
+    setBusy(true);
+    createConnection(useClient ? { kind: "shopify", name: "", shop, clientId, clientSecret } : { kind: "shopify", name: "", shop, accessToken: token }).then(
+      async (row) => {
+        toast.success(t("added"));
+        reset();
+        onOpenChange(false);
+        await firstSync(row.id, t);
+      },
+      (e) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
+    ).finally(() => setBusy(false));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><ShopifyLogo className="size-5" /> {t("shopifyTitle")}</DialogTitle>
+          <DialogDescription>{t("shopifyIntro")}</DialogDescription>
+        </DialogHeader>
+        <ol className="list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
+          <li>{t.rich("shopifyStep1", { b: bold })}</li>
+          <li>{t.rich("shopifyStep2", { b: bold, code })}</li>
+          <li>{t.rich("shopifyStep3", { b: bold })}</li>
+        </ol>
+        <Field id="sh-shop" label={t("shopifyShop")} required error={tried && !shopOk ? t("shopifyShopError") : undefined}>
+          <Input id="sh-shop" value={shop} onChange={(e) => setShop(e.target.value)} placeholder="mystore.myshopify.com" autoComplete="off" aria-invalid={tried && !shopOk} />
+        </Field>
+        <Field id="sh-way" label={t("shopifyKeyType")}>
+          <NativeSelect id="sh-way" value={useClient ? "client" : "token"} onChange={(e) => setUseClient(e.target.value === "client")}>
+            <option value="token">{t("shopifyUseToken")}</option>
+            <option value="client">{t("shopifyUseClient")}</option>
+          </NativeSelect>
+        </Field>
+        {useClient ? (
+          <>
+            <Field id="sh-cid" label={t("clientId")} required error={tried && clientId.trim().length < 6 ? t("clientIdError") : undefined}>
+              <Input id="sh-cid" value={clientId} onChange={(e) => setClientId(e.target.value)} autoComplete="off" aria-invalid={tried && clientId.trim().length < 6} />
+            </Field>
+            <Field id="sh-csecret" label={t("clientSecret")} required error={tried && clientSecret.trim().length < 6 ? t("secretError") : undefined}>
+              <SecretInput id="sh-csecret" value={clientSecret} onChange={setClientSecret} placeholder={t("secret")} invalid={tried && clientSecret.trim().length < 6} t={t} />
+            </Field>
+          </>
+        ) : (
+          <Field id="sh-token" label={t("shopifyToken")} required error={tried && token.trim().length < 10 ? t("secretError") : undefined}>
+            <SecretInput id="sh-token" value={token} onChange={setToken} placeholder="shpat_…" invalid={tried && token.trim().length < 10} t={t} />
+          </Field>
+        )}
+        <SecurityNote>{t("securityNote", { provider: "Shopify" })}</SecurityNote>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t("cancel")}</Button>
+          <Button onClick={submit} disabled={busy || !shop.trim()}>
+            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("verifyAndAdd")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function WooDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
+  const [url, setUrl] = useState("");
+  const [ck, setCk] = useState("");
+  const [cs, setCs] = useState("");
+  const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const urlOk = /^(https:\/\/)?[^\s/]+\.[^\s]+$/i.test(url.trim()) && !/^http:\/\//i.test(url.trim());
+  const ckOk = /^ck_[A-Za-z0-9]{20,80}$/.test(ck.trim());
+  const csOk = /^cs_[A-Za-z0-9]{20,80}$/.test(cs.trim());
+  const reset = () => { setUrl(""); setCk(""); setCs(""); setTried(false); };
+  const submit = () => {
+    setTried(true);
+    if (!urlOk || !ckOk || !csOk) return;
+    setBusy(true);
+    createConnection({ kind: "woocommerce", name: "", url, consumerKey: ck, consumerSecret: cs }).then(
+      async (row) => {
+        toast.success(t("added"));
+        reset();
+        onOpenChange(false);
+        await firstSync(row.id, t);
+      },
+      (e) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
+    ).finally(() => setBusy(false));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><WooLogo className="size-5" /> {t("wooTitle")}</DialogTitle>
+          <DialogDescription>{t.rich("wooIntro", { b: bold })}</DialogDescription>
+        </DialogHeader>
+        <Field id="wc-url" label={t("wooUrl")} required error={tried && !urlOk ? t("wooUrlError") : undefined}>
+          <Input id="wc-url" type="url" inputMode="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourshop.com" autoComplete="off" aria-invalid={tried && !urlOk} />
+        </Field>
+        <Field id="wc-ck" label={t("wooKey")} required error={tried && !ckOk ? t("wooKeyError") : undefined}>
+          <Input id="wc-ck" value={ck} onChange={(e) => setCk(e.target.value)} placeholder="ck_…" autoComplete="off" aria-invalid={tried && !ckOk} />
+        </Field>
+        <Field id="wc-cs" label={t("wooSecret")} required error={tried && !csOk ? t("wooSecretError") : undefined}>
+          <SecretInput id="wc-cs" value={cs} onChange={setCs} placeholder="cs_…" invalid={tried && !csOk} t={t} />
+        </Field>
+        <SecurityNote>{t("securityNote", { provider: "WooCommerce" })}</SecurityNote>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t("cancel")}</Button>
+          <Button onClick={submit} disabled={busy || !url.trim() || !ck.trim() || !cs.trim()}>
+            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("verifyAndAdd")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** A store card's lower half: what came across, the two switches and "Sync now". */
+function StorePanel({ c, t, locale }: { c: FlowConnection; t: T; locale: string }) {
+  const [status, setStatus] = useState<StoreStatus | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const store = c.kind === "shopify" ? "Shopify" : "WooCommerce";
+
+  const refresh = () =>
+    storeStatus(c.id).then(
+      (s) => { setStatus(s); setFailed(false); },
+      () => setFailed(true),
+    );
+  useEffect(() => {
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per card
+  }, [c.id]);
+
+  const syncNow = async () => {
+    setBusy(true);
+    try {
+      const out = await syncStore(c.id);
+      toast.success(t("storeSyncDone", { count: out.products?.count ?? 0, sent: out.orders.sent, updated: out.orders.updated }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("storeSyncFailed"));
+    }
+    await refresh();
+    setBusy(false);
+  };
+  const toggle = async (key: "sync_products" | "push_orders", value: boolean) => {
+    setStatus((s) => (s ? { ...s, [key]: value } : s));
+    try {
+      await setStoreOptions(c.id, { [key]: value });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("saveFailed"));
+      void refresh();
+    }
+  };
+
+  if (failed) return <p className="mt-3 text-sm text-muted-foreground">{t("storeStatusFailed")}</p>;
+  if (!status) return <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("storeLoading")}</p>;
+  return (
+    <div className="mt-3 space-y-3 rounded-xl bg-muted/60 p-3">
+      <p className="text-sm text-foreground">
+        {status.synced_at
+          ? t("storeProducts", { count: status.products, when: new Date(status.synced_at).toLocaleString(locale, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) })
+          : t("storeNotSynced")}
+        {" · "}
+        {t("storeOrdersSent", { count: status.orders_sent })}
+      </p>
+      {status.sync_error && (
+        <p role="alert" className="flex items-start gap-1.5 text-xs text-rose-800 dark:text-rose-300">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {t("storeLastError", { error: status.sync_error })}
+        </p>
+      )}
+      {status.orders_failed.map((o) => (
+        <p key={o.number} className="flex items-start gap-1.5 text-xs text-rose-800 dark:text-rose-300">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {t("storeOrderFailed", { number: o.number, error: o.error })}
+        </p>
+      ))}
+      <div className="divide-y divide-border rounded-lg border border-border bg-background">
+        {(["sync_products", "push_orders"] as const).map((key) => (
+          <label key={key} htmlFor={`${c.id}-${key}`} className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-3 py-2">
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-foreground">{t(`store_${key}`, { store })}</span>
+              <span className="block text-xs text-muted-foreground">{t(`store_${key}_help`, { store })}</span>
+            </span>
+            <Switch id={`${c.id}-${key}`} checked={status[key]} onCheckedChange={(v) => void toggle(key, v)} />
+          </label>
+        ))}
+      </div>
+      <Button variant="outline" className="min-h-11 w-full gap-1.5 sm:w-auto" disabled={busy} onClick={() => void syncNow()}>
+        {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <RefreshCw className="size-4" aria-hidden />} {t("storeSyncNow")}
+      </Button>
+      <p className="text-xs text-muted-foreground">{t("storeHow", { store })}</p>
+    </div>
+  );
+}
+
+const KIND_LABEL: Record<ConnectionKind, string> = { google: "kindGoogle", razorpay: "kindRazorpay", cashfree: "kindCashfree", shopify: "kindShopify", woocommerce: "kindWoo" };
 const kindLabel = (c: FlowConnection) => (c.kind === "google" && c.detail.endsWith(".gserviceaccount.com") ? "kindGoogleSa" : KIND_LABEL[c.kind]);
 
 /** Where the payment provider tells AutoShift that a customer paid (copied into its Webhooks settings). */
@@ -307,6 +524,7 @@ function ConnectionCard({ c, onRemove, t, locale }: { c: FlowConnection; onRemov
         </Button>
       </div>
       {c.kind === "razorpay" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/razorpay/c/${c.id}`} provider="Razorpay" events={t("webhookEvents")} t={t} />}
+      {isStoreKind(c.kind) && backendUrl() && <StorePanel c={c} t={t} locale={locale} />}
       {c.kind === "cashfree" && backendUrl() && <WebhookUrl url={`${backendUrl()}/v1/webhooks/cashfree/c/${c.id}`} provider="Cashfree" events={t("webhookEventsCashfree")} t={t} />}
     </li>
   );
@@ -389,6 +607,8 @@ export function ConnectionsPage() {
               <DropdownMenuItem onClick={() => setDialog("google")}><Table2 className="size-4" /> {t("googleServiceAccount")}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDialog("razorpay")}><RazorpayLogo className="size-4" /> Razorpay</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDialog("cashfree")}><CashfreeLogo className="size-4" /> Cashfree</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDialog("shopify")}><ShopifyLogo className="size-4" /> Shopify</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDialog("woocommerce")}><WooLogo className="size-4" /> WooCommerce</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -407,6 +627,8 @@ export function ConnectionsPage() {
       <GoogleDialog open={dialog === "google"} onOpenChange={closeDialog} t={t} />
       <RazorpayDialog open={dialog === "razorpay"} onOpenChange={closeDialog} t={t} />
       <CashfreeDialog open={dialog === "cashfree"} onOpenChange={closeDialog} t={t} />
+      <ShopifyDialog open={dialog === "shopify"} onOpenChange={closeDialog} t={t} />
+      <WooDialog open={dialog === "woocommerce"} onOpenChange={closeDialog} t={t} />
 
       <ConfirmDialog
         open={removing !== null}

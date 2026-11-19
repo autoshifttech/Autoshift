@@ -63,6 +63,21 @@ def create_app() -> FastAPI:
                     await catalog_feed.sync_all(sdb)
                 except Exception:  # noqa: BLE001
                     logging.getLogger("autoshift").exception("product feed pass failed")
+            if tick % 10 == 5:  # every five minutes: WhatsApp orders to Shopify / WooCommerce, and their status back
+                try:
+                    from . import store_sync
+                    from .web_bridge import HttpWebBridge
+
+                    await store_sync.sync_orders(sdb, settings, HttpWebBridge(settings))
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("store order pass failed")
+            if tick % 120 == 90:  # about once an hour: products from Shopify / WooCommerce
+                try:
+                    from . import store_sync
+
+                    await store_sync.sync_all_products(sdb, settings)
+                except Exception:  # noqa: BLE001
+                    logging.getLogger("autoshift").exception("store product pass failed")
             if tick % 120 == 0:  # about once an hour: close businesses whose grace period has ended
                 try:
                     await closing.close_due(sdb, RazorpayClient(settings))

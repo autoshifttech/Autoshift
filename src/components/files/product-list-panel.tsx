@@ -56,6 +56,12 @@ export function ProductListPanel({ file }: { file?: { name: string; url: string 
           <span>{t("currentNamed", { name: catalog.file_name, count: catalog.products.length, date: new Date(catalog.updated_at).toLocaleDateString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) })}</span>
         </p>
       )}
+      {!file && (catalog?.source === "shopify" || catalog?.source === "woocommerce") && !preview && (
+        <p className="mt-2 rounded-lg bg-muted/60 p-2.5 text-xs text-muted-foreground">
+          {t("fromStore", { store: catalog.source === "shopify" ? "Shopify" : "WooCommerce" })}{" "}
+          <Link href="/flows/connections" className="font-medium text-primary hover:underline">{t("openConnections")}</Link>
+        </p>
+      )}
       {!file ? null : isCurrent && catalog ? (
         <p className="mt-2 flex items-start gap-2 text-sm text-foreground">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />

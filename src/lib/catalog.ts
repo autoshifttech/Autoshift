@@ -24,7 +24,7 @@ export interface Catalog {
   columns: string[]
   updated_at: string
   /** Where the list came from: a file, the website's feed link, or the website's API. */
-  source?: 'file' | 'feed' | 'api'
+  source?: 'file' | 'feed' | 'api' | 'shopify' | 'woocommerce'
   feed_url?: string | null
   feed_synced_at?: string | null
   feed_error?: string | null

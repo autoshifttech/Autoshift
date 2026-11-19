@@ -6,11 +6,14 @@ import { backend, backendUrl } from '@/lib/backend/client'
  * Secrets are never kept here — only what is safe to show (an email, a masked key id).
  * Connected to the backend, the secret is sent once and stored there, encrypted.
  */
-export type ConnectionKind = 'google' | 'razorpay' | 'cashfree'
+export type ConnectionKind = 'google' | 'razorpay' | 'cashfree' | 'shopify' | 'woocommerce'
 
 /** Payment providers: a payment-link step or the shop assistant can use any of them. */
 export const PAYMENT_KINDS: readonly ConnectionKind[] = ['razorpay', 'cashfree']
 export const isPaymentKind = (k: ConnectionKind) => PAYMENT_KINDS.includes(k)
+/** Online stores: products come from them, WhatsApp orders go to them. */
+export const STORE_KINDS: readonly ConnectionKind[] = ['shopify', 'woocommerce']
+export const isStoreKind = (k: ConnectionKind) => STORE_KINDS.includes(k)
 
 /** Whether an account of kind `have` can serve a step that asks for `want`. */
 export const kindFits = (want: ConnectionKind, have: ConnectionKind) => want === have || (isPaymentKind(want) && isPaymentKind(have))
@@ -24,6 +27,8 @@ export interface FlowConnection {
   /** "test" / "live" for Razorpay and Cashfree. */
   mode?: string
   createdAt: string
+  /** Store options (Shopify / WooCommerce). */
+  settings?: { sync_products?: boolean; push_orders?: boolean }
 }
 
 interface State {
@@ -75,8 +80,9 @@ interface ConnectionRow {
   detail: string
   mode: string | null
   created_at: string
+  settings?: FlowConnection['settings'] | null
 }
-const fromRow = (r: ConnectionRow): FlowConnection => ({ id: r.id, kind: r.kind, name: r.name, detail: r.detail, mode: r.mode ?? undefined, createdAt: r.created_at })
+const fromRow = (r: ConnectionRow): FlowConnection => ({ id: r.id, kind: r.kind, name: r.name, detail: r.detail, mode: r.mode ?? undefined, createdAt: r.created_at, settings: r.settings ?? undefined })
 
 export async function loadConnections(): Promise<void> {
   if (!backendUrl()) return
@@ -88,17 +94,24 @@ export type ConnectionSecret =
   | { kind: 'google'; name: string; serviceAccountJson: string }
   | { kind: 'razorpay'; name: string; keyId: string; keySecret: string; webhookSecret?: string }
   | { kind: 'cashfree'; name: string; appId: string; secretKey: string; mode: 'test' | 'live' }
+  | { kind: 'shopify'; name: string; shop: string; accessToken?: string; clientId?: string; clientSecret?: string }
+  | { kind: 'woocommerce'; name: string; url: string; consumerKey: string; consumerSecret: string }
 
 /** Saves a connection with its secret on the server (encrypted there). Only used when connected. */
-export async function createConnection(c: ConnectionSecret): Promise<void> {
+export async function createConnection(c: ConnectionSecret): Promise<{ id: string }> {
   const body =
     c.kind === 'google'
       ? { kind: 'google', name: c.name, google: { service_account_json: c.serviceAccountJson } }
       : c.kind === 'cashfree'
         ? { kind: 'cashfree', name: c.name, cashfree: { app_id: c.appId.trim(), secret_key: c.secretKey.trim(), mode: c.mode } }
-        : { kind: 'razorpay', name: c.name, razorpay: { key_id: c.keyId.trim(), key_secret: c.keySecret.trim(), webhook_secret: c.webhookSecret?.trim() || null } }
-  await backend('/v1/connections', { method: 'POST', body })
+        : c.kind === 'shopify'
+          ? { kind: 'shopify', name: c.name, shopify: { shop: c.shop.trim(), access_token: c.accessToken?.trim() || null, client_id: c.clientId?.trim() || null, client_secret: c.clientSecret?.trim() || null } }
+          : c.kind === 'woocommerce'
+            ? { kind: 'woocommerce', name: c.name, woocommerce: { url: c.url.trim(), consumer_key: c.consumerKey.trim(), consumer_secret: c.consumerSecret.trim() } }
+            : { kind: 'razorpay', name: c.name, razorpay: { key_id: c.keyId.trim(), key_secret: c.keySecret.trim(), webhook_secret: c.webhookSecret?.trim() || null } }
+  const row = await backend<{ id: string }>('/v1/connections', { method: 'POST', body })
   await loadConnections()
+  return row
 }
 
 export async function deleteConnection(id: string): Promise<void> {
@@ -131,3 +144,26 @@ export async function startGoogleSignIn(name = ''): Promise<string> {
 /** Cashfree: test keys start with TEST (app id) or carry _test_ (secret key). */
 export const cashfreeMode = (appId: string, secret: string): 'test' | 'live' =>
   appId.trim().toUpperCase().startsWith('TEST') || secret.includes('_test_') ? 'test' : 'live'
+
+// ------------------------------------------------------------- online store (Shopify / WooCommerce)
+
+export interface StoreStatus {
+  sync_products: boolean
+  push_orders: boolean
+  products: number
+  synced_at: string | null
+  sync_error: string | null
+  orders_sent: number
+  orders_failed: { number: number; error: string }[]
+}
+
+export const storeStatus = (id: string) => backend<StoreStatus>(`/v1/connections/${id}/store`)
+
+/** Products now (when switched on), then orders waiting to be sent or updated. */
+export const syncStore = (id: string) =>
+  backend<{ products: { count: number } | null; orders: { sent: number; updated: number } }>(`/v1/connections/${id}/sync`, { method: 'POST' })
+
+export async function setStoreOptions(id: string, patch: { sync_products?: boolean; push_orders?: boolean }): Promise<void> {
+  await backend(`/v1/connections/${id}`, { method: 'PATCH', body: patch })
+  await loadConnections()
+}

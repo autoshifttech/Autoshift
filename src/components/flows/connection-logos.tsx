@@ -30,8 +30,30 @@ export function CashfreeLogo({ className = "size-5" }: { className?: string }) {
   );
 }
 
+/** Plain marks for the two online stores (not their trademark artwork). */
+export function ShopifyLogo({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect width="24" height="24" rx="6" fill="#4A7A2C" />
+      <path d="M7 9h10l-1 10H8L7 9z" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9.5 9V7.5a2.5 2.5 0 0 1 5 0V9" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function WooLogo({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect width="24" height="24" rx="6" fill="#6B4AA3" />
+      <text x="12" y="16" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="10" fontWeight="700" fill="#FFFFFF">wc</text>
+    </svg>
+  );
+}
+
 export function ConnectionLogo({ kind, className }: { kind: ConnectionKind; className?: string }) {
   if (kind === "google") return <GoogleLogo className={className} />;
   if (kind === "cashfree") return <CashfreeLogo className={className} />;
+  if (kind === "shopify") return <ShopifyLogo className={className} />;
+  if (kind === "woocommerce") return <WooLogo className={className} />;
   return <RazorpayLogo className={className} />;
 }

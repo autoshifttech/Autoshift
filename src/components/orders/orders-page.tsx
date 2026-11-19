@@ -220,6 +220,14 @@ function OrderDialog({ order, onClose, onChanged, date }: { order: ShopOrder | n
                   <dd className="text-foreground">{order.note}</dd>
                 </div>
               )}
+              {order.ext_source && (
+                <div>
+                  <dt className="text-xs text-muted-foreground">{t("inStore", { store: order.ext_source === "shopify" ? "Shopify" : "WooCommerce" })}</dt>
+                  <dd className={order.ext_order_name ? "text-foreground" : "text-rose-800 dark:text-rose-300"}>
+                    {order.ext_order_name ? t("storeOrder", { name: order.ext_order_name }) : t("storeNotSent", { reason: order.ext_error ?? "" })}
+                  </dd>
+                </div>
+              )}
               {order.tracking && (
                 <div>
                   <dt className="text-xs text-muted-foreground">{t("tracking")}</dt>

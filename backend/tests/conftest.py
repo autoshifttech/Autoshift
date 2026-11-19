@@ -61,6 +61,8 @@ class FakeDb:
                 return str(val) in {str(a) for a in arg}
             if op == "is":
                 return val is None if str(arg) == "null" else str(val).lower() == str(arg).lower()
+            if op == "not.is":
+                return val is not None if str(arg) == "null" else str(val).lower() != str(arg).lower()
             if op == "neq":
                 return str(val).lower() != str(arg).lower()
             if op == "ilike":

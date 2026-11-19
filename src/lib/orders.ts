@@ -43,6 +43,10 @@ export interface ShopOrder {
   contact_id: string | null
   created_at: string
   paid_at: string | null
+  /** Set when the order was sent to the business's Shopify or WooCommerce store. */
+  ext_source?: 'shopify' | 'woocommerce' | null
+  ext_order_name?: string | null
+  ext_error?: string | null
 }
 
 /** Filters on the page. "todo" = paid (or cash on delivery) but not yet shipped. */
@@ -97,7 +101,7 @@ export function matches(o: ShopOrder, query: string): boolean {
   return String(o.number).includes(q) || o.customer_name.toLowerCase().includes(q) || (digits.length >= 4 && o.customer_phone.replace(/\D/g, '').includes(digits))
 }
 
-const COLUMNS = 'id, number, status, payment_status, payment_method, items, subtotal_paise, delivery_paise, total_paise, customer_name, customer_phone, address, note, tracking, payment_url, conversation_id, contact_id, created_at, paid_at'
+const COLUMNS = 'id, number, status, payment_status, payment_method, items, subtotal_paise, delivery_paise, total_paise, customer_name, customer_phone, address, note, tracking, payment_url, conversation_id, contact_id, created_at, paid_at, ext_source, ext_order_name, ext_error'
 
 /** The newest 200 orders, refreshed every 30 seconds while the page is open. */
 export function useOrders() {
