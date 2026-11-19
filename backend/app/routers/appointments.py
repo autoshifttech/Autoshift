@@ -18,6 +18,14 @@ class Service(BaseModel):
     price: float = Field(0, ge=0, le=1_000_000)
 
 
+class ReminderTemplate(BaseModel):
+    """The business's own approved WhatsApp template for reminders after the 24-hour window."""
+    name: str = Field(min_length=1, max_length=512, pattern=r"^[a-z0-9_]+$")
+    language: str = Field("en", min_length=2, max_length=10)
+    # vars[0] fills {{1}}, vars[1] fills {{2}} …
+    vars: list[Literal["customer_name", "service", "when", "date", "time", "number"]] = Field(default_factory=list, max_length=10)
+
+
 class SettingsBody(BaseModel):
     services: list[Service] = Field(default_factory=list, max_length=50)
     hours: dict[str, list[list[str]]] = Field(default_factory=dict)
@@ -28,6 +36,7 @@ class SettingsBody(BaseModel):
     min_notice_minutes: int = Field(60, ge=0, le=10080)
     reminders: bool = True
     language: Literal["en", "pt", "es", "ko"] = "en"
+    reminder_template: ReminderTemplate | None = None
 
 
 class ManualBooking(BaseModel):
@@ -186,7 +195,8 @@ async def send_reminders(sdb, bridge, now: datetime | None = None) -> int:
         ok, reason = False, "No owner to send as"
         if owner:
             ok, reason, _ = await wa_templates.deliver(sdb, bridge, account_id=appt["account_id"], user_id=owner, role="owner", conversation_id=appt["conversation_id"],
-                                                       text=text, kind="reminder", params=[appt.get("customer_name") or "there", appt["service"], when], language=lang)
+                                                       text=text, kind="reminder", params=[appt.get("customer_name") or "there", appt["service"], when], language=lang,
+                                                       custom=booking.chosen_reminder(appt, settings))
         await sdb.update("appointments", {"id": appt["id"]}, {"reminded_at": now.isoformat(), "reminder_error": None if ok else (reason or "Not sent")[:300]})
         sent += ok
     return sent

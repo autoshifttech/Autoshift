@@ -11,7 +11,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { isLive } from "@/lib/workspace/live";
-import { TEMPLATE_FIELDS, type TemplateField, type UpdateTemplate } from "@/lib/assistants/model";
+import { TEMPLATE_FIELDS } from "@/lib/assistants/model";
 
 interface Row {
   name: string;
@@ -42,15 +42,40 @@ function fetchTemplates() {
 }
 
 const KNOWN_STATUSES = ["approved", "pending", "rejected", "draft"] as const;
-const DEFAULT_VARS: TemplateField[] = ["customer_name", "order_number", "update", "total", "tracking"];
+
+/** What can fill a {{n}} in an appointment reminder template. */
+export const REMINDER_FIELDS = ["customer_name", "service", "when", "date", "time", "number"] as const;
+
+/** The two places a business picks its own template: order updates (Shop tab) and reminders (Appointments). */
+const KINDS = {
+  order: { fields: TEMPLATE_FIELDS, draft: "order_update" },
+  reminder: { fields: REMINDER_FIELDS, draft: "appointment_reminder" },
+} as const;
+export type PickerKind = keyof typeof KINDS;
+
+/** A chosen template: vars[0] fills {{1}}, vars[1] fills {{2}} … */
+export interface TemplateChoice {
+  name: string;
+  language: string;
+  vars: string[];
+}
 const key = (r: Pick<Row, "name" | "language">) => `${r.name}|${r.language ?? ""}`;
 
 /**
- * Shop tab → "Order updates after 24 hours": WhatsApp only allows free text within 24 hours of the
- * customer's last message. The business picks one of its own templates (or creates one on the
- * Templates page) and says what fills each {{n}}.
+ * "Order updates after 24 hours" (Shop tab) and "Reminders after 24 hours" (Appointments): WhatsApp only
+ * allows free text within 24 hours of the customer's last message. The business picks one of its own
+ * templates (or creates one on the Templates page) and says what fills each {{n}}.
  */
-export function OrderTemplatePicker({ value, language, onChange }: { value: UpdateTemplate | null | undefined; language: string; onChange: (v: UpdateTemplate | null) => void }) {
+export function TemplatePicker<V extends TemplateChoice>({ kind, value, language, onChange, returnTo }: {
+  kind: PickerKind;
+  value: V | null | undefined;
+  language: string;
+  onChange: (v: V | null) => void;
+  /** Where the Templates page sends the person back to; default: this page. */
+  returnTo?: string;
+}) {
+  const fields = KINDS[kind].fields as readonly string[];
+  const id = `${kind}-tpl`;
   const t = useTranslations("OrderTemplate");
   const router = useRouter();
   const [rows, setRows] = useState<Row[] | null>(() => (isLive() ? null : []));
@@ -74,15 +99,20 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
   const options = useMemo(() => (rows ?? []).filter((r) => usable(r) && r.category !== "Authentication"), [rows]);
   const chosen = value ? options.find((r) => key(r) === key({ name: value.name, language: value.language })) ?? null : null;
   const count = chosen ? varCount(chosen.body_text) : 0;
-  const vars: TemplateField[] = Array.from({ length: count }, (_, i) => value?.vars?.[i] ?? DEFAULT_VARS[i] ?? "update");
+  const vars: string[] = Array.from({ length: count }, (_, i) => value?.vars?.[i] ?? fields[i] ?? fields[0]);
   const status = String(chosen?.status ?? "").toUpperCase();
 
-  const sample: Record<TemplateField, string> = {
+  const sample: Record<string, string> = {
     customer_name: "Asha",
     order_number: "1001",
     update: t("sampleUpdate"),
     total: "₹1,498",
     tracking: "https://track.example.com/AB123",
+    service: t("sampleService"),
+    when: t("sampleWhen"),
+    date: t("sampleDate"),
+    time: t("sampleTime"),
+    number: "12",
   };
   const preview = chosen ? chosen.body_text.replace(/\{\{\s*(\d+)\s*\}\}/g, (_, n) => sample[vars[Number(n) - 1]] ?? `{{${n}}}`) : "";
 
@@ -93,12 +123,12 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
   const pick = (k: string) => {
     if (!k) return onChange(null);
     const r = options.find((o) => key(o) === k);
-    if (r) onChange({ name: r.name, language: r.language ?? "en", vars: DEFAULT_VARS.slice(0, varCount(r.body_text)) });
+    if (r) onChange({ name: r.name, language: r.language ?? "en", vars: fields.slice(0, varCount(r.body_text)) } as V);
   };
-  const setVar = (i: number, field: TemplateField) => value && onChange({ ...value, vars: vars.map((v, j) => (j === i ? field : v)) });
+  const setVar = (i: number, field: string) => value && onChange({ ...value, vars: vars.map((v, j) => (j === i ? field : v)) });
   // Built on click: the page address (where to come back to) only exists in the browser.
   const openCreate = () =>
-    router.push(`/templates?new=order_update&lang=${encodeURIComponent(language)}&back=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    router.push(`/templates?new=${KINDS[kind].draft}&lang=${encodeURIComponent(language)}&back=${encodeURIComponent(returnTo ?? window.location.pathname + window.location.search)}`);
 
   const badge = !chosen ? null : status === "APPROVED" ? (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"><CheckCircle2 className="size-3.5" aria-hidden /> {t("approved")}</span>
@@ -109,12 +139,12 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
   );
 
   return (
-    <section className="rounded-xl border border-border p-4" aria-labelledby="order-tpl-title">
+    <section className="rounded-xl border border-border p-4" aria-labelledby={`${id}-title`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id="order-tpl-title" className="text-sm font-semibold text-foreground">{t("title")}</h3>
+        <h3 id={`${id}-title`} className="text-sm font-semibold text-foreground">{t(`title_${kind}`)}</h3>
         {badge}
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{t("help")}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{t(`help_${kind}`)}</p>
 
       {rows === null ? (
         <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>
@@ -122,8 +152,8 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
         <p role="alert" className="mt-3 text-sm text-rose-800 dark:text-rose-300">{t("loadFailed")}</p>
       ) : (
         <div className="mt-3 grid min-w-0 gap-1.5">
-          <Label htmlFor="order-tpl">{t("pick")}</Label>
-          <NativeSelect id="order-tpl" className="min-w-0" value={chosen ? key(chosen) : ""} onChange={(e) => pick(e.target.value)}>
+          <Label htmlFor={id}>{t(`pick_${kind}`)}</Label>
+          <NativeSelect id={id} className="min-w-0" value={chosen ? key(chosen) : ""} onChange={(e) => pick(e.target.value)}>
             <option value="">{options.length ? t("none") : t("noTemplates")}</option>
             {options.map((r) => (
               <option key={key(r)} value={key(r)}>
@@ -142,9 +172,9 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
               <legend className="mb-1 text-sm font-medium text-foreground">{t("fill")}</legend>
               {vars.map((v, i) => (
                 <div key={i} className="grid gap-1">
-                  <Label htmlFor={`order-tpl-var-${i}`} className="text-xs text-muted-foreground">{t("var", { n: i + 1 })}</Label>
-                  <NativeSelect id={`order-tpl-var-${i}`} value={v} onChange={(e) => setVar(i, e.target.value as TemplateField)}>
-                    {TEMPLATE_FIELDS.map((f) => <option key={f} value={f}>{t(`field_${f}`)}</option>)}
+                  <Label htmlFor={`${id}-var-${i}`} className="text-xs text-muted-foreground">{t("var", { n: i + 1 })}</Label>
+                  <NativeSelect id={`${id}-var-${i}`} value={v} onChange={(e) => setVar(i, e.target.value)}>
+                    {fields.map((f) => <option key={f} value={f}>{t(`field_${f}` as "field_customer_name")}</option>)}
                   </NativeSelect>
                 </div>
               ))}
@@ -170,7 +200,7 @@ export function OrderTemplatePicker({ value, language, onChange }: { value: Upda
           {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <RefreshCw className="size-4" aria-hidden />} {t("refresh")}
         </Button>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{t("cost")}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{t(`cost_${kind}`)}</p>
     </section>
   );
 }

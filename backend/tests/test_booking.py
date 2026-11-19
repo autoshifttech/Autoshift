@@ -127,7 +127,7 @@ async def test_reminders_go_a_day_before_as_text_or_template(client, world, clin
     # window closed and no template: not sent, the reason is kept
     assert await send_reminders(world.service, clinic["bridge"]) == 0
     a1 = next(a for a in world.rows("appointments") if a["id"] == "a1")
-    assert a1["reminded_at"] and "template isn't approved" in a1["reminder_error"]
+    assert a1["reminded_at"] and "no reminder template is chosen" in a1["reminder_error"]
     assert next(a for a in world.rows("appointments") if a["id"] == "a2")["reminded_at"] is None
     # with the approved template it goes out
     a1["reminded_at"] = None
@@ -143,3 +143,22 @@ async def test_switched_off_appointments_block_the_api_and_the_ai(client, world,
     clinic["llm"].answer = book_line(tomorrow_at(10))
     out = ask(client, world, clinic, "wamid.b6")
     assert out.get("appointment") is None and not world.rows("appointments")
+
+
+
+async def test_reminders_use_the_business_own_template(client, world, clinic):
+    soon = datetime.now(timezone.utc) + timedelta(hours=20)
+    world.rows("appointments").append({"account_id": world.acct_a, "id": "r1", "number": 7, "service": "Consultation", "minutes": 30, "status": "booked", "customer_name": "Asha",
+                                       "conversation_id": "conv_1", "reminded_at": None, "starts_at": soon.isoformat(), "ends_at": (soon + timedelta(minutes=30)).isoformat()})
+    h = world.headers("owner_a")
+    current = client.get("/v1/appointments/settings", headers=h).json()
+    tpl = {"name": "visit_reminder", "language": "en_US", "vars": ["customer_name", "service", "date", "time"]}
+    assert client.put("/v1/appointments/settings", json={**current, "reminder_template": {**tpl, "vars": ["nope"]}}, headers=h).status_code == 422
+    saved = client.put("/v1/appointments/settings", json={**current, "reminder_template": tpl}, headers=h)
+    assert saved.status_code == 200 and saved.json()["reminder_template"]["name"] == "visit_reminder"
+    world.rows("message_templates").append({"account_id": world.acct_a, "name": "visit_reminder", "language": "en_US", "status": "Approved"})
+    assert await send_reminders(world.service, clinic["bridge"]) == 1
+    _, fields = clinic["bridge"].calls[-1]
+    assert fields["template"]["name"] == "visit_reminder" and fields["template"]["params"][:2] == ["Asha", "Consultation"]
+    date, time = fields["template"]["params"][2:]
+    assert " " in date and (time.endswith("AM") or time.endswith("PM"))

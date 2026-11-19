@@ -34,6 +34,8 @@ DEFAULTS: dict[str, Any] = {
     "services": [], "hours": {d: ([["09:00", "18:00"]] if d != "sun" else []) for d in DAYS},
     "timezone": "Asia/Kolkata", "slot_minutes": 30, "per_slot": 1, "days_ahead": 14,
     "min_notice_minutes": 60, "reminders": True, "language": "en",
+    # The business's own approved reminder template: {name, language, vars}; None = AutoShift's.
+    "reminder_template": None,
 }
 
 TEXT: dict[str, dict[str, str]] = {
@@ -91,14 +93,50 @@ def words(lang: str) -> dict[str, str]:
     return TEXT.get(lang, TEXT["en"])
 
 
+def day_text(dt: datetime, lang: str) -> str:
+    """'Mon 24 Nov' in the business's language."""
+    lang = lang if lang in TEXT else "en"
+    if lang == "ko":
+        return f"{dt.month}월 {dt.day}일 ({WEEKDAY['ko'][dt.weekday()]})"
+    return f"{WEEKDAY[lang][dt.weekday()]} {dt.day} {MONTH[lang][dt.month - 1]}"
+
+
+def clock_text(dt: datetime, lang: str) -> str:
+    """'10:30 AM' (English), '오전 10:30' (Korean) or '10:30'."""
+    lang = lang if lang in TEXT else "en"
+    if lang == "ko":
+        return f"{'오전' if dt.hour < 12 else '오후'} {dt.hour % 12 or 12}:{dt.minute:02d}"
+    return f"{dt.hour % 12 or 12}:{dt.minute:02d} {'AM' if dt.hour < 12 else 'PM'}" if lang == "en" else f"{dt.hour:02d}:{dt.minute:02d}"
+
+
 def when_text(dt: datetime, lang: str) -> str:
     """'Mon 24 Nov at 10:30 AM' in the business's language (the time is already local)."""
     lang = lang if lang in TEXT else "en"
     if lang == "ko":
-        return f"{dt.month}월 {dt.day}일 ({WEEKDAY['ko'][dt.weekday()]}) {'오전' if dt.hour < 12 else '오후'} {dt.hour % 12 or 12}:{dt.minute:02d}"
-    day = f"{WEEKDAY[lang][dt.weekday()]} {dt.day} {MONTH[lang][dt.month - 1]}"
-    clock = f"{dt.hour % 12 or 12}:{dt.minute:02d} {'AM' if dt.hour < 12 else 'PM'}" if lang == "en" else f"{dt.hour:02d}:{dt.minute:02d}"
-    return f"{day} {words(lang)['at']} {clock}"
+        return f"{day_text(dt, lang)} {clock_text(dt, lang)}"
+    return f"{day_text(dt, lang)} {words(lang)['at']} {clock_text(dt, lang)}"
+
+
+def reminder_values(appt: dict, settings: dict) -> dict[str, str]:
+    """Everything a business's own reminder template can show."""
+    lang = settings["language"]
+    dt = local(appt, settings)
+    return {
+        "customer_name": appt.get("customer_name") or "there",
+        "service": appt.get("service") or "-",
+        "when": when_text(dt, lang),
+        "date": day_text(dt, lang),
+        "time": clock_text(dt, lang),
+        "number": str(appt.get("number") or "-"),
+    }
+
+
+def chosen_reminder(appt: dict, settings: dict) -> dict | None:
+    tpl = settings.get("reminder_template") or None
+    if not tpl or not tpl.get("name"):
+        return None
+    values = reminder_values(appt, settings)
+    return {"name": tpl["name"], "language": tpl.get("language") or "en", "params": [values.get(v, "-") for v in tpl.get("vars") or []]}
 
 
 def _minutes(hhmm: str) -> int:

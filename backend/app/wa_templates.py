@@ -118,7 +118,7 @@ async def deliver(sdb: Db, bridge, *, account_id: str, user_id: str, role: str, 
     if not tpl:
         if kind == "order":
             return False, "The customer's 24-hour WhatsApp window is closed and no order-update template is chosen. Pick one on the assistant's Shop tab.", None
-        return False, "The customer's 24-hour WhatsApp window is closed and the reminder template isn't approved yet. Create it in the Appointments booking settings.", None
+        return False, "The customer's 24-hour WhatsApp window is closed and no reminder template is chosen. Pick one in the Appointments booking settings.", None
     try:
         await bridge.call("send", account_id, user_id, role, conversation_id=conversation_id, type="template",
                           template={"name": tpl["name"], "language": tpl.get("language") or "en", "params": [clean_param(p) for p in params]})

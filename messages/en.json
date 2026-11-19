@@ -2013,7 +2013,8 @@
       "previewEmpty": "Start typing and your template appears here, just as customers will see it.",
       "previewMessage": "Message",
       "previewYourBusiness": "Your business",
-      "backToShop": "Template submitted. Back to the shop settings: pick it there once Meta approves it."
+      "backToShop": "Template submitted. Back to the shop settings: pick it there once Meta approves it.",
+      "backToAppointments": "Template submitted. Back to the booking settings: pick it there once Meta approves it."
     },
     "roles": {
       "admin": "Admin",
@@ -5423,26 +5424,6 @@
     "linkSent": "We sent a sign-in link to <strong>{email}</strong>. Open the email on this device and tap Sign in.",
     "haveCode": "Have a 6-digit code?"
   },
-  "SystemTemplates": {
-    "title_order": "Order updates after 24 hours",
-    "help_order": "WhatsApp allows normal messages only within 24 hours of the customer's last message. With this approved template, packed, shipped, delivered and payment updates still reach them later.",
-    "preview_order": "Hi Asha, here is an update on your order #1001: it has been shipped, track it here: https://… Reply to this message if you have any questions.",
-    "title_reminder": "Appointment reminders",
-    "help_reminder": "Reminders are usually sent a day before, often outside the 24-hour window, so they need this approved template.",
-    "preview_reminder": "Hi Asha, this is a reminder of your consultation appointment on Mon 24 Nov at 10:30 AM. Reply to this message if you need to change it.",
-    "approved": "Approved",
-    "pending": "Waiting for Meta",
-    "rejected": "Rejected",
-    "none": "Not created",
-    "loading": "Loading",
-    "create": "Create template",
-    "refresh": "Check status",
-    "submitted": "Sent to Meta for review. It usually takes a few minutes.",
-    "failed": "That didn't work. Check that WhatsApp is connected and try again.",
-    "loadFailed": "The template status couldn't be loaded.",
-    "reason": "Meta's reason: {reason}",
-    "cost": "Used only when the 24-hour window is closed. Meta charges a small fee per template message (utility rate)."
-  },
   "Appointments": {
     "title": "Appointments",
     "intro": "Bookings your AI assistant and your team made, with reminders the day before.",
@@ -5540,12 +5521,8 @@
     "open": "Open Appointments"
   },
   "OrderTemplate": {
-    "title": "Order updates after 24 hours",
-    "help": "WhatsApp allows normal messages only within 24 hours of the customer's last message. Choose one of your approved templates, and packed, shipped, delivered and payment updates still reach the customer later.",
     "loading": "Loading your templates…",
     "loadFailed": "Your templates couldn't be loaded.",
-    "pick": "Template for order updates",
-    "none": "No template (updates only within 24 hours)",
     "noTemplates": "No templates yet",
     "missing": "The template “{name}” wasn't found. Pick another one or create it again.",
     "status_approved": "approved",
@@ -5564,10 +5541,28 @@
     "approved": "Approved",
     "pending": "Waiting for Meta",
     "rejected": "Rejected",
-    "pendingHelp": "Meta is still reviewing this template (usually a few minutes). Until it's approved, updates after 24 hours aren't sent. Press Refresh list to check.",
+    "pendingHelp": "Meta is still reviewing this template (usually a few minutes). Until it's approved, messages after 24 hours aren't sent. Press Refresh list to check.",
     "rejectedHelp": "Meta rejected this template. Edit it on the Templates page, or create a new one.",
     "create": "Create new template",
     "refresh": "Refresh list",
-    "cost": "Used only when the 24-hour window is closed. Choose the Utility category; Meta charges a small fee per template message."
+    "title_order": "Order updates after 24 hours",
+    "help_order": "WhatsApp allows normal messages only within 24 hours of the customer's last message. Choose one of your approved templates, and packed, shipped, delivered and payment updates still reach the customer later.",
+    "pick_order": "Template for order updates",
+    "cost_order": "Used only when the 24-hour window is closed. Choose the Utility category; Meta charges a small fee per template message.",
+    "none_order": "No template (updates only within 24 hours)",
+    "title_reminder": "Reminders after 24 hours",
+    "help_reminder": "WhatsApp allows normal messages only within 24 hours of the customer's last message. Choose one of your approved templates and the reminder the day before still reaches customers who booked earlier.",
+    "pick_reminder": "Template for reminders",
+    "none_reminder": "No template (reminders only within 24 hours)",
+    "cost_reminder": "Used only when the 24-hour window is closed. Choose the Utility category; Meta charges a small fee per template message.",
+    "field_service": "Service",
+    "field_when": "Date and time",
+    "field_date": "Date",
+    "field_time": "Time",
+    "field_number": "Appointment number",
+    "sampleService": "consultation",
+    "sampleWhen": "Mon 24 Nov at 10:30 AM",
+    "sampleDate": "Mon 24 Nov",
+    "sampleTime": "10:30 AM"
   }
 }

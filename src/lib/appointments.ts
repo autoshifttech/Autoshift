@@ -48,6 +48,8 @@ export interface BookingSettings {
   min_notice_minutes: number
   reminders: boolean
   language: 'en' | 'pt' | 'es' | 'ko'
+  /** The business's own approved reminder template ({{n}} → field); null = AutoShift's. */
+  reminder_template?: { name: string; language: string; vars: string[] } | null
 }
 
 export const APPOINTMENT_VIEWS = ['today', 'upcoming', 'past', 'cancelled'] as const

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { usable, varCount } from './order-template-picker'
+import { usable, varCount } from './template-picker'
 
 const row = (over: Record<string, unknown> = {}) => ({ name: 't', language: 'en', status: 'APPROVED', category: 'Utility', body_text: 'Hi {{1}}, order #{{2}}: {{3}}.', header_type: null, header_content: null, buttons: null, ...over })
 

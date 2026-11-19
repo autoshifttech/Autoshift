@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyPanel } from "@/components/ui/empty-panel";
-import { SystemTemplateCard } from "@/components/templates/system-template-card";
+import { TemplatePicker } from "@/components/templates/template-picker";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { BackendError, backendUrl } from "@/lib/backend/client";
@@ -60,7 +60,16 @@ export function AppointmentsPage() {
 
   useEffect(() => {
     if (!backendUrl()) return;
-    getBookingSettings().then(setSettings).catch(() => {});
+    getBookingSettings()
+      .then((loaded) => {
+        setSettings(loaded);
+        // Back from the Templates page ("Create new template"): reopen the booking settings.
+        if (new URLSearchParams(window.location.search).get("settings") === "open") {
+          setEditing(true);
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const counts = useMemo(() => Object.fromEntries(APPOINTMENT_VIEWS.map((v) => [v, items.filter((a) => inView(a, v)).length])) as Record<AppointmentView, number>, [items]);
@@ -355,7 +364,7 @@ function SettingsDialog({ open, onOpenChange, settings, onSaved }: { open: boole
             </NativeSelect>
           </div>
         </div>
-        {s.reminders && <SystemTemplateCard kind="reminder" language={s.language} />}
+        {s.reminders && <TemplatePicker kind="reminder" value={s.reminder_template} language={s.language} returnTo="/appointments?settings=open" onChange={(reminder_template) => setS({ ...s, reminder_template })} />}
 
         <div className="flex justify-end gap-2 border-t border-border pt-4">
           <Button variant="outline" className="min-h-11" onClick={() => onOpenChange(false)}>{t("close")}</Button>

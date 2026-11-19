@@ -2013,7 +2013,8 @@
       "previewEmpty": "Empieza a escribir y tu plantilla aparece aquí, tal como la verán tus clientes.",
       "previewMessage": "Mensaje",
       "previewYourBusiness": "Tu empresa",
-      "backToShop": "Plantilla enviada. De vuelta a los ajustes de la tienda: elígela allí cuando Meta la apruebe."
+      "backToShop": "Plantilla enviada. De vuelta a los ajustes de la tienda: elígela allí cuando Meta la apruebe.",
+      "backToAppointments": "Plantilla enviada. De vuelta a los ajustes de reservas: elígela allí cuando Meta la apruebe."
     },
     "roles": {
       "admin": "Administrador",
@@ -5423,26 +5424,6 @@
     "linkSent": "Enviamos un enlace de acceso a <strong>{email}</strong>. Abre el correo en este dispositivo y toca Iniciar sesión.",
     "haveCode": "¿Tienes un código de 6 dígitos?"
   },
-  "SystemTemplates": {
-    "title_order": "Avisos de pedido después de 24 horas",
-    "help_order": "WhatsApp solo permite mensajes normales hasta 24 horas después del último mensaje del cliente. Con esta plantilla aprobada, los avisos de empacado, enviado, entregado y pago le llegan igual más tarde.",
-    "preview_order": "Hola Asha, aquí tienes una actualización de tu pedido n.º 1001: fue enviado, síguelo aquí: https://… Responde a este mensaje si tienes alguna pregunta.",
-    "title_reminder": "Recordatorios de citas",
-    "help_reminder": "Los recordatorios suelen enviarse un día antes, a menudo fuera de la ventana de 24 horas, así que necesitan esta plantilla aprobada.",
-    "preview_reminder": "Hola Asha, te recordamos tu cita de consulta el lun. 24 nov. a las 10:30. Responde a este mensaje si necesitas cambiarla.",
-    "approved": "Aprobada",
-    "pending": "Esperando a Meta",
-    "rejected": "Rechazada",
-    "none": "Sin crear",
-    "loading": "Cargando",
-    "create": "Crear plantilla",
-    "refresh": "Ver estado",
-    "submitted": "Enviada a Meta para revisión. Suele tardar unos minutos.",
-    "failed": "No funcionó. Revisa que WhatsApp esté conectado e inténtalo de nuevo.",
-    "loadFailed": "No se pudo cargar el estado de la plantilla.",
-    "reason": "Motivo de Meta: {reason}",
-    "cost": "Se usa solo cuando la ventana de 24 horas está cerrada. Meta cobra una pequeña tarifa por mensaje de plantilla (tarifa de utilidad)."
-  },
   "Appointments": {
     "title": "Citas",
     "intro": "Citas que reservaron tu asistente de IA y tu equipo, con recordatorio el día anterior.",
@@ -5540,12 +5521,8 @@
     "open": "Abrir Citas"
   },
   "OrderTemplate": {
-    "title": "Actualizaciones de pedido después de 24 horas",
-    "help": "WhatsApp solo permite mensajes normales hasta 24 horas después del último mensaje del cliente. Elige una de tus plantillas aprobadas y las actualizaciones de empacado, enviado, entregado y pago seguirán llegando al cliente después.",
     "loading": "Cargando tus plantillas…",
     "loadFailed": "No se pudieron cargar tus plantillas.",
-    "pick": "Plantilla para actualizaciones de pedido",
-    "none": "Sin plantilla (actualizaciones solo dentro de 24 horas)",
     "noTemplates": "Aún no hay plantillas",
     "missing": "No se encontró la plantilla “{name}”. Elige otra o vuelve a crearla.",
     "status_approved": "aprobada",
@@ -5564,10 +5541,28 @@
     "approved": "Aprobada",
     "pending": "Esperando a Meta",
     "rejected": "Rechazada",
-    "pendingHelp": "Meta aún está revisando esta plantilla (normalmente unos minutos). Hasta que se apruebe, las actualizaciones después de 24 horas no se envían. Pulsa Actualizar lista para comprobarlo.",
+    "pendingHelp": "Meta aún está revisando esta plantilla (normalmente unos minutos). Hasta que se apruebe, los mensajes después de 24 horas no se envían. Pulsa Actualizar lista para comprobarlo.",
     "rejectedHelp": "Meta rechazó esta plantilla. Edítala en la página Plantillas o crea una nueva.",
     "create": "Crear nueva plantilla",
     "refresh": "Actualizar lista",
-    "cost": "Se usa solo cuando la ventana de 24 horas está cerrada. Elige la categoría Utilidad; Meta cobra una pequeña tarifa por mensaje de plantilla."
+    "title_order": "Actualizaciones de pedido después de 24 horas",
+    "help_order": "WhatsApp solo permite mensajes normales hasta 24 horas después del último mensaje del cliente. Elige una de tus plantillas aprobadas y las actualizaciones de empacado, enviado, entregado y pago seguirán llegando al cliente después.",
+    "pick_order": "Plantilla para actualizaciones de pedido",
+    "cost_order": "Se usa solo cuando la ventana de 24 horas está cerrada. Elige la categoría Utilidad; Meta cobra una pequeña tarifa por mensaje de plantilla.",
+    "none_order": "Sin plantilla (actualizaciones solo dentro de 24 horas)",
+    "title_reminder": "Recordatorios después de 24 horas",
+    "help_reminder": "WhatsApp solo permite mensajes normales hasta 24 horas después del último mensaje del cliente. Elige una de tus plantillas aprobadas y el recordatorio del día anterior seguirá llegando a quien reservó antes.",
+    "pick_reminder": "Plantilla para recordatorios",
+    "none_reminder": "Sin plantilla (recordatorios solo dentro de 24 horas)",
+    "cost_reminder": "Se usa solo cuando la ventana de 24 horas está cerrada. Elige la categoría Utilidad; Meta cobra una pequeña tarifa por mensaje de plantilla.",
+    "field_service": "Servicio",
+    "field_when": "Fecha y hora",
+    "field_date": "Fecha",
+    "field_time": "Hora",
+    "field_number": "Número de cita",
+    "sampleService": "consulta",
+    "sampleWhen": "lun 24 nov a las 10:30",
+    "sampleDate": "lun 24 nov",
+    "sampleTime": "10:30"
   }
 }

@@ -105,10 +105,18 @@ const ORDER_UPDATE_LANG = { en: 'en', pt: 'pt_BR', es: 'es', ko: 'ko' } as const
 
 /** A ready-made order-update template (Utility). Meta's rule: the body can't start or end with a variable. */
 const ORDER_UPDATE_DRAFT = {
-  en: { body: 'Hi {{1}}, here is an update on your order #{{2}}: {{3}}. Reply to this message if you have any questions.', sample: 'it has been shipped' },
-  pt: { body: 'Olá {{1}}, aqui está uma atualização do seu pedido nº {{2}}: {{3}}. Responda a esta mensagem se tiver alguma dúvida.', sample: 'foi enviado' },
-  es: { body: 'Hola {{1}}, aquí tienes una actualización de tu pedido n.º {{2}}: {{3}}. Responde a este mensaje si tienes alguna pregunta.', sample: 'ha sido enviado' },
-  ko: { body: '안녕하세요 {{1}}님, 주문 #{{2}} 안내입니다: {{3}}. 궁금한 점이 있으면 이 메시지에 답장해 주세요.', sample: '배송이 시작되었습니다' },
+  en: { body: 'Hi {{1}}, here is an update on your order #{{2}}: {{3}}. Reply to this message if you have any questions.', samples: ['Asha', '1001', 'it has been shipped'] },
+  pt: { body: 'Olá {{1}}, aqui está uma atualização do seu pedido nº {{2}}: {{3}}. Responda a esta mensagem se tiver alguma dúvida.', samples: ['Asha', '1001', 'foi enviado'] },
+  es: { body: 'Hola {{1}}, aquí tienes una actualización de tu pedido n.º {{2}}: {{3}}. Responde a este mensaje si tienes alguna pregunta.', samples: ['Asha', '1001', 'ha sido enviado'] },
+  ko: { body: '안녕하세요 {{1}}님, 주문 #{{2}} 안내입니다: {{3}}. 궁금한 점이 있으면 이 메시지에 답장해 주세요.', samples: ['Asha', '1001', '배송이 시작되었습니다'] },
+} as const;
+
+/** A ready-made appointment reminder (Utility): name, service, when. */
+const REMINDER_DRAFT = {
+  en: { body: 'Hi {{1}}, this is a reminder of your {{2}} appointment on {{3}}. Reply to this message if you need to change it.', samples: ['Asha', 'consultation', 'Mon 24 Nov at 10:30 AM'] },
+  pt: { body: 'Olá {{1}}, lembrete do seu horário de {{2}} em {{3}}. Responda a esta mensagem se precisar alterar.', samples: ['Asha', 'consulta', 'seg 24 nov às 10:30'] },
+  es: { body: 'Hola {{1}}, te recordamos tu cita de {{2}} el {{3}}. Responde a este mensaje si necesitas cambiarla.', samples: ['Asha', 'consulta', 'lun 24 nov a las 10:30'] },
+  ko: { body: '안녕하세요 {{1}}님, 예약하신 {{2}} 일정({{3}})을 알려 드립니다. 변경이 필요하면 이 메시지에 답장해 주세요.', samples: ['Asha', '상담', '11월 24일 (월) 오전 10:30'] },
 } as const;
 
 const COMMON_LANGUAGE_CODES = [
@@ -290,7 +298,9 @@ export function TemplateManager() {
   // /templates?new=order_update&lang=en&back=/agents/…: start a ready-made order-update draft.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    if (q.get('new') !== 'order_update') return;
+    const kind = q.get('new');
+    if (kind !== 'order_update' && kind !== 'appointment_reminder') return;
+    const draft = kind === 'order_update' ? ORDER_UPDATE_DRAFT : REMINDER_DRAFT;
     const lang = (['en', 'pt', 'es', 'ko'] as const).find((l) => l === q.get('lang')) ?? 'en';
     const back = q.get('back') ?? '';
     // Only a path inside this app, never another site.
@@ -298,11 +308,11 @@ export function TemplateManager() {
     setEditingId(null);
     setForm({
       ...emptyForm,
-      name: 'order_update',
+      name: kind,
       category: 'Utility',
       language: ORDER_UPDATE_LANG[lang],
-      body_text: ORDER_UPDATE_DRAFT[lang].body,
-      body_samples: ['Asha', '1001', ORDER_UPDATE_DRAFT[lang].sample],
+      body_text: draft[lang].body,
+      body_samples: [...draft[lang].samples],
     });
     setMobileView('edit');
     setDialogOpen(true);
@@ -353,7 +363,7 @@ export function TemplateManager() {
       setForm(emptyForm);
       setEditingId(null);
       if (backTo) {
-        toast.info(t('backToShop'));
+        toast.info(t(backTo.startsWith('/appointments') ? 'backToAppointments' : 'backToShop'));
         router.push(backTo);
       }
     } catch (err) {
