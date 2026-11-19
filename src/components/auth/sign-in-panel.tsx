@@ -82,8 +82,9 @@ export function SignInPanel({ next, onBusy }: { next: string; onBusy?: (busy: bo
       setBusy(null);
       return setError(/expired/i.test(err.message) ? t("codeExpired") : t("wrongCode"));
     }
-    // A full page load so the middleware sees the new sign-in cookies.
-    window.location.href = next;
+    // A full page load so the middleware sees the new sign-in cookies; /auth/continue sends
+    // new sign-ups to the setup wizard first.
+    window.location.href = `/auth/continue?next=${encodeURIComponent(next)}`;
   };
 
   const errorBox = error ? (

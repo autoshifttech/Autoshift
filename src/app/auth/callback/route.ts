@@ -30,6 +30,7 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server';
+import { afterSignIn } from '@/lib/auth/after-sign-in';
 import {
   loginFailurePath,
   parseEmailLink,
@@ -76,5 +77,6 @@ export async function GET(request: Request) {
     return relativeRedirect(loginFailurePath('link_invalid'));
   }
 
-  return relativeRedirect(next);
+  // New sign-ups go to the setup wizard first, whichever page they started from.
+  return relativeRedirect(await afterSignIn(supabase, next));
 }
