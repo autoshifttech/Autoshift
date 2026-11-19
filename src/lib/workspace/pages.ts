@@ -17,12 +17,13 @@ export const SHOP_SOURCES = ['whatsapp', 'shopify', 'website'] as const
 export type ShopSource = (typeof SHOP_SOURCES)[number]
 
 /** Pages the AutoShift team can switch on or off. Everything else is always on. */
-export const OPTIONAL_PAGES = ['leads', 'orders', 'insights', 'broadcasts', 'templates', 'drips', 'segments', 'automations', 'flows', 'ai_tools'] as const
+export const OPTIONAL_PAGES = ['leads', 'orders', 'appointments', 'insights', 'broadcasts', 'templates', 'drips', 'segments', 'automations', 'flows', 'ai_tools'] as const
 export type OptionalPage = (typeof OPTIONAL_PAGES)[number]
 
 export const PAGE_HREF: Record<OptionalPage, string> = {
   leads: '/leads',
   orders: '/orders',
+  appointments: '/appointments',
   insights: '/insights',
   broadcasts: '/broadcasts',
   templates: '/templates',

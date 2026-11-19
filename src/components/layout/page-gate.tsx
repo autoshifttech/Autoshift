@@ -80,6 +80,7 @@ export function PageOff({ page }: { page: OptionalPage }) {
 const LABEL_KEY: Record<OptionalPage, string> = {
   leads: "leads",
   orders: "orders",
+  appointments: "appointments",
   insights: "insights",
   broadcasts: "broadcasts",
   templates: "templates",

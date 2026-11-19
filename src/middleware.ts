@@ -7,7 +7,7 @@ import { siteRole, siteRoleRedirect } from '@/lib/site-role'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
-const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/orders', '/segments', '/drips', '/insights', '/files', '/opt-ins', '/support', '/verify-phone']
+const PROTECTED_PATHS = ['/dashboard', '/inbox', '/contacts', '/broadcasts', '/automations', '/flows', '/agents', '/notifications', '/settings', '/onboarding', '/wallet', '/templates', '/ai-tools', '/leads', '/orders', '/appointments', '/segments', '/drips', '/insights', '/files', '/opt-ins', '/support', '/verify-phone']
 
 /** Set by the database (migration 080) when a login is on the AutoShift admin team. */
 function isAdminType(user: { app_metadata?: Record<string, unknown> }): boolean {

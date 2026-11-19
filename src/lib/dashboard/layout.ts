@@ -3,12 +3,12 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /** The sections of the overview a person can hide or move (the bento at the top is always first). */
-export const DASH_SECTIONS = ["nextSteps", "orders", "summary", "attention", "kpis", "queue", "team", "campaigns", "activity"] as const;
+export const DASH_SECTIONS = ["nextSteps", "orders", "appointments", "summary", "attention", "kpis", "queue", "team", "campaigns", "activity"] as const;
 export type DashSection = (typeof DASH_SECTIONS)[number];
 /** Sections that fill the whole row; the rest sit two to a row on wide screens. */
-export const FULL_WIDTH: DashSection[] = ["nextSteps", "orders", "summary", "attention", "kpis", "activity"];
+export const FULL_WIDTH: DashSection[] = ["nextSteps", "orders", "appointments", "summary", "attention", "kpis", "activity"];
 /** Sections that belong to a page the business may not have (the AutoShift team switches pages per business). */
-export const SECTION_PAGE: Partial<Record<DashSection, "orders" | "broadcasts">> = { orders: "orders", campaigns: "broadcasts" };
+export const SECTION_PAGE: Partial<Record<DashSection, "orders" | "appointments" | "broadcasts">> = { orders: "orders", appointments: "appointments", campaigns: "broadcasts" };
 
 interface Layout {
   order: DashSection[];

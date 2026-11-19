@@ -25,6 +25,7 @@ export interface AssistantRow {
   knowledge: Assistant['knowledge']
   use_catalog?: boolean
   shop?: Partial<ShopSettings>
+  booking?: { enabled?: boolean }
   tool_ids: string[]
   capture_leads: boolean
   audience: Assistant['audience']
@@ -83,6 +84,7 @@ export function toBody(a: Assistant): RowBody {
     knowledge: a.knowledge.map((f) => ({ q: f.q.slice(0, 300), a: f.a.slice(0, 4000) })),
     use_catalog: Boolean(a.useCatalog),
     shop: cleanShop(a.shop),
+    booking: { enabled: Boolean(a.booking?.enabled) },
     tool_ids: a.toolIds,
     capture_leads: a.captureLeads,
     audience: a.audience,
@@ -107,6 +109,7 @@ export function fromRow(row: AssistantRow, local?: Assistant): Assistant {
     knowledge: row.knowledge,
     useCatalog: row.use_catalog ?? false,
     shop: { ...DEFAULT_SHOP, ...(row.shop ?? {}) },
+    booking: { enabled: Boolean(row.booking?.enabled) },
     toolIds: row.tool_ids,
     captureLeads: row.capture_leads,
     audience: row.audience,

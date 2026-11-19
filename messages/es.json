@@ -59,7 +59,8 @@
     "skipToContent": "Saltar al contenido",
     "morePages": "Todas las páginas",
     "search": "Buscar",
-    "orders": "Pedidos"
+    "orders": "Pedidos",
+    "appointments": "Citas"
   },
   "Header": {
     "dashboard": "Panel",
@@ -89,7 +90,8 @@
     "optIns": "Opt-ins y bloqueos",
     "support": "Ayuda y soporte",
     "flowConnections": "Conexiones",
-    "orders": "Pedidos"
+    "orders": "Pedidos",
+    "appointments": "Citas"
   },
   "ModeToggle": {
     "switchMode": "Cambiar al modo {mode}"
@@ -153,7 +155,8 @@
         "team": "Equipo",
         "campaigns": "Campañas",
         "activity": "Actividad reciente",
-        "orders": "Pedidos de hoy"
+        "orders": "Pedidos de hoy",
+        "appointments": "Citas de hoy"
       }
     },
     "nextSteps": {
@@ -393,6 +396,15 @@
       "toShip": "Por enviar",
       "awaiting": "Esperando pago",
       "takings": "Cobrado hoy"
+    },
+    "appointments": {
+      "title": "Citas de hoy",
+      "open": "Abrir Citas",
+      "today": "Hoy",
+      "done": "Atendidas",
+      "upcoming": "Próximas",
+      "next": "Siguiente: {name}, {service}, {when}",
+      "none": "No hay citas próximas."
     }
   },
   "Inbox": {
@@ -3990,7 +4002,8 @@
     "wizardSkip": "Omitir configuración",
     "wizardDone": "{name} está listo. Puedes seguir editando cuando quieras.",
     "loadingList": "Cargando tus asistentes…",
-    "tabShop": "Tienda"
+    "tabShop": "Tienda",
+    "tabBookings": "Citas"
   },
   "AiTools": {
     "title": "Herramientas de IA",
@@ -5253,7 +5266,8 @@
     "defaultsDesc": "Lo que recibe un negocio nuevo al elegir su tipo en el registro. Aún puedes cambiar cada negocio en su pestaña Páginas.",
     "defaultsSaved": "Páginas iniciales guardadas. Los negocios nuevos las reciben desde ahora.",
     "defaultsNote": "Los negocios existentes mantienen sus páginas. Solo superadmins.",
-    "cellLabel": "{page} para {type}"
+    "cellLabel": "{page} para {type}",
+    "about_appointments": "Citas por WhatsApp y en recepción, con recordatorios"
   },
   "WebsiteSync": {
     "title": "Sincronizar con tu sitio web",
@@ -5313,5 +5327,101 @@
     "loadFailed": "No se pudo cargar el estado de la plantilla.",
     "reason": "Motivo de Meta: {reason}",
     "cost": "Se usa solo cuando la ventana de 24 horas está cerrada. Meta cobra una pequeña tarifa por mensaje de plantilla (tarifa de utilidad)."
+  },
+  "Appointments": {
+    "title": "Citas",
+    "intro": "Citas que reservaron tu asistente de IA y tu equipo, con recordatorio el día anterior.",
+    "settings": "Ajustes de reservas",
+    "add": "Nueva cita",
+    "setupFirst": "Primero agrega tus servicios y horario de atención, para que la IA sepa qué puede reservar.",
+    "openSettings": "Abrir ajustes de reservas",
+    "views": "Mostrar citas",
+    "view_today": "Hoy",
+    "view_upcoming": "Próximas",
+    "view_past": "Pasadas",
+    "view_cancelled": "Canceladas",
+    "loading": "Cargando citas…",
+    "loadError": "No se pudieron cargar las citas.",
+    "retry": "Reintentar",
+    "emptyTitle": "Aún no hay citas",
+    "emptyHelp": "Activa las reservas en la pestaña Citas de tu asistente de IA, o agrega una cita tú mismo.",
+    "emptyView": "No hay citas aquí",
+    "noName": "Sin nombre",
+    "minutes": "{n} min",
+    "byAi": "reservada por la IA",
+    "byTeam": "reservada por tu equipo",
+    "status_booked": "Reservada",
+    "status_completed": "Atendida",
+    "status_no_show": "No asistió",
+    "status_cancelled": "Cancelada",
+    "status": "Estado",
+    "apptTitle": "Cita n.º {n}",
+    "service": "Servicio",
+    "customer": "Cliente",
+    "note": "Nota",
+    "reminder": "Recordatorio",
+    "reminderSent": "Enviado el día anterior",
+    "reminderFailed": "No enviado: {reason}",
+    "action_completed": "Marcar atendida",
+    "action_no_show": "Marcar no asistió",
+    "action_cancelled": "Cancelar cita",
+    "working": "Procesando…",
+    "done_completed": "Marcada como atendida",
+    "done_no_show": "Marcada como no asistió",
+    "done_cancelled": "Cita cancelada. Se avisó al cliente.",
+    "cancelledNotTold": "Cita cancelada, pero no se envió mensaje al cliente: {reason}",
+    "failed": "No funcionó. Inténtalo de nuevo.",
+    "openChat": "Abrir el chat",
+    "keep": "Mantener cita",
+    "cancelTitle": "¿Cancelar la cita n.º {n}?",
+    "cancelHelp": "La hora queda libre otra vez y se avisa al cliente por WhatsApp si escribió en las últimas 24 horas.",
+    "addTitle": "Nueva cita",
+    "addHelp": "Para reservas por teléfono o en recepción. Cualquier hora libre sirve, incluso fuera del horario.",
+    "date": "Fecha",
+    "time": "Hora",
+    "name": "Nombre del cliente",
+    "phone": "Teléfono (opcional)",
+    "loadingSlots": "Cargando horas libres…",
+    "freeOnDay": "Horas libres ese día:",
+    "noFreeOnDay": "No hay horas libres en el horario de ese día. Aún puedes elegir una hora.",
+    "addSave": "Agregar cita",
+    "added": "Cita agregada",
+    "settingsTitle": "Ajustes de reservas",
+    "settingsHelp": "Qué se puede reservar y cuándo. La IA solo ofrece horas libres dentro de este horario.",
+    "services": "Servicios",
+    "serviceName": "Servicio",
+    "serviceMinutes": "Minutos",
+    "servicePrice": "Precio (₹)",
+    "removeService": "Quitar {name}",
+    "addService": "Agregar servicio",
+    "hours": "Horario de atención",
+    "openOn": "Abierto el {day}",
+    "opens": "{day}: abre",
+    "closes": "{day}: cierra",
+    "day_mon": "Lunes",
+    "day_tue": "Martes",
+    "day_wed": "Miércoles",
+    "day_thu": "Jueves",
+    "day_fri": "Viernes",
+    "day_sat": "Sábado",
+    "day_sun": "Domingo",
+    "slotMinutes": "Intervalo (min)",
+    "perSlot": "Citas a la misma hora",
+    "daysAhead": "Reservar hasta (días)",
+    "notice": "Antelación mínima (min)",
+    "reminders": "Enviar recordatorio el día anterior",
+    "language": "Idioma de los mensajes",
+    "close": "Cerrar",
+    "saveSettings": "Guardar ajustes",
+    "settingsSaved": "Ajustes de reservas guardados"
+  },
+  "BookingTab": {
+    "enable": "Reservar citas en el chat",
+    "enableHelp": "El asistente ofrece horas libres de tus servicios y horario, pide el nombre del cliente y reserva. Nunca inventa una hora.",
+    "howTitle": "Cómo funciona",
+    "how1": "Agrega tus servicios y horario en la página Citas.",
+    "how2": "El cliente pide una hora por WhatsApp; la IA ofrece horas libres y confirma la reserva.",
+    "how3": "Recibe un recordatorio el día anterior, y tú ves todas las citas en la página Citas.",
+    "open": "Abrir Citas"
   }
 }

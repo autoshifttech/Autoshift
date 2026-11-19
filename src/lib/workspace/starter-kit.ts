@@ -90,6 +90,7 @@ export async function applyStarterKit(
           enabled: false,
           useCatalog: isShopType(type),
           shop: shop ? { ...DEFAULT_SHOP, enabled: true } : undefined,
+          booking: { enabled: type === 'clinic' || type === 'salon' },
         }
         await httpApi.create(toBody(a))
         out.assistant = 'made'

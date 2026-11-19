@@ -59,7 +59,8 @@
     "skipToContent": "Ir para o conteúdo",
     "morePages": "Todas as páginas",
     "search": "Pesquisar",
-    "orders": "Pedidos"
+    "orders": "Pedidos",
+    "appointments": "Agendamentos"
   },
   "Header": {
     "dashboard": "Painel",
@@ -89,7 +90,8 @@
     "optIns": "Opt-ins e bloqueios",
     "support": "Ajuda e suporte",
     "flowConnections": "Conexões",
-    "orders": "Pedidos"
+    "orders": "Pedidos",
+    "appointments": "Agendamentos"
   },
   "ModeToggle": {
     "switchMode": "Mudar para o modo {mode}"
@@ -153,7 +155,8 @@
         "team": "Equipe",
         "campaigns": "Campanhas",
         "activity": "Atividade recente",
-        "orders": "Pedidos de hoje"
+        "orders": "Pedidos de hoje",
+        "appointments": "Agendamentos de hoje"
       }
     },
     "nextSteps": {
@@ -393,6 +396,15 @@
       "toShip": "Para enviar",
       "awaiting": "Aguardando pagamento",
       "takings": "Recebido hoje"
+    },
+    "appointments": {
+      "title": "Agendamentos de hoje",
+      "open": "Abrir Agendamentos",
+      "today": "Hoje",
+      "done": "Atendidos",
+      "upcoming": "Próximos",
+      "next": "Próximo: {name}, {service}, {when}",
+      "none": "Nenhum agendamento próximo."
     }
   },
   "Inbox": {
@@ -3990,7 +4002,8 @@
     "wizardSkip": "Pular configuração",
     "wizardDone": "{name} está pronto. Você pode continuar editando quando quiser.",
     "loadingList": "Carregando seus assistentes…",
-    "tabShop": "Loja"
+    "tabShop": "Loja",
+    "tabBookings": "Agendamentos"
   },
   "AiTools": {
     "title": "Ferramentas de IA",
@@ -5253,7 +5266,8 @@
     "defaultsDesc": "O que um novo negócio recebe ao escolher o tipo no cadastro. Você ainda pode mudar cada negócio na aba Páginas.",
     "defaultsSaved": "Páginas iniciais salvas. Novos negócios as recebem a partir de agora.",
     "defaultsNote": "Negócios existentes mantêm suas páginas. Só superadmins.",
-    "cellLabel": "{page} para {type}"
+    "cellLabel": "{page} para {type}",
+    "about_appointments": "Agendamentos pelo WhatsApp e na recepção, com lembretes"
   },
   "WebsiteSync": {
     "title": "Sincronizar com seu site",
@@ -5313,5 +5327,101 @@
     "loadFailed": "Não foi possível carregar o status do modelo.",
     "reason": "Motivo da Meta: {reason}",
     "cost": "Usado só quando a janela de 24 horas está fechada. A Meta cobra uma pequena taxa por mensagem de modelo (tarifa de utilidade)."
+  },
+  "Appointments": {
+    "title": "Agendamentos",
+    "intro": "Horários marcados pelo seu assistente de IA e pela sua equipe, com lembrete na véspera.",
+    "settings": "Configurar agenda",
+    "add": "Novo agendamento",
+    "setupFirst": "Cadastre primeiro seus serviços e horários de funcionamento, para a IA saber o que pode agendar.",
+    "openSettings": "Abrir configurações da agenda",
+    "views": "Mostrar agendamentos",
+    "view_today": "Hoje",
+    "view_upcoming": "Próximos",
+    "view_past": "Anteriores",
+    "view_cancelled": "Cancelados",
+    "loading": "Carregando agendamentos…",
+    "loadError": "Não foi possível carregar os agendamentos.",
+    "retry": "Tentar de novo",
+    "emptyTitle": "Nenhum agendamento ainda",
+    "emptyHelp": "Ative os agendamentos na aba Agendamentos do seu assistente de IA, ou adicione um você mesmo.",
+    "emptyView": "Nenhum agendamento aqui",
+    "noName": "Sem nome",
+    "minutes": "{n} min",
+    "byAi": "agendado pela IA",
+    "byTeam": "agendado pela equipe",
+    "status_booked": "Agendado",
+    "status_completed": "Atendido",
+    "status_no_show": "Não compareceu",
+    "status_cancelled": "Cancelado",
+    "status": "Status",
+    "apptTitle": "Agendamento nº {n}",
+    "service": "Serviço",
+    "customer": "Cliente",
+    "note": "Observação",
+    "reminder": "Lembrete",
+    "reminderSent": "Enviado na véspera",
+    "reminderFailed": "Não enviado: {reason}",
+    "action_completed": "Marcar atendido",
+    "action_no_show": "Marcar falta",
+    "action_cancelled": "Cancelar agendamento",
+    "working": "Processando…",
+    "done_completed": "Marcado como atendido",
+    "done_no_show": "Marcado como falta",
+    "done_cancelled": "Agendamento cancelado. O cliente foi avisado.",
+    "cancelledNotTold": "Agendamento cancelado, mas o cliente não recebeu mensagem: {reason}",
+    "failed": "Não deu certo. Tente de novo.",
+    "openChat": "Abrir a conversa",
+    "keep": "Manter agendamento",
+    "cancelTitle": "Cancelar o agendamento nº {n}?",
+    "cancelHelp": "O horário fica livre de novo e o cliente é avisado no WhatsApp se escreveu nas últimas 24 horas.",
+    "addTitle": "Novo agendamento",
+    "addHelp": "Para marcações por telefone ou na recepção. Qualquer horário livre vale, mesmo fora do expediente.",
+    "date": "Data",
+    "time": "Hora",
+    "name": "Nome do cliente",
+    "phone": "Telefone (opcional)",
+    "loadingSlots": "Carregando horários livres…",
+    "freeOnDay": "Horários livres nesse dia:",
+    "noFreeOnDay": "Sem horários livres no expediente desse dia. Você ainda pode escolher um horário.",
+    "addSave": "Adicionar agendamento",
+    "added": "Agendamento adicionado",
+    "settingsTitle": "Configurações da agenda",
+    "settingsHelp": "O que pode ser agendado e quando. A IA oferece só horários livres dentro desse expediente.",
+    "services": "Serviços",
+    "serviceName": "Serviço",
+    "serviceMinutes": "Minutos",
+    "servicePrice": "Preço (₹)",
+    "removeService": "Remover {name}",
+    "addService": "Adicionar serviço",
+    "hours": "Horário de funcionamento",
+    "openOn": "Aberto na {day}",
+    "opens": "{day}: abre",
+    "closes": "{day}: fecha",
+    "day_mon": "Segunda",
+    "day_tue": "Terça",
+    "day_wed": "Quarta",
+    "day_thu": "Quinta",
+    "day_fri": "Sexta",
+    "day_sat": "Sábado",
+    "day_sun": "Domingo",
+    "slotMinutes": "Intervalo (min)",
+    "perSlot": "Agendamentos no mesmo horário",
+    "daysAhead": "Agendar até (dias)",
+    "notice": "Antecedência mínima (min)",
+    "reminders": "Enviar lembrete na véspera",
+    "language": "Idioma das mensagens",
+    "close": "Fechar",
+    "saveSettings": "Salvar configurações",
+    "settingsSaved": "Configurações da agenda salvas"
+  },
+  "BookingTab": {
+    "enable": "Agendar horários no chat",
+    "enableHelp": "O assistente oferece horários livres dos seus serviços e expediente, pede o nome do cliente e faz o agendamento. Nunca inventa um horário.",
+    "howTitle": "Como funciona",
+    "how1": "Cadastre seus serviços e horários na página Agendamentos.",
+    "how2": "O cliente pede um horário no WhatsApp; a IA oferece horários livres e confirma.",
+    "how3": "Ele recebe um lembrete na véspera, e você vê tudo na página Agendamentos.",
+    "open": "Abrir Agendamentos"
   }
 }

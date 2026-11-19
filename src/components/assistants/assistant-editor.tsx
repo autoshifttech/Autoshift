@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, ArrowRight, BookOpen, Check, Hand, Plus, Settings2, ShoppingBag, Trash2, Users, Wrench, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, Hand, Plus, Settings2, ShoppingBag, Trash2, Users, Wrench, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import { useCatalog } from "@/lib/catalog";
 import { AssistantAvatar, TestChat, toolIcon } from "./assistant-ui";
 import { AssistantModelPicker } from "./assistant-model-picker";
 import { ShopTab } from "./shop-tab";
+import { BookingTab } from "./booking-tab";
 import { isOn, usePages } from "@/lib/workspace/pages";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
@@ -62,6 +63,7 @@ export function AssistantEditor({ id }: { id: string }) {
 
   const set = (patch: Partial<Assistant>) => updateAssistant(a.id, patch);
   const ordersOn = isOn(pages, "orders");
+  const bookingsOn = isOn(pages, "appointments");
 
   return (
     <div className="space-y-5">
@@ -125,6 +127,12 @@ export function AssistantEditor({ id }: { id: string }) {
                 <BookOpen className="mr-1.5 h-4 w-4" />
                 {t("tabKnowledge")}
               </TabsTrigger>
+              {bookingsOn && (
+                <TabsTrigger value="bookings">
+                  <CalendarDays className="mr-1.5 h-4 w-4" />
+                  {t("tabBookings")}
+                </TabsTrigger>
+              )}
               {ordersOn && (
                 <TabsTrigger value="shop">
                   <ShoppingBag className="mr-1.5 h-4 w-4" />
@@ -146,6 +154,11 @@ export function AssistantEditor({ id }: { id: string }) {
             <TabsContent value="knowledge" className="mt-4">
               <KnowledgeTab a={a} set={set} />
             </TabsContent>
+            {bookingsOn && (
+              <TabsContent value="bookings" className="mt-4">
+                <BookingTab a={a} set={set} />
+              </TabsContent>
+            )}
             {ordersOn && (
               <TabsContent value="shop" className="mt-4">
                 <ShopTab a={a} set={set} />

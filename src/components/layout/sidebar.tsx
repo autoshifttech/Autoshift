@@ -11,6 +11,7 @@ import { useTotalUnread } from "@/hooks/use-total-unread";
 import {
   BarChart3,
   Bot,
+  CalendarDays,
   FileText,
   Filter,
   LayoutDashboard,
@@ -52,6 +53,7 @@ export const navGroups: { labelKey: string; items: NavItem[] }[] = [
       { href: "/inbox", labelKey: "inbox", icon: MessageSquare },
       { href: "/leads", labelKey: "leads", icon: Target },
       { href: "/orders", labelKey: "orders", icon: ShoppingBag },
+      { href: "/appointments", labelKey: "appointments", icon: CalendarDays },
       { href: "/insights", labelKey: "insights", icon: BarChart3 },
       { href: "/contacts", labelKey: "contacts", icon: Users },
     ],

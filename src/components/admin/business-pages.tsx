@@ -21,7 +21,7 @@ interface PagesInfo {
 }
 
 export const PAGE_LABEL_KEY: Record<OptionalPage, string> = {
-  leads: "leads", orders: "orders", insights: "insights", broadcasts: "broadcasts", templates: "templates",
+  leads: "leads", orders: "orders", appointments: "appointments", insights: "insights", broadcasts: "broadcasts", templates: "templates",
   drips: "drips", segments: "segments", automations: "automations", flows: "flows", ai_tools: "aiTools",
 };
 const CORE_KEYS = ["dashboard", "inbox", "contacts", "aiAgents", "settings", "wallet"];

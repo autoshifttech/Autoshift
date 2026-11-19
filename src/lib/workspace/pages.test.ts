@@ -30,6 +30,7 @@ describe('pages per business', () => {
 
   it('cleans unknown pages and keeps the standard order', () => {
     expect(cleanPages(['orders', 'x', 'leads'])).toEqual(['leads', 'orders'])
+    expect(pageForPath('/appointments')).toBe('appointments')
     expect(cleanPages(null)).toEqual([])
   })
 })

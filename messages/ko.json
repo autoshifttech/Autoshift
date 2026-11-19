@@ -59,7 +59,8 @@
     "skipToContent": "본문으로 건너뛰기",
     "morePages": "모든 페이지",
     "search": "검색",
-    "orders": "주문"
+    "orders": "주문",
+    "appointments": "예약"
   },
   "Header": {
     "dashboard": "대시보드",
@@ -89,7 +90,8 @@
     "optIns": "수신 동의 및 차단",
     "support": "도움말 및 지원",
     "flowConnections": "연결",
-    "orders": "주문"
+    "orders": "주문",
+    "appointments": "예약"
   },
   "ModeToggle": {
     "switchMode": "{mode} 모드로 전환"
@@ -153,7 +155,8 @@
         "team": "팀",
         "campaigns": "캠페인",
         "activity": "최근 활동",
-        "orders": "오늘의 주문"
+        "orders": "오늘의 주문",
+        "appointments": "오늘의 예약"
       }
     },
     "nextSteps": {
@@ -393,6 +396,15 @@
       "toShip": "발송 대기",
       "awaiting": "결제 대기",
       "takings": "오늘 매출"
+    },
+    "appointments": {
+      "title": "오늘의 예약",
+      "open": "예약 열기",
+      "today": "오늘",
+      "done": "방문 완료",
+      "upcoming": "예정",
+      "next": "다음: {name}, {service}, {when}",
+      "none": "예정된 예약이 없습니다."
     }
   },
   "Inbox": {
@@ -3990,7 +4002,8 @@
     "wizardSkip": "설정 건너뛰기",
     "wizardDone": "{name}이(가) 준비되었습니다. 언제든 계속 편집할 수 있습니다.",
     "loadingList": "어시스턴트를 불러오는 중…",
-    "tabShop": "쇼핑"
+    "tabShop": "쇼핑",
+    "tabBookings": "예약"
   },
   "AiTools": {
     "title": "AI 도구",
@@ -5253,7 +5266,8 @@
     "defaultsDesc": "새 비즈니스가 가입할 때 업종을 고르면 받는 페이지입니다. 각 비즈니스는 페이지 탭에서 따로 바꿀 수 있습니다.",
     "defaultsSaved": "시작 페이지를 저장했습니다. 이제부터 새 비즈니스에 적용됩니다.",
     "defaultsNote": "기존 비즈니스의 페이지는 그대로입니다. 최고 관리자 전용.",
-    "cellLabel": "{type}의 {page}"
+    "cellLabel": "{type}의 {page}",
+    "about_appointments": "WhatsApp과 데스크 예약, 알림 포함"
   },
   "WebsiteSync": {
     "title": "웹사이트와 동기화",
@@ -5313,5 +5327,101 @@
     "loadFailed": "템플릿 상태를 불러오지 못했습니다.",
     "reason": "Meta의 사유: {reason}",
     "cost": "24시간 창이 닫혔을 때만 사용됩니다. Meta가 템플릿 메시지마다 소액(유틸리티 요금)을 청구합니다."
+  },
+  "Appointments": {
+    "title": "예약",
+    "intro": "AI 어시스턴트와 팀이 받은 예약입니다. 하루 전에 알림이 갑니다.",
+    "settings": "예약 설정",
+    "add": "새 예약",
+    "setupFirst": "먼저 서비스와 영업시간을 추가해야 AI가 예약을 받을 수 있습니다.",
+    "openSettings": "예약 설정 열기",
+    "views": "예약 보기",
+    "view_today": "오늘",
+    "view_upcoming": "예정",
+    "view_past": "지난 예약",
+    "view_cancelled": "취소됨",
+    "loading": "예약을 불러오는 중…",
+    "loadError": "예약을 불러오지 못했습니다.",
+    "retry": "다시 시도",
+    "emptyTitle": "아직 예약이 없습니다",
+    "emptyHelp": "AI 어시스턴트의 예약 탭에서 예약 받기를 켜거나 직접 예약을 추가하세요.",
+    "emptyView": "여기에 예약이 없습니다",
+    "noName": "이름 없음",
+    "minutes": "{n}분",
+    "byAi": "AI 예약",
+    "byTeam": "팀 예약",
+    "status_booked": "예약됨",
+    "status_completed": "방문 완료",
+    "status_no_show": "노쇼",
+    "status_cancelled": "취소됨",
+    "status": "상태",
+    "apptTitle": "예약 #{n}",
+    "service": "서비스",
+    "customer": "고객",
+    "note": "메모",
+    "reminder": "알림",
+    "reminderSent": "하루 전에 보냄",
+    "reminderFailed": "보내지 못함: {reason}",
+    "action_completed": "방문 완료로 표시",
+    "action_no_show": "노쇼로 표시",
+    "action_cancelled": "예약 취소",
+    "working": "처리 중…",
+    "done_completed": "방문 완료로 표시했습니다",
+    "done_no_show": "노쇼로 표시했습니다",
+    "done_cancelled": "예약을 취소하고 고객에게 알렸습니다.",
+    "cancelledNotTold": "예약을 취소했지만 고객에게 메시지를 보내지 못했습니다: {reason}",
+    "failed": "실패했습니다. 다시 시도하세요.",
+    "openChat": "채팅 열기",
+    "keep": "예약 유지",
+    "cancelTitle": "예약 #{n}을(를) 취소할까요?",
+    "cancelHelp": "해당 시간이 다시 비게 되며, 고객이 24시간 안에 메시지를 보냈다면 WhatsApp으로 알립니다.",
+    "addTitle": "새 예약",
+    "addHelp": "전화나 데스크에서 받은 예약용입니다. 영업시간 밖이라도 빈 시간이면 됩니다.",
+    "date": "날짜",
+    "time": "시간",
+    "name": "고객 이름",
+    "phone": "전화번호 (선택)",
+    "loadingSlots": "빈 시간을 불러오는 중…",
+    "freeOnDay": "그날의 빈 시간:",
+    "noFreeOnDay": "그날 영업시간에는 빈 시간이 없습니다. 그래도 시간을 고를 수 있습니다.",
+    "addSave": "예약 추가",
+    "added": "예약을 추가했습니다",
+    "settingsTitle": "예약 설정",
+    "settingsHelp": "예약 가능한 서비스와 시간입니다. AI는 이 영업시간 안의 빈 시간만 제안합니다.",
+    "services": "서비스",
+    "serviceName": "서비스",
+    "serviceMinutes": "분",
+    "servicePrice": "가격 (₹)",
+    "removeService": "{name} 삭제",
+    "addService": "서비스 추가",
+    "hours": "영업시간",
+    "openOn": "{day} 영업",
+    "opens": "{day} 시작",
+    "closes": "{day} 종료",
+    "day_mon": "월요일",
+    "day_tue": "화요일",
+    "day_wed": "수요일",
+    "day_thu": "목요일",
+    "day_fri": "금요일",
+    "day_sat": "토요일",
+    "day_sun": "일요일",
+    "slotMinutes": "시간 간격 (분)",
+    "perSlot": "같은 시간 예약 수",
+    "daysAhead": "예약 가능 기간 (일)",
+    "notice": "최소 사전 시간 (분)",
+    "reminders": "하루 전 알림 보내기",
+    "language": "메시지 언어",
+    "close": "닫기",
+    "saveSettings": "설정 저장",
+    "settingsSaved": "예약 설정을 저장했습니다"
+  },
+  "BookingTab": {
+    "enable": "채팅에서 예약 받기",
+    "enableHelp": "어시스턴트가 서비스와 영업시간에서 빈 시간을 제안하고 고객 이름을 받아 예약합니다. 시간을 지어내지 않습니다.",
+    "howTitle": "작동 방식",
+    "how1": "예약 페이지에서 서비스와 영업시간을 추가하세요.",
+    "how2": "고객이 WhatsApp으로 시간을 요청하면 AI가 빈 시간을 제안하고 예약을 확정합니다.",
+    "how3": "고객은 하루 전에 알림을 받고, 모든 예약은 예약 페이지에서 볼 수 있습니다.",
+    "open": "예약 열기"
   }
 }

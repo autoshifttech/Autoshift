@@ -23,6 +23,7 @@ import { derivePresence } from '@/lib/presence'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { BusinessTypeCard } from '@/components/dashboard/business-type-card'
 import { OrdersTodayCard } from '@/components/dashboard/orders-today-card'
+import { AppointmentsTodayCard } from '@/components/dashboard/appointments-today-card'
 import { isOn, usePages } from '@/lib/workspace/pages'
 import { AttentionRow } from '@/components/dashboard/attention-row'
 import { CampaignsCard } from '@/components/dashboard/campaigns-card'
@@ -177,6 +178,7 @@ function DashboardPageInner() {
                 <div key={id} style={{ order: i }} className={FULL_WIDTH.includes(id) ? 'min-w-0 lg:col-span-2' : 'min-w-0'}>
                   {id === 'nextSteps' && <NextSteps data={data} />}
                   {id === 'orders' && <OrdersTodayCard />}
+                  {id === 'appointments' && <AppointmentsTodayCard />}
                   {id === 'summary' && <WorkspaceSummary />}
                   {id === 'attention' && <AttentionRow data={data} now={now} onlineCount={onlineCount} />}
                   {id === 'kpis' && <KpiRow data={data} />}

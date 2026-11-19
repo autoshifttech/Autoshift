@@ -59,7 +59,8 @@
     "skipToContent": "Skip to content",
     "morePages": "All pages",
     "search": "Search",
-    "orders": "Orders"
+    "orders": "Orders",
+    "appointments": "Appointments"
   },
   "Header": {
     "dashboard": "Dashboard",
@@ -89,7 +90,8 @@
     "optIns": "Opt-ins & blocklist",
     "support": "Help & support",
     "flowConnections": "Connections",
-    "orders": "Orders"
+    "orders": "Orders",
+    "appointments": "Appointments"
   },
   "ModeToggle": {
     "switchMode": "Switch to {mode} mode"
@@ -153,7 +155,8 @@
         "team": "Team",
         "campaigns": "Campaigns",
         "activity": "Recent activity",
-        "orders": "Today's orders"
+        "orders": "Today's orders",
+        "appointments": "Today's appointments"
       }
     },
     "nextSteps": {
@@ -393,6 +396,15 @@
       "toShip": "To ship",
       "awaiting": "Awaiting payment",
       "takings": "Taken today"
+    },
+    "appointments": {
+      "title": "Today's appointments",
+      "open": "Open Appointments",
+      "today": "Today",
+      "done": "Visited",
+      "upcoming": "Upcoming",
+      "next": "Next: {name}, {service}, {when}",
+      "none": "No upcoming appointments."
     }
   },
   "Inbox": {
@@ -3990,7 +4002,8 @@
     "wizardSkip": "Skip setup",
     "wizardDone": "{name} is ready. You can keep editing any time.",
     "loadingList": "Loading your assistants…",
-    "tabShop": "Shop"
+    "tabShop": "Shop",
+    "tabBookings": "Bookings"
   },
   "AiTools": {
     "title": "AI tools",
@@ -5253,7 +5266,8 @@
     "defaultsDesc": "What a new business gets when it picks its type at sign-up. You can still change any single business on its Pages tab.",
     "defaultsSaved": "Starting pages saved. New businesses get them from now on.",
     "defaultsNote": "Existing businesses keep their pages. Super admins only.",
-    "cellLabel": "{page} for {type}"
+    "cellLabel": "{page} for {type}",
+    "about_appointments": "Bookings from WhatsApp and the desk, with reminders"
   },
   "WebsiteSync": {
     "title": "Sync from your website",
@@ -5313,5 +5327,101 @@
     "loadFailed": "The template status couldn't be loaded.",
     "reason": "Meta's reason: {reason}",
     "cost": "Used only when the 24-hour window is closed. Meta charges a small fee per template message (utility rate)."
+  },
+  "Appointments": {
+    "title": "Appointments",
+    "intro": "Bookings your AI assistant and your team made, with reminders the day before.",
+    "settings": "Booking settings",
+    "add": "New appointment",
+    "setupFirst": "Add your services and opening hours first, so the AI knows what it can book.",
+    "openSettings": "Open booking settings",
+    "views": "Show appointments",
+    "view_today": "Today",
+    "view_upcoming": "Upcoming",
+    "view_past": "Past",
+    "view_cancelled": "Cancelled",
+    "loading": "Loading appointments…",
+    "loadError": "Appointments couldn't be loaded.",
+    "retry": "Try again",
+    "emptyTitle": "No appointments yet",
+    "emptyHelp": "Switch on booking on your AI assistant's Bookings tab, or add an appointment yourself.",
+    "emptyView": "No appointments here",
+    "noName": "No name",
+    "minutes": "{n} min",
+    "byAi": "booked by AI",
+    "byTeam": "booked by your team",
+    "status_booked": "Booked",
+    "status_completed": "Visited",
+    "status_no_show": "No-show",
+    "status_cancelled": "Cancelled",
+    "status": "Status",
+    "apptTitle": "Appointment #{n}",
+    "service": "Service",
+    "customer": "Customer",
+    "note": "Note",
+    "reminder": "Reminder",
+    "reminderSent": "Sent the day before",
+    "reminderFailed": "Not sent: {reason}",
+    "action_completed": "Mark visited",
+    "action_no_show": "Mark no-show",
+    "action_cancelled": "Cancel appointment",
+    "working": "Working…",
+    "done_completed": "Marked visited",
+    "done_no_show": "Marked no-show",
+    "done_cancelled": "Appointment cancelled. The customer was told.",
+    "cancelledNotTold": "Appointment cancelled, but the customer wasn't messaged: {reason}",
+    "failed": "That didn't work. Try again.",
+    "openChat": "Open the chat",
+    "keep": "Keep appointment",
+    "cancelTitle": "Cancel appointment #{n}?",
+    "cancelHelp": "The time becomes free again and the customer is told on WhatsApp if they wrote in the last 24 hours.",
+    "addTitle": "New appointment",
+    "addHelp": "For bookings by phone or at the desk. Any free time works, even outside opening hours.",
+    "date": "Date",
+    "time": "Time",
+    "name": "Customer name",
+    "phone": "Phone (optional)",
+    "loadingSlots": "Loading free times…",
+    "freeOnDay": "Free times that day:",
+    "noFreeOnDay": "No free times in opening hours that day. You can still pick a time.",
+    "addSave": "Add appointment",
+    "added": "Appointment added",
+    "settingsTitle": "Booking settings",
+    "settingsHelp": "What can be booked and when. The AI offers only free times inside these hours.",
+    "services": "Services",
+    "serviceName": "Service",
+    "serviceMinutes": "Minutes",
+    "servicePrice": "Price (₹)",
+    "removeService": "Remove {name}",
+    "addService": "Add service",
+    "hours": "Opening hours",
+    "openOn": "Open on {day}",
+    "opens": "{day} opens",
+    "closes": "{day} closes",
+    "day_mon": "Monday",
+    "day_tue": "Tuesday",
+    "day_wed": "Wednesday",
+    "day_thu": "Thursday",
+    "day_fri": "Friday",
+    "day_sat": "Saturday",
+    "day_sun": "Sunday",
+    "slotMinutes": "Time step (min)",
+    "perSlot": "Bookings at the same time",
+    "daysAhead": "Book up to (days)",
+    "notice": "Minimum notice (min)",
+    "reminders": "Send a reminder the day before",
+    "language": "Language of messages",
+    "close": "Close",
+    "saveSettings": "Save settings",
+    "settingsSaved": "Booking settings saved"
+  },
+  "BookingTab": {
+    "enable": "Book appointments in the chat",
+    "enableHelp": "The assistant offers free times from your services and opening hours, asks the customer's name and books it. It never invents a time.",
+    "howTitle": "How it works",
+    "how1": "Add your services and opening hours on the Appointments page.",
+    "how2": "The customer asks for a time on WhatsApp; the AI offers free times and confirms the booking.",
+    "how3": "They get a reminder the day before, and you see every booking on the Appointments page.",
+    "open": "Open Appointments"
   }
 }

@@ -35,6 +35,8 @@ export interface Assistant {
   useCatalog?: boolean
   /** Take orders in the chat: payment options and delivery charge. */
   shop?: ShopSettings
+  /** Book appointments in the chat (services and hours are on the Appointments page). */
+  booking?: { enabled: boolean }
   toolIds: string[]
   captureLeads: boolean
   audience: Audience
