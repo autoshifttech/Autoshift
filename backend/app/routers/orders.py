@@ -12,10 +12,9 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from .. import audit, events, shop_orders, shop_payments
+from .. import audit, events, shop_orders, shop_payments, wa_templates
 from ..config import Settings, get_settings
 from ..deps import AgentMember, Bridge, Member, ServiceDb
-from ..web_bridge import BridgeError
 from .workspace_ops import BLOCKED_TAG, OPT_IN_WORDS, OPT_OUT_WORDS
 
 router = APIRouter(prefix="/v1/orders", tags=["orders"])
@@ -127,18 +126,19 @@ async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember,
         if body.action in ("shipped", "delivered", "cancelled"):
             await shop_orders.move_lead(sdb, ctx.account_id, order.get("lead_id"), body.action)
 
-    notified, reason = False, None
+    notified, reason, via = False, None, None
     if body.notify:
         reason = await _may_message(sdb, ctx.account_id, order)
         if reason is None:
-            text = shop_orders.update_text(await _shop_of(sdb, order), order, body.action)
-            try:
-                await bridge.call("send", ctx.account_id, ctx.user.id, ctx.role, conversation_id=order["conversation_id"], type="text", text=text)
-                notified = True
-            except BridgeError as exc:
-                # Most often WhatsApp's 24-hour window: a free-text message needs the customer to have written in the last day.
-                reason = f"WhatsApp did not send it: {exc.detail}"
+            shop = await _shop_of(sdb, order)
+            # Free text inside WhatsApp's 24-hour window, else the approved order-update template.
+            notified, reason, via = await wa_templates.deliver(
+                sdb, bridge, account_id=ctx.account_id, user_id=ctx.user.id, role=ctx.role, conversation_id=order["conversation_id"],
+                text=shop_orders.update_text(shop, order, body.action), kind="order",
+                params=[order.get("customer_name") or "there", str(order["number"]), shop_orders.update_phrase(shop, order, body.action)],
+                language=str(shop.get("language") or "en"),
+            )
 
     await audit.record(sdb, scope="account", action=f"shop_order.{body.action}", actor_id=ctx.user.id, account_id=ctx.account_id, target=order_id, details={"number": order["number"], "notified": notified})
     await events.emit(sdb, ctx.account_id, "order.updated", {**shop_orders.public(order), "change": body.action})
-    return {"order": order, "notified": notified, "not_notified_reason": reason}
+    return {"order": order, "notified": notified, "not_notified_reason": reason, "sent_as": via}

@@ -150,7 +150,7 @@ function OrderDialog({ order, onClose, onChanged, date }: { order: ShopOrder | n
         (said === "paid" ? toast.success : said === "error" ? toast.error : toast.info)(t(`checked_${said}`));
         return;
       }
-      if (res.notified) toast.success(t("doneTold", { action: t(`done_${action}`) }));
+      if (res.notified) toast.success(t(res.sent_as === "template" ? "doneToldTemplate" : "doneTold", { action: t(`done_${action}`) }));
       else if (notify && res.not_notified_reason) toast.warning(t("doneNotTold", { action: t(`done_${action}`), reason: res.not_notified_reason }));
       else toast.success(t(`done_${action}`));
       setTracking("");

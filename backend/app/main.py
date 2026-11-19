@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .mcp_server import mount_mcp
 from .deps import PageAccess
-from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders, pages
+from .routers import internal, support, tools, team, billing_details, hooks, ai_models, assistants, businesses, connections, keys, me, plans, platform, platform_money, reports, wallet, webhooks, workspace_more, workspace_ops, platform_ops, platform_more, custom_tools, catalog, orders, pages, system_templates
 
 
 class McpPathFix:
@@ -92,6 +92,7 @@ def create_app() -> FastAPI:
         guarded = r in (workspace_more.router, workspace_ops.router, orders.router, tools.router)
         app.include_router(r, dependencies=[PageAccess] if guarded else [])
     app.include_router(pages.router)
+    app.include_router(system_templates.router)
 
     mcp = mount_mcp(app)
     return app

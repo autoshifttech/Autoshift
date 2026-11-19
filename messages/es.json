@@ -5187,7 +5187,8 @@
     "checked_paid": "Pagado. El pedido se marcó como pagado y se avisó al cliente.",
     "checked_unpaid": "Aún no pagado. Razorpay no ha recibido este pago.",
     "checked_expired": "El enlace de pago venció sin pago. Envía un enlace nuevo si el cliente aún quiere el pedido.",
-    "checked_error": "No se pudo contactar con Razorpay. Revisa la conexión de Razorpay e inténtalo de nuevo."
+    "checked_error": "No se pudo contactar con Razorpay. Revisa la conexión de Razorpay e inténtalo de nuevo.",
+    "doneToldTemplate": "{action}. Se avisó al cliente con la plantilla de aviso de pedido."
   },
   "PageAccess": {
     "title": "{page} no está activado para tu negocio",
@@ -5292,5 +5293,25 @@
     "codeExpired": "Ese código venció. Envía uno nuevo.",
     "linkSent": "Enviamos un enlace de acceso a <strong>{email}</strong>. Abre el correo en este dispositivo y toca Iniciar sesión.",
     "haveCode": "¿Tienes un código de 6 dígitos?"
+  },
+  "SystemTemplates": {
+    "title_order": "Avisos de pedido después de 24 horas",
+    "help_order": "WhatsApp solo permite mensajes normales hasta 24 horas después del último mensaje del cliente. Con esta plantilla aprobada, los avisos de empacado, enviado, entregado y pago le llegan igual más tarde.",
+    "preview_order": "Hola Asha, aquí tienes una actualización de tu pedido n.º 1001: fue enviado, síguelo aquí: https://… Responde a este mensaje si tienes alguna pregunta.",
+    "title_reminder": "Recordatorios de citas",
+    "help_reminder": "Los recordatorios suelen enviarse un día antes, a menudo fuera de la ventana de 24 horas, así que necesitan esta plantilla aprobada.",
+    "preview_reminder": "Hola Asha, te recordamos tu cita de consulta el lun. 24 nov. a las 10:30. Responde a este mensaje si necesitas cambiarla.",
+    "approved": "Aprobada",
+    "pending": "Esperando a Meta",
+    "rejected": "Rechazada",
+    "none": "Sin crear",
+    "loading": "Cargando",
+    "create": "Crear plantilla",
+    "refresh": "Ver estado",
+    "submitted": "Enviada a Meta para revisión. Suele tardar unos minutos.",
+    "failed": "No funcionó. Revisa que WhatsApp esté conectado e inténtalo de nuevo.",
+    "loadFailed": "No se pudo cargar el estado de la plantilla.",
+    "reason": "Motivo de Meta: {reason}",
+    "cost": "Se usa solo cuando la ventana de 24 horas está cerrada. Meta cobra una pequeña tarifa por mensaje de plantilla (tarifa de utilidad)."
   }
 }

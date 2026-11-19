@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_SHOP, type Assistant, type ShopSettings } from "@/lib/assistants/model";
 import { useCatalog } from "@/lib/catalog";
 import { useConnections } from "@/lib/flows/connections";
+import { SystemTemplateCard } from "@/components/templates/system-template-card";
 
 const LANGS = ["en", "pt", "es", "ko"] as const;
 
@@ -108,6 +109,8 @@ export function ShopTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>)
               {t("languageHelp")}
             </p>
           </div>
+
+          <SystemTemplateCard kind="order" language={shop.language} />
 
           <div className="rounded-xl border border-border p-4 text-sm">
             <p className="font-medium text-foreground">{t("howTitle")}</p>

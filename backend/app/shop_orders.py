@@ -58,6 +58,7 @@ TEXT: dict[str, dict[str, str]] = {
         "delivered": "✅ Your order #{n} has been delivered. Thank you for shopping with us!",
         "cancelled": "Your order #{n} has been cancelled.", "cancelled_paid": "We'll contact you about your refund.",
         "handoff": "Thanks for your message! A member of our team will reply to you here shortly.",
+        "p_packed": "it is packed and will be on its way soon", "p_shipped": "it has been shipped", "p_tracking": "track it here: {t}", "p_delivered": "it has been delivered, thank you for shopping with us", "p_cancelled": "it has been cancelled", "p_resend": "payment of ₹{total} is pending, pay here: {url}",
         "new_link": "💳 Here is a new payment link for order #{n} (₹{total}): {url}\nThe link works for 24 hours.",
     },
     "pt": {
@@ -75,6 +76,7 @@ TEXT: dict[str, dict[str, str]] = {
         "delivered": "✅ Seu pedido nº {n} foi entregue. Obrigado pela compra!",
         "cancelled": "Seu pedido nº {n} foi cancelado.", "cancelled_paid": "Vamos entrar em contato sobre o reembolso.",
         "handoff": "Obrigado pela mensagem! Uma pessoa da nossa equipe vai responder aqui em breve.",
+        "p_packed": "ele foi embalado e logo será enviado", "p_shipped": "ele foi enviado", "p_tracking": "acompanhe aqui: {t}", "p_delivered": "ele foi entregue, obrigado pela compra", "p_cancelled": "ele foi cancelado", "p_resend": "o pagamento de ₹{total} está pendente, pague aqui: {url}",
         "new_link": "💳 Aqui está um novo link de pagamento do pedido nº {n} (₹{total}): {url}\nO link vale por 24 horas.",
     },
     "es": {
@@ -92,6 +94,7 @@ TEXT: dict[str, dict[str, str]] = {
         "delivered": "✅ Tu pedido n.º {n} fue entregado. ¡Gracias por tu compra!",
         "cancelled": "Tu pedido n.º {n} fue cancelado.", "cancelled_paid": "Te contactaremos por el reembolso.",
         "handoff": "¡Gracias por tu mensaje! Una persona de nuestro equipo te responderá aquí pronto.",
+        "p_packed": "está empacado y saldrá pronto", "p_shipped": "fue enviado", "p_tracking": "síguelo aquí: {t}", "p_delivered": "fue entregado, gracias por tu compra", "p_cancelled": "fue cancelado", "p_resend": "el pago de ₹{total} está pendiente, paga aquí: {url}",
         "new_link": "💳 Aquí tienes un nuevo enlace de pago del pedido n.º {n} (₹{total}): {url}\nEl enlace vale 24 horas.",
     },
     "ko": {
@@ -109,6 +112,7 @@ TEXT: dict[str, dict[str, str]] = {
         "delivered": "✅ 주문 #{n}이(가) 배송 완료되었습니다. 구매해 주셔서 감사합니다!",
         "cancelled": "주문 #{n}이(가) 취소되었습니다.", "cancelled_paid": "환불에 대해 연락드리겠습니다.",
         "handoff": "메시지 감사합니다! 곧 담당자가 여기에서 답변드리겠습니다.",
+        "p_packed": "포장이 끝나 곧 발송됩니다", "p_shipped": "발송되었습니다", "p_tracking": "배송 조회: {t}", "p_delivered": "배송이 완료되었습니다. 구매해 주셔서 감사합니다", "p_cancelled": "취소되었습니다", "p_resend": "₹{total} 결제가 대기 중입니다. 결제하기: {url}",
         "new_link": "💳 주문 #{n}의 새 결제 링크입니다 (₹{total}): {url}\n링크는 24시간 동안 유효합니다.",
     },
 }
@@ -534,3 +538,13 @@ def update_text(shop: dict, order: dict, action: str) -> str:
     if action == "resend_link":
         return w["new_link"].format(n=n, total=total, url=order.get("payment_url") or "")
     return w[action].format(n=n)
+
+
+def update_phrase(shop: dict, order: dict, action: str) -> str:
+    """The {{3}} part of the order-update template (one line, no emoji)."""
+    w = words(shop)
+    if action == "shipped":
+        return w["p_shipped"] + (f", {w['p_tracking'].format(t=order['tracking'])}" if order.get("tracking") else "")
+    if action == "resend_link":
+        return w["p_resend"].format(total=rs(int(order["total_paise"])), url=order.get("payment_url") or "")
+    return w[f"p_{action}"]

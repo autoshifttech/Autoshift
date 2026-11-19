@@ -142,6 +142,8 @@ export interface ActionResult {
   payment?: 'paid' | 'unpaid' | 'expired' | 'error'
   notified: boolean
   not_notified_reason: string | null
+  /** How the customer was told: free text inside the 24-hour window, or the approved template. */
+  sent_as?: 'text' | 'template' | null
 }
 
 export function updateOrder(id: string, action: OrderAction, opts: { tracking?: string; notify: boolean }): Promise<ActionResult> {

@@ -5187,7 +5187,8 @@
     "checked_paid": "Paid. The order is marked paid and the customer was told.",
     "checked_unpaid": "Not paid yet. Razorpay hasn't received this payment.",
     "checked_expired": "The payment link expired without payment. Send a new link if the customer still wants the order.",
-    "checked_error": "Couldn't reach Razorpay. Check the Razorpay connection and try again."
+    "checked_error": "Couldn't reach Razorpay. Check the Razorpay connection and try again.",
+    "doneToldTemplate": "{action}. The customer was told with the order-update template."
   },
   "PageAccess": {
     "title": "{page} isn't switched on for your business",
@@ -5292,5 +5293,25 @@
     "codeExpired": "That code has expired. Send a new one.",
     "linkSent": "We sent a sign-in link to <strong>{email}</strong>. Open the email on this device and tap Sign in.",
     "haveCode": "Have a 6-digit code?"
+  },
+  "SystemTemplates": {
+    "title_order": "Order updates after 24 hours",
+    "help_order": "WhatsApp allows normal messages only within 24 hours of the customer's last message. With this approved template, packed, shipped, delivered and payment updates still reach them later.",
+    "preview_order": "Hi Asha, here is an update on your order #1001: it has been shipped, track it here: https://… Reply to this message if you have any questions.",
+    "title_reminder": "Appointment reminders",
+    "help_reminder": "Reminders are usually sent a day before, often outside the 24-hour window, so they need this approved template.",
+    "preview_reminder": "Hi Asha, this is a reminder of your consultation appointment on Mon 24 Nov at 10:30 AM. Reply to this message if you need to change it.",
+    "approved": "Approved",
+    "pending": "Waiting for Meta",
+    "rejected": "Rejected",
+    "none": "Not created",
+    "loading": "Loading",
+    "create": "Create template",
+    "refresh": "Check status",
+    "submitted": "Sent to Meta for review. It usually takes a few minutes.",
+    "failed": "That didn't work. Check that WhatsApp is connected and try again.",
+    "loadFailed": "The template status couldn't be loaded.",
+    "reason": "Meta's reason: {reason}",
+    "cost": "Used only when the 24-hour window is closed. Meta charges a small fee per template message (utility rate)."
   }
 }

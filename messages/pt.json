@@ -5187,7 +5187,8 @@
     "checked_paid": "Pago. O pedido foi marcado como pago e o cliente foi avisado.",
     "checked_unpaid": "Ainda não pago. A Razorpay não recebeu este pagamento.",
     "checked_expired": "O link de pagamento expirou sem pagamento. Envie um novo link se o cliente ainda quiser o pedido.",
-    "checked_error": "Não foi possível falar com a Razorpay. Verifique a conexão Razorpay e tente de novo."
+    "checked_error": "Não foi possível falar com a Razorpay. Verifique a conexão Razorpay e tente de novo.",
+    "doneToldTemplate": "{action}. O cliente foi avisado pelo modelo de atualização de pedido."
   },
   "PageAccess": {
     "title": "{page} não está ativado para o seu negócio",
@@ -5292,5 +5293,25 @@
     "codeExpired": "Esse código expirou. Envie um novo.",
     "linkSent": "Enviamos um link de acesso para <strong>{email}</strong>. Abra o e-mail neste aparelho e toque em Entrar.",
     "haveCode": "Tem um código de 6 dígitos?"
+  },
+  "SystemTemplates": {
+    "title_order": "Atualizações de pedido após 24 horas",
+    "help_order": "O WhatsApp só permite mensagens normais até 24 horas após a última mensagem do cliente. Com este modelo aprovado, avisos de embalado, enviado, entregue e pagamento continuam chegando depois.",
+    "preview_order": "Olá Asha, aqui está uma atualização do seu pedido nº 1001: ele foi enviado, acompanhe aqui: https://… Responda a esta mensagem se tiver alguma dúvida.",
+    "title_reminder": "Lembretes de horário",
+    "help_reminder": "Lembretes costumam sair um dia antes, muitas vezes fora da janela de 24 horas, então precisam deste modelo aprovado.",
+    "preview_reminder": "Olá Asha, lembrete do seu horário de consulta em seg., 24 nov. às 10:30. Responda a esta mensagem se precisar alterar.",
+    "approved": "Aprovado",
+    "pending": "Aguardando a Meta",
+    "rejected": "Rejeitado",
+    "none": "Não criado",
+    "loading": "Carregando",
+    "create": "Criar modelo",
+    "refresh": "Ver status",
+    "submitted": "Enviado para a Meta revisar. Costuma levar alguns minutos.",
+    "failed": "Não deu certo. Verifique se o WhatsApp está conectado e tente de novo.",
+    "loadFailed": "Não foi possível carregar o status do modelo.",
+    "reason": "Motivo da Meta: {reason}",
+    "cost": "Usado só quando a janela de 24 horas está fechada. A Meta cobra uma pequena taxa por mensagem de modelo (tarifa de utilidade)."
   }
 }

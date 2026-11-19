@@ -76,6 +76,9 @@ async def shop(client, world, settings, monkeypatch, llm):
     p.update(enabled=True, key_ciphertext=encrypt("sk-live-1234", s), key_tail="1234")
     await wallet.apply(world.service, world.acct_a, 5000, "topup", "t", "fund-shop")
     aid = client.post("/v1/assistants", json={"name": "Shop", "provider": "openai", "model_id": "gpt-5.5", "enabled": True, "shop": SHOP}, headers=world.headers("admin_a")).json()["id"]
+    # The customer wrote a moment ago, so WhatsApp's 24-hour window is open.
+    from datetime import datetime, timezone
+    world.rows("messages").append({"id": "m-recent", "conversation_id": "conv_1", "sender_type": "customer", "content_text": "yes", "created_at": datetime.now(timezone.utc).isoformat()})
     return {"h": {"X-AutoShift-Internal": SECRET}, "aid": aid, "bridge": bridge, "links": links, "conn": conn, "llm": llm, "remote": remote, "settings": s}
 
 
@@ -353,3 +356,18 @@ async def test_check_payment_from_the_orders_page_and_the_background_check(clien
 async def test_a_shop_customer_is_told_when_a_person_takes_over(client, world, shop):
     out = ask(client, world, shop, "wamid.shop.h", "Let me talk to a human")
     assert out["status"] == "handoff" and "A member of our team will reply" in out["text"]
+
+
+async def test_after_24_hours_the_update_goes_as_the_approved_template(client, world, shop):
+    shop["llm"].answer = order_line(pay="cod")
+    ask(client, world, shop, "wamid.shop.t")
+    oid = world.rows("shop_orders")[0]["id"]
+    world.rows("messages")[:] = [{"id": "m-old", "conversation_id": "conv_1", "sender_type": "customer", "content_text": "hi", "created_at": "2026-01-01T00:00:00+00:00"}]
+    r = patch(client, world, oid, action="packed").json()
+    assert r["notified"] is False and "template isn't approved" in r["not_notified_reason"] and not shop["bridge"].calls
+    world.rows("message_templates").append({"account_id": world.acct_a, "name": "autoshift_order_update", "language": "en", "status": "APPROVED"})
+    r = patch(client, world, oid, action="shipped", tracking="https://t.example.com/1\nX").json()
+    assert r["notified"] is True and r["sent_as"] == "template"
+    action, fields = shop["bridge"].calls[-1]
+    assert action == "send" and fields["type"] == "template" and fields["template"]["name"] == "autoshift_order_update"
+    assert fields["template"]["params"] == ["Asha Rao", "1001", "it has been shipped, track it here: https://t.example.com/1 X"]
