@@ -5280,15 +5280,17 @@
     "codeSent": "Enviamos um código de 6 dígitos para <strong>{email}</strong>. Ele vale por 1 hora.",
     "codeLabel": "Código de acesso",
     "verify": "Entrar",
-    "resend": "Enviar novo código",
+    "resend": "Enviar outro e-mail",
     "back": "Trocar e-mail",
-    "codeHelp": "Não encontrou? Veja o spam ou promoções. Você também pode tocar no link do e-mail.",
+    "codeHelp": "Não encontrou? Veja o spam ou promoções. Abra o link neste mesmo navegador.",
     "googleFailed": "Não foi possível iniciar o login com Google. Tente de novo ou use o e-mail.",
     "badEmail": "Digite um e-mail válido.",
     "sendFailed": "Não conseguimos enviar o código. Confira o e-mail e tente de novo.",
     "tooSoon": "Um código acabou de ser enviado. Espere um minuto para pedir outro.",
     "badCode": "Digite o código de 6 dígitos do e-mail.",
     "wrongCode": "Esse código está errado. Confira ou envie um novo.",
-    "codeExpired": "Esse código expirou. Envie um novo."
+    "codeExpired": "Esse código expirou. Envie um novo.",
+    "linkSent": "Enviamos um link de acesso para <strong>{email}</strong>. Abra o e-mail neste aparelho e toque em Entrar.",
+    "haveCode": "Tem um código de 6 dígitos?"
   }
 }

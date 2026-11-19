@@ -32,14 +32,16 @@ export function SignInPanel({ next, onBusy }: { next: string; onBusy?: (busy: bo
   const [mode, setMode] = useState<"choose" | "email" | "code">("choose");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  // The standard email has a sign-in link; a 6-digit code appears only once a custom email template adds it.
+  const [codeOpen, setCodeOpen] = useState(false);
   const [busy, setBusy] = useState<"google" | "send" | "verify" | null>(null);
   const [error, setError] = useState("");
   const codeRef = useRef<HTMLInputElement>(null);
   const callback = () => `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
   useEffect(() => {
-    if (mode === "code") codeRef.current?.focus();
-  }, [mode]);
+    if (mode === "code" && codeOpen) codeRef.current?.focus();
+  }, [mode, codeOpen]);
   useEffect(() => onBusy?.(busy !== null), [busy, onBusy]);
 
   const google = async () => {
@@ -66,6 +68,7 @@ export function SignInPanel({ next, onBusy }: { next: string; onBusy?: (busy: bo
     setBusy(null);
     if (err) return setError(/rate|seconds/i.test(err.message) ? t("tooSoon") : t("sendFailed"));
     setCode("");
+    setCodeOpen(false);
     setMode("code");
   };
 
@@ -95,26 +98,37 @@ export function SignInPanel({ next, onBusy }: { next: string; onBusy?: (busy: bo
         <button type="button" onClick={() => { setMode("email"); setError(""); }} className="flex min-h-11 items-center gap-1 self-start text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" aria-hidden /> {t("back")}
         </button>
-        <p className="text-sm text-muted-foreground">{t.rich("codeSent", { email: email.trim(), strong: (c) => <span className="font-medium text-foreground">{c}</span> })}</p>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="signin-code">{t("codeLabel")}</Label>
-          <Input
-            id="signin-code"
-            ref={codeRef}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={CODE_LENGTH}
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
-            placeholder="123456"
-            className="min-h-11 text-center font-mono text-xl tracking-[0.4em]"
-          />
-        </div>
-        {errorBox}
-        <Button type="submit" className="min-h-11 w-full" disabled={busy !== null || code.length !== CODE_LENGTH}>
-          {busy === "verify" && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          {t("verify")}
-        </Button>
+        <p className="text-sm text-muted-foreground">{t.rich("linkSent", { email: email.trim(), strong: (c) => <span className="font-medium text-foreground">{c}</span> })}</p>
+        {codeOpen ? (
+          <>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="signin-code">{t("codeLabel")}</Label>
+              <Input
+                id="signin-code"
+                ref={codeRef}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={CODE_LENGTH}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
+                placeholder="123456"
+                className="min-h-11 text-center font-mono text-xl tracking-[0.4em]"
+              />
+            </div>
+            {errorBox}
+            <Button type="submit" className="min-h-11 w-full" disabled={busy !== null || code.length !== CODE_LENGTH}>
+              {busy === "verify" && <Loader2 className="size-4 animate-spin" aria-hidden />}
+              {t("verify")}
+            </Button>
+          </>
+        ) : (
+          <>
+            {errorBox}
+            <button type="button" onClick={() => setCodeOpen(true)} className="flex min-h-11 items-center self-start text-sm font-medium text-primary hover:underline">
+              {t("haveCode")}
+            </button>
+          </>
+        )}
         <Button type="button" variant="ghost" className="min-h-11 w-full" disabled={busy !== null} onClick={() => void sendCode()}>
           {t("resend")}
         </Button>

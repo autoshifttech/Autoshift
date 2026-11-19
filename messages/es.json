@@ -5280,15 +5280,17 @@
     "codeSent": "Enviamos un código de 6 dígitos a <strong>{email}</strong>. Vale 1 hora.",
     "codeLabel": "Código de acceso",
     "verify": "Entrar",
-    "resend": "Enviar un código nuevo",
+    "resend": "Enviar otro correo",
     "back": "Cambiar correo",
-    "codeHelp": "¿No lo encuentras? Revisa spam o promociones. También puedes tocar el enlace del correo.",
+    "codeHelp": "¿No lo encuentras? Revisa spam o promociones. Abre el enlace en este mismo navegador.",
     "googleFailed": "No se pudo iniciar el acceso con Google. Inténtalo de nuevo o usa el correo.",
     "badEmail": "Escribe un correo válido.",
     "sendFailed": "No pudimos enviar el código. Revisa el correo e inténtalo de nuevo.",
     "tooSoon": "Acabamos de enviar un código. Espera un minuto antes de pedir otro.",
     "badCode": "Escribe el código de 6 dígitos del correo.",
     "wrongCode": "Ese código no es correcto. Revísalo o envía uno nuevo.",
-    "codeExpired": "Ese código venció. Envía uno nuevo."
+    "codeExpired": "Ese código venció. Envía uno nuevo.",
+    "linkSent": "Enviamos un enlace de acceso a <strong>{email}</strong>. Abre el correo en este dispositivo y toca Iniciar sesión.",
+    "haveCode": "¿Tienes un código de 6 dígitos?"
   }
 }
