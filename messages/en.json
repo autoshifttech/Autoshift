@@ -2012,7 +2012,8 @@
       "previewSeeAll": "See all options",
       "previewEmpty": "Start typing and your template appears here, just as customers will see it.",
       "previewMessage": "Message",
-      "previewYourBusiness": "Your business"
+      "previewYourBusiness": "Your business",
+      "backToShop": "Template submitted. Back to the shop settings: pick it there once Meta approves it."
     },
     "roles": {
       "admin": "Admin",
@@ -5537,5 +5538,36 @@
     "how2": "The customer asks for a time on WhatsApp; the AI offers free times and confirms the booking.",
     "how3": "They get a reminder the day before, and you see every booking on the Appointments page.",
     "open": "Open Appointments"
+  },
+  "OrderTemplate": {
+    "title": "Order updates after 24 hours",
+    "help": "WhatsApp allows normal messages only within 24 hours of the customer's last message. Choose one of your approved templates, and packed, shipped, delivered and payment updates still reach the customer later.",
+    "loading": "Loading your templates…",
+    "loadFailed": "Your templates couldn't be loaded.",
+    "pick": "Template for order updates",
+    "none": "No template (updates only within 24 hours)",
+    "noTemplates": "No templates yet",
+    "missing": "The template “{name}” wasn't found. Pick another one or create it again.",
+    "status_approved": "approved",
+    "status_pending": "waiting for Meta",
+    "status_rejected": "rejected",
+    "status_draft": "draft",
+    "fill": "What goes in each blank",
+    "var": "Blank '{{'{n}'}}'",
+    "field_customer_name": "Customer name",
+    "field_order_number": "Order number",
+    "field_update": "The update (e.g. shipped, with tracking)",
+    "field_total": "Order total",
+    "field_tracking": "Tracking link",
+    "preview": "Preview",
+    "sampleUpdate": "it has been shipped, track it here: https://track.example.com/AB123",
+    "approved": "Approved",
+    "pending": "Waiting for Meta",
+    "rejected": "Rejected",
+    "pendingHelp": "Meta is still reviewing this template (usually a few minutes). Until it's approved, updates after 24 hours aren't sent. Press Refresh list to check.",
+    "rejectedHelp": "Meta rejected this template. Edit it on the Templates page, or create a new one.",
+    "create": "Create new template",
+    "refresh": "Refresh list",
+    "cost": "Used only when the 24-hour window is closed. Choose the Utility category; Meta charges a small fee per template message."
   }
 }

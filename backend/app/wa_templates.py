@@ -92,18 +92,33 @@ async def window_open(sdb: Db, conversation_id: str, now: datetime | None = None
     return (now or datetime.now(timezone.utc)) - at < WINDOW
 
 
+async def business_template(sdb: Db, account_id: str, name: str, language: str) -> dict | None:
+    """The business's own approved template with this name (this language first, else any approved one)."""
+    rows = [r for r in await sdb.select("message_templates", {"account_id": account_id, "name": name}) if str(r.get("status", "")).upper() == "APPROVED"]
+    return next((r for r in rows if r.get("language") == language), rows[0] if rows else None)
+
+
 async def deliver(sdb: Db, bridge, *, account_id: str, user_id: str, role: str, conversation_id: str, text: str,
-                  kind: str, params: list[str], language: str) -> tuple[bool, str | None, str | None]:
-    """Send `text` while the 24-hour window is open, else the approved template. (sent, reason, via)."""
+                  kind: str, params: list[str], language: str, custom: dict | None = None) -> tuple[bool, str | None, str | None]:
+    """Send `text` while the 24-hour window is open, else an approved template: the business's own (`custom`:
+    name, language, params) when it chose one, else AutoShift's. (sent, reason, via)."""
     if await window_open(sdb, conversation_id):
         try:
             await bridge.call("send", account_id, user_id, role, conversation_id=conversation_id, type="text", text=text)
             return True, None, "text"
         except BridgeError as exc:
             log.info("free text refused for %s, trying the template: %s", conversation_id, exc.detail)
-    tpl = await approved(sdb, account_id, kind, language)
+    if custom:
+        tpl = await business_template(sdb, account_id, custom["name"], custom.get("language") or "en")
+        if not tpl:
+            return False, f"The customer's 24-hour WhatsApp window is closed and the template '{custom['name']}' isn't approved yet.", None
+        params = custom.get("params") or []
+    else:
+        tpl = await approved(sdb, account_id, kind, language)
     if not tpl:
-        return False, "The customer's 24-hour WhatsApp window is closed and the update template isn't approved yet. Create it on the assistant's Shop tab.", None
+        if kind == "order":
+            return False, "The customer's 24-hour WhatsApp window is closed and no order-update template is chosen. Pick one on the assistant's Shop tab.", None
+        return False, "The customer's 24-hour WhatsApp window is closed and the reminder template isn't approved yet. Create it in the Appointments booking settings.", None
     try:
         await bridge.call("send", account_id, user_id, role, conversation_id=conversation_id, type="template",
                           template={"name": tpl["name"], "language": tpl.get("language") or "en", "params": [clean_param(p) for p in params]})

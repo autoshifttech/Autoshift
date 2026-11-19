@@ -364,10 +364,29 @@ async def test_after_24_hours_the_update_goes_as_the_approved_template(client, w
     oid = world.rows("shop_orders")[0]["id"]
     world.rows("messages")[:] = [{"id": "m-old", "conversation_id": "conv_1", "sender_type": "customer", "content_text": "hi", "created_at": "2026-01-01T00:00:00+00:00"}]
     r = patch(client, world, oid, action="packed").json()
-    assert r["notified"] is False and "template isn't approved" in r["not_notified_reason"] and not shop["bridge"].calls
+    assert r["notified"] is False and "no order-update template" in r["not_notified_reason"] and not shop["bridge"].calls
     world.rows("message_templates").append({"account_id": world.acct_a, "name": "autoshift_order_update", "language": "en", "status": "APPROVED"})
     r = patch(client, world, oid, action="shipped", tracking="https://t.example.com/1\nX").json()
     assert r["notified"] is True and r["sent_as"] == "template"
     action, fields = shop["bridge"].calls[-1]
     assert action == "send" and fields["type"] == "template" and fields["template"]["name"] == "autoshift_order_update"
     assert fields["template"]["params"] == ["Asha Rao", "1001", "it has been shipped, track it here: https://t.example.com/1 X"]
+
+
+async def test_after_24_hours_the_business_own_template_is_used(client, world, shop):
+    shop["llm"].answer = order_line(pay="cod")
+    ask(client, world, shop, "wamid.shop.own")
+    oid = world.rows("shop_orders")[0]["id"]
+    for a in world.rows("assistants"):
+        a["shop"] = {**(a.get("shop") or {}), "update_template": {"name": "order_status", "language": "en_US", "vars": ["customer_name", "order_number", "update", "total"]}}
+    world.rows("messages")[:] = [{"id": "m-old", "conversation_id": "conv_1", "sender_type": "customer", "content_text": "hi", "created_at": "2026-01-01T00:00:00+00:00"}]
+    world.rows("message_templates").append({"account_id": world.acct_a, "name": "autoshift_order_update", "language": "en", "status": "APPROVED"})
+    world.rows("message_templates").append({"account_id": world.acct_a, "name": "order_status", "language": "en_US", "status": "Pending"})
+    r = patch(client, world, oid, action="packed").json()
+    assert r["notified"] is False and "'order_status' isn't approved" in r["not_notified_reason"] and not shop["bridge"].calls
+    world.rows("message_templates")[-1]["status"] = "Approved"
+    r = patch(client, world, oid, action="shipped").json()
+    assert r["notified"] is True and r["sent_as"] == "template"
+    _, fields = shop["bridge"].calls[-1]
+    assert fields["template"]["name"] == "order_status" and fields["template"]["language"] == "en_US"
+    assert fields["template"]["params"][:3] == ["Asha Rao", "1001", "it has been shipped"] and fields["template"]["params"][3].startswith("₹")

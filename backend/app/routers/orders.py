@@ -136,7 +136,7 @@ async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember,
                 sdb, bridge, account_id=ctx.account_id, user_id=ctx.user.id, role=ctx.role, conversation_id=order["conversation_id"],
                 text=shop_orders.update_text(shop, order, body.action), kind="order",
                 params=[order.get("customer_name") or "there", str(order["number"]), shop_orders.update_phrase(shop, order, body.action)],
-                language=str(shop.get("language") or "en"),
+                language=str(shop.get("language") or "en"), custom=shop_orders.chosen_template(shop, order, body.action),
             )
 
     await audit.record(sdb, scope="account", action=f"shop_order.{body.action}", actor_id=ctx.user.id, account_id=ctx.account_id, target=order_id, details={"number": order["number"], "notified": notified})

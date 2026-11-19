@@ -16,6 +16,18 @@ class Handoff(BaseModel):
     maxReplies: int = Field(15, ge=1, le=50)
 
 
+# What can fill a {{n}} in the business's own order-update template.
+TemplateField = Literal["customer_name", "order_number", "update", "total", "tracking"]
+
+
+class UpdateTemplate(BaseModel):
+    """The business's own approved WhatsApp template for order updates after the 24-hour window."""
+    name: str = Field(min_length=1, max_length=512, pattern=r"^[a-z0-9_]+$")
+    language: str = Field("en", min_length=2, max_length=10)
+    # vars[0] fills {{1}}, vars[1] fills {{2}} …
+    vars: list[TemplateField] = Field(default_factory=list, max_length=10)
+
+
 class ShopSettings(BaseModel):
     """An assistant that takes orders: payment options and delivery charge (in rupees)."""
     enabled: bool = False
@@ -27,6 +39,7 @@ class ShopSettings(BaseModel):
     cod_max: float = Field(0, ge=0, le=10_000_000)  # 0: no limit for cash on delivery
     language: Literal["en", "pt", "es", "ko"] = "en"  # of the order summary AutoShift adds
     delivery_note: str = Field("", max_length=300)  # e.g. "Delivery in 3-5 days across India"
+    update_template: UpdateTemplate | None = None
 
 
 class BookingToggle(BaseModel):

@@ -481,7 +481,7 @@ async def apply_store_state(sdb: Db, bridge, order: dict, action: str, tracking:
                 sdb, bridge, account_id=order["account_id"], user_id=owner, role="owner", conversation_id=order["conversation_id"],
                 text=shop_orders.update_text(shop, order, action), kind="order",
                 params=[order.get("customer_name") or "there", str(order["number"]), shop_orders.update_phrase(shop, order, action)],
-                language=str(shop.get("language") or "en"),
+                language=str(shop.get("language") or "en"), custom=shop_orders.chosen_template(shop, order, action),
             )
         except Exception as exc:  # noqa: BLE001 - the order moved; a failed message must not undo that
             log.warning("could not tell the customer about order %s: %s", order["id"], exc)

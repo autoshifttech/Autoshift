@@ -62,6 +62,19 @@ export interface ShopSettings {
   /** Language of the order summary and status messages AutoShift sends. */
   language: 'en' | 'pt' | 'es' | 'ko'
   delivery_note: string
+  /** The business's own approved WhatsApp template for order updates after the 24-hour window. */
+  update_template?: UpdateTemplate | null
+}
+
+/** What can fill a {{n}} in the order-update template. */
+export const TEMPLATE_FIELDS = ['customer_name', 'order_number', 'update', 'total', 'tracking'] as const
+export type TemplateField = (typeof TEMPLATE_FIELDS)[number]
+
+export interface UpdateTemplate {
+  name: string
+  language: string
+  /** vars[0] fills {{1}}, vars[1] fills {{2}} … */
+  vars: TemplateField[]
 }
 
 export const DEFAULT_SHOP: ShopSettings = { enabled: false, online: true, cod: true, delivery_fee: 0, free_above: 0, min_order: 0, cod_max: 0, language: 'en', delivery_note: '' }

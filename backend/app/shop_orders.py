@@ -540,6 +540,26 @@ def update_text(shop: dict, order: dict, action: str) -> str:
     return w[action].format(n=n)
 
 
+def template_values(shop: dict, order: dict, action: str) -> dict[str, str]:
+    """Everything a business's own order-update template can show, for this update."""
+    return {
+        "customer_name": order.get("customer_name") or "there",
+        "order_number": str(order["number"]),
+        "update": update_phrase(shop, order, action),
+        "total": f"₹{rs(int(order['total_paise']))}",
+        "tracking": order.get("tracking") or "-",
+    }
+
+
+def chosen_template(shop: dict, order: dict, action: str) -> dict | None:
+    """The business's own template for this update ({name, language, params}), or None to use AutoShift's."""
+    tpl = shop.get("update_template") or None
+    if not tpl or not tpl.get("name"):
+        return None
+    values = template_values(shop, order, action)
+    return {"name": tpl["name"], "language": tpl.get("language") or "en", "params": [values.get(v, "-") for v in tpl.get("vars") or []]}
+
+
 def update_phrase(shop: dict, order: dict, action: str) -> str:
     """The {{3}} part of the order-update template (one line, no emoji)."""
     w = words(shop)

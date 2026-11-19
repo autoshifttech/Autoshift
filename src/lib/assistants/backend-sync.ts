@@ -6,7 +6,7 @@
  * written back: created, changed (after a short pause so typing isn't one request per key) and deleted.
  * Fields the backend doesn't hold (model tier, reply counters) stay in the browser.
  */
-import { assistantsStore, registerAssistantAlias, DEFAULT_SHOP, type ShopSettings, type Assistant, type AssistantRole, type AssistantsState, type Tool } from './model'
+import { assistantsStore, registerAssistantAlias, DEFAULT_SHOP, TEMPLATE_FIELDS, type ShopSettings, type Assistant, type AssistantRole, type AssistantsState, type Tool } from './model'
 import { createStore, useStore, type Store } from '@/lib/workspace/store'
 import { backend, backendUrl } from '@/lib/backend/client'
 import { toast } from '@/lib/toast'
@@ -65,6 +65,13 @@ export function cleanShop(shop?: Partial<ShopSettings>): ShopSettings {
     cod_max: money(s.cod_max, 10_000_000),
     language: (['en', 'pt', 'es', 'ko'] as const).includes(s.language) ? s.language : 'en',
     delivery_note: String(s.delivery_note ?? '').slice(0, 300),
+    update_template: s.update_template?.name
+      ? {
+          name: s.update_template.name,
+          language: s.update_template.language || 'en',
+          vars: (s.update_template.vars ?? []).filter((v) => (TEMPLATE_FIELDS as readonly string[]).includes(v)).slice(0, 10),
+        }
+      : null,
   }
 }
 

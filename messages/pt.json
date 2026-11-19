@@ -2012,7 +2012,8 @@
       "previewSeeAll": "Ver todas as opções",
       "previewEmpty": "Comece a digitar e seu modelo aparece aqui, como os clientes vão ver.",
       "previewMessage": "Mensagem",
-      "previewYourBusiness": "Sua empresa"
+      "previewYourBusiness": "Sua empresa",
+      "backToShop": "Modelo enviado. De volta às configurações da loja: escolha-o lá quando a Meta aprovar."
     },
     "roles": {
       "admin": "Administrador",
@@ -5537,5 +5538,36 @@
     "how2": "O cliente pede um horário no WhatsApp; a IA oferece horários livres e confirma.",
     "how3": "Ele recebe um lembrete na véspera, e você vê tudo na página Agendamentos.",
     "open": "Abrir Agendamentos"
+  },
+  "OrderTemplate": {
+    "title": "Atualizações de pedido após 24 horas",
+    "help": "O WhatsApp só permite mensagens normais até 24 horas após a última mensagem do cliente. Escolha um dos seus modelos aprovados e as atualizações de embalado, enviado, entregue e pagamento ainda chegam ao cliente depois.",
+    "loading": "Carregando seus modelos…",
+    "loadFailed": "Não foi possível carregar seus modelos.",
+    "pick": "Modelo para atualizações de pedido",
+    "none": "Nenhum modelo (atualizações só em até 24 horas)",
+    "noTemplates": "Nenhum modelo ainda",
+    "missing": "O modelo “{name}” não foi encontrado. Escolha outro ou crie de novo.",
+    "status_approved": "aprovado",
+    "status_pending": "aguardando a Meta",
+    "status_rejected": "rejeitado",
+    "status_draft": "rascunho",
+    "fill": "O que vai em cada espaço",
+    "var": "Espaço '{{'{n}'}}'",
+    "field_customer_name": "Nome do cliente",
+    "field_order_number": "Número do pedido",
+    "field_update": "A atualização (ex.: enviado, com rastreio)",
+    "field_total": "Total do pedido",
+    "field_tracking": "Link de rastreio",
+    "preview": "Prévia",
+    "sampleUpdate": "foi enviado, acompanhe aqui: https://track.example.com/AB123",
+    "approved": "Aprovado",
+    "pending": "Aguardando a Meta",
+    "rejected": "Rejeitado",
+    "pendingHelp": "A Meta ainda está analisando este modelo (geralmente alguns minutos). Até ser aprovado, as atualizações após 24 horas não são enviadas. Toque em Atualizar lista para verificar.",
+    "rejectedHelp": "A Meta rejeitou este modelo. Edite na página Modelos ou crie um novo.",
+    "create": "Criar novo modelo",
+    "refresh": "Atualizar lista",
+    "cost": "Usado só quando a janela de 24 horas está fechada. Escolha a categoria Utilidade; a Meta cobra uma pequena taxa por mensagem de modelo."
   }
 }

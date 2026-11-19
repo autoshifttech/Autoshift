@@ -2012,7 +2012,8 @@
       "previewSeeAll": "모든 옵션 보기",
       "previewEmpty": "입력을 시작하면 고객이 보게 될 모습 그대로 템플릿이 여기에 표시됩니다.",
       "previewMessage": "메시지",
-      "previewYourBusiness": "내 비즈니스"
+      "previewYourBusiness": "내 비즈니스",
+      "backToShop": "템플릿을 제출했습니다. 상점 설정으로 돌아갑니다. Meta 승인 후 그곳에서 선택하세요."
     },
     "roles": {
       "admin": "관리자",
@@ -5537,5 +5538,36 @@
     "how2": "고객이 WhatsApp으로 시간을 요청하면 AI가 빈 시간을 제안하고 예약을 확정합니다.",
     "how3": "고객은 하루 전에 알림을 받고, 모든 예약은 예약 페이지에서 볼 수 있습니다.",
     "open": "예약 열기"
+  },
+  "OrderTemplate": {
+    "title": "24시간 이후 주문 안내",
+    "help": "WhatsApp은 고객의 마지막 메시지 후 24시간 동안만 일반 메시지를 허용합니다. 승인된 템플릿 하나를 선택하면 포장, 발송, 배송 완료, 결제 안내가 그 이후에도 고객에게 전달됩니다.",
+    "loading": "템플릿을 불러오는 중…",
+    "loadFailed": "템플릿을 불러오지 못했습니다.",
+    "pick": "주문 안내용 템플릿",
+    "none": "템플릿 없음 (24시간 이내에만 안내)",
+    "noTemplates": "아직 템플릿이 없습니다",
+    "missing": "“{name}” 템플릿을 찾을 수 없습니다. 다른 템플릿을 고르거나 다시 만드세요.",
+    "status_approved": "승인됨",
+    "status_pending": "Meta 검토 중",
+    "status_rejected": "거절됨",
+    "status_draft": "초안",
+    "fill": "각 빈칸에 들어갈 내용",
+    "var": "빈칸 '{{'{n}'}}'",
+    "field_customer_name": "고객 이름",
+    "field_order_number": "주문 번호",
+    "field_update": "안내 내용 (예: 발송, 배송 조회 포함)",
+    "field_total": "주문 합계",
+    "field_tracking": "배송 조회 링크",
+    "preview": "미리보기",
+    "sampleUpdate": "발송되었습니다. 배송 조회: https://track.example.com/AB123",
+    "approved": "승인됨",
+    "pending": "Meta 검토 중",
+    "rejected": "거절됨",
+    "pendingHelp": "Meta가 아직 이 템플릿을 검토 중입니다(보통 몇 분). 승인 전에는 24시간 이후 안내가 전송되지 않습니다. 목록 새로고침을 눌러 확인하세요.",
+    "rejectedHelp": "Meta가 이 템플릿을 거절했습니다. 템플릿 페이지에서 수정하거나 새로 만드세요.",
+    "create": "새 템플릿 만들기",
+    "refresh": "목록 새로고침",
+    "cost": "24시간 창이 닫혔을 때만 사용됩니다. 유틸리티 카테고리를 선택하세요. Meta가 템플릿 메시지마다 소액을 청구합니다."
   }
 }

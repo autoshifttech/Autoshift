@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_SHOP, type Assistant, type ShopSettings } from "@/lib/assistants/model";
 import { useCatalog } from "@/lib/catalog";
 import { isPaymentKind, useConnections } from "@/lib/flows/connections";
-import { SystemTemplateCard } from "@/components/templates/system-template-card";
+import { OrderTemplatePicker } from "@/components/templates/order-template-picker";
 
 const LANGS = ["en", "pt", "es", "ko"] as const;
 
@@ -110,7 +110,7 @@ export function ShopTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>)
             </p>
           </div>
 
-          <SystemTemplateCard kind="order" language={shop.language} />
+          <OrderTemplatePicker value={shop.update_template} language={shop.language} onChange={(update_template) => put({ update_template })} />
 
           <div className="rounded-xl border border-border p-4 text-sm">
             <p className="font-medium text-foreground">{t("howTitle")}</p>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from "@/lib/toast";
 import {
   Plus,
@@ -99,6 +100,17 @@ const emptyForm: TemplateFormData = {
   buttons: [],
 };
 
+/** The order-update draft's language, as Meta names it. */
+const ORDER_UPDATE_LANG = { en: 'en', pt: 'pt_BR', es: 'es', ko: 'ko' } as const;
+
+/** A ready-made order-update template (Utility). Meta's rule: the body can't start or end with a variable. */
+const ORDER_UPDATE_DRAFT = {
+  en: { body: 'Hi {{1}}, here is an update on your order #{{2}}: {{3}}. Reply to this message if you have any questions.', sample: 'it has been shipped' },
+  pt: { body: 'Olá {{1}}, aqui está uma atualização do seu pedido nº {{2}}: {{3}}. Responda a esta mensagem se tiver alguma dúvida.', sample: 'foi enviado' },
+  es: { body: 'Hola {{1}}, aquí tienes una actualización de tu pedido n.º {{2}}: {{3}}. Responde a este mensaje si tienes alguna pregunta.', sample: 'ha sido enviado' },
+  ko: { body: '안녕하세요 {{1}}님, 주문 #{{2}} 안내입니다: {{3}}. 궁금한 점이 있으면 이 메시지에 답장해 주세요.', sample: '배송이 시작되었습니다' },
+} as const;
+
 const COMMON_LANGUAGE_CODES = [
   'en_US',
   'en_GB',
@@ -138,6 +150,7 @@ export function TemplateManager() {
   const categoryLabel = (category: string) =>
     t.has(`categoryLabels.${category}`) ? t(`categoryLabels.${category}`) : category;
   const supabase = createClient();
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -155,6 +168,8 @@ export function TemplateManager() {
   // submit handler from POST /submit to PATCH /[id] and changes the
   // dialog title + CTA. Set to the template id to pre-fill from a row.
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Opened from the Shop tab ("Create new template"): where to go back to after submitting.
+  const [backTo, setBackTo] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   // Template selected for the confirm-delete dialog. The destructive
   // action goes through this two-step so a slip on the trash icon
@@ -185,11 +200,14 @@ export function TemplateManager() {
 
   // Resize body_samples so it always has exactly bodyVarCount entries.
   // (We mutate via setForm in an effect so React owns the state.)
+  // The count is read from the form being updated, not this render's value, so a form set in the same
+  // tick (a pre-filled draft) keeps its samples.
   useEffect(() => {
     setForm((prev) => {
-      if (prev.body_samples.length === bodyVarCount) return prev;
-      const next = prev.body_samples.slice(0, bodyVarCount);
-      while (next.length < bodyVarCount) next.push('');
+      const count = extractVariableIndices(prev.body_text).length;
+      if (prev.body_samples.length === count) return prev;
+      const next = prev.body_samples.slice(0, count);
+      while (next.length < count) next.push('');
       return { ...prev, body_samples: next };
     });
   }, [bodyVarCount]);
@@ -269,6 +287,28 @@ export function TemplateManager() {
     setDialogOpen(true);
   }
 
+  // /templates?new=order_update&lang=en&back=/agents/…: start a ready-made order-update draft.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('new') !== 'order_update') return;
+    const lang = (['en', 'pt', 'es', 'ko'] as const).find((l) => l === q.get('lang')) ?? 'en';
+    const back = q.get('back') ?? '';
+    // Only a path inside this app, never another site.
+    setBackTo(back.startsWith('/') && !back.startsWith('//') ? back : null);
+    setEditingId(null);
+    setForm({
+      ...emptyForm,
+      name: 'order_update',
+      category: 'Utility',
+      language: ORDER_UPDATE_LANG[lang],
+      body_text: ORDER_UPDATE_DRAFT[lang].body,
+      body_samples: ['Asha', '1001', ORDER_UPDATE_DRAFT[lang].sample],
+    });
+    setMobileView('edit');
+    setDialogOpen(true);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
+
   function openCreate() {
     setEditingId(null);
     setForm(emptyForm);
@@ -312,6 +352,10 @@ export function TemplateManager() {
       setDialogOpen(false);
       setForm(emptyForm);
       setEditingId(null);
+      if (backTo) {
+        toast.info(t('backToShop'));
+        router.push(backTo);
+      }
     } catch (err) {
       console.error('Submit error:', err);
       toast.error(err instanceof Error ? err.message : t('toastSubmitFailed'));
