@@ -90,6 +90,61 @@ function OutLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
+type GuideLink = { href: string; label: string };
+type GuideStep = { title: string; help: string; links?: GuideLink[] };
+
+/** Numbered set-up steps with buttons that open the provider's page in a new tab. */
+function SetupGuide({ steps, t }: { steps: GuideStep[]; t: T }) {
+  return (
+    <ol className="space-y-3 text-sm">
+      {steps.map((step, i) => (
+        <li key={step.title} className="flex gap-3">
+          <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
+          <div className="min-w-0">
+            <p className="font-medium text-foreground">{t(step.title)}</p>
+            <p className="mt-0.5 text-muted-foreground">{t.rich(step.help, { b: bold, code })}</p>
+            {step.links && step.links.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {step.links.map((l) => <OutLink key={l.href} href={l.href}>{t(l.label)}</OutLink>)}
+              </div>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+const LINKS = {
+  rzpKeys: "https://dashboard.razorpay.com/app/website-app-settings/api-keys",
+  rzpHooks: "https://dashboard.razorpay.com/app/webhooks",
+  rzpHelp: "https://razorpay.com/docs/payments/dashboard/account-settings/api-keys/",
+  cfDashboard: "https://merchant.cashfree.com/merchants/login",
+  cfHelp: "https://www.cashfree.com/docs/",
+  shopifyAdmin: "https://admin.shopify.com/",
+  shopifyDev: "https://dev.shopify.com/dashboard",
+  shopifyHelp: "https://help.shopify.com/en/manual/apps/app-types/custom-apps",
+  wooHelp: "https://woocommerce.com/document/woocommerce-rest-api/",
+} as const;
+
+/** "mystore", "mystore.myshopify.com" or an admin link → the store handle, or "" while unclear. */
+function shopHandle(value: string): string {
+  const v = value.trim().toLowerCase();
+  const fromAdmin = v.match(/admin\.shopify\.com\/store\/([a-z0-9-]+)/);
+  if (fromAdmin) return fromAdmin[1];
+  const host = v.replace(/^https?:\/\//, "").split("/")[0];
+  const handle = host.endsWith(".myshopify.com") ? host.slice(0, -".myshopify.com".length) : host.includes(".") ? "" : host;
+  return /^[a-z0-9][a-z0-9-]{1,60}$/.test(handle) ? handle : "";
+}
+
+/** The WordPress site's REST API keys page, once the address looks like a site. */
+function wooKeysPage(value: string): string {
+  const v = value.trim().replace(/\/+$/, "");
+  if (!/^(https:\/\/)?[^\s/]+\.[^\s/]+(\/[^\s]*)?$/i.test(v) || /^http:\/\//i.test(v)) return "";
+  const base = v.startsWith("https://") ? v : `https://${v}`;
+  return `${base}/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`;
+}
+
 function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
   const [name, setName] = useState("");
   const [json, setJson] = useState("");
@@ -154,30 +209,16 @@ function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: 
           <DialogDescription>{t("googleIntro")}</DialogDescription>
         </DialogHeader>
 
-        <ol className="space-y-3 text-sm">
-          {([
-            ["googleGuide1", "googleGuide1Help", GOOGLE_LINKS.accounts, "googleOpenAccounts"],
-            ["googleGuide2", "googleGuide2Help", null, null],
-            ["googleGuide3", "googleGuide3Help", null, null],
-            ["googleGuide4", "googleGuide4Help", null, null],
-            ["googleGuide5", "googleGuide5Help", null, null],
-          ] as const).map(([title, help, href, linkLabel], i) => (
-            <li key={title} className="flex gap-3">
-              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
-              <div className="min-w-0">
-                <p className="font-medium text-foreground">{t(title)}</p>
-                <p className="mt-0.5 text-muted-foreground">{t.rich(help, { b: bold, code })}</p>
-                {href && linkLabel && <OutLink href={href}>{t(linkLabel)}</OutLink>}
-                {title === "googleGuide3" && (
-                  <div className="flex flex-wrap gap-2">
-                    <OutLink href={GOOGLE_LINKS.sheets}>{t("googleOpenSheets")}</OutLink>
-                    <OutLink href={GOOGLE_LINKS.calendar}>{t("googleOpenCalendar")}</OutLink>
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
+        <SetupGuide
+          t={t}
+          steps={[
+            { title: "googleGuide1", help: "googleGuide1Help", links: [{ href: GOOGLE_LINKS.accounts, label: "googleOpenAccounts" }] },
+            { title: "googleGuide2", help: "googleGuide2Help" },
+            { title: "googleGuide3", help: "googleGuide3Help", links: [{ href: GOOGLE_LINKS.sheets, label: "googleOpenSheets" }, { href: GOOGLE_LINKS.calendar, label: "googleOpenCalendar" }] },
+            { title: "googleGuide4", help: "googleGuide4Help" },
+            { title: "googleGuide5", help: "googleGuide5Help" },
+          ]}
+        />
 
         <div className="grid gap-1.5">
           <Label htmlFor="g-name">{t("nameOptional")}</Label>
@@ -286,11 +327,20 @@ function RazorpayDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><RazorpayLogo className="size-5" /> {t("razorpayTitle")}</DialogTitle>
-          <DialogDescription>{t.rich("razorpayIntro", { b: bold, code })}</DialogDescription>
+          <DialogDescription>{t("razorpayAbout")}</DialogDescription>
         </DialogHeader>
+        <SetupGuide
+          t={t}
+          steps={[
+            { title: "rzpGuide1", help: "rzpGuide1Help", links: [{ href: LINKS.rzpKeys, label: "rzpOpenKeys" }] },
+            { title: "rzpGuide2", help: "rzpGuide2Help" },
+            { title: "rzpGuide3", help: "rzpGuide3Help" },
+            { title: "rzpGuide4", help: "rzpGuide4Help", links: [{ href: LINKS.rzpHooks, label: "rzpOpenHooks" }, { href: LINKS.rzpHelp, label: "openHelp" }] },
+          ]}
+        />
         <Field id="rzp-name" label={t("nameOptional")}>
           <Input id="rzp-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("razorpayNamePh")} />
         </Field>
@@ -352,11 +402,20 @@ function CashfreeDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><CashfreeLogo className="size-5" /> {t("cashfreeTitle")}</DialogTitle>
-          <DialogDescription>{t.rich("cashfreeIntro", { b: bold, code })}</DialogDescription>
+          <DialogDescription>{t("cashfreeAbout")}</DialogDescription>
         </DialogHeader>
+        <SetupGuide
+          t={t}
+          steps={[
+            { title: "cfGuide1", help: "cfGuide1Help", links: [{ href: LINKS.cfDashboard, label: "cfOpenDashboard" }] },
+            { title: "cfGuide2", help: "cfGuide2Help" },
+            { title: "cfGuide3", help: "cfGuide3Help" },
+            { title: "cfGuide4", help: "cfGuide4Help", links: [{ href: LINKS.cfHelp, label: "openHelp" }] },
+          ]}
+        />
         <Field id="cf-name" label={t("nameOptional")}>
           <Input id="cf-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("cashfreeNamePh")} />
         </Field>
@@ -423,16 +482,20 @@ function ShopifyDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange:
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><ShopifyLogo className="size-5" /> {t("shopifyTitle")}</DialogTitle>
           <DialogDescription>{t("shopifyIntro")}</DialogDescription>
         </DialogHeader>
-        <ol className="list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
-          <li>{t.rich("shopifyStep1", { b: bold })}</li>
-          <li>{t.rich("shopifyStep2", { b: bold, code })}</li>
-          <li>{t.rich("shopifyStep3", { b: bold })}</li>
-        </ol>
+        <SetupGuide
+          t={t}
+          steps={[
+            { title: "shopifyGuide1", help: "shopifyGuide1Help", links: [{ href: shopHandle(shop) ? `https://admin.shopify.com/store/${shopHandle(shop)}/settings/apps/development` : LINKS.shopifyAdmin, label: shopHandle(shop) ? "shopifyOpenApps" : "shopifyOpenAdmin" }] },
+            { title: "shopifyGuide2", help: "shopifyGuide2Help" },
+            { title: "shopifyGuide3", help: "shopifyGuide3Help" },
+            { title: "shopifyGuide4", help: "shopifyGuide4Help", links: [{ href: LINKS.shopifyDev, label: "shopifyOpenDev" }, { href: LINKS.shopifyHelp, label: "openHelp" }] },
+          ]}
+        />
         <Field id="sh-shop" label={t("shopifyShop")} required error={tried && !shopOk ? t("shopifyShopError") : undefined}>
           <Input id="sh-shop" value={shop} onChange={(e) => setShop(e.target.value)} placeholder="mystore.myshopify.com" autoComplete="off" aria-invalid={tried && !shopOk} />
         </Field>
@@ -496,11 +559,20 @@ function WooDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o:
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><WooLogo className="size-5" /> {t("wooTitle")}</DialogTitle>
-          <DialogDescription>{t.rich("wooIntro", { b: bold })}</DialogDescription>
+          <DialogDescription>{t("wooAbout")}</DialogDescription>
         </DialogHeader>
+        <SetupGuide
+          t={t}
+          steps={[
+            { title: "wooGuide1", help: "wooGuide1Help", links: wooKeysPage(url) ? [{ href: wooKeysPage(url), label: "wooOpenKeys" }] : [] },
+            { title: "wooGuide2", help: "wooGuide2Help" },
+            { title: "wooGuide3", help: "wooGuide3Help" },
+            { title: "wooGuide4", help: "wooGuide4Help", links: [{ href: LINKS.wooHelp, label: "openHelp" }] },
+          ]}
+        />
         <Field id="wc-url" label={t("wooUrl")} required error={tried && !urlOk ? t("wooUrlError") : undefined}>
           <Input id="wc-url" type="url" inputMode="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourshop.com" autoComplete="off" aria-invalid={tried && !urlOk} />
         </Field>
