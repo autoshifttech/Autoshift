@@ -1318,7 +1318,12 @@ def build_mcp(get_app) -> MCPServer:
                          "next_node_key", "not_found_node_key"} → {{vars.cart_summary}}, {{vars.cart_total}}, {{vars.cart_total_text}}
           action        {"service": "razorpay_link", "params": {"amount": "{{vars.cart_total}}", "description", "send_qr": "yes"|""},
                          "save_as": "payment_link", "next_node_key", "error_node_key"} → {{vars.payment_link}}, {{vars.payment_link_qr}}
-                         (the business's own Razorpay connection; a create_lead before it is moved to "Paid" when paid)
+                         (the business's own Razorpay or Cashfree connection; a create_lead before it is moved to "Paid" when paid)
+                        {"service": "google_sheets_append", "connection": "<Google email or name>", "params": {"spreadsheet": "<sheet link or id>",
+                         "sheet": "Sheet1", "values": "{{contact.name}}\\n{{contact.phone}}\\n{{vars.x}}" (one cell per line)}, "next_node_key", "error_node_key"}
+                        {"service": "google_calendar_event", "connection": "...", "params": {"calendar": "primary or a calendar id", "title",
+                         "start": "{{vars.visit_time}} (2026-11-20 15:30)", "minutes": "30"}, "save_as": "event_link", "next_node_key", "error_node_key"}
+                         (the sheet or calendar must be shared with the Google connection's email)
           send_media    {"media_type": "image", "media_url" (may be {{vars.payment_link_qr}}; skipped when empty), "caption", "next_node_key"}
           handoff       {"note"} (assigns the chat to a person and ends)   end {}
         Texts may use {{vars.x}}; lead fields also {{contact.name}} / {{contact.phone}}.

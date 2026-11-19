@@ -164,3 +164,29 @@ def test_shop_flow_with_cart_and_payment_link(client, world):
     assert "different" in client.post("/v1/ws/flows", json=dupes, headers=admin).json()["detail"]
     paid = {"name": "Paid", "trigger": "payment_received", "nodes": [{"key": "thanks", "type": "send_message", "config": {"text": "Got ₹{{vars.payment_amount}}", "next_node_key": "bye"}}, {"key": "bye", "type": "end", "config": {}}]}
     assert client.post("/v1/ws/flows", json=paid, headers=admin).status_code == 201
+
+
+def test_flow_with_google_sheets_step(client, world):
+    admin = world.headers("admin_a")
+    sa = "bot@proj.iam.gserviceaccount.com"
+    flow = {
+        "name": "Budget to sheet", "trigger": "keyword", "keywords": ["sheettest"],
+        "nodes": [
+            {"key": "ask", "type": "collect_input", "config": {"prompt_text": "Budget?", "var_key": "budget", "next_node_key": "row"}},
+            {"key": "row", "type": "action", "config": {"service": "google_sheets_append", "connection": sa,
+             "params": {"spreadsheet": "https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKl/edit", "sheet": "Leads", "values": "{{contact.name}}\n{{vars.budget}}"},
+             "next_node_key": "thanks", "error_node_key": "thanks"}},
+            {"key": "thanks", "type": "send_message", "config": {"text": "Noted", "next_node_key": "bye"}},
+            {"key": "bye", "type": "end", "config": {}},
+        ],
+    }
+    bad = {**flow, "nodes": [flow["nodes"][0], {**flow["nodes"][1], "config": {**flow["nodes"][1]["config"], "params": {"sheet": "Leads"}}}, *flow["nodes"][2:]]}
+    assert "params.spreadsheet" in client.post("/v1/ws/flows", json={**bad, "dry_run": True}, headers=admin).json()["detail"]
+    world.rows("flow_connections").append({"id": "c-rzp", "account_id": world.acct_a, "kind": "razorpay", "name": "Shop", "detail": "rzp", "created_at": "2026-03-01T00:00:00Z"})
+    no_google = client.post("/v1/ws/flows", json=flow, headers=admin)
+    assert no_google.status_code == 422 and "Google" in no_google.json()["detail"]
+    world.rows("flow_connections").append({"id": "c-g", "account_id": world.acct_a, "kind": "google", "name": sa, "detail": sa, "created_at": "2026-02-01T00:00:00Z"})
+    made = client.post("/v1/ws/flows", json=flow, headers=admin)
+    assert made.status_code == 201, made.text
+    nodes = {n["node_key"]: n for n in world.store["flow_nodes"] if n["flow_id"] == made.json()["id"]}
+    assert nodes["row"]["config"]["connection_id"] == "c-g" and nodes["row"]["config"]["params"]["sheet"] == "Leads"

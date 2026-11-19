@@ -613,19 +613,30 @@ def _flow_problems(body: FlowCreate) -> list[str]:
                 out.append(f"'{n.key}': 'product' says which answer holds the product, e.g. {{{{vars.product}}}}")
             need(n, c.get("not_found_node_key"), "the step for a product that isn't in the list (not_found_node_key)")
         if n.type == "action":
-            if c.get("service") != "razorpay_link":
-                out.append(f"'{n.key}': the only connected step available here is service 'razorpay_link'")
-            if not str((c.get("params") or {}).get("amount", "")).strip():
+            service = c.get("service")
+            params = c.get("params") or {}
+            if service not in ACTION_SERVICES:
+                out.append(f"'{n.key}': service must be one of {', '.join(ACTION_SERVICES)}")
+            elif service == "razorpay_link" and not str(params.get("amount", "")).strip():
                 out.append(f"'{n.key}': params.amount is missing (e.g. {{{{vars.cart_total}}}})")
+            elif service == "google_sheets_append" and (not str(params.get("spreadsheet", "")).strip() or not str(params.get("values", "")).strip()):
+                out.append(f"'{n.key}': params.spreadsheet (the sheet's link or id) and params.values (one value per line) are needed")
+            elif service == "google_calendar_event" and not str(params.get("start", "")).strip():
+                out.append(f"'{n.key}': params.start is needed (e.g. {{{{vars.visit_time}}}})")
             if c.get("error_node_key"):
-                need(n, c.get("error_node_key"), "the step for when the link can't be made")
+                need(n, c.get("error_node_key"), "the step for when it fails")
     return out
 
 
+# A flow's "Use a connection" step: which service, and which kinds of connected account can do it.
+ACTION_SERVICES = {"razorpay_link": ("razorpay", "cashfree"), "google_sheets_append": ("google",), "google_calendar_event": ("google",)}
+
+
 async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
-    """Names to ids: a tag name (made if new) and a pipeline/stage name for create_lead."""
+    """Names to ids: a tag name (made if new), a pipeline/stage name for create_lead, and the connected account
+    (by id, name or Google email) for a connection step."""
     pipes = await _pipelines(sdb, ctx.account_id)
-    razorpay = await sdb.select("flow_connections", {"account_id": ctx.account_id, "kind": "razorpay"}, order="created_at.desc")
+    connections = await sdb.select("flow_connections", {"account_id": ctx.account_id}, order="created_at.desc")
     out = []
     for n in body.nodes:
         c = dict(n.config)
@@ -644,12 +655,19 @@ async def _resolve_flow_refs(sdb, ctx, body: FlowCreate) -> list[dict]:
             c["pipeline_id"] = pipe["id"] if pipe else ""
             c["stage_id"] = stage["id"] if stage else ""
         if n.type == "action":
+            kinds = ACTION_SERVICES[c["service"]]
+            usable = [r for r in connections if r["kind"] in kinds]
+            label = "Google" if kinds == ("google",) else "Razorpay or Cashfree"
             want = str(c.get("connection_id") or c.pop("connection", "") or "")
-            conn = next((r for r in razorpay if want and (r["id"] == want or r["name"].lower() == want.lower())), None) if want else (razorpay[0] if razorpay else None)
+            match = lambda r: r["id"] == want or r["name"].lower() == want.lower() or str(r.get("detail", "")).lower() == want.lower()
+            conn = next((r for r in usable if match(r)), None) if want else (usable[0] if usable else None)
             if not conn:
-                raise HTTPException(422, f"'{n.key}': connect a Razorpay account first (Flows → Connections)" if not razorpay else f"'{n.key}': no Razorpay connection '{want}'")
+                raise HTTPException(422, f"'{n.key}': connect a {label} account first (Flows → Connections)" if not usable else f"'{n.key}': no {label} connection '{want}'")
             c["connection_id"] = conn["id"]
-            c.setdefault("save_as", "payment_link")
+            if c["service"] == "razorpay_link":
+                c.setdefault("save_as", "payment_link")
+            else:
+                c.setdefault("save_as", "")
             c["params"] = {k: str(v) for k, v in (c.get("params") or {}).items()}
         if n.type == "add_to_cart" and c.get("source") == "catalog":
             c["products"] = []
