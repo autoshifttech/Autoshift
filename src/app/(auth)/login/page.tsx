@@ -1,14 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { ShiftyFigure, type ShiftyApi } from "@/components/shifty/shifty";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SignInPanel } from "@/components/auth/sign-in-panel";
 import {
   Card,
   CardContent,
@@ -48,44 +45,11 @@ function LoginPageInner() {
         ? t("linkInvalid")
         : null;
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  // Shifty covers his eyes while you type your password, and shakes his head at a failed sign-in.
+  // Shifty waves hello and shakes his head when a sign-in link didn't work.
   const shifty = useRef<ShiftyApi | null>(null);
-  useEffect(() => { if (error) void shifty.current?.uncover().then(() => shifty.current?.shake()); }, [error]);
-  const [loading, setLoading] = useState(false);
-  const supabase = createClient();
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
-    // Full-page navigation (not router.push) so the browser issues a
-    // fresh top-level request that carries the just-written Supabase
-    // auth cookies to the middleware gating /dashboard. A soft
-    // client-side navigation can reach the protected route before the
-    // server observes the new session, so the middleware bounces it
-    // back to /login — which looks like the page "just refreshing"
-    // instead of signing in (issue #365). Mirrors the deliberate full
-    // reload the invite-accept flow already uses in join/[token].
-    const destination = inviteToken
-      ? `/join/${encodeURIComponent(inviteToken)}`
-      : "/dashboard";
-    window.location.href = destination;
-  };
+  useEffect(() => { if (linkErrorMessage) void shifty.current?.shake(); }, [linkErrorMessage]);
+  // Where a signed-in person goes: the invite they were accepting, else the dashboard.
+  const next = inviteToken ? `/join/${encodeURIComponent(inviteToken)}` : "/dashboard";
 
   return (
     <div className="app-canvas flex min-h-dvh items-center justify-center bg-background px-4 py-10">
@@ -110,68 +74,14 @@ function LoginPageInner() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            {linkErrorMessage && !error && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          <div className="flex flex-col gap-4">
+            {linkErrorMessage && (
+              <div role="alert" className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
                 {linkErrorMessage}
               </div>
             )}
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-400">
-                {error}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-muted-foreground">
-                {t('emailLabel')}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t('emailPlaceholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={(e) => { void shifty.current?.uncover(); shifty.current?.look(e.currentTarget); }}
-                onBlur={() => shifty.current?.look(null)}
-                required
-                className="border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-muted-foreground">
-                  {t('passwordLabel')}
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:text-primary/80"
-                >
-                  {t('forgotPassword')}
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder={t('passwordPlaceholder')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => void shifty.current?.cover()}
-                onBlur={() => void shifty.current?.uncover()}
-                required
-                className="border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? t('signingIn') : t('signIn')}
-            </Button>
-          </form>
+            <SignInPanel next={next} />
+          </div>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {t('noAccount')}{" "}

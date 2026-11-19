@@ -3,7 +3,7 @@
     "titleAccept": "Entre para aceitar",
     "titleWelcome": "Bem-vindo de volta",
     "descAccept": "Entre e levaremos você até o convite.",
-    "descWelcome": "Entre na sua conta",
+    "descWelcome": "Entre com o Google ou com um código por e-mail. Sem senha.",
     "emailLabel": "E-mail",
     "emailPlaceholder": "voce@exemplo.com",
     "passwordLabel": "Senha",
@@ -13,8 +13,8 @@
     "signIn": "Entrar",
     "noAccount": "Não tem uma conta?",
     "createAccount": "Criar conta",
-    "linkExpired": "Esse link expirou. Para redefinir a senha, use “Esqueceu a senha?” para pedir um novo; se estava confirmando seu e-mail, cadastre-se novamente.",
-    "linkInvalid": "Não foi possível entrar com esse link. Se estava confirmando seu e-mail, ele já pode estar verificado — basta entrar abaixo. Para redefinir a senha, peça um novo link e abra-o no mesmo navegador em que o solicitou."
+    "linkExpired": "Esse link de acesso expirou. Entre de novo abaixo.",
+    "linkInvalid": "Esse link não conseguiu fazer seu login. Abra no mesmo navegador em que pediu, ou entre de novo abaixo."
   },
   "Sidebar": {
     "title": "AutoShift",
@@ -2247,7 +2247,13 @@
         "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
         "weak_password": "Use pelo menos {min} caracteres.",
         "generic": "Algo deu errado. Tente novamente."
-      }
+      },
+      "signInTitle": "Como você entra",
+      "signInDesc": "A AutoShift não usa senhas.",
+      "signInGoogle": "Com o Google ({email}).",
+      "signInEmail": "Com um código de 6 dígitos enviado para {email}.",
+      "signInLoading": "Carregando…",
+      "signInNote": "Você pode entrar das duas formas com este e-mail: Continuar com o Google, se for uma conta Google, ou um código por e-mail."
     },
     "browserNotifications": {
       "title": "Notificações do navegador",
@@ -2674,8 +2680,8 @@
     "backToSignIn": "Voltar ao login",
     "titleJoin": "Criar conta e entrar na equipe",
     "title": "Criar conta",
-    "descJoin": "Confirme seu e-mail e depois aceite o convite para entrar na sua equipe.",
-    "desc": "Comece a usar o Modelo de CRM para WhatsApp",
+    "descJoin": "Entre com o e-mail para o qual o convite foi enviado e aceite para entrar na equipe.",
+    "desc": "Comece com o Google em um toque, ou com um código por e-mail. Sem senha.",
     "fullNameLabel": "Nome completo",
     "fullNamePlaceholder": "João Silva",
     "emailLabel": "E-mail",
@@ -4773,8 +4779,12 @@
       "expired": "Este código expirou. Envie um novo.",
       "too_many_attempts": "Muitas tentativas erradas. Envie um novo código.",
       "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
-      "generic": "Algo deu errado. Tente novamente."
-    }
+      "generic": "Algo deu errado. Tente novamente.",
+      "google": "Não foi possível iniciar o login com Google. Tente de novo."
+    },
+    "descGoogle": "Só para a equipe da AutoShift. Entre com sua conta Google da equipe de administração. Cada acesso e ação fica registrado.",
+    "google": "Continuar com o Google",
+    "checking": "Verificando…"
   },
   "Pipelines": {
     "title": "Funis",
@@ -5259,5 +5269,26 @@
     "stopped": "Sincronização parada. Sua lista de produtos continua.",
     "failed": "Não deu certo. Verifique o link e tente de novo.",
     "apiNote": "Enviar um arquivo manualmente para a sincronização com o site. Seu desenvolvedor também pode enviar produtos e atualizações de pedidos pela API da AutoShift."
+  },
+  "SignIn": {
+    "google": "Continuar com o Google",
+    "useEmail": "Usar e-mail",
+    "or": "ou",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "voce@empresa.com",
+    "sendCode": "Enviar código de acesso por e-mail",
+    "codeSent": "Enviamos um código de 6 dígitos para <strong>{email}</strong>. Ele vale por 1 hora.",
+    "codeLabel": "Código de acesso",
+    "verify": "Entrar",
+    "resend": "Enviar novo código",
+    "back": "Trocar e-mail",
+    "codeHelp": "Não encontrou? Veja o spam ou promoções. Você também pode tocar no link do e-mail.",
+    "googleFailed": "Não foi possível iniciar o login com Google. Tente de novo ou use o e-mail.",
+    "badEmail": "Digite um e-mail válido.",
+    "sendFailed": "Não conseguimos enviar o código. Confira o e-mail e tente de novo.",
+    "tooSoon": "Um código acabou de ser enviado. Espere um minuto para pedir outro.",
+    "badCode": "Digite o código de 6 dígitos do e-mail.",
+    "wrongCode": "Esse código está errado. Confira ou envie um novo.",
+    "codeExpired": "Esse código expirou. Envie um novo."
   }
 }

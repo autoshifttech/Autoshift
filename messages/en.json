@@ -3,7 +3,7 @@
     "titleAccept": "Sign in to accept",
     "titleWelcome": "Welcome back",
     "descAccept": "Sign in and we'll take you to the invitation.",
-    "descWelcome": "Sign in to your account",
+    "descWelcome": "Sign in with Google or an email code. No password needed.",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
@@ -13,8 +13,8 @@
     "signIn": "Sign in",
     "noAccount": "Don't have an account?",
     "createAccount": "Create account",
-    "linkExpired": "That link has expired. For a password reset, use “Forgot password?” to request a new one; if you were confirming your email, sign up again.",
-    "linkInvalid": "That link couldn’t be used to sign you in. If you were confirming your email, it may already be verified — just sign in below. For a password reset, request a new link and open it in the same browser you requested it from."
+    "linkExpired": "That sign-in link has expired. Sign in again below.",
+    "linkInvalid": "That link couldn't sign you in. Open it in the same browser you asked for it from, or sign in again below."
   },
   "Sidebar": {
     "title": "AutoShift",
@@ -2247,7 +2247,13 @@
         "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
         "weak_password": "Use at least {min} characters.",
         "generic": "Something went wrong. Try again."
-      }
+      },
+      "signInTitle": "How you sign in",
+      "signInDesc": "AutoShift doesn't use passwords.",
+      "signInGoogle": "With Google ({email}).",
+      "signInEmail": "With a 6-digit code sent to {email}.",
+      "signInLoading": "Loading…",
+      "signInNote": "You can sign in either way with this email: Continue with Google if it's a Google account, or an emailed code."
     },
     "browserNotifications": {
       "title": "Browser notifications",
@@ -2674,8 +2680,8 @@
     "backToSignIn": "Back to sign in",
     "titleJoin": "Create account & join",
     "title": "Create account",
-    "descJoin": "Verify your email, then accept the invitation to join your team.",
-    "desc": "Get started with AutoShift",
+    "descJoin": "Sign in with the email your invitation was sent to, then accept it to join your team.",
+    "desc": "Start with Google in one tap, or with an email code. No password needed.",
     "fullNameLabel": "Full name",
     "fullNamePlaceholder": "John Doe",
     "emailLabel": "Email",
@@ -4773,8 +4779,12 @@
       "expired": "This code has expired. Send a new one.",
       "too_many_attempts": "Too many wrong tries. Send a new code.",
       "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
-      "generic": "Something went wrong. Try again."
-    }
+      "generic": "Something went wrong. Try again.",
+      "google": "Google sign-in couldn't start. Try again."
+    },
+    "descGoogle": "Only for the AutoShift team. Sign in with your Google account on the admin team. Every sign-in and action is recorded.",
+    "google": "Continue with Google",
+    "checking": "Checking…"
   },
   "Pipelines": {
     "title": "Pipelines",
@@ -5259,5 +5269,26 @@
     "stopped": "Website sync stopped. Your product list stays.",
     "failed": "That didn't work. Check the link and try again.",
     "apiNote": "Uploading a file by hand stops the website sync. Your web developer can also send products and order updates through the AutoShift API."
+  },
+  "SignIn": {
+    "google": "Continue with Google",
+    "useEmail": "Use email instead",
+    "or": "or",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@business.com",
+    "sendCode": "Email me a sign-in code",
+    "codeSent": "We sent a 6-digit code to <strong>{email}</strong>. It works for 1 hour.",
+    "codeLabel": "Sign-in code",
+    "verify": "Sign in",
+    "resend": "Send a new code",
+    "back": "Change email",
+    "codeHelp": "Can't find it? Check spam or promotions. You can also tap the link in the email.",
+    "googleFailed": "Google sign-in couldn't start. Try again, or use email instead.",
+    "badEmail": "Enter a valid email address.",
+    "sendFailed": "We couldn't send the code. Check the email and try again.",
+    "tooSoon": "A code was just sent. Wait a minute before asking for another.",
+    "badCode": "Enter the 6-digit code from the email.",
+    "wrongCode": "That code isn't right. Check it or send a new one.",
+    "codeExpired": "That code has expired. Send a new one."
   }
 }

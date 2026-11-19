@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-// Shared metadata for auth pages (login / signup / forgot-password).
+// Shared metadata for auth pages (login / signup).
 // None of these should be indexed — they'd compete with the marketing
 // landing in SERPs and offer nothing to a searcher who hasn't already
 // signed up. Each page still gets its own <title> via its own

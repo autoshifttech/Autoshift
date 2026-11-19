@@ -110,8 +110,7 @@ export async function middleware(request: NextRequest) {
   // would silently drop them on /dashboard.
   if (user && (
     request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/signup' ||
-    request.nextUrl.pathname === '/forgot-password'
+    request.nextUrl.pathname === '/signup'
   )) {
     const url = request.nextUrl.clone()
     const inviteToken = request.nextUrl.searchParams.get('invite')
