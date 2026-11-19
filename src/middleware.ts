@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { ADMIN_COOKIE } from '@/lib/admin/session'
 import { readAdminToken } from '@/lib/admin/admin-token'
+import { siteRole, siteRoleRedirect } from '@/lib/site-role'
 
 // Every top-level route under src/app/(dashboard)/ belongs here —
 // middleware.test.ts reads that directory and fails on a missing one.
@@ -14,6 +15,13 @@ function isAdminType(user: { app_metadata?: Record<string, unknown> }): boolean 
 }
 
 export async function middleware(request: NextRequest) {
+  // Separate links: this service may be only the admin panel or only the business app (SITE_ROLE).
+  const elsewhere = siteRoleRedirect(siteRole(process.env.SITE_ROLE), request.nextUrl.pathname, request.nextUrl.search, {
+    adminUrl: process.env.ADMIN_SITE_URL,
+    appUrl: process.env.APP_SITE_URL,
+  })
+  if (elsewhere) return NextResponse.redirect(elsewhere.startsWith('/') ? new URL(elsewhere, request.url) : elsewhere)
+
   // Platform admin panel: every /admin page but the sign-in needs a genuine, unexpired admin
   // device token (issued by /api/admin/login after the password and, when on, the WhatsApp code).
   const pathname = request.nextUrl.pathname
