@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { AlertTriangle, ChevronRight, Eye, EyeOff, Link2, Loader2, Plus, RefreshCw, ShieldCheck, Table2, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, FileUp, Eye, EyeOff, Link2, Loader2, Plus, RefreshCw, ShieldCheck, Table2, Trash2 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -68,17 +68,68 @@ function SecurityNote({ children }: { children: React.ReactNode }) {
 const code = (chunks: React.ReactNode) => <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{chunks}</code>;
 const bold = (chunks: React.ReactNode) => <strong className="font-semibold text-foreground">{chunks}</strong>;
 
+const GOOGLE_LINKS = {
+  accounts: "https://console.cloud.google.com/iam-admin/serviceaccounts",
+  sheets: "https://console.cloud.google.com/apis/library/sheets.googleapis.com",
+  calendar: "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com",
+  help: "https://cloud.google.com/iam/docs/keys-create-delete",
+} as const;
+const MAX_KEY_BYTES = 20_000;
+
+/** A link that opens Google Cloud in a new tab (the dialog stays open here). */
+function OutLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-1.5 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-sm font-medium text-primary hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      {children} <ExternalLink className="size-3.5" aria-hidden />
+    </a>
+  );
+}
+
 function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: (o: boolean) => void; t: T }) {
   const [name, setName] = useState("");
   const [json, setJson] = useState("");
+  const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const pick = useRef<HTMLInputElement>(null);
 
-  const reset = () => { setName(""); setJson(""); setError(""); };
+  const parsed = json.trim() ? parseServiceAccount(json.trim()) : null;
+  const email = parsed && "email" in parsed ? parsed.email : "";
+
+  const reset = () => { setName(""); setJson(""); setFileName(""); setError(""); setDragging(false); };
+  const check = (text: string) => {
+    const r = parseServiceAccount(text.trim());
+    setError("error" in r ? t(r.error === "invalid" ? "googleInvalidJson" : "googleNotServiceAccount") : "");
+  };
+  const readFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > MAX_KEY_BYTES || !/\.json$/i.test(file.name)) {
+      setError(t("googleFileWrong"));
+      return;
+    }
+    const text = await file.text();
+    setJson(text);
+    setFileName(file.name);
+    check(text);
+  };
+  const copyEmail = () =>
+    navigator.clipboard.writeText(email).then(
+      () => toast.success(t("googleEmailCopied")),
+      () => toast.error(t("webhookCopyFailed")),
+    );
+
   const submit = () => {
     const r = parseServiceAccount(json.trim());
     if ("error" in r) return setError(t(r.error === "invalid" ? "googleInvalidJson" : "googleNotServiceAccount"));
     if (backendUrl()) {
       // The key goes to the server once and is stored there encrypted; the browser keeps nothing.
+      setBusy(true);
       createConnection({ kind: "google", name: name.trim() || r.email, serviceAccountJson: json.trim() }).then(
         () => {
           toast.success(t("added"));
@@ -86,7 +137,7 @@ function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: 
           onOpenChange(false);
         },
         (e) => setError(e instanceof Error ? e.message : t("googleInvalidJson")),
-      );
+      ).finally(() => setBusy(false));
       return;
     }
     addConnection({ kind: "google", name: name.trim() || r.email, detail: r.email });
@@ -97,24 +148,94 @@ function GoogleDialog({ open, onOpenChange, t }: { open: boolean; onOpenChange: 
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t("googleTitle")}</DialogTitle>
-          <DialogDescription className="sr-only">{t("bannerDesc")}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><GoogleLogo className="size-5" /> {t("googleTitle")}</DialogTitle>
+          <DialogDescription>{t("googleIntro")}</DialogDescription>
         </DialogHeader>
-        <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-          <li>{t.rich("googleStep1", { b: bold, code })}</li>
-          <li>{t.rich("googleStep2", { b: bold })}</li>
-          <li>{t.rich("googleStep3", { code })}</li>
+
+        <ol className="space-y-3 text-sm">
+          {([
+            ["googleGuide1", "googleGuide1Help", GOOGLE_LINKS.accounts, "googleOpenAccounts"],
+            ["googleGuide2", "googleGuide2Help", null, null],
+            ["googleGuide3", "googleGuide3Help", null, null],
+            ["googleGuide4", "googleGuide4Help", null, null],
+            ["googleGuide5", "googleGuide5Help", null, null],
+          ] as const).map(([title, help, href, linkLabel], i) => (
+            <li key={title} className="flex gap-3">
+              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
+              <div className="min-w-0">
+                <p className="font-medium text-foreground">{t(title)}</p>
+                <p className="mt-0.5 text-muted-foreground">{t.rich(help, { b: bold, code })}</p>
+                {href && linkLabel && <OutLink href={href}>{t(linkLabel)}</OutLink>}
+                {title === "googleGuide3" && (
+                  <div className="flex flex-wrap gap-2">
+                    <OutLink href={GOOGLE_LINKS.sheets}>{t("googleOpenSheets")}</OutLink>
+                    <OutLink href={GOOGLE_LINKS.calendar}>{t("googleOpenCalendar")}</OutLink>
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
         </ol>
-        <Input aria-label={t("nameOptional")} value={name} onChange={(e) => setName(e.target.value)} placeholder={t("googleNamePh")} />
+
         <div className="grid gap-1.5">
-          <Textarea aria-label={t("googleJsonLabel")} aria-invalid={!!error} rows={9} value={json} onChange={(e) => { setJson(e.target.value); setError(""); }} placeholder={t("googleJsonPh")} className="min-h-44 font-mono text-xs" />
+          <Label htmlFor="g-name">{t("nameOptional")}</Label>
+          <Input id="g-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("googleNamePh")} />
+        </div>
+
+        <div className="grid gap-1.5">
+          <p id="g-key-label" className="text-sm font-medium text-foreground">{t("googleJsonLabel")}</p>
+          <div
+            role="group"
+            aria-labelledby="g-key-label"
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setDragging(false); void readFile(e.dataTransfer.files?.[0]); }}
+            className={cn(
+              "flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-5 text-center transition-colors motion-reduce:transition-none",
+              dragging ? "border-primary bg-primary/5" : email ? "border-primary/40 bg-primary/5" : "border-border bg-muted/40",
+            )}
+          >
+            {email ? <CheckCircle2 className="size-6 text-primary" aria-hidden /> : <FileUp className="size-6 text-muted-foreground" aria-hidden />}
+            <p className="text-sm text-foreground">{email ? t("googleFileReady", { file: fileName || "JSON" }) : t("googleDrop")}</p>
+            <Button type="button" variant="outline" className="min-h-11" onClick={() => pick.current?.click()}>
+              {email ? t("googleChooseOther") : t("googleChoose")}
+            </Button>
+            <input ref={pick} type="file" accept=".json,application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; void readFile(f); }} />
+          </div>
+          <details className="group rounded-xl border border-border px-3 py-2" open={!!json && !fileName}>
+            <summary className="flex min-h-9 cursor-pointer items-center text-sm font-medium text-foreground">{t("googlePasteInstead")}</summary>
+            <Textarea
+              aria-label={t("googleJsonLabel")}
+              aria-invalid={!!error}
+              rows={6}
+              value={json}
+              onChange={(e) => { setJson(e.target.value); setFileName(""); setError(""); }}
+              onBlur={() => json.trim() && check(json)}
+              placeholder={t("googleJsonPh")}
+              className="mt-2 min-h-32 font-mono text-xs"
+            />
+          </details>
           {error && <p role="alert" className="text-xs font-medium text-destructive">{error}</p>}
         </div>
+
+        {email && (
+          <div className="rounded-xl bg-muted/60 p-3 text-sm" aria-live="polite">
+            <p className="text-foreground">{t("googleShareWith")}</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <code className="min-w-0 flex-1 rounded-md bg-background px-2 py-1.5 font-mono text-xs break-all text-foreground select-all">{email}</code>
+              <Button type="button" variant="outline" size="sm" className="min-h-11 shrink-0" onClick={() => void copyEmail()}>{t("googleCopyEmail")}</Button>
+            </div>
+          </div>
+        )}
+
+        <SecurityNote>{t.rich("googleSecurity", { a: (c) => <a href={GOOGLE_LINKS.help} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">{c}</a> })}</SecurityNote>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("cancel")}</Button>
-          <Button onClick={submit} disabled={!json.trim()}>{t("addAccount")}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>{t("cancel")}</Button>
+          <Button onClick={submit} disabled={busy || !email}>
+            {busy && <Loader2 className="mr-2 size-4 animate-spin" />} {t("addAccount")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
