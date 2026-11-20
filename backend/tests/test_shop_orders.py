@@ -128,8 +128,8 @@ def test_extract_strips_the_order_line():
 
 def test_summary_is_in_the_shop_language():
     order = {**shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P001"}], "name": "A", "address": "12 MG Road 560001", "pay": "cod"}), "number": 1001}
-    assert "Pedido nº 1001" in shop_orders.summary({**SHOP, "language": "pt"}, order)
-    assert "주문 #1001" in shop_orders.summary({**SHOP, "language": "ko"}, order)
+    assert "Pedido confirmado: nº 1001" in shop_orders.summary({**SHOP, "language": "pt"}, order)
+    assert "주문 확정: #1001" in shop_orders.summary({**SHOP, "language": "ko"}, order)
 
 
 # ------------------------------------------------------------------ the AI places it
@@ -146,7 +146,7 @@ async def test_confirmed_online_order_gets_a_payment_link(client, world, shop):
     out = ask(client, world, shop, "wamid.shop.1")
     assert out["status"] == "reply" and out["order"]["number"] == 1001
     assert "[ORDER]" not in out["text"] and "Great, placing your order now!" in out["text"]
-    assert "2 × Cotton T-shirt — ₹998" in out["text"] and "(P001)" not in out["text"] and "₹1,048" in out["text"] and "https://rzp.io/i/l1" in out["text"]
+    assert "• Cotton T-shirt\n   2 × ₹499 = ₹998" in out["text"] and "(P001)" not in out["text"] and "Subtotal: ₹998" in out["text"] and "₹1,048" in out["text"] and "https://rzp.io/i/l1" in out["text"]
     # The link also comes as a "Pay ₹…" button; the summary's link line is what the web app leaves out then.
     pay = out["pay_button"]
     assert pay["url"] == "https://rzp.io/i/l1" and pay["label"] == "Pay ₹1,048" and pay["link_line"] in out["text"] and "₹1,048" in pay["text"]
@@ -185,7 +185,7 @@ async def test_paying_the_link_marks_the_order_paid(client, world, shop):
 async def test_cash_on_delivery_order_needs_no_link(client, world, shop):
     shop["llm"].answer = order_line(pay="cod")
     out = ask(client, world, shop, "wamid.shop.c")
-    assert "Cash on delivery: please keep ₹1,048 ready." in out["text"] and not shop["links"]
+    assert "*Payment:* Cash on delivery" in out["text"] and "Please keep *₹1,048* ready" in out["text"] and not shop["links"]
     order = world.rows("shop_orders")[0]
     assert order["payment_status"] == "cod"
     assert next(d for d in world.rows("deals") if d["id"] == order["lead_id"])["stage_id"] == "st_cod"
@@ -208,7 +208,7 @@ async def test_missing_razorpay_still_saves_the_order(client, world, shop):
 async def test_test_reply_never_saves_an_order(client, world, shop):
     shop["llm"].answer = order_line()
     out = client.post(f"/v1/assistants/{shop['aid']}/test-reply", json={"message": "yes", "history": [], "idempotency_key": "test-order-1"}, headers=world.headers("admin_a")).json()
-    assert "Order #TEST" in out["text"] and "rzp.io/i/test-link" in out["text"]
+    assert "Order confirmed: #TEST" in out["text"] and "rzp.io/i/test-link" in out["text"]
     assert not world.rows("shop_orders") and not shop["links"]
 
 
@@ -249,7 +249,7 @@ async def test_unpaid_online_order_waits_and_can_get_a_new_link(client, world, s
     # Inside the 24-hour window the new link goes as a "Pay ₹…" button.
     action, fields = shop["bridge"].calls[-1]
     assert r.status_code == 200 and r.json()["sent_as"] == "button"
-    assert action == "send_pay_button" and fields["url"] == "https://rzp.io/i/l2" and fields["button"].startswith("Pay ₹") and fields["text"].startswith("🧾 #1001")
+    assert action == "send_pay_button" and fields["url"] == "https://rzp.io/i/l2" and fields["button"].startswith("Pay ₹") and fields["text"].startswith("🧾 *Order #1001*") and "Complete your payment" in fields["text"]
     assert world.rows("shop_orders")[0]["payment_url"] == "https://rzp.io/i/l2"
     r = patch(client, world, oid, action="cancelled", notify=False)
     assert r.json()["order"]["status"] == "cancelled" and r.json()["notified"] is False
@@ -281,7 +281,7 @@ def test_sizes_are_kept_per_item_and_shown():
     out = shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P001", "qty": 1, "option": "M"}, {"code": "P001", "qty": 2, "size": " l "}, {"code": "p001", "qty": 1, "option": "m"}], "name": "A", "address": "12 MG Road 560001", "pay": "cod"})
     assert [(i["option"], i["qty"]) for i in out["items"]] == [("M", 2), ("l", 2)]
     text = shop_orders.summary(SHOP, {**out, "number": 1001})
-    assert "2 × Cotton T-shirt (M) — ₹998" in text and "2 × Cotton T-shirt (l) — ₹998" in text and "P001" not in text
+    assert "• Cotton T-shirt (M)\n   2 × ₹499 = ₹998" in text and "• Cotton T-shirt (l)\n   2 × ₹499 = ₹998" in text and "P001" not in text
     with pytest.raises(shop_orders.OrderProblem):  # stock counts every size of the product
         shop_orders.price(PRODUCTS, SHOP, {"items": [{"code": "P002", "qty": 2, "option": "30"}, {"code": "P002", "qty": 2, "option": "32"}], "name": "A", "address": "12 MG Road 560001", "pay": "cod"})
 
