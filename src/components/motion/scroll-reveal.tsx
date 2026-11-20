@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 const TARGETS = '[data-slot="card"], section, [data-reveal]';
 
 /**
- * Cards and sections below the fold rise in as they scroll into view.
+ * Cards and sections rise in as they scroll into view, and drop in from
+ * above when you scroll back up to them.
  * `rootId` is the scrolling container of the page; leave it out when the
  * window itself scrolls (the public site pages).
  *
@@ -25,21 +26,31 @@ export function ScrollReveal({ rootId }: { rootId?: string }) {
     if (!root || !("IntersectionObserver" in window)) return;
 
     const watched = new WeakSet<Element>();
+    // Elements currently "in"; leaving the view resets them so they can
+    // animate again, from below when scrolling down and from above when
+    // scrolling back up.
+    const shown = new WeakSet<Element>();
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          io.unobserve(e.target);
+          if (!e.isIntersecting) {
+            shown.delete(e.target);
+            continue;
+          }
+          if (shown.has(e.target)) continue;
+          shown.add(e.target);
+          const top = e.rootBounds ? e.rootBounds.top : 0;
+          const fromAbove = e.boundingClientRect.top < top + 1;
           e.target.animate(
             [
-              { opacity: 0, transform: "translateY(28px) scale(0.985)" },
+              { opacity: 0, transform: `translateY(${fromAbove ? -28 : 28}px) scale(0.985)` },
               { opacity: 1, transform: "none" },
             ],
             { duration: 700, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" },
           );
         }
       },
-      { root: box, rootMargin: "0px 0px -4% 0px", threshold: 0 },
+      { root: box, rootMargin: "0px", threshold: 0 },
     );
 
     const scan = () => {
@@ -50,8 +61,8 @@ export function ScrollReveal({ rootId }: { rootId?: string }) {
         // Only the outermost card: nested cards ride along with their parent.
         const outer = el.parentElement?.closest(TARGETS);
         if (outer && root.contains(outer)) return;
-        // On screen already: the page-entry animation handles it.
-        if (el.getBoundingClientRect().top < fold) return;
+        // On screen already: the page-entry animation handles it this time.
+        if (el.getBoundingClientRect().top < fold) shown.add(el);
         io.observe(el);
       });
     };

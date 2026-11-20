@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { RouteTransition } from "@/components/motion/route-transition";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
@@ -16,9 +18,12 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <div className="scroll-progress" aria-hidden />
       <SiteHeader />
       <main id="main">
-        <PageMotion>{children}</PageMotion>
+        <RouteTransition>
+          <PageMotion>{children}</PageMotion>
+        </RouteTransition>
       </main>
       <ScrollReveal />
+      <SmoothScroll />
       <SiteFooter />
     </div>
   );

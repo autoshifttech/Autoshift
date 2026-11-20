@@ -45,6 +45,8 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { AdminCommandPalette } from "./admin-command-palette";
 import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
+import { RouteTransition } from "@/components/motion/route-transition";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { ShiftyCompanion } from "@/components/shifty/shifty-companion";
@@ -384,8 +386,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="flex-1 px-4 pt-2 pb-24 outline-none sm:px-6 lg:pb-8">
-          <PageMotion className="mx-auto max-w-[1400px] space-y-6">{children}</PageMotion>
+          <RouteTransition>
+            <PageMotion className="mx-auto max-w-[1400px] space-y-6">{children}</PageMotion>
+          </RouteTransition>
           <ScrollReveal rootId="admin-scroll" />
+          <SmoothScroll rootId="admin-scroll" />
         </main>
       </div>
       <AdminMobileNav />

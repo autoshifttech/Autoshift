@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/layout/sidebar";
 import { RailTip } from "@/components/layout/rail-tip";
+import { RouteTransition } from "@/components/motion/route-transition";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { PullToRefresh } from "@/components/motion/pull-to-refresh";
@@ -106,10 +108,13 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
             {/* Above every page: writes are being rejected and here's why.
                 Renders nothing unless the account/role failed to resolve. */}
             <AccountAccessAlert />
-            <PageMotion>
-              <PageGate>{children}</PageGate>
-            </PageMotion>
+            <RouteTransition>
+              <PageMotion>
+                <PageGate>{children}</PageGate>
+              </PageMotion>
+            </RouteTransition>
             <ScrollReveal rootId="app-scroll" />
+            <SmoothScroll rootId="app-scroll" />
             <PullToRefresh rootId="app-scroll" />
           </main>
         </div>
