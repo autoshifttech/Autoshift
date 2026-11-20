@@ -78,14 +78,18 @@ def pick_knowledge(faqs: list[dict], message: str, limit: int = 5) -> list[dict]
 SHOW_ALL_PRODUCTS = 150  # a list this size fits the prompt whole, so the assistant never "forgets" a product
 
 
-# How every reply is laid out: WhatsApp shows *bold*, _italic_ and plain bullets, not Markdown.
+# How every reply is laid out: plain WhatsApp text, no asterisks or Markdown symbols.
 WHATSAPP_FORMAT = (
     "Write like a professional, friendly shop team member, formatted for WhatsApp: a short greeting or acknowledgement, "
-    "then the answer in short paragraphs separated by a blank line. Use *single asterisks* for bold (product names, prices, "
-    "totals, key details) and \"• \" at the start of list lines. When you suggest products, list each as "
-    "\"• *Product name* — ₹price\" with one short line about it underneath. End with one clear question or next step. "
-    "Never use Markdown headings (#), tables or **double asterisks**."
+    "then the answer in short paragraphs separated by a blank line, and \"• \" at the start of list lines. When you suggest "
+    "products, list each as \"• Product name — ₹price\" with one short line about it underneath. End with one clear question "
+    "or next step. Never use asterisks (*), underscores for emphasis, Markdown headings (#) or tables."
 )
+
+
+def plain(text: str) -> str:
+    """Takes out the asterisks a model adds for bold (*word*, **word**), which the business doesn't want shown."""
+    return re.sub(r"\*+", "", text)
 
 
 def build_system(assistant: dict, message: str, context: str = "") -> str:
@@ -231,6 +235,7 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         text, order = shop_orders.extract(text)
     if booking.booking_on(assistant):
         text, book = booking.extract(text)
+    text = plain(text)
     if draft:
         order = book = None
         buttons = []

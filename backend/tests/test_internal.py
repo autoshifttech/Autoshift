@@ -142,3 +142,10 @@ async def test_ai_reply_can_offer_tap_buttons(client, world, internal, settings,
     assert out["status"] == "reply" and out["buttons"] == ["Pay online", "Cash on delivery"] and "[BUTTONS" not in out["text"]
     draft = client.post("/v1/internal/ai-draft", json={"account_id": world.acct_a, "assistant_id": aid, "message": "that's all"}, headers=internal).json()
     assert "buttons" not in draft and "[BUTTONS" not in draft["text"]
+
+
+
+def test_replies_never_show_asterisks():
+    from app.ai_runner import plain
+
+    assert plain("• **Golden Jhumka** — *₹249*\n*Total:* ₹249") == "• Golden Jhumka — ₹249\nTotal: ₹249"

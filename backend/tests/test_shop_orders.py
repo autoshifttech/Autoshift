@@ -185,7 +185,7 @@ async def test_paying_the_link_marks_the_order_paid(client, world, shop):
 async def test_cash_on_delivery_order_needs_no_link(client, world, shop):
     shop["llm"].answer = order_line(pay="cod")
     out = ask(client, world, shop, "wamid.shop.c")
-    assert "*Payment:* Cash on delivery" in out["text"] and "Please keep *₹1,048* ready" in out["text"] and not shop["links"]
+    assert "Payment: Cash on delivery" in out["text"] and "Please keep ₹1,048 ready" in out["text"] and "*" not in out["text"] and not shop["links"]
     order = world.rows("shop_orders")[0]
     assert order["payment_status"] == "cod"
     assert next(d for d in world.rows("deals") if d["id"] == order["lead_id"])["stage_id"] == "st_cod"
@@ -249,7 +249,7 @@ async def test_unpaid_online_order_waits_and_can_get_a_new_link(client, world, s
     # Inside the 24-hour window the new link goes as a "Pay ₹…" button.
     action, fields = shop["bridge"].calls[-1]
     assert r.status_code == 200 and r.json()["sent_as"] == "button"
-    assert action == "send_pay_button" and fields["url"] == "https://rzp.io/i/l2" and fields["button"].startswith("Pay ₹") and fields["text"].startswith("🧾 *Order #1001*") and "Complete your payment" in fields["text"]
+    assert action == "send_pay_button" and fields["url"] == "https://rzp.io/i/l2" and fields["button"].startswith("Pay ₹") and fields["text"].startswith("🧾 Order #1001") and "*" not in fields["text"] and "Complete your payment" in fields["text"]
     assert world.rows("shop_orders")[0]["payment_url"] == "https://rzp.io/i/l2"
     r = patch(client, world, oid, action="cancelled", notify=False)
     assert r.json()["order"]["status"] == "cancelled" and r.json()["notified"] is False

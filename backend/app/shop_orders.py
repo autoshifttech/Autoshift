@@ -44,7 +44,7 @@ STATUSES = ("new", "packed", "shipped", "delivered", "cancelled")
 # What AutoShift itself writes to the customer, in the shop's language.
 TEXT: dict[str, dict[str, str]] = {
     "en": {
-        "confirmed": "✅ *Order confirmed: #{n}*", "items": "*Items*", "subtotal": "Subtotal", "payment": "Payment", "pay_online_label": "Online (UPI, cards, net banking)", "pay_cod_label": "Cash on delivery", "delivery_time": "Delivery", "deliver_to_h": "*Deliver to*", "cod_ready": "💵 Please keep *₹{total}* ready for the delivery person.", "pay_title": "💳 *Complete your payment*", "pay_amount": "Amount: *₹{total}*", "pay_how": "Pay securely with UPI, card or net banking. The link is valid for 24 hours.", "order_ref": "🧾 *Order #{n}*",
+        "confirmed": "✅ Order confirmed: #{n}", "items": "Items", "subtotal": "Subtotal", "payment": "Payment", "pay_online_label": "Online (UPI, cards, net banking)", "pay_cod_label": "Cash on delivery", "delivery_time": "Delivery", "deliver_to_h": "Deliver to", "cod_ready": "💵 Please keep ₹{total} ready for the delivery person.", "pay_title": "💳 Complete your payment", "pay_amount": "Amount: ₹{total}", "pay_how": "Pay securely with UPI, card or net banking. The link is valid for 24 hours.", "order_ref": "🧾 Order #{n}",
         "pay_prompt": "💳 Pay ₹{total} securely (UPI, cards, net banking). The link works for 24 hours.", "b_pay": "Pay ₹{total}",
         "b_online": "Pay online", "b_cod": "Cash on delivery", "b_confirm": "Confirm order", "b_change": "Change order",
         "order": "🧾 Order #{n}", "delivery": "Delivery", "free": "Free", "total": "Total", "deliver_to": "Deliver to",
@@ -65,7 +65,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Here is a new payment link for order #{n} (₹{total}): {url}\nThe link works for 24 hours.",
     },
     "pt": {
-        "confirmed": "✅ *Pedido confirmado: nº {n}*", "items": "*Itens*", "subtotal": "Subtotal", "payment": "Pagamento", "pay_online_label": "Online (UPI, cartões, internet banking)", "pay_cod_label": "Pagamento na entrega", "delivery_time": "Entrega", "deliver_to_h": "*Entregar para*", "cod_ready": "💵 Tenha *₹{total}* em mãos para o entregador.", "pay_title": "💳 *Conclua seu pagamento*", "pay_amount": "Valor: *₹{total}*", "pay_how": "Pague com segurança por UPI, cartão ou internet banking. O link vale por 24 horas.", "order_ref": "🧾 *Pedido nº {n}*",
+        "confirmed": "✅ Pedido confirmado: nº {n}", "items": "Itens", "subtotal": "Subtotal", "payment": "Pagamento", "pay_online_label": "Online (UPI, cartões, internet banking)", "pay_cod_label": "Pagamento na entrega", "delivery_time": "Entrega", "deliver_to_h": "Entregar para", "cod_ready": "💵 Tenha ₹{total} em mãos para o entregador.", "pay_title": "💳 Conclua seu pagamento", "pay_amount": "Valor: ₹{total}", "pay_how": "Pague com segurança por UPI, cartão ou internet banking. O link vale por 24 horas.", "order_ref": "🧾 Pedido nº {n}",
         "pay_prompt": "💳 Pague ₹{total} com segurança (UPI, cartões, internet banking). O link vale por 24 horas.", "b_pay": "Pagar ₹{total}",
         "b_online": "Pagar online", "b_cod": "Pagar na entrega", "b_confirm": "Confirmar pedido", "b_change": "Alterar pedido",
         "order": "🧾 Pedido nº {n}", "delivery": "Entrega", "free": "Grátis", "total": "Total", "deliver_to": "Entregar para",
@@ -86,7 +86,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aqui está um novo link de pagamento do pedido nº {n} (₹{total}): {url}\nO link vale por 24 horas.",
     },
     "es": {
-        "confirmed": "✅ *Pedido confirmado: n.º {n}*", "items": "*Productos*", "subtotal": "Subtotal", "payment": "Pago", "pay_online_label": "En línea (UPI, tarjetas, banca en línea)", "pay_cod_label": "Pago contra entrega", "delivery_time": "Entrega", "deliver_to_h": "*Entregar a*", "cod_ready": "💵 Ten listos *₹{total}* para el repartidor.", "pay_title": "💳 *Completa tu pago*", "pay_amount": "Importe: *₹{total}*", "pay_how": "Paga de forma segura con UPI, tarjeta o banca en línea. El enlace vale 24 horas.", "order_ref": "🧾 *Pedido n.º {n}*",
+        "confirmed": "✅ Pedido confirmado: n.º {n}", "items": "Productos", "subtotal": "Subtotal", "payment": "Pago", "pay_online_label": "En línea (UPI, tarjetas, banca en línea)", "pay_cod_label": "Pago contra entrega", "delivery_time": "Entrega", "deliver_to_h": "Entregar a", "cod_ready": "💵 Ten listos ₹{total} para el repartidor.", "pay_title": "💳 Completa tu pago", "pay_amount": "Importe: ₹{total}", "pay_how": "Paga de forma segura con UPI, tarjeta o banca en línea. El enlace vale 24 horas.", "order_ref": "🧾 Pedido n.º {n}",
         "pay_prompt": "💳 Paga ₹{total} de forma segura (UPI, tarjetas, banca en línea). El enlace vale 24 horas.", "b_pay": "Pagar ₹{total}",
         "b_online": "Pagar en línea", "b_cod": "Contra entrega", "b_confirm": "Confirmar pedido", "b_change": "Cambiar pedido",
         "order": "🧾 Pedido n.º {n}", "delivery": "Envío", "free": "Gratis", "total": "Total", "deliver_to": "Entregar a",
@@ -107,7 +107,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aquí tienes un nuevo enlace de pago del pedido n.º {n} (₹{total}): {url}\nEl enlace vale 24 horas.",
     },
     "ko": {
-        "confirmed": "✅ *주문 확정: #{n}*", "items": "*주문 상품*", "subtotal": "상품 금액", "payment": "결제", "pay_online_label": "온라인 (UPI, 카드, 인터넷 뱅킹)", "pay_cod_label": "착불 결제", "delivery_time": "배송", "deliver_to_h": "*배송지*", "cod_ready": "💵 배송 기사님께 드릴 *₹{total}*을(를) 준비해 주세요.", "pay_title": "💳 *결제를 완료해 주세요*", "pay_amount": "금액: *₹{total}*", "pay_how": "UPI, 카드 또는 인터넷 뱅킹으로 안전하게 결제하세요. 링크는 24시간 동안 유효합니다.", "order_ref": "🧾 *주문 #{n}*",
+        "confirmed": "✅ 주문 확정: #{n}", "items": "주문 상품", "subtotal": "상품 금액", "payment": "결제", "pay_online_label": "온라인 (UPI, 카드, 인터넷 뱅킹)", "pay_cod_label": "착불 결제", "delivery_time": "배송", "deliver_to_h": "배송지", "cod_ready": "💵 배송 기사님께 드릴 ₹{total}을(를) 준비해 주세요.", "pay_title": "💳 결제를 완료해 주세요", "pay_amount": "금액: ₹{total}", "pay_how": "UPI, 카드 또는 인터넷 뱅킹으로 안전하게 결제하세요. 링크는 24시간 동안 유효합니다.", "order_ref": "🧾 주문 #{n}",
         "pay_prompt": "💳 ₹{total}을(를) 안전하게 결제하세요 (UPI, 카드, 인터넷 뱅킹). 링크는 24시간 동안 유효합니다.", "b_pay": "₹{total} 결제",
         "b_online": "온라인 결제", "b_cod": "착불 결제", "b_confirm": "주문 확인", "b_change": "주문 변경",
         "order": "🧾 주문 #{n}", "delivery": "배송비", "free": "무료", "total": "합계", "deliver_to": "배송지",
@@ -184,17 +184,17 @@ def instructions(shop: dict) -> str:
         "4. Ask how they want to pay: " + "; or ".join(options) + "."
         + (f" End that question with this line so they can tap an answer: [BUTTONS: {' | '.join(choices)}]" if len(choices) > 1 else ""),
         "5. Read the whole order back in exactly this layout (WhatsApp formatting), then ask them to confirm:",
-        "   📝 *Please review your order*",
+        "   📝 Please review your order",
         "   ",
-        "   • *Product name* (size/colour or custom text) — qty × ₹price",
+        "   • Product name (size/colour or custom text) — qty × ₹price",
         "   ",
         "   Subtotal: ₹…",
         "   Delivery: ₹… (or Free)",
-        "   *Total: ₹…*",
+        "   Total: ₹…",
         "   ",
-        "   *Name:* …",
-        "   *Address:* …",
-        "   *Payment:* Online / Cash on delivery",
+        "   Name: …",
+        "   Address: …",
+        "   Payment: Online / Cash on delivery",
         f"   End that message with this line so they can tap an answer: [BUTTONS: {w['b_confirm']} | {w['b_change']}]",
         f"   A reply of \"{w['b_confirm']}\" is a clear confirmation; \"{w['b_change']}\" means ask what they want to change. "
         "Use a [BUTTONS: …] line only for these two questions, never with the [ORDER] line.",
@@ -351,16 +351,16 @@ def summary(shop: dict, order: dict, *, link_failed: bool = False) -> str:
         "",
         f"{w['subtotal']}: ₹{rs(order.get('subtotal_paise') or sum(int(i['total_paise']) for i in order['items']))}",
         f"{w['delivery']}: " + (f"₹{rs(order['delivery_paise'])}" if order["delivery_paise"] else w["free"]),
-        f"*{w['total']}: ₹{total}*",
+        f"{w['total']}: ₹{total}",
         "",
         w["deliver_to_h"],
         order["customer_name"],
         order["address"],
         "",
-        f"*{w['payment']}:* " + (w["pay_cod_label"] if order["payment_method"] == "cod" else w["pay_online_label"]),
+        f"{w['payment']}: " + (w["pay_cod_label"] if order["payment_method"] == "cod" else w["pay_online_label"]),
     ]
     if shop.get("delivery_note"):
-        lines.append(f"*{w['delivery_time']}:* {shop['delivery_note']}")
+        lines.append(f"{w['delivery_time']}: {shop['delivery_note']}")
     lines.append("")
     if order["payment_method"] == "cod":
         lines.append(w["cod_ready"].format(total=total))
