@@ -246,7 +246,10 @@ async def test_unpaid_online_order_waits_and_can_get_a_new_link(client, world, s
     oid = world.rows("shop_orders")[0]["id"]
     assert patch(client, world, oid, action="packed").status_code == 409
     r = patch(client, world, oid, action="resend_link")
-    assert r.status_code == 200 and "https://rzp.io/i/l2" in shop["bridge"].calls[-1][1]["text"]
+    # Inside the 24-hour window the new link goes as a "Pay ₹…" button.
+    action, fields = shop["bridge"].calls[-1]
+    assert r.status_code == 200 and r.json()["sent_as"] == "button"
+    assert action == "send_pay_button" and fields["url"] == "https://rzp.io/i/l2" and fields["button"].startswith("Pay ₹") and fields["text"].startswith("🧾 #1001")
     assert world.rows("shop_orders")[0]["payment_url"] == "https://rzp.io/i/l2"
     r = patch(client, world, oid, action="cancelled", notify=False)
     assert r.json()["order"]["status"] == "cancelled" and r.json()["notified"] is False

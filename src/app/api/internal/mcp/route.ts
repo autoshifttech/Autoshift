@@ -11,6 +11,7 @@
 // Body: { action, account_id, user_id, role, ...action fields }
 // ============================================================
 
+import { engineSendCtaUrl } from '@/lib/flows/meta-send'
 import { after, NextResponse } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
 
@@ -125,6 +126,20 @@ export async function POST(request: Request) {
           senderId: userId,
         })
         return NextResponse.json({ message_id: result.messageId, whatsapp_message_id: result.whatsappMessageId, conversation_id: conversationId, contact_id: contactId }, { status: 201 })
+      }
+
+      case 'send_pay_button': {
+        // A payment link as a WhatsApp button ("Pay ₹199") in an open chat: the Orders page's new link.
+        const conversationId = str(body.conversation_id)
+        const text = str(body.text)
+        const button = str(body.button)
+        const url = str(body.url)
+        if (!conversationId || !text || !button || !url) return fail(400, "'conversation_id', 'text', 'button' and 'url' are required")
+        if (!/^https:\/\//i.test(url)) return fail(400, 'The link must start with https://')
+        const { data } = await db.from('conversations').select('id, contact_id').eq('id', conversationId).eq('account_id', accountId).maybeSingle()
+        if (!data?.contact_id) return fail(404, 'Conversation not found')
+        const sent = await engineSendCtaUrl({ accountId, userId, conversationId, contactId: data.contact_id as string, bodyText: text.slice(0, 1024), buttonText: button.slice(0, 20), url })
+        return NextResponse.json({ whatsapp_message_id: sent.whatsapp_message_id, conversation_id: conversationId }, { status: 201 })
       }
 
       case 'broadcast_create': {

@@ -1,3 +1,4 @@
+import logging
 """Orders the AI shop assistant took on WhatsApp (Orders page).
 
 The team moves an order on (packed, shipped with a tracking link, delivered, cancelled) or sends a
@@ -129,7 +130,18 @@ async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember,
     notified, reason, via = False, None, None
     if body.notify:
         reason = await _may_message(sdb, ctx.account_id, order)
-        if reason is None:
+        pay = None
+        if reason is None and body.action == "resend_link" and await wa_templates.window_open(sdb, order["conversation_id"]):
+            pay = shop_orders.pay_button(await _shop_of(sdb, order), order)
+        if pay:
+            # The new link as a "Pay ₹…" button; the plain link below if WhatsApp refuses it.
+            try:
+                await bridge.call("send_pay_button", ctx.account_id, ctx.user.id, ctx.role, conversation_id=order["conversation_id"],
+                                  text=f"🧾 #{order['number']}\n{pay['text']}", button=pay["label"], url=pay["url"])
+                notified, via = True, "button"
+            except Exception as exc:  # noqa: BLE001
+                logging.getLogger("autoshift.orders").warning("pay button refused for order %s: %s", order_id, exc)
+        if reason is None and not notified:
             shop = await _shop_of(sdb, order)
             # Free text inside WhatsApp's 24-hour window, else the approved order-update template.
             notified, reason, via = await wa_templates.deliver(
