@@ -1,4 +1,5 @@
 import { AlertSettingsPage } from "@/components/admin/alert-settings-page";
+import { AdminAccountPanel } from "@/components/admin/admin-account-panel";
 import { CustomToolsPanel } from "@/components/admin/custom-tools-panel";
 import { PhoneOtpPanel } from "@/components/admin/phone-otp-panel";
 import { ApiKeysPanel } from "@/components/settings/api-keys-panel";
@@ -8,6 +9,10 @@ import { PageDefaultsPanel } from "@/components/admin/page-defaults-panel";
 export default function Page() {
   return (
     <>
+      {/* This admin's own username and password for the admin login. */}
+      <div className="mx-auto mb-10 max-w-3xl">
+        <AdminAccountPanel />
+      </div>
       <AlertSettingsPage />
       {/* Business details shown on the Contact, Refund, Shipping and other legal pages. */}
       <div className="mx-auto mt-10 max-w-3xl">

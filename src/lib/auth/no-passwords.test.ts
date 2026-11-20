@@ -12,9 +12,18 @@ function files(dir: string): string[] {
 describe('sign-in without passwords', () => {
   const src = files(join(process.cwd(), 'src'))
 
-  it('no screen signs in or signs up with a password', () => {
+  it('no business screen signs in or signs up with a password', () => {
+    // Only AutoShift staff may use a password, on the admin login (then the WhatsApp code).
     const offenders = src.filter((f) => /signInWithPassword|auth\.signUp\(|updateUser\(\s*\{\s*password/.test(readFileSync(f, 'utf8')))
-    expect(offenders).toEqual([])
+    expect(offenders.map((f) => f.slice(process.cwd().length + 1))).toEqual(['src/app/api/admin/login/password/route.ts'])
+  })
+
+  it('the admin password routes are staff-only', () => {
+    const signIn = readFileSync(join(process.cwd(), 'src/app/api/admin/login/password/route.ts'), 'utf8')
+    expect(signIn).toContain("from('platform_admins')")
+    expect(signIn).toContain('signOut()')
+    const account = readFileSync(join(process.cwd(), 'src/app/api/admin/account/route.ts'), 'utf8')
+    expect(account).toContain('verifyAdminToken')
   })
 
   it('the password pages are gone', () => {

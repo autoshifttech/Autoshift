@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Loader2, LockKeyhole, MessageCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, LockKeyhole, MessageCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ async function post(path: string, body?: unknown): Promise<{ ok: boolean; data: 
 }
 
 /**
- * Admin sign-in: Continue with Google (only emails on the AutoShift admin team get in), then (when
+ * Admin sign-in: a username (or email) and password, or Continue with Google (only emails on the AutoShift admin team get in), then (when
  * admin sign-in codes are on and this device isn't trusted yet) a 6-digit code sent to the admin's
  * WhatsApp. A device that passes is trusted for 30 days. The server and the backend both check it.
  */
@@ -45,6 +45,10 @@ export function AdminLogin() {
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [pwBusy, setPwBusy] = useState(false);
   const [error, setError] = useState("");
   const codeRef = useRef<HTMLInputElement>(null);
 
@@ -53,7 +57,7 @@ export function AdminLogin() {
   }, [step]);
 
   const explain = (data: ApiError) => {
-    const known = ["not_signed_in", "not_admin", "no_phone", "not_available", "wait", "too_many", "send_failed", "invalid_code", "no_code", "expired", "too_many_attempts", "wrong_code"];
+    const known = ["wrong_login", "locked", "not_signed_in", "not_admin", "no_phone", "not_available", "wait", "too_many", "send_failed", "invalid_code", "no_code", "expired", "too_many_attempts", "wrong_code"];
     const key = known.includes(data.error ?? "") ? data.error! : "generic";
     return t(`error.${key}`, { seconds: data.retry_after ?? 60, left: data.attempts_left ?? 0 });
   };
@@ -73,6 +77,25 @@ export function AdminLogin() {
     setPhone(data.phone ?? "");
     setCode("");
     setStep("code");
+  };
+
+  const withPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!login.trim() || !password) return setError(t("error.wrong_login"));
+    setError("");
+    setPwBusy(true);
+    try {
+      const { ok, data } = await post("/api/admin/login/password", { login: login.trim(), password });
+      if (!ok) {
+        setError(explain(data));
+        return;
+      }
+      setPassword("");
+      // Same next step as after Google: the WhatsApp code (or straight in on a trusted device).
+      await start();
+    } finally {
+      setPwBusy(false);
+    }
   };
 
   const google = async () => {
@@ -164,7 +187,36 @@ export function AdminLogin() {
                   {error}
                 </p>
               )}
-              <Button type="button" variant="outline" className="min-h-12 w-full gap-3 text-base font-semibold" disabled={busy} onClick={() => void google()}>
+              <form onSubmit={withPassword} className="space-y-3" noValidate>
+                <div className="space-y-1.5">
+                  <Label htmlFor="admin-login">{t("loginLabel")}</Label>
+                  <Input id="admin-login" autoComplete="username" autoCapitalize="none" spellCheck={false} value={login} onChange={(e) => setLogin(e.target.value)} className="min-h-11" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="admin-password">{t("passwordLabel")}</Label>
+                  <div className="relative">
+                    <Input id="admin-password" type={showPw ? "text" : "password"} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-11 pr-12" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((v) => !v)}
+                      aria-label={showPw ? t("hidePassword") : t("showPassword")}
+                      className="absolute top-1/2 right-1 flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    >
+                      {showPw ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                    </button>
+                  </div>
+                </div>
+                <Button type="submit" className="min-h-11 w-full" disabled={pwBusy || busy}>
+                  {pwBusy && <Loader2 className="size-4 animate-spin" aria-hidden />}
+                  {t("signIn")}
+                </Button>
+              </form>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden>
+                <span className="h-px flex-1 bg-border" />
+                {t("or")}
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button type="button" variant="outline" className="min-h-12 w-full gap-3 text-base font-semibold" disabled={busy || pwBusy} onClick={() => void google()}>
                 {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <GoogleMark />}
                 {busy && returning ? t("checking") : t("google")}
               </Button>

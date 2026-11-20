@@ -4904,11 +4904,19 @@
       "too_many_attempts": "Too many wrong tries. Send a new code.",
       "wrong_code": "That code isn't right. {left, plural, =0 {Send a new code.} one {# try left.} other {# tries left.}}",
       "generic": "Something went wrong. Try again.",
-      "google": "Google sign-in couldn't start. Try again."
+      "google": "Google sign-in couldn't start. Try again.",
+      "wrong_login": "Username or password is wrong.",
+      "locked": "Too many tries. Wait {seconds} seconds and try again."
     },
-    "descGoogle": "Only for the AutoShift team. Sign in with your Google account on the admin team. Every sign-in and action is recorded.",
+    "descGoogle": "Sign in with your admin username and password, or with Google. Then confirm with the code we send to your WhatsApp.",
     "google": "Continue with Google",
-    "checking": "Checking…"
+    "checking": "Checking…",
+    "loginLabel": "Username or email",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "or": "or"
   },
   "Pipelines": {
     "title": "Pipelines",
@@ -5564,5 +5572,34 @@
     "sampleWhen": "Mon 24 Nov at 10:30 AM",
     "sampleDate": "Mon 24 Nov",
     "sampleTime": "10:30 AM"
+  },
+  "AdminAccount": {
+    "title": "Your sign-in",
+    "desc": "Set a username and password to sign in to the admin panel without Google. The WhatsApp code step stays the same.",
+    "current": "Username: {username}",
+    "none": "No username yet, so you sign in with Google.",
+    "email": "Google account {email}",
+    "loading": "Loading…",
+    "username": "Username",
+    "usernameHelp": "3 to 32 characters: lowercase letters, numbers, dot, dash or underscore.",
+    "password": "New password",
+    "passwordHelp": "At least 10 characters, with a letter and a number.",
+    "confirm": "Type the password again",
+    "show": "Show password",
+    "hide": "Hide password",
+    "save": "Save username and password",
+    "update": "Update username and password",
+    "saved": "Saved. You can now sign in with your username and password.",
+    "note": "Keep your password private. Every admin sign-in is recorded in the audit log.",
+    "error": {
+      "bad_username": "Use 3 to 32 characters: lowercase letters, numbers, dot, dash or underscore.",
+      "too_short": "Use at least 10 characters.",
+      "too_simple": "Use at least one letter and one number.",
+      "too_long": "Use at most 72 characters.",
+      "mismatch": "The two passwords don't match.",
+      "username_taken": "Another admin already has this username.",
+      "not_verified": "Sign in again with the WhatsApp code, then try again.",
+      "save_failed": "Couldn't save. Try again."
+    }
   }
 }

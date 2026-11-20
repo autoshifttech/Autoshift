@@ -4904,11 +4904,19 @@
       "too_many_attempts": "Muitas tentativas erradas. Envie um novo código.",
       "wrong_code": "Código incorreto. {left, plural, =0 {Envie um novo código.} one {Resta # tentativa.} other {Restam # tentativas.}}",
       "generic": "Algo deu errado. Tente novamente.",
-      "google": "Não foi possível iniciar o login com Google. Tente de novo."
+      "google": "Não foi possível iniciar o login com Google. Tente de novo.",
+      "wrong_login": "Usuário ou senha incorretos.",
+      "locked": "Muitas tentativas. Aguarde {seconds} segundos e tente de novo."
     },
-    "descGoogle": "Só para a equipe da AutoShift. Entre com sua conta Google da equipe de administração. Cada acesso e ação fica registrado.",
+    "descGoogle": "Entre com seu usuário e senha de administrador, ou com o Google. Depois confirme com o código que enviamos ao seu WhatsApp.",
     "google": "Continuar com o Google",
-    "checking": "Verificando…"
+    "checking": "Verificando…",
+    "loginLabel": "Usuário ou e-mail",
+    "passwordLabel": "Senha",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "signIn": "Entrar",
+    "or": "ou"
   },
   "Pipelines": {
     "title": "Funis",
@@ -5564,5 +5572,34 @@
     "sampleWhen": "seg 24 nov às 10:30",
     "sampleDate": "seg 24 nov",
     "sampleTime": "10:30"
+  },
+  "AdminAccount": {
+    "title": "Seu acesso",
+    "desc": "Defina um usuário e uma senha para entrar no painel de administração sem o Google. A etapa do código do WhatsApp continua igual.",
+    "current": "Usuário: {username}",
+    "none": "Ainda sem usuário: você entra com o Google.",
+    "email": "Conta Google {email}",
+    "loading": "Carregando…",
+    "username": "Usuário",
+    "usernameHelp": "3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.",
+    "password": "Nova senha",
+    "passwordHelp": "Pelo menos 10 caracteres, com uma letra e um número.",
+    "confirm": "Digite a senha de novo",
+    "show": "Mostrar senha",
+    "hide": "Ocultar senha",
+    "save": "Salvar usuário e senha",
+    "update": "Atualizar usuário e senha",
+    "saved": "Salvo. Agora você pode entrar com seu usuário e senha.",
+    "note": "Mantenha sua senha em sigilo. Todo acesso de administrador fica registrado no log de auditoria.",
+    "error": {
+      "bad_username": "Use 3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.",
+      "too_short": "Use pelo menos 10 caracteres.",
+      "too_simple": "Use pelo menos uma letra e um número.",
+      "too_long": "Use no máximo 72 caracteres.",
+      "mismatch": "As duas senhas não são iguais.",
+      "username_taken": "Outro administrador já usa este usuário.",
+      "not_verified": "Entre de novo com o código do WhatsApp e tente outra vez.",
+      "save_failed": "Não foi possível salvar. Tente de novo."
+    }
   }
 }

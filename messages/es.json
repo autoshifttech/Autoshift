@@ -4904,11 +4904,19 @@
       "too_many_attempts": "Demasiados intentos fallidos. Envía un código nuevo.",
       "wrong_code": "Ese código no es correcto. {left, plural, =0 {Envía un código nuevo.} one {Te queda # intento.} other {Te quedan # intentos.}}",
       "generic": "Algo salió mal. Inténtalo de nuevo.",
-      "google": "No se pudo iniciar el acceso con Google. Inténtalo de nuevo."
+      "google": "No se pudo iniciar el acceso con Google. Inténtalo de nuevo.",
+      "wrong_login": "El usuario o la contraseña no son correctos.",
+      "locked": "Demasiados intentos. Espera {seconds} segundos e inténtalo de nuevo."
     },
-    "descGoogle": "Solo para el equipo de AutoShift. Entra con tu cuenta de Google del equipo de administración. Cada acceso y acción queda registrado.",
+    "descGoogle": "Inicia sesión con tu usuario y contraseña de administrador, o con Google. Luego confirma con el código que enviamos a tu WhatsApp.",
     "google": "Continuar con Google",
-    "checking": "Comprobando…"
+    "checking": "Comprobando…",
+    "loginLabel": "Usuario o correo",
+    "passwordLabel": "Contraseña",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "signIn": "Iniciar sesión",
+    "or": "o"
   },
   "Pipelines": {
     "title": "Embudos",
@@ -5564,5 +5572,34 @@
     "sampleWhen": "lun 24 nov a las 10:30",
     "sampleDate": "lun 24 nov",
     "sampleTime": "10:30"
+  },
+  "AdminAccount": {
+    "title": "Tu acceso",
+    "desc": "Define un usuario y una contraseña para entrar al panel de administración sin Google. El paso del código de WhatsApp sigue igual.",
+    "current": "Usuario: {username}",
+    "none": "Aún no tienes usuario: entras con Google.",
+    "email": "Cuenta de Google {email}",
+    "loading": "Cargando…",
+    "username": "Usuario",
+    "usernameHelp": "De 3 a 32 caracteres: minúsculas, números, punto, guion o guion bajo.",
+    "password": "Nueva contraseña",
+    "passwordHelp": "Al menos 10 caracteres, con una letra y un número.",
+    "confirm": "Escribe la contraseña otra vez",
+    "show": "Mostrar contraseña",
+    "hide": "Ocultar contraseña",
+    "save": "Guardar usuario y contraseña",
+    "update": "Actualizar usuario y contraseña",
+    "saved": "Guardado. Ya puedes entrar con tu usuario y contraseña.",
+    "note": "Mantén tu contraseña en privado. Cada acceso de administrador queda en el registro de auditoría.",
+    "error": {
+      "bad_username": "Usa de 3 a 32 caracteres: minúsculas, números, punto, guion o guion bajo.",
+      "too_short": "Usa al menos 10 caracteres.",
+      "too_simple": "Usa al menos una letra y un número.",
+      "too_long": "Usa como máximo 72 caracteres.",
+      "mismatch": "Las dos contraseñas no coinciden.",
+      "username_taken": "Otro administrador ya usa este usuario.",
+      "not_verified": "Vuelve a entrar con el código de WhatsApp e inténtalo otra vez.",
+      "save_failed": "No se pudo guardar. Inténtalo de nuevo."
+    }
   }
 }
