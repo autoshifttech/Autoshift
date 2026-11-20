@@ -1,5 +1,6 @@
 "use client";
 
+import { ViewTransition } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -169,7 +170,10 @@ export function BusinessesPage() {
             <tr key={b.id} className="cursor-pointer hover:bg-muted/50" onClick={() => router.push(`/admin/businesses/${b.id}`)}>
               <td className={td}>
                 <div className="flex items-center gap-3">
-                  <Initials name={b.name} />
+                  {/* Same business on its own page: the badge morphs across (shared element). */}
+                  <ViewTransition name={`biz-${b.id}`} share="morph" default="none">
+                    <Initials name={b.name} />
+                  </ViewTransition>
                   <div className="min-w-0">
                     <Link href={`/admin/businesses/${b.id}`} onClick={(e) => e.stopPropagation()} className="block truncate font-medium text-foreground hover:underline">
                       {b.name}

@@ -53,6 +53,25 @@ export function ScrollReveal({ rootId }: { rootId?: string }) {
       { root: box, rootMargin: "0px", threshold: 0 },
     );
 
+    // Inside the app and admin: cards sink back and fade a little as they
+    // leave over the top, tied to the scroll position (scroll-driven, so it
+    // follows the finger exactly). Only cards shorter than ~2/3 of the view,
+    // so long tables you are reading never move. Browsers without view
+    // timelines skip it.
+    type ViewTimelineCtor = new (o: { subject: Element; axis?: string }) => AnimationTimeline;
+    const VT = (window as unknown as { ViewTimeline?: ViewTimelineCtor }).ViewTimeline;
+    const depth = (el: Element) => {
+      if (!box || !VT) return;
+      if ((el as HTMLElement).offsetHeight > box.clientHeight * 0.66) return;
+      el.animate([{ transform: "none", opacity: 1 }, { transform: "scale(0.94)", opacity: 0.3 }], {
+        timeline: new VT({ subject: el, axis: "block" }),
+        rangeStart: "exit 0%",
+        rangeEnd: "exit 100%",
+        fill: "none",
+        easing: "cubic-bezier(0.4, 0, 1, 1)",
+      } as KeyframeAnimationOptions);
+    };
+
     const scan = () => {
       const fold = box ? box.getBoundingClientRect().bottom : window.innerHeight;
       root.querySelectorAll(TARGETS).forEach((el) => {
@@ -64,6 +83,7 @@ export function ScrollReveal({ rootId }: { rootId?: string }) {
         // On screen already: the page-entry animation handles it this time.
         if (el.getBoundingClientRect().top < fold) shown.add(el);
         io.observe(el);
+        depth(el);
       });
     };
 

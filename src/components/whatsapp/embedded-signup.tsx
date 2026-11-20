@@ -1,5 +1,6 @@
 "use client";
 
+import { celebrate } from "@/lib/celebrate";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
@@ -74,6 +75,7 @@ export function EmbeddedSignup({
       setNumber(n);
       onConnected?.(n);
       setPhase("success");
+      celebrate();
       if (!done.registered) toast.error(t("registerLater"));
     } catch (e) {
       setProblem(e instanceof Error ? e.message : null);

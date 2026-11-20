@@ -1,5 +1,6 @@
 "use client";
 
+import { LightWords } from "@/components/motion/light-words";
 import { useAdminT } from "@/lib/admin/strings";
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import type { ReactNode } from "react";
@@ -16,7 +17,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="title-weight text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground">{tr(title)}</h1>
+        <h1 className="title-weight text-[27px] leading-tight font-bold tracking-[-0.03em] text-foreground"><LightWords text={tr(title)} /></h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{tr(description)}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -61,11 +62,11 @@ export function Kpi({ label, value, hint, delta, icon: Icon, tone = "mint", href
   );
   const cls = "block min-w-0 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]";
   return href ? (
-    <Link href={href} className={cn(cls, "transition-colors hover:border-primary/40")}>
+    <Link href={href} data-tilt className={cn(cls, "transition-colors hover:border-primary/40")}>
       {body}
     </Link>
   ) : (
-    <div className={cls}>{body}</div>
+    <div data-tilt className={cls}>{body}</div>
   );
 }
 

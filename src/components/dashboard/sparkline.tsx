@@ -20,7 +20,10 @@ export function Sparkline({ values }: { values: (number | null)[] }) {
               fillOpacity={0.12}
               connectNulls
               dot={false}
-              isAnimationActive={false}
+              // The line draws itself in from the left on first show.
+              isAnimationActive
+              animationDuration={900}
+              animationEasing="ease-out"
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -60,7 +60,7 @@ export function KpiTile({
   footer: ReactNode
 }) {
   return (
-    <Card size="sm" className="gap-2 px-4">
+    <Card size="sm" data-tilt className="gap-2 px-4">
       <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <span className="truncate">{title}</span>
         <Tooltip>

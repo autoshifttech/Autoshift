@@ -1,5 +1,6 @@
 "use client";
 
+import { celebrate } from "@/lib/celebrate";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
@@ -41,6 +42,7 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       const result = await payTopUp(value);
       if (result.status === "paid") {
         onOpenChange(false);
+        celebrate();
         toast.success(t("topUpDone", { amount: formatMoney(value) }));
       }
     } catch (e) {
@@ -58,6 +60,7 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       topUp(value, method);
       setPaying(false);
       onOpenChange(false);
+      celebrate();
       toast.success(t("topUpDone", { amount: formatMoney(value) }));
     }, 1100);
   };

@@ -1245,3 +1245,78 @@ html[data-vt-reveal]::view-transition-new(root) { animation: theme-reveal 0.6s c
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none !important; }
 }
+
+/* ==========================================================================
+   Dashboard and admin: Apple-style scrolling and navigation.
+   ========================================================================== */
+/* Compact title bar that takes over from the big page title (collapsing-title.tsx). */
+.title-bar { opacity: 0; translate: 0 -14px; scale: 0.96; visibility: hidden; }
+.title-bar[data-show] { opacity: 1; translate: 0 0; scale: 1; visibility: visible; pointer-events: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  .title-bar { transition: opacity 0.25s, translate 0.4s cubic-bezier(0.3, 1.3, 0.5, 1), scale 0.4s cubic-bezier(0.3, 1.3, 0.5, 1), visibility 0.25s; }
+}
+
+/* Direction-aware page slides (nav-direction.tsx sets data-nav-dir). */
+html[data-nav-dir="forward"]::view-transition-old(.page) { animation: slide-out-left 0.28s cubic-bezier(0.4, 0, 0.6, 1) both; }
+html[data-nav-dir="forward"]::view-transition-new(.page) { animation: slide-in-right 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+html[data-nav-dir="back"]::view-transition-old(.page) { animation: slide-out-right 0.28s cubic-bezier(0.4, 0, 0.6, 1) both; }
+html[data-nav-dir="back"]::view-transition-new(.page) { animation: slide-in-left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes slide-out-left { to { opacity: 0; translate: -48px 0; } }
+@keyframes slide-in-right { from { opacity: 0; translate: 64px 0; } }
+@keyframes slide-out-right { to { opacity: 0; translate: 48px 0; } }
+@keyframes slide-in-left { from { opacity: 0; translate: -64px 0; } }
+/* Shared elements (the same business or contact on the list and on its page) morph between pages. */
+::view-transition-group(.morph) { animation-duration: 0.45s; animation-timing-function: cubic-bezier(0.3, 1.1, 0.4, 1); }
+::view-transition-image-pair(.morph) { animation-name: morph-blur; }
+@keyframes morph-blur { 40% { filter: blur(2px); } }
+
+/* Long-press peek (long-press-peek.tsx): the row sinks while held, the
+   preview springs up over a blurred page. */
+.peek-host { -webkit-touch-callout: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .peek-host { transition: scale 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+  .peek-host[data-holding] { scale: 0.96; }
+  .peek-backdrop { animation: page-fade-in 0.25s ease-out; }
+  .peek-card { animation: peek-in 0.45s cubic-bezier(0.3, 1.4, 0.5, 1); }
+}
+@keyframes page-fade-in { from { opacity: 0; } }
+@keyframes peek-in { from { opacity: 0; scale: 0.85; } }
+
+/* 3D tilt and magnetic buttons (micro-motion.tsx; desktop mouse, motion allowed). */
+@media (prefers-reduced-motion: no-preference) {
+  [data-tilt], a[data-slot="card"], button[data-slot="card"], a > [data-slot="card"]:only-child {
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+  }
+  [data-tilting] {
+    transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 0.12s ease-out, translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+  }
+  [data-slot="button"][data-pulling] { transform: translate(var(--pull-x, 0px), var(--pull-y, 0px)); transition: transform 0.15s ease-out, translate 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.15s; }
+}
+
+/* Page titles light up word by word (light-words.tsx). */
+@media (prefers-reduced-motion: no-preference) {
+  .light-word { display: inline-block; animation: light-word 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(80ms + var(--i, 0) * 90ms); }
+}
+@keyframes light-word {
+  from { opacity: 0.15; filter: blur(4px); translate: 0 4px; }
+}
+
+/* Hero card: two soft lights drift slowly (animated gradient glow) and move a
+   little against the scroll (parallax). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-glow { animation: hero-drift 14s ease-in-out infinite alternate; }
+  .hero-glow-2 { animation-duration: 18s; animation-direction: alternate-reverse; }
+  @supports (animation-timeline: view()) {
+    .hero-glow { animation: hero-drift 14s ease-in-out infinite alternate, hero-parallax linear both; animation-timeline: auto, view(); }
+    .hero-glow-2 { animation: hero-drift 18s ease-in-out infinite alternate-reverse, hero-parallax linear both; animation-timeline: auto, view(); }
+  }
+}
+@keyframes hero-drift {
+  from { scale: 1; rotate: 0deg; }
+  to { scale: 1.35; rotate: 8deg; }
+}
+@keyframes hero-parallax {
+  from { translate: 0 -24px; }
+  to { translate: 0 24px; }
+}

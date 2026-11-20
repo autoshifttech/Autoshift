@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { celebrate } from "@/lib/celebrate";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -492,6 +493,11 @@ function DoneStep() {
     setup.features.includes("ai_support") && { href: "/agents", label: t("doneAi") },
     setup.features.includes("lead_capture") && { href: "/agents?tab=leads", label: t("doneLeads") },
   ].filter(Boolean) as { href: string; label: string }[];
+  // Confetti once the green wave pulls back.
+  useEffect(() => {
+    const id = window.setTimeout(() => celebrate(), 900);
+    return () => window.clearTimeout(id);
+  }, []);
   return (
     <section className="mx-auto max-w-xl text-center">
       {/* Finishing: a green wave fills the screen and pulls back to reveal this page (onboarding). */}

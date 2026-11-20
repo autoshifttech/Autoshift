@@ -43,6 +43,44 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   )
 }
 
+/** Drag-to-close for bottom sheets: follows the finger, closes past ~90px or a quick flick, else springs back. */
+function useSheetDrag(enabled: boolean) {
+  const sheet = React.useRef<HTMLDivElement>(null)
+  const close = React.useRef<HTMLButtonElement>(null)
+  const start = React.useRef<{ y: number; t: number } | null>(null)
+  const dy = React.useRef(0)
+  const down = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!enabled) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    start.current = { y: e.clientY, t: performance.now() }
+    if (sheet.current) sheet.current.style.transition = "none"
+  }
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!start.current || !sheet.current) return
+    dy.current = Math.max(0, e.clientY - start.current.y)
+    sheet.current.style.translate = `0 ${dy.current}px`
+  }
+  const up = () => {
+    const s = start.current
+    const el = sheet.current
+    start.current = null
+    if (!s || !el) return
+    const speed = dy.current / Math.max(1, performance.now() - s.t)
+    el.style.transition = "translate 0.35s cubic-bezier(0.3, 1.3, 0.5, 1)"
+    if (dy.current > 90 || speed > 0.6) {
+      el.style.translate = "0 100%"
+      window.setTimeout(() => close.current?.click(), 120)
+    } else {
+      el.style.translate = ""
+    }
+    window.setTimeout(() => {
+      el.style.transition = ""
+    }, 400)
+    dy.current = 0
+  }
+  return { sheet, close, down, move, up }
+}
+
 function SheetContent({
   className,
   children,
@@ -53,10 +91,12 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
+  const { sheet: sheetRef, close: closeRef, down: dragDown, move: dragMove, up: dragUp } = useSheetDrag(side === "bottom")
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Popup
+        ref={sheetRef}
         data-slot="sheet-content"
         data-side={side}
         className={cn(
@@ -65,7 +105,21 @@ function SheetContent({
         )}
         {...props}
       >
+        {side === "bottom" && (
+          // Grab handle: drag the sheet down to close it (iOS-style).
+          <div
+            aria-hidden
+            className="-mt-2 -mb-2 flex h-6 shrink-0 cursor-grab touch-none items-start justify-center active:cursor-grabbing"
+            onPointerDown={dragDown}
+            onPointerMove={dragMove}
+            onPointerUp={dragUp}
+            onPointerCancel={dragUp}
+          >
+            <span className="mt-1 h-1.5 w-10 rounded-full bg-foreground/20" />
+          </div>
+        )}
         {children}
+        {side === "bottom" && <SheetPrimitive.Close ref={closeRef} hidden tabIndex={-1} aria-hidden />}
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"

@@ -1,5 +1,6 @@
 "use client";
 
+import { celebrate } from "@/lib/celebrate";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { CreditCard, Landmark, Loader2, Lock, Smartphone } from "lucide-react";
@@ -82,6 +83,7 @@ export function CheckoutDialog({
     window.setTimeout(() => {
       setPaying(false);
       setPaid(true);
+      celebrate();
       window.setTimeout(() => {
         setPaid(false);
         onPaid();

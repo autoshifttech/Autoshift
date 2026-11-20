@@ -1,5 +1,6 @@
 "use client";
 
+import { ViewTransition } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";
@@ -109,14 +110,16 @@ export function BusinessDetail({ id }: { id: string }) {
 
   return (
     <>
-      <Link href="/admin/businesses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/admin/businesses" data-nav-back className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" />
         Businesses
       </Link>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <Initials name={b.name} className="size-14 text-base" />
+          <ViewTransition name={`biz-${b.id}`} share="morph" default="none">
+            <Initials name={b.name} className="size-14 text-base" />
+          </ViewTransition>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-2xl font-bold tracking-tight text-foreground">{b.name}</h1>

@@ -1,5 +1,6 @@
 "use client";
 
+import { LongPressPeek } from "@/components/motion/long-press-peek";
 import { ListSkeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -452,7 +453,26 @@ function ConversationItem({
       })
     : "";
 
+  // Phones: press and hold to peek at the whole last message (long-press preview).
+  const peek = (
+    <div className="space-y-3 p-5">
+      <div className="flex items-center gap-3">
+        <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-base font-semibold text-foreground">
+          {contact?.avatar_url ? <img src={contact.avatar_url} alt="" className="size-12 object-cover" /> : initials}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-foreground">{displayName}</p>
+          {timeAgo && <p className="text-xs text-muted-foreground">{timeAgo}</p>}
+        </div>
+      </div>
+      <p className="max-h-60 overflow-hidden rounded-2xl bg-muted/60 px-4 py-3 text-sm whitespace-pre-wrap text-foreground">
+        {conversation.last_message_text || t("noMessagesYet")}
+      </p>
+    </div>
+  );
+
   return (
+    <LongPressPeek peek={peek} onOpen={handleClick} label={displayName}>
     <button
       onClick={handleClick}
       className={cn(
@@ -503,5 +523,6 @@ function ConversationItem({
         </div>
       </div>
     </button>
+    </LongPressPeek>
   );
 }

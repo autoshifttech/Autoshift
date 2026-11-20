@@ -176,7 +176,8 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.05fr)_repeat(3,minmax(0,1fr))]">
       {/* Hero: every message in and out, by period */}
       <section className="bg-hero relative flex min-h-[420px] flex-col overflow-hidden rounded-[22px] p-5 text-white shadow-[0_24px_50px_-28px_var(--primary)] md:row-span-2">
-        <span aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(400px_200px_at_80%_0%,rgb(255_255_255/0.14),transparent_70%)]" />
+        <span aria-hidden className="hero-glow pointer-events-none absolute inset-0 bg-[radial-gradient(400px_200px_at_80%_0%,rgb(255_255_255/0.14),transparent_70%)]" />
+        <span aria-hidden className="hero-glow hero-glow-2 pointer-events-none absolute inset-0 bg-[radial-gradient(320px_220px_at_10%_90%,rgb(201_242_122/0.12),transparent_70%)]" />
         <div className="relative flex items-center justify-between">
           <h3 className="text-[15px] font-semibold">{t('handled')}</h3>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2 py-0.5 text-xs font-bold tracking-[0.08em]">

@@ -47,6 +47,8 @@ import { Initials, Pill, SEVERITY_META } from "./admin-ui";
 import { RailTip } from "@/components/layout/rail-tip";
 import { RouteTransition } from "@/components/motion/route-transition";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { CollapsingTitle } from "@/components/motion/collapsing-title";
+import { NavDirection } from "@/components/motion/nav-direction";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { ShiftyCompanion } from "@/components/shifty/shifty-companion";
@@ -372,6 +374,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <RailTip />
       {/* The top bar scrolls with the page, so there's no band behind it. */}
       <div id="admin-scroll" className="smooth-scroll flex min-w-0 flex-1 flex-col overflow-y-auto">
+        <CollapsingTitle rootId="admin-scroll" />
+        <NavDirection />
         <header className="flex h-16 shrink-0 items-center gap-3 px-4 pt-2 sm:px-6 lg:h-[4.5rem] lg:pt-3">
           <Link href="/admin" className="flex items-center gap-2 lg:hidden">
             <LogoMark className="size-8" />
