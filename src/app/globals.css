@@ -973,3 +973,254 @@ html[data-mode="dark"] .sh-host svg { filter: drop-shadow(0 0 1.2px rgb(201 242 
 .grab { cursor: grab; }
 .grab:active { cursor: grabbing; }
 @media (prefers-reduced-motion: reduce) { .sh-bubble { transition: none; } }
+
+/* ==========================================================================
+   Micro-interactions (from the motion reference clips). Brand green only.
+   Pointer-driven parts are set by components/motion/micro-motion.tsx.
+   ========================================================================== */
+@property --rr { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --ra { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+
+/* Primary buttons sit on a thin darker ledge and press into it (button_1). */
+[data-slot="button"].bg-primary:not(:disabled) {
+  box-shadow: 0 3px 0 0 color-mix(in oklab, var(--primary) 62%, black), 0 8px 16px -8px color-mix(in oklab, var(--primary) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot="button"].bg-primary:not(:disabled) {
+    transition: translate 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.15s, scale 0.12s;
+  }
+  [data-slot="button"].bg-primary:not(:disabled):active {
+    translate: 0 2px;
+    box-shadow: 0 1px 0 0 color-mix(in oklab, var(--primary) 62%, black), 0 3px 8px -6px color-mix(in oklab, var(--primary) 60%, transparent);
+  }
+
+  /* A soft wave spreads from where you pressed (button_3). */
+  :is([data-slot="button"], [data-slot="tabs-trigger"], [data-ripple-host])[data-ripple]:not(.lg-chip) {
+    background-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), color-mix(in oklab, currentColor var(--ra), transparent) var(--rr), transparent calc(var(--rr) + 1px));
+    animation: ripple 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes ripple {
+    from { --rr: 0px; --ra: 28%; }
+    to { --rr: var(--rmax, 160px); --ra: 0%; }
+  }
+
+  /* Copy buttons flash green, pop, and send out a ring (copy_1). */
+  [data-copied] {
+    animation: copied-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1), copied-ring 0.7s ease-out;
+    background-color: color-mix(in oklab, var(--primary) 14%, transparent) !important;
+    color: var(--primary) !important;
+  }
+  @keyframes copied-pop {
+    40% { scale: 0.9; }
+    70% { scale: 1.06; }
+  }
+  @keyframes copied-ring {
+    from { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent); }
+    to { box-shadow: 0 0 0 10px transparent; }
+  }
+
+  /* Spinners that replace a button's icon pop in instead of snapping. */
+  [data-slot="button"] > svg.animate-spin {
+    animation: spin 1s linear infinite, pop-in 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+}
+
+/* AI is working: dots ripple (thinking_1) and the label shimmers (thinking_2). */
+.thinking-dots { display: inline-flex; align-items: center; gap: 3px; height: 1em; }
+.thinking-dots i { width: 6px; height: 6px; border-radius: 999px; background: var(--primary); opacity: 0.85; }
+.thinking-dots i:nth-child(2) { opacity: 0.65; }
+.thinking-dots i:nth-child(3) { opacity: 0.45; }
+.thinking-text {
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  background: linear-gradient(90deg, transparent 0 35%, var(--primary) 50%, transparent 65% 100%) no-repeat;
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .thinking-dots i { animation: thinking-dot 1.1s cubic-bezier(0.4, 0, 0.3, 1) infinite; }
+  .thinking-dots i:nth-child(2) { animation-delay: 0.14s; }
+  .thinking-dots i:nth-child(3) { animation-delay: 0.28s; }
+  .thinking-text { animation: thinking-sweep 1.8s linear infinite; }
+  /* Counts on badges pop when they change (cart_1). */
+  .badge-pop { animation: badge-pop 0.5s cubic-bezier(0.3, 1.7, 0.5, 1); }
+}
+@keyframes thinking-dot {
+  0%, 60%, 100% { translate: 0 0; scale: 1 1; }
+  20% { translate: 0 -5px; scale: 0.9 1.1; }
+  40% { translate: 0 0; scale: 1.15 0.85; }
+}
+@keyframes thinking-sweep {
+  from { background-position: 100% 0; }
+  to { background-position: -50% 0; }
+}
+@keyframes badge-pop {
+  0% { scale: 0.3; }
+  60% { scale: 1.25; }
+  100% { scale: 1; }
+}
+
+/* Pay buttons fold into a round spinner while paying, then open back up (checkout). */
+[data-slot="button"][data-morph] { clip-path: inset(-8px -8px -16px -8px round 999px); }
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot="button"][data-morph] { transition: clip-path 0.45s cubic-bezier(0.3, 1.2, 0.5, 1), background-color 0.3s, translate 0.12s, box-shadow 0.12s; }
+}
+[data-slot="button"][data-morph][data-busy] {
+  clip-path: inset(0 calc(50% - 18px) round 999px);
+  color: transparent;
+  opacity: 1;
+}
+[data-slot="button"][data-morph][data-busy] > svg.animate-spin {
+  position: absolute;
+  left: calc(50% - 8px);
+  color: var(--primary-foreground);
+}
+
+/* Menu button: three lines fold into an X (menu_1). Driven by aria-expanded. */
+.burger { position: relative; display: block; width: 20px; height: 14px; }
+.burger i { position: absolute; left: 0; width: 100%; height: 2px; border-radius: 2px; background: currentColor; top: 6px; }
+.burger i:nth-child(1) { top: 0; }
+.burger i:nth-child(3) { top: 12px; }
+[aria-expanded="true"] > .burger i:nth-child(1) { top: 6px; rotate: 45deg; }
+[aria-expanded="true"] > .burger i:nth-child(2) { opacity: 0; scale: 0.2 1; }
+[aria-expanded="true"] > .burger i:nth-child(3) { top: 6px; rotate: -45deg; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .burger i { transition: top 0.3s cubic-bezier(0.3, 1.4, 0.5, 1), rotate 0.45s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.2s, scale 0.25s; }
+  /* Menus drop open from their button; items follow one by one (menu_3). */
+  .menu-drop { animation: menu-drop 0.32s cubic-bezier(0.3, 1.3, 0.5, 1); transform-origin: top right; }
+  .menu-drop > * { animation: rise-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(40ms + var(--i, 0) * 35ms); }
+  [data-slot="dropdown-menu-content"][data-open] > *,
+  [data-slot="select-content"][data-open] [data-slot="select-item"] {
+    animation: menu-item-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  [data-slot="dropdown-menu-content"][data-open] > :nth-child(2),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(2) { animation-delay: 30ms; }
+  [data-slot="dropdown-menu-content"][data-open] > :nth-child(3),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(3) { animation-delay: 60ms; }
+  [data-slot="dropdown-menu-content"][data-open] > :nth-child(4),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(4) { animation-delay: 90ms; }
+  [data-slot="dropdown-menu-content"][data-open] > :nth-child(5),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(5) { animation-delay: 120ms; }
+  [data-slot="dropdown-menu-content"][data-open] > :nth-child(n + 6),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(n + 6) { animation-delay: 150ms; }
+  /* The tick on the chosen option pops in (menu_3). */
+  [data-slot="select-item"][data-selected] svg,
+  [data-slot="dropdown-menu-checkbox-item-indicator"] svg,
+  [data-slot="dropdown-menu-radio-item-indicator"] svg { animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
+}
+@keyframes menu-drop {
+  from { opacity: 0; scale: 0.92; translate: 0 -6px; }
+}
+@keyframes menu-item-in {
+  from { opacity: 0; translate: 0 -4px; }
+}
+
+/* Dialogs spring open (dialog_1); the warning icon gives a small wobble. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot="dialog-content"][data-open] { animation: dialog-in 0.42s cubic-bezier(0.3, 1.35, 0.5, 1); }
+  .dialog-wobble { animation: wobble 0.6s 0.2s ease-in-out; }
+  .mode-icon { animation: mode-spin 0.5s cubic-bezier(0.3, 1.5, 0.5, 1); }
+}
+@keyframes dialog-in {
+  from { opacity: 0; scale: 0.86; }
+  60% { opacity: 1; }
+}
+@keyframes wobble {
+  20% { rotate: -14deg; }
+  45% { rotate: 10deg; }
+  70% { rotate: -5deg; }
+}
+@keyframes mode-spin {
+  from { opacity: 0; rotate: -90deg; scale: 0.5; }
+}
+/* Light/dark: the new look spreads as a circle from the toggle (darkmode_1). */
+html[data-vt-reveal]::view-transition-old(root),
+html[data-vt-reveal]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-vt-reveal]::view-transition-new(root) { animation: theme-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--vt-x) var(--vt-y)); }
+  to { clip-path: circle(var(--vt-r) at var(--vt-x) var(--vt-y)); }
+}
+
+/* Steppers: lines fill toward the next step, the current step breathes (stepper_2). */
+.step-fill { scale: 0 1; }
+.step-fill[data-on] { scale: 1 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .step-fill { transition: scale 0.6s cubic-bezier(0.6, 0, 0.2, 1); }
+  .step-ring { animation: step-ring 2s ease-out 3; }
+  .step-dot { transition: width 0.4s cubic-bezier(0.3, 1.3, 0.5, 1), background-color 0.3s; }
+}
+@keyframes step-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 7px transparent; }
+}
+
+/* One-time code boxes (keypad_1, signup). See components/ui/code-boxes.tsx. */
+.code-boxes-input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; opacity: 0; cursor: text; }
+.code-boxes:focus-within .code-box[data-active] { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 22%, transparent); }
+.code-box[data-filled] { border-color: color-mix(in oklab, var(--primary) 55%, var(--input)); }
+.code-box[data-done] { border-color: var(--primary); background: color-mix(in oklab, var(--primary) 10%, var(--card)); color: var(--primary); }
+.code-box[data-error] { border-color: var(--destructive); }
+@media (prefers-reduced-motion: no-preference) {
+  .code-box { transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s; }
+  .code-digit { animation: pop-in 0.3s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .code-box[data-done] { animation: code-done 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+  .code-box[data-done]:nth-child(2) { animation-delay: 40ms; }
+  .code-box[data-done]:nth-child(3) { animation-delay: 80ms; }
+  .code-box[data-done]:nth-child(4) { animation-delay: 120ms; }
+  .code-box[data-done]:nth-child(5) { animation-delay: 160ms; }
+  .code-box[data-done]:nth-child(6) { animation-delay: 200ms; }
+  .code-shake { animation: shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  /* A field that just failed validation shakes once (signup). */
+  :is(input, textarea)[aria-invalid="true"] { animation: shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+}
+@keyframes code-done {
+  50% { scale: 1.08; }
+}
+@keyframes shake {
+  15%, 85% { translate: -1px 0; }
+  30%, 70% { translate: 3px 0; }
+  45%, 55% { translate: -5px 0; }
+}
+
+/* Chat: the newest message springs up from the composer (send_1); the send
+   arrow takes off when pressed and lands back in place. */
+@media (prefers-reduced-motion: no-preference) {
+  .msg-day:last-child .msg-list > :last-child { animation: msg-in 0.42s cubic-bezier(0.3, 1.3, 0.5, 1); transform-origin: 50% 100%; }
+  .send-btn:not(:disabled):active svg { translate: 3px -3px; rotate: -12deg; }
+  .send-btn svg { transition: translate 0.25s cubic-bezier(0.3, 1.5, 0.5, 1), rotate 0.25s; }
+  .send-btn[aria-busy="true"] svg, .send-btn:disabled svg { animation: send-fly 0.5s cubic-bezier(0.5, 0, 0.3, 1); }
+}
+@keyframes msg-in {
+  from { opacity: 0; translate: 0 18px; scale: 0.94; }
+}
+@keyframes send-fly {
+  40% { translate: 14px -14px; opacity: 0; }
+  41% { translate: -10px 10px; opacity: 0; }
+}
+/* Pull to refresh: the mark launches upward on release (pull_2). */
+.ptr-launch { translate: 0 40px; animation: ptr-launch 0.45s cubic-bezier(0.5, 0, 0.7, 0.3) forwards; }
+@keyframes ptr-launch {
+  20% { translate: 0 48px; }
+  to { translate: 0 -120px; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .ptr-launch { animation: none; } }
+
+/* Onboarding finished (onboarding clip): green floods out from the centre and
+   pulls back; the party icon pops in after it. */
+.welcome-burst { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .welcome-burst {
+    display: block; position: fixed; inset: 0; z-index: 60; pointer-events: none;
+    background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--primary) 85%, white), var(--primary));
+    animation: welcome-burst 1.3s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+  }
+  .welcome-icon { animation: pop-in 0.6s 0.85s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+}
+@keyframes welcome-burst {
+  0% { clip-path: circle(0 at 50% 40%); }
+  45% { clip-path: circle(150% at 50% 40%); opacity: 1; }
+  100% { clip-path: circle(150% at 50% 40%); opacity: 0; visibility: hidden; }
+}

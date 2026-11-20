@@ -101,10 +101,24 @@ export function OnboardingWizard() {
 function Stepper({ current }: { current: number }) {
   const t = useTranslations("Onboarding");
   return (
+    <>
+    {/* Phones: page dots; the current one stretches into a pill (onboarding). */}
+    <ol className="flex items-center gap-1.5 sm:hidden" aria-label={t("progress")}>
+      {STEPS.map((s, i) => (
+        <li key={s} aria-current={i === current ? "step" : undefined} className={cn("step-dot h-2 rounded-full", i === current ? "w-6 bg-primary" : i < current ? "w-2 bg-primary/60" : "w-2 bg-border")}>
+          <span className="sr-only">{t(`step_${s}`)}</span>
+        </li>
+      ))}
+    </ol>
     <ol className="hidden items-center gap-2 sm:flex" aria-label={t("progress")}>
       {STEPS.map((s, i) => (
         <li key={s} className="flex items-center gap-2">
-          {i > 0 && <span className="h-px w-6 bg-border" />}
+          {/* The line fills toward the next step (stepper_2). */}
+          {i > 0 && (
+            <span className="relative h-0.5 w-6 overflow-hidden rounded-full bg-border">
+              <span className="step-fill absolute inset-0 origin-left rounded-full bg-primary" data-on={i <= current || undefined} />
+            </span>
+          )}
           <span
             aria-current={i === current ? "step" : undefined}
             className={cn(
@@ -119,15 +133,17 @@ function Stepper({ current }: { current: number }) {
                 "flex size-5 items-center justify-center rounded-full border text-xs",
                 i <= current ? "border-primary" : "border-border",
                 i < current && "bg-primary text-primary-foreground",
+                i === current && "step-ring",
               )}
             >
-              {i < current ? <Check className="size-3" /> : i + 1}
+              {i < current ? <Check className="pop-in size-3" /> : i + 1}
             </span>
             <span className="hidden md:inline">{t(`step_${s}`)}</span>
           </span>
         </li>
       ))}
     </ol>
+    </>
   );
 }
 
@@ -478,12 +494,14 @@ function DoneStep() {
   ].filter(Boolean) as { href: string; label: string }[];
   return (
     <section className="mx-auto max-w-xl text-center">
-      <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[var(--tone-mint)] text-primary">
+      {/* Finishing: a green wave fills the screen and pulls back to reveal this page (onboarding). */}
+      <div aria-hidden className="welcome-burst" />
+      <span className="welcome-icon mx-auto flex size-16 items-center justify-center rounded-2xl bg-[var(--tone-mint)] text-primary">
         <PartyPopper className="size-8" />
       </span>
       <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">{t("doneTitle")}</h1>
       <p className="mt-2 text-muted-foreground">{t("doneDesc", { name: setup.business.name || "AutoShift" })}</p>
-      <ul className="mt-8 space-y-2 text-left">
+      <ul className="stack-in mt-8 space-y-2 text-left">
         {next.map(({ href, label }) => (
           <li key={href}>
             <Link href={href} className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:border-primary/50">

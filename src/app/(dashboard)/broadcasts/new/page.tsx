@@ -149,7 +149,7 @@ export default function NewBroadcastPage() {
             <div key={step.key} className="flex flex-1 items-center">
               <div className="flex items-center gap-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-all ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-all ${isActive ? 'step-ring ' : ''}${
                     isCompleted
                       ? 'bg-primary text-primary-foreground'
                       : isActive
@@ -157,7 +157,7 @@ export default function NewBroadcastPage() {
                         : 'border border-border bg-muted text-muted-foreground'
                   }`}
                 >
-                  {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
+                  {isCompleted ? <Check className="pop-in h-4 w-4" /> : index + 1}
                 </div>
                 <span
                   className={`hidden text-sm font-medium sm:block ${
@@ -168,11 +168,10 @@ export default function NewBroadcastPage() {
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div
-                  className={`mx-3 h-px flex-1 ${
-                    index < currentStep ? 'bg-primary' : 'bg-muted'
-                  }`}
-                />
+                // The line fills toward the next step (stepper_2).
+                <div className="relative mx-3 h-0.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div className="step-fill absolute inset-0 origin-left rounded-full bg-primary" data-on={index < currentStep || undefined} />
+                </div>
               )}
             </div>
           );

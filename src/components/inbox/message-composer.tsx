@@ -1,5 +1,6 @@
 "use client";
 
+import { ThinkingDots } from "@/components/motion/thinking";
 import {
   useState,
   useRef,
@@ -741,7 +742,7 @@ export function MessageComposer({
             onClick={handleDraft}
           >
             {drafting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <ThinkingDots className="[&_i]:size-1" />
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
@@ -778,9 +779,9 @@ export function MessageComposer({
             gateReason={tGate("reasons.sendMessages")}
             disabled={!text.trim() || sessionExpired || sending}
             onClick={handleSend}
-            className="order-1 h-9 w-9 shrink-0 bg-primary p-0 hover:bg-primary/90 disabled:opacity-40 sm:order-3"
+            className="send-btn order-1 h-9 w-9 shrink-0 bg-primary p-0 hover:bg-primary/90 disabled:opacity-40 sm:order-3"
           >
-            <Send className="h-4 w-4" />
+            <Send key={sending ? "go" : "idle"} className="h-4 w-4" />
           </GatedButton>
         </div>
       )}

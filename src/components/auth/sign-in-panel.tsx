@@ -1,5 +1,6 @@
 "use client";
 
+import { CodeBoxes } from "@/components/ui/code-boxes";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
@@ -104,17 +105,18 @@ export function SignInPanel({ next, onBusy }: { next: string; onBusy?: (busy: bo
           <>
             <div className="flex flex-col gap-2">
               <Label htmlFor="signin-code">{t("codeLabel")}</Label>
-              <Input
-                id="signin-code"
-                ref={codeRef}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={CODE_LENGTH}
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
-                placeholder="123456"
-                className="min-h-11 text-center font-mono text-xl tracking-[0.4em]"
-              />
+              <CodeBoxes value={code} length={CODE_LENGTH} error={error}>
+                <Input
+                  id="signin-code"
+                  ref={codeRef}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={CODE_LENGTH}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
+                  className="code-boxes-input"
+                />
+              </CodeBoxes>
             </div>
             {errorBox}
             <Button type="submit" className="min-h-11 w-full" disabled={busy !== null || code.length !== CODE_LENGTH}>

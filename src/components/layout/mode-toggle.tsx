@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { flushSync } from "react-dom";
 
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
@@ -20,11 +21,30 @@ export function ModeToggle({ className, tip }: { className?: string; /** Show th
   const { mode, toggleMode } = useTheme();
   const goingTo = mode === "dark" ? "light" : "dark";
   const switchLabel = t("switchMode", { mode: goingTo });
+
+  // The new mode spreads out as a circle from the button (darkmode_1).
+  // Browsers without view transitions, or with reduced motion, just switch.
+  const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
+    if (!doc.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      toggleMode();
+      return;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    const root = document.documentElement;
+    root.style.setProperty("--vt-x", `${x}px`);
+    root.style.setProperty("--vt-y", `${y}px`);
+    root.style.setProperty("--vt-r", `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`);
+    root.dataset.vtReveal = "";
+    doc.startViewTransition(() => flushSync(toggleMode)).finished.finally(() => delete root.dataset.vtReveal);
+  };
   
   return (
     <button
       type="button"
-      onClick={toggleMode}
+      onClick={onClick}
       aria-label={switchLabel}
       title={tip ? undefined : switchLabel}
       data-tip={tip ? switchLabel : undefined}
@@ -34,9 +54,9 @@ export function ModeToggle({ className, tip }: { className?: string; /** Show th
       )}
     >
       {mode === "dark" ? (
-        <Moon className="h-5 w-5" />
+        <Moon key="moon" className="mode-icon h-5 w-5" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun key="sun" className="mode-icon h-5 w-5" />
       )}
     </button>
   );

@@ -149,7 +149,7 @@ export function TopUpDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={paying}>
             {t("cancel")}
           </Button>
-          <Button onClick={pay} disabled={paying || tooLow} className="gap-1.5">
+          <Button onClick={pay} disabled={paying || tooLow} data-morph data-busy={paying || undefined} aria-busy={paying || undefined} className="relative gap-1.5">
             {paying && <Loader2 className="size-4 animate-spin" />}
             {t("pay", { amount: formatMoney(total) })}
           </Button>

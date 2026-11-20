@@ -1197,7 +1197,7 @@ export function MessageThread({
               </div>
             )}
             {messageGroups.map((group) => (
-              <div key={group.date}>
+              <div key={group.date} className="msg-day">
                 {/* Date separator */}
                 <div className="mb-4 flex items-center justify-center">
                   <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -1205,7 +1205,7 @@ export function MessageThread({
                   </span>
                 </div>
                 {/* Messages */}
-                <div className="space-y-2">
+                <div className="msg-list space-y-2">
                   {group.messages.map((msg) => {
                     const parent = msg.reply_to_message_id
                       ? messagesById.get(msg.reply_to_message_id)

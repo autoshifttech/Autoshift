@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoMark } from "@/components/brand/logo-mark";
+import { SiteMobileMenu } from "@/components/site/site-mobile-menu";
 
 /*
  * Header and footer for the app-rendered marketing pages (free tools,
@@ -51,6 +52,7 @@ export function SiteHeader() {
           >
             Free audit
           </a>
+          <SiteMobileMenu items={NAV} />
         </div>
       </div>
     </header>

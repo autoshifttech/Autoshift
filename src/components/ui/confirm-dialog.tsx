@@ -36,7 +36,7 @@ export function ConfirmDialog({
             aria-hidden
             className={destructive ? "mb-1 flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive" : "mb-1 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary"}
           >
-            <TriangleAlert className="size-5" />
+            <TriangleAlert className="dialog-wobble size-5" />
           </span>
           <DialogTitle>{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}

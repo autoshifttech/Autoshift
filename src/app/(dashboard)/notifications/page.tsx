@@ -1,5 +1,6 @@
 "use client";
 
+import { SwipeRow } from "@/components/motion/swipe-row";
 import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -197,6 +198,7 @@ export default function NotificationsPage() {
             const isUnread = !n.read_at;
             return (
               <li key={n.id}>
+                <SwipeRow enabled={isUnread} onSwipe={() => markRead(n.id)}>
                 <button
                   type="button"
                   onClick={() => handleClick(n)}
@@ -250,6 +252,7 @@ export default function NotificationsPage() {
                     </p>
                   </div>
                 </button>
+                </SwipeRow>
               </li>
             );
           })}

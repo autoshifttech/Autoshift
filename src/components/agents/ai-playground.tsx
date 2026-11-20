@@ -1,5 +1,6 @@
 'use client';
 
+import { ThinkingDots, ThinkingText } from "@/components/motion/thinking";
 import { useEffect, useRef, useState } from 'react';
 import { toast } from "@/lib/toast";
 import { useTranslations } from 'next-intl';
@@ -156,7 +157,7 @@ export function AiPlayground() {
         {sending && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Bot className="h-5 w-5 text-primary" />
-            <Loader2 className="h-4 w-4 animate-spin" /> {t('thinking')}
+            <ThinkingDots /> <ThinkingText>{t('thinking')}</ThinkingText>
           </div>
         )}
       </div>

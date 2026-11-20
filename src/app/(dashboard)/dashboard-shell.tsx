@@ -10,6 +10,7 @@ import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/l
 import { RailTip } from "@/components/layout/rail-tip";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import { PullToRefresh } from "@/components/motion/pull-to-refresh";
 import { Header } from "@/components/layout/header";
 import { AccountAccessAlert } from "@/components/layout/account-access-alert";
 import { BackendSync } from "@/components/backend-sync";
@@ -109,6 +110,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
               <PageGate>{children}</PageGate>
             </PageMotion>
             <ScrollReveal rootId="app-scroll" />
+            <PullToRefresh rootId="app-scroll" />
           </main>
         </div>
       </div>

@@ -114,7 +114,7 @@ function NavBadges({ href, active, counts }: { href: string; active: boolean; co
   const { totalUnread } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
-      <span aria-label={t("unreadConversations", { count: totalUnread })} className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">
+      <span key={totalUnread} aria-label={t("unreadConversations", { count: totalUnread })} className="badge-pop absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">
         {totalUnread > 9 ? "9+" : totalUnread}
       </span>
     );

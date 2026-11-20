@@ -7,6 +7,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { NotificationHost } from "@/components/notification-host";
 import { LiquidGlassDefs } from "@/components/motion/liquid-glass-defs";
+import { MicroMotion } from "@/components/motion/micro-motion";
 import {
   DEFAULT_MODE,
   DEFAULT_THEME,
@@ -129,6 +130,7 @@ export default async function RootLayout({
             {children}
             <NotificationHost />
             <LiquidGlassDefs />
+            <MicroMotion />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

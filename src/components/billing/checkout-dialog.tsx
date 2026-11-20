@@ -146,7 +146,10 @@ export function CheckoutDialog({
           <Button
             onClick={pay}
             disabled={paying || paid || (tried && !valid)}
-            className={cn("gap-1.5 transition-colors", paid && "bg-[#1e6b3a] text-white disabled:opacity-100")}
+            data-morph
+            data-busy={paying || undefined}
+            aria-busy={paying || undefined}
+            className={cn("relative gap-1.5 transition-colors", paid && "bg-[#1e6b3a] text-white disabled:opacity-100")}
           >
             {paid ? (
               <span key="paid" className="pop-in inline-flex items-center gap-1.5">

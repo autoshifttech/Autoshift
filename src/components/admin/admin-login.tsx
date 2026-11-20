@@ -1,5 +1,6 @@
 "use client";
 
+import { CodeBoxes } from "@/components/ui/code-boxes";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -236,17 +237,18 @@ export function AdminLogin() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-code">{t("codeLabel")}</Label>
-                <Input
-                  id="admin-code"
-                  ref={codeRef}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={CODE_LENGTH}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
-                  placeholder="123456"
-                  className="min-h-11 text-center font-mono text-xl tracking-[0.4em]"
-                />
+                <CodeBoxes value={code} length={CODE_LENGTH} error={error}>
+                  <Input
+                    id="admin-code"
+                    ref={codeRef}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={CODE_LENGTH}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))}
+                    className="code-boxes-input"
+                  />
+                </CodeBoxes>
               </div>
               {error && (
                 <p className="text-sm text-rose-700 dark:text-rose-400" role="alert">

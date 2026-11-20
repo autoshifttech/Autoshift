@@ -1,5 +1,6 @@
 "use client";
 
+import { CodeBoxes } from "@/components/ui/code-boxes";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -141,17 +142,18 @@ function VerifyPhone() {
                 <Label htmlFor="vp-code" className="text-muted-foreground">
                   {t("codeLabel")}
                 </Label>
-                <Input
-                  id="vp-code"
-                  ref={codeRef}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={4}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="1010"
-                  className={`${field} text-center font-mono text-xl tracking-[0.5em]`}
-                />
+                <CodeBoxes value={code} length={4} error={error}>
+                  <Input
+                    id="vp-code"
+                    ref={codeRef}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={4}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    className="code-boxes-input"
+                  />
+                </CodeBoxes>
               </div>
             )}
 
