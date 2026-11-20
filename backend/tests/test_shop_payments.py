@@ -144,3 +144,13 @@ def test_paid_stage_in_another_language(client, world, shop):
     payload = {"payment_link": {"entity": {"id": "plink_1"}}, "payment": {"entity": {"id": "pay_9", "amount": 149800}}}
     assert hook(client, shop["conn"]["id"], "payment_link.paid", payload).json()["status"] == "processed"
     assert world.rows("deals")[0]["stage_id"] == "st_paid"
+
+
+def test_text_sent_to_the_provider_has_no_emoji(client, world, shop):
+    # Razorpay refuses emoji: a customised order's message ("I like you 💕") broke the link.
+    assert shop_payments.provider_text("1 × Letter (I like you 💕)") == "1 × Letter (I like you)"
+    assert shop_payments.provider_text("Gift (💕) for 🌙 MP") == "Gift for MP"
+    res = make_link(client, shop, world, description="Order #9: 1 × Letter (I like you 💕)", customer_name="MP 🌙")
+    assert res.status_code == 201, res.text
+    _, _, sent = shop["calls"][0]
+    assert sent["description"] == "Order #9: 1 × Letter (I like you)" and sent["customer"]["name"] == "MP"

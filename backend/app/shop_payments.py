@@ -42,6 +42,15 @@ class PaymentLinkError(Exception):
         self.status, self.message = status, message
 
 
+def provider_text(value: str | None) -> str:
+    """Text a payment provider accepts: no emoji or other characters outside the basic plane (Razorpay
+    refuses them), no control characters, single spaces. A customised order's message keeps its emoji in
+    the order itself; only the copy sent to the provider is cleaned."""
+    kept = "".join(ch for ch in str(value or "") if ord(ch) <= 0xFFFF and (ch.isprintable() or ch == " ") and not 0xFE00 <= ord(ch) <= 0xFE0F and ord(ch) != 0x200D)
+    text = " ".join(kept.split()).replace("( ", "(").replace(" )", ")")
+    return " ".join(text.replace("()", "").split())
+
+
 def to_paise(amount: str | float) -> int:
     """'1,498.50', '₹ 999' or 999 → paise. Raises PaymentLinkError for anything else."""
     raw = re.sub(r"[^\d.]", "", str(amount))
@@ -109,7 +118,8 @@ async def create_link(
     paise = to_paise(amount)
     conn, keys = await connection_keys(sdb, settings, account_id, connection_id)
     row_id = str(uuid.uuid4())
-    description = (description or "Order payment").strip()[:2000]
+    description = (provider_text(description) or "Order payment")[:2000]
+    customer_name = provider_text(customer_name) or None
     expire = datetime.now(timezone.utc) + timedelta(hours=LINK_HOURS)
     notes = {"autoshift_account": account_id, "autoshift_payment": row_id}
 
