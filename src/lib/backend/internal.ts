@@ -98,6 +98,32 @@ export interface PaymentLinkResult {
 }
 
 /**
+ * The inbox's ✨ button: the business's AI assistant suggests a reply for a person to edit and send
+ * (platform AI, charged like one AI reply; never hands off, never places an order). Null when the
+ * backend isn't reachable.
+ */
+export async function assistantDraft(args: { accountId: string; assistantId: string; message: string; history: { role: 'user' | 'assistant'; content: string }[]; contactId?: string | null; conversationId?: string }): Promise<AssistantReply | null> {
+  const c = config()
+  if (!c) return null
+  try {
+    const res = await fetch(`${c.url}/v1/internal/ai-draft`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-AutoShift-Internal': c.secret },
+      body: JSON.stringify({ account_id: args.accountId, assistant_id: args.assistantId, message: args.message.slice(0, 4000), history: args.history.slice(-40), contact_id: args.contactId ?? null, conversation_id: args.conversationId ?? null }),
+      signal: AbortSignal.timeout(50000),
+    })
+    if (!res.ok) {
+      console.error('[backend] ai-draft refused:', res.status)
+      return null
+    }
+    return (await res.json()) as AssistantReply
+  } catch (err) {
+    console.error('[backend] ai-draft failed:', err)
+    return null
+  }
+}
+
+/**
  * A Razorpay payment link (and optional UPI QR picture) on the business's own Razorpay account, for
  * a flow's payment step. Throws with the backend's reason so the flow can take its "if it fails" exit.
  */

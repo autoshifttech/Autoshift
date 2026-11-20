@@ -3363,7 +3363,14 @@
         "savedIndexFailed": "Saved, but semantic indexing failed ({message}). Lexical search still works; use Reindex to retry.",
         "savedNotIndexed": "Saved, but indexing failed ({message}). The document is not searchable yet; use Reindex to retry.",
         "savedKeywordOnly": "Saved with keyword search only — your embeddings key could not be decrypted (check ENCRYPTION_KEY, then re-enter the key)."
-      }
+      },
+      "noAssistant": "Create an AI assistant first (AI Agents), then ✨ can draft replies.",
+      "noModel": "No AI model is switched on yet. Ask AutoShift support.",
+      "noFunds": "Your wallet is empty. Add credits to use AI drafts.",
+      "planLimit": "This month's AI replies on your plan are used up.",
+      "businessOff": "This business is suspended.",
+      "draftFailed": "The AI couldn't write a draft. Try again.",
+      "draftUnavailable": "The AI service isn't reachable right now. Try again in a minute."
     },
     "automations": {
       "copyName": "{name} (Copy)",

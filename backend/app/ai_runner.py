@@ -129,12 +129,14 @@ async def resolve_model(sdb: Db, assistant: dict) -> tuple[str, str, str] | None
     return models[0] if models else None
 
 
-async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict], message: str, ref: str, *, live: bool = True, recent_ai_replies: int | None = None, contact_id: str | None = None) -> Reply:
+async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict], message: str, ref: str, *, live: bool = True, recent_ai_replies: int | None = None, contact_id: str | None = None, draft: bool = False) -> Reply:
     """history: earlier turns [{"role": "user"|"assistant", "content": str}].
-    live=False is the preview in the app: it ignores the on/off switch."""
-    if live and not assistant.get("enabled"):
+    live=False is the preview in the app: it ignores the on/off switch.
+    draft=True is the inbox's ✨ button: a suggestion for a person to edit and send, so it never hands
+    off, ignores the reply limit, and its order or booking markers are dropped (nothing is placed)."""
+    if live and not draft and not assistant.get("enabled"):
         return Reply("off", reason="This assistant is switched off")
-    handoff = assistant.get("handoff") or {}
+    handoff = {"onRequest": False, "maxReplies": 10**9} if draft else (assistant.get("handoff") or {})
     if handoff.get("onRequest", True) and HUMAN_WORDS.search(message):
         return Reply("handoff", reason="The customer asked for a person")
     # The limit stops endless loops in one conversation: it counts the AI's replies in the last 24
@@ -200,6 +202,9 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         text, order = shop_orders.extract(text)
     if booking.booking_on(assistant):
         text, book = booking.extract(text)
+    if draft:
+        order = book = None
+        text = text.replace(UNSURE_MARKER, "").strip()
     if not text and order is None and book is None:
         return Reply("failed", reason="The model sent an empty reply")
     if UNSURE_MARKER in text:

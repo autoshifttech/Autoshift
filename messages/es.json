@@ -3363,7 +3363,14 @@
         "savedIndexFailed": "Guardado, pero la indexación semántica falló ({message}). La búsqueda por palabras clave sigue funcionando; usa Reindexar para reintentar.",
         "savedNotIndexed": "Guardado, pero la indexación falló ({message}). El documento aún no aparece en las búsquedas; usa Reindexar para reintentar.",
         "savedKeywordOnly": "Guardado solo con búsqueda por palabras clave: no se pudo descifrar tu clave de embeddings (revisa ENCRYPTION_KEY y vuelve a ingresar la clave)."
-      }
+      },
+      "noAssistant": "Primero crea un asistente de IA (Agentes de IA); luego ✨ podrá sugerir respuestas.",
+      "noModel": "Aún no hay ningún modelo de IA activo. Contacta con el soporte de AutoShift.",
+      "noFunds": "Tu monedero está vacío. Añade créditos para usar las sugerencias de IA.",
+      "planLimit": "Se agotaron las respuestas de IA de tu plan este mes.",
+      "businessOff": "Esta empresa está suspendida.",
+      "draftFailed": "La IA no pudo escribir una sugerencia. Inténtalo de nuevo.",
+      "draftUnavailable": "El servicio de IA no está disponible ahora. Inténtalo en un minuto."
     },
     "automations": {
       "copyName": "{name} (Copia)",

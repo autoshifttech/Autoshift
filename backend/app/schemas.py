@@ -434,6 +434,15 @@ class InternalPaymentLink(BaseModel):
     send_qr: bool = False
 
 
+class InternalAiDraft(BaseModel):
+    account_id: str
+    assistant_id: str
+    message: str = Field(min_length=1, max_length=4000)
+    history: list[dict] = Field(default_factory=list, max_length=40)
+    contact_id: str | None = None
+    conversation_id: str | None = None
+
+
 class InternalGoogleAction(BaseModel):
     account_id: str
     connection_id: str | None = None

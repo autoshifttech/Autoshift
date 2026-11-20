@@ -108,3 +108,20 @@ def test_only_super_admins_flip_the_meta_fees_switch(client, world):
     assert client.put("/v1/platform/settings/meta-fees", json={"billed_to": "autoshift"}, headers=world.headers("staff_super")).json() == {"meta_fees_billed_to": "autoshift"}
     assert client.get("/v1/platform/settings", headers=world.headers("staff_support")).json()["meta_fees_billed_to"] == "autoshift"
     assert any(a["action"] == "settings.meta_fees" for a in world.rows("audit_log"))
+
+
+async def test_ai_draft_suggests_without_handoff_or_sending(client, world, internal, settings, llm):
+    p = next(p for p in world.rows("platform_ai_providers") if p["vendor"] == "openai")
+    p.update(enabled=True, key_ciphertext=encrypt("sk-live-1234", settings), key_tail="1234")
+    await wallet.apply(world.service, world.acct_a, 1000, "topup", "t", "fund-draft")
+    # A switched-off assistant still drafts: the person decides what to send.
+    aid = client.post("/v1/assistants", json={"name": "Sam", "provider": "openai", "model_id": "gpt-5.5", "enabled": False}, headers=world.headers("admin_a")).json()["id"]
+    body = {"account_id": world.acct_a, "assistant_id": aid, "message": "talk to a human please", "history": [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "Hello!"}]}
+    out = client.post("/v1/internal/ai-draft", json=body, headers=internal).json()
+    assert out["status"] == "reply" and out["text"] and out["balance_paise"] == 975
+    assert "order" not in out and "booking" not in out
+    # each draft is its own charge
+    again = client.post("/v1/internal/ai-draft", json=body, headers=internal).json()
+    assert again["balance_paise"] == 950
+    assert client.post("/v1/internal/ai-draft", json={**body, "account_id": world.acct_b}, headers=internal).status_code == 404
+    assert client.post("/v1/internal/ai-draft", json=body, headers=world.headers("owner_a")).status_code == 401

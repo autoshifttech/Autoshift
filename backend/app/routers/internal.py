@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from .. import ai_runner, audit, booking, events, google_api, pages, platform_settings, shop_orders, shop_payments, wallet
 from ..config import Settings, get_settings
 from ..deps import Bridge, ServiceDb, get_llm
-from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalEvent, InternalGoogleAction, InternalPaymentLink
+from ..schemas import InternalAiReply, InternalCanSend, InternalCharge, InternalAiDraft, InternalEvent, InternalGoogleAction, InternalPaymentLink
 
 router = APIRouter(prefix="/v1/internal", tags=["internal"], include_in_schema=False)
 LOW_BALANCE_PAISE = 20000  # ₹200: tell the business (and their automations) the wallet is running low
@@ -110,6 +110,31 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
         added, order = await shop_orders.place(sdb, settings, assistant=rows[0], products=products, req=out.order, conversation_id=body.conversation_id, contact_id=body.contact_id, customer_phone=body.customer_phone)
         result["text"] = "\n\n".join(t for t in (result["text"], added) if t)
         result["order"] = {"id": order["id"], "number": order["number"]} if order else None
+    return result
+
+
+@router.post("/ai-draft")
+async def ai_draft(body: InternalAiDraft, _: Internal, sdb: ServiceDb, settings: Annotated[Settings, Depends(get_settings)], llm: Annotated[object, Depends(get_llm)]):
+    """The inbox's ✨ button: the assistant's suggested reply for a person to edit and send. Same model,
+    knowledge and product list as the live replies; charged like one AI reply; nothing is sent or placed."""
+    import uuid
+
+    acct = await _account(sdb, body.account_id)
+    if acct.get("status") == "suspended":
+        return {"status": "off", "text": "", "reason": "The business is suspended", "balance_paise": None}
+    rows = await sdb.select("assistants", {"id": body.assistant_id, "account_id": body.account_id}, limit=1)
+    if not rows:
+        raise HTTPException(404, "Assistant not found")
+    history = [{"role": h.get("role"), "content": str(h.get("content", ""))[:4000]} for h in body.history if h.get("role") in ("user", "assistant")]
+    assistant = rows[0]
+    if booking.booking_on(assistant) and "appointments" not in pages.enabled(acct):
+        assistant = {**assistant, "booking": {"enabled": False}}
+    if shop_orders.shop_on(assistant) and "orders" not in pages.enabled(acct):
+        assistant = {**assistant, "shop": {**(assistant.get("shop") or {}), "enabled": False}}
+    out = await ai_runner.reply(sdb, llm, settings, assistant, history, body.message, ref=f"draft:{uuid.uuid4()}", contact_id=body.contact_id, draft=True)
+    result = asdict(out)
+    result.pop("order", None)
+    result.pop("booking", None)
     return result
 
 

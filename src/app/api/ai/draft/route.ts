@@ -11,6 +11,7 @@ import { logAiUsage } from '@/lib/ai/usage'
 import { supabaseAdmin } from '@/lib/ai/admin-client'
 import { AiError } from '@/lib/ai/types'
 import { getT } from '@/lib/i18n/translate'
+import { assistantDraft, internalConfigured } from '@/lib/backend/internal'
 
 const t = getT('Api')
 
@@ -20,7 +21,8 @@ const t = getT('Api')
  * Body: { conversation_id }
  * Returns: { draft } — a suggested reply for the agent to edit + send.
  *
- * Uses the account's configured provider/key (BYO). Read-only: it never
+ * Drafts with the business's AI assistant (AutoShift's AI, charged to the wallet like one AI reply)
+ * when the backend is connected; otherwise with the older own-key AI settings. Read-only: it never
  * sends or stores anything, just hands text back to the composer.
  */
 export async function POST(request: Request) {
@@ -60,6 +62,8 @@ export async function POST(request: Request) {
     if (!conversation) {
       return NextResponse.json({ error: t('common.conversationNotFound') }, { status: 404 })
     }
+
+    if (internalConfigured()) return draftWithAssistant(supabase, accountId, conversationId)
 
     const config = await loadAiConfig(supabase, accountId).catch((err) => {
       // Decrypt failure — surface distinctly from "not configured".
@@ -139,4 +143,33 @@ export async function POST(request: Request) {
     }
     return toErrorResponse(err)
   }
+}
+
+type Db = Awaited<ReturnType<typeof requireRole>>['supabase']
+
+/** The assistant that answers this business's chats: the first switched-on one, else the first one. */
+async function draftWithAssistant(supabase: Db, accountId: string, conversationId: string): Promise<Response> {
+  const { data: assistants } = await supabase
+    .from('assistants')
+    .select('id, enabled')
+    .eq('account_id', accountId)
+    .order('created_at', { ascending: true })
+    .limit(20)
+  const assistant = (assistants ?? []).find((a) => a.enabled) ?? (assistants ?? [])[0]
+  if (!assistant) return NextResponse.json({ error: t('ai.noAssistant'), code: 'no_assistant' }, { status: 400 })
+
+  const messages = await buildConversationContext(supabase, conversationId)
+  const message = latestUserMessage(messages)
+  if (messages.length === 0 || !message) {
+    return NextResponse.json({ error: t('ai.noMessages'), code: 'no_messages' }, { status: 400 })
+  }
+  const lastUser = messages.map((m) => m.role).lastIndexOf('user')
+  const history = messages.slice(0, lastUser).map((m) => ({ role: m.role === 'user' ? ('user' as const) : ('assistant' as const), content: m.content }))
+  const { data: conv } = await supabase.from('conversations').select('contact_id').eq('id', conversationId).maybeSingle()
+
+  const out = await assistantDraft({ accountId, assistantId: assistant.id as string, message, history, contactId: (conv?.contact_id as string | null) ?? null, conversationId })
+  if (!out) return NextResponse.json({ error: t('ai.draftUnavailable'), code: 'backend_down' }, { status: 502 })
+  if (out.status === 'reply' && out.text.trim()) return NextResponse.json({ draft: out.text.trim() })
+  const known: Record<string, string> = { no_model: 'ai.noModel', no_funds: 'ai.noFunds', plan_limit: 'ai.planLimit', off: 'ai.businessOff' }
+  return NextResponse.json({ error: t(known[out.status] ?? 'ai.draftFailed'), code: out.status }, { status: out.status === 'no_funds' ? 402 : 400 })
 }
