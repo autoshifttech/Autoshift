@@ -137,7 +137,7 @@ async def update_order(order_id: uuid.UUID, body: OrderAction, ctx: AgentMember,
             # The new link as a "Pay ₹…" button; the plain link below if WhatsApp refuses it.
             try:
                 await bridge.call("send_pay_button", ctx.account_id, ctx.user.id, ctx.role, conversation_id=order["conversation_id"],
-                                  text=f"{shop_orders.words(await _shop_of(sdb, order))['order_ref'].format(n=order['number'])}\n\n{pay['text']}", button=pay["label"], url=pay["url"])
+                                  text=f"{shop_orders.words(await _shop_of(sdb, order))['order_ref'].format(n=order['number'])}\n{pay['text']}", button=pay["label"], url=pay["url"])
                 notified, via = True, "button"
             except Exception as exc:  # noqa: BLE001
                 logging.getLogger("autoshift.orders").warning("pay button refused for order %s: %s", order_id, exc)

@@ -80,10 +80,10 @@ SHOW_ALL_PRODUCTS = 150  # a list this size fits the prompt whole, so the assist
 
 # How every reply is laid out: plain WhatsApp text, no asterisks or Markdown symbols.
 WHATSAPP_FORMAT = (
-    "Write like a professional, friendly shop team member, formatted for WhatsApp: a short greeting or acknowledgement, "
-    "then the answer in short paragraphs separated by a blank line, and \"• \" at the start of list lines. When you suggest "
-    "products, list each as \"• Product name — ₹price\" with one short line about it underneath. End with one clear question "
-    "or next step. Never use asterisks (*), underscores for emphasis, Markdown headings (#) or tables."
+    "Keep every reply short and clear, like a professional shop team member on WhatsApp: 2 to 4 short lines, no long "
+    "paragraphs, no repeating what the customer said. When you suggest products, give at most 3, one line each: "
+    "\"• Product name — ₹price\". End with one short question or next step. Never use asterisks (*), underscores for "
+    "emphasis, Markdown headings (#) or tables."
 )
 
 
