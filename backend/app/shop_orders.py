@@ -44,6 +44,7 @@ STATUSES = ("new", "packed", "shipped", "delivered", "cancelled")
 # What AutoShift itself writes to the customer, in the shop's language.
 TEXT: dict[str, dict[str, str]] = {
     "en": {
+        "pay_prompt": "💳 Pay ₹{total} securely (UPI, cards, net banking). The link works for 24 hours.", "b_pay": "Pay ₹{total}",
         "b_online": "Pay online", "b_cod": "Cash on delivery", "b_confirm": "Confirm order", "b_change": "Change order",
         "order": "🧾 Order #{n}", "delivery": "Delivery", "free": "Free", "total": "Total", "deliver_to": "Deliver to",
         "pay_link": "💳 Pay securely here (UPI, cards, net banking): {url}\nThe link works for 24 hours.",
@@ -63,6 +64,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Here is a new payment link for order #{n} (₹{total}): {url}\nThe link works for 24 hours.",
     },
     "pt": {
+        "pay_prompt": "💳 Pague ₹{total} com segurança (UPI, cartões, internet banking). O link vale por 24 horas.", "b_pay": "Pagar ₹{total}",
         "b_online": "Pagar online", "b_cod": "Pagar na entrega", "b_confirm": "Confirmar pedido", "b_change": "Alterar pedido",
         "order": "🧾 Pedido nº {n}", "delivery": "Entrega", "free": "Grátis", "total": "Total", "deliver_to": "Entregar para",
         "pay_link": "💳 Pague com segurança aqui (UPI, cartões, internet banking): {url}\nO link vale por 24 horas.",
@@ -82,6 +84,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aqui está um novo link de pagamento do pedido nº {n} (₹{total}): {url}\nO link vale por 24 horas.",
     },
     "es": {
+        "pay_prompt": "💳 Paga ₹{total} de forma segura (UPI, tarjetas, banca en línea). El enlace vale 24 horas.", "b_pay": "Pagar ₹{total}",
         "b_online": "Pagar en línea", "b_cod": "Contra entrega", "b_confirm": "Confirmar pedido", "b_change": "Cambiar pedido",
         "order": "🧾 Pedido n.º {n}", "delivery": "Envío", "free": "Gratis", "total": "Total", "deliver_to": "Entregar a",
         "pay_link": "💳 Paga de forma segura aquí (UPI, tarjetas, banca en línea): {url}\nEl enlace vale 24 horas.",
@@ -101,6 +104,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aquí tienes un nuevo enlace de pago del pedido n.º {n} (₹{total}): {url}\nEl enlace vale 24 horas.",
     },
     "ko": {
+        "pay_prompt": "💳 ₹{total}을(를) 안전하게 결제하세요 (UPI, 카드, 인터넷 뱅킹). 링크는 24시간 동안 유효합니다.", "b_pay": "₹{total} 결제",
         "b_online": "온라인 결제", "b_cod": "착불 결제", "b_confirm": "주문 확인", "b_change": "주문 변경",
         "order": "🧾 주문 #{n}", "delivery": "배송비", "free": "무료", "total": "합계", "deliver_to": "배송지",
         "pay_link": "💳 여기에서 안전하게 결제하세요 (UPI, 카드, 인터넷 뱅킹): {url}\n링크는 24시간 동안 유효합니다.",
@@ -183,6 +187,7 @@ def instructions(shop: dict) -> str:
         "6. Only after they clearly confirm, end your reply with one line in exactly this form, and nothing after it:",
         '[ORDER]{"items":[{"code":"P001","qty":2,"option":"M"},{"code":"P007","qty":1,"option":"Black"}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',
         'Put the chosen size or colour in "option" ("" when the product has none). One item per code and option.',
+        "Never show product codes to the customer: call every product by its name. Codes are only for the [ORDER] line.",
         "Use only codes from the product list. Never change a price, never give a discount, never write a payment link "
         "yourself: AutoShift adds the order summary and the payment link to your reply. When you place the order, write one short "
         "sentence only (no list of items, no totals): the summary follows it.",
@@ -323,7 +328,7 @@ def summary(shop: dict, order: dict, *, link_failed: bool = False) -> str:
     w = words(shop)
     lines = [w["order"].format(n=order.get("number", "—"))]
     for i in order["items"]:
-        lines.append(f"{i['qty']} × {item_label(i)} ({i['code']}) — ₹{rs(i['total_paise'])}")
+        lines.append(f"{i['qty']} × {item_label(i)} — ₹{rs(i['total_paise'])}")  # names only: codes are for the shop
     lines.append(f"{w['delivery']} — " + (f"₹{rs(order['delivery_paise'])}" if order["delivery_paise"] else w["free"]))
     lines.append(f"*{w['total']}: ₹{rs(order['total_paise'])}*")
     lines.append(f"{w['deliver_to']}: {order['customer_name']}, {order['address']}")
@@ -338,6 +343,16 @@ def summary(shop: dict, order: dict, *, link_failed: bool = False) -> str:
 
 
 # ------------------------------------------------------------------ placing it
+def pay_button(shop: dict, order: dict) -> dict | None:
+    """For an unpaid online order: a WhatsApp button that opens the payment link (the web app sends it after
+    the summary). None when there's nothing to pay online."""
+    if order.get("payment_method") != "online" or not order.get("payment_url") or order.get("payment_status") == "paid":
+        return None
+    w, total = words(shop), rs(int(order["total_paise"]))
+    return {"url": order["payment_url"], "label": w["b_pay"].format(total=total)[:20], "text": w["pay_prompt"].format(total=total),
+            "link_line": w["pay_link"].format(url=order["payment_url"])}
+
+
 def item_label(item: dict) -> str:
     return f"{item['name']} ({item['option']})" if item.get("option") else item["name"]
 

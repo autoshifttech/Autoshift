@@ -110,6 +110,9 @@ async def ai_reply(body: InternalAiReply, _: Internal, sdb: ServiceDb, bridge: B
         added, order = await shop_orders.place(sdb, settings, assistant=rows[0], products=products, req=out.order, conversation_id=body.conversation_id, contact_id=body.contact_id, customer_phone=body.customer_phone)
         result["text"] = "\n\n".join(t for t in (result["text"], added) if t)
         result["order"] = {"id": order["id"], "number": order["number"]} if order else None
+        # The payment link as a "Pay ₹…" button: the web app sends it after the summary, and drops the
+        # link line from the summary only when the button really went out (the line stays as fallback).
+        result["pay_button"] = shop_orders.pay_button(rows[0].get("shop") or {}, order) if order else None
     return result
 
 

@@ -1,4 +1,5 @@
 import {
+  sendCtaUrl,
   sendInteractiveButtons,
   sendInteractiveList,
   sendMediaMessage,
@@ -354,9 +355,31 @@ export async function engineSendInteractiveList(
   return sendInteractiveViaMeta({ ...args, kind: 'list' })
 }
 
+interface SendCtaUrlEngineArgs {
+  accountId: string
+  userId: string
+  conversationId: string
+  contactId: string
+  bodyText: string
+  buttonText: string
+  url: string
+  aiGenerated?: boolean
+}
+
+/**
+ * Send text with one button that opens a link (the shop's "Pay ₹…" button). Saved in the inbox as a
+ * text message with the link under it, so the thread reads the same as what the customer got.
+ */
+export async function engineSendCtaUrl(
+  args: SendCtaUrlEngineArgs,
+): Promise<{ whatsapp_message_id: string }> {
+  return sendInteractiveViaMeta({ ...args, kind: 'cta' })
+}
+
 type SendInput =
   | (SendInteractiveButtonsEngineArgs & { kind: 'buttons' })
   | (SendInteractiveListEngineArgs & { kind: 'list' })
+  | (SendCtaUrlEngineArgs & { kind: 'cta' })
 
 async function sendInteractiveViaMeta(
   input: SendInput,
@@ -396,6 +419,10 @@ async function sendInteractiveViaMeta(
   )
 
   const attempt = async (phone: string): Promise<string> => {
+    if (input.kind === 'cta') {
+      const r = await sendCtaUrl({ phoneNumberId, accessToken, to: phone, bodyText: input.bodyText, buttonText: input.buttonText, url: input.url })
+      return r.messageId
+    }
     if (input.kind === 'buttons') {
       const r = await sendInteractiveButtons({
         phoneNumberId,
@@ -457,6 +484,26 @@ async function sendInteractiveViaMeta(
   // when their reply arrives. We DO persist the structured payload so
   // the inbox thread re-renders the buttons/rows the bot sent (round-
   // trip), matching the composer + automation send paths.
+  if (input.kind === 'cta') {
+    const text = `${input.bodyText}\n${input.url}`
+    const { error: ctaErr } = await db.from('messages').insert({
+      conversation_id: input.conversationId,
+      sender_type: 'bot',
+      content_type: 'text',
+      content_text: text,
+      message_id: waMessageId,
+      status: 'sent',
+      ai_generated: input.aiGenerated ?? false,
+    })
+    if (ctaErr) throw new Error(t('send.dbInsertFailed', { message: ctaErr.message }))
+    await db
+      .from('conversations')
+      .update({ last_message_text: input.bodyText, last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', input.conversationId)
+      .eq('account_id', input.accountId)
+    return { whatsapp_message_id: waMessageId }
+  }
+
   const interactivePayload: InteractiveMessagePayload =
     input.kind === 'buttons'
       ? {

@@ -1040,6 +1040,51 @@ export async function sendInteractiveButtons(
   return { messageId: data.messages[0].id }
 }
 
+export interface SendCtaUrlArgs {
+  phoneNumberId: string
+  accessToken: string
+  to: string
+  /** The text above the button (≤ 1024 chars). */
+  bodyText: string
+  /** The button's label (≤ 20 chars), e.g. "Pay ₹1,503". */
+  buttonText: string
+  /** What the button opens (https). */
+  url: string
+}
+
+/**
+ * Send a "call to action URL" message: text with one button that opens a link (Meta's `cta_url`
+ * interactive type). Used for the shop's "Pay ₹…" button, so the customer doesn't copy a link.
+ */
+export async function sendCtaUrl(args: SendCtaUrlArgs): Promise<MetaSendResult> {
+  const { phoneNumberId, accessToken, to, bodyText, buttonText, url } = args
+  validateInteractiveBody(bodyText)
+  if (!buttonText || buttonText.length > INTERACTIVE_LIMITS.buttonTitleMaxLength) {
+    throw new Error(ti('buttonTitleTooLong', { title: buttonText, max: INTERACTIVE_LIMITS.buttonTitleMaxLength }))
+  }
+  if (!/^https:\/\//i.test(url)) throw new Error('The button link must start with https://')
+  const body = {
+    messaging_product: 'whatsapp',
+    ...recipientFields(to),
+    type: 'interactive',
+    interactive: {
+      type: 'cta_url',
+      body: { text: bodyText },
+      action: { name: 'cta_url', parameters: { display_text: buttonText, url } },
+    },
+  }
+  const response = await fetch(`${META_API_BASE}/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    await throwMetaError(response, `Meta API error: ${response.status}`)
+  }
+  const data = await response.json()
+  return { messageId: data.messages[0].id }
+}
+
 export interface InteractiveListRow {
   /** Stable id sent back in the webhook when tapped (≤ 200 chars). */
   id: string

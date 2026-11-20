@@ -62,6 +62,9 @@ export interface AssistantReply {
   order?: { id: string; number: number } | null
   /** Tap-buttons to send under the reply (WhatsApp reply buttons; 3 at most). */
   buttons?: string[]
+  /** An unpaid online order: a "Pay ₹…" button that opens the payment link (sent after the summary).
+   * `link_line` is the summary's link line, left out when the button goes out. */
+  pay_button?: { url: string; label: string; text: string; link_line: string } | null
 }
 
 /**

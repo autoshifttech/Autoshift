@@ -8,6 +8,7 @@ import { buildHandoffSummary } from './handoff'
 import { logAiUsage } from './usage'
 import { latestUserMessage } from './query'
 import {
+  engineSendCtaUrl,
   engineSendInteractiveButtons,
   engineSendText,
   loadAccountMetaCredentials,
@@ -355,12 +356,39 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
   }
   // A newer message will get its own reply, except when this one placed an order: its summary and payment link must arrive.
   if (!out.order && inboundMessageId && (await hasNewerInbound(db, conversationId, inboundMessageId))) return
+  if (out.order && out.pay_button) {
+    await sendOrderWithPayButton({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, pay: out.pay_button })
+    return
+  }
   const buttons = (out.buttons ?? []).filter((b) => b.trim()).slice(0, 3)
   if (buttons.length > 0 && !out.order) {
     await sendWithButtons({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, buttons })
     return
   }
   await engineSendText({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, aiGenerated: true })
+}
+
+/**
+ * The order summary, then the payment link as a "Pay ₹…" button. When WhatsApp refuses the button, the
+ * summary goes out with the link written in it instead (as before the button existed).
+ */
+async function sendOrderWithPayButton(args: {
+  accountId: string
+  userId: string
+  conversationId: string
+  contactId: string
+  text: string
+  pay: { url: string; label: string; text: string; link_line: string }
+}): Promise<void> {
+  const { text, pay, ...who } = args
+  const summary = text.replace(pay.link_line, '').replace(/\n{3,}/g, '\n\n').trim()
+  await engineSendText({ ...who, text: summary, aiGenerated: true })
+  try {
+    await engineSendCtaUrl({ ...who, bodyText: pay.text, buttonText: pay.label, url: pay.url, aiGenerated: true })
+  } catch (err) {
+    console.warn('[ai auto-reply] pay button refused, sending the link as text:', err)
+    await engineSendText({ ...who, text: pay.link_line, aiGenerated: true })
+  }
 }
 
 /** Ids of AI tap-buttons start with this, so the webhook sends their taps back to the AI. */
