@@ -566,7 +566,7 @@ function WizardSteps({
         ) : (
           <Button className="h-10 rounded-full px-5 text-sm" onClick={() => go(step + 1)}>
             {t("wizardNext")}
-            <ArrowRight className="size-4" />
+            <ArrowRight data-nudge className="size-4" />
           </Button>
         )}
       </div>

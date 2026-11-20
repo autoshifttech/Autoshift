@@ -514,7 +514,7 @@ export function Step2SelectAudience({
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {t('next')}
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight data-nudge className="h-4 w-4" />
         </Button>
       </div>
     </div>

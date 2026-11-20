@@ -7,19 +7,21 @@ const TARGETS = '[data-slot="card"], section, [data-reveal]';
 
 /**
  * Cards and sections below the fold rise in as they scroll into view.
- * `rootId` is the scrolling container of the page.
+ * `rootId` is the scrolling container of the page; leave it out when the
+ * window itself scrolls (the public site pages).
  *
  * Uses the Web Animations API when an element enters view, so it never
  * writes a class or attribute onto markup React owns (doing that before a
  * section finished hydrating caused hydration warnings). Anything already
  * on screen is left alone; the page-entry animation covers it.
  */
-export function ScrollReveal({ rootId }: { rootId: string }) {
+export function ScrollReveal({ rootId }: { rootId?: string }) {
   const pathname = usePathname();
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const root = document.getElementById(rootId);
+    const box = rootId ? document.getElementById(rootId) : null;
+    const root = rootId ? box : document.getElementById("main");
     if (!root || !("IntersectionObserver" in window)) return;
 
     const watched = new WeakSet<Element>();
@@ -37,11 +39,11 @@ export function ScrollReveal({ rootId }: { rootId: string }) {
           );
         }
       },
-      { root, rootMargin: "0px 0px -4% 0px", threshold: 0 },
+      { root: box, rootMargin: "0px 0px -4% 0px", threshold: 0 },
     );
 
     const scan = () => {
-      const fold = root.getBoundingClientRect().bottom;
+      const fold = box ? box.getBoundingClientRect().bottom : window.innerHeight;
       root.querySelectorAll(TARGETS).forEach((el) => {
         if (watched.has(el)) return;
         watched.add(el);

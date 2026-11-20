@@ -108,7 +108,7 @@ export function WorkspaceSummary() {
             </span>
             <Link href="/settings?tab=whatsapp" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               {connected ? t("manage") : t("connect")}
-              <ArrowUpRight className="size-3.5" />
+              <ArrowUpRight data-nudge data-up className="size-3.5" />
             </Link>
           </div>
         </section>
@@ -128,7 +128,7 @@ export function WorkspaceSummary() {
               <span className="block truncate text-lg font-bold text-foreground">{value}</span>
               <span className="block truncate text-xs text-muted-foreground">{label}</span>
             </span>
-            <ArrowUpRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <ArrowUpRight data-nudge data-up className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </Link>
         ))}
       </div>

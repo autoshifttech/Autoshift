@@ -207,7 +207,7 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
       <MiniCard
         href="/inbox"
         title={t('waiting')}
-        note={<ArrowRight className="size-4 text-muted-foreground" aria-hidden />}
+        note={<ArrowRight data-nudge className="size-4 text-muted-foreground" aria-hidden />}
       >
         <Big value={format.number(waiting)} />
         <p className="mt-auto text-xs text-muted-foreground">

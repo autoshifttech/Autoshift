@@ -154,7 +154,7 @@ function Nav({ onBack, onNext, nextLabel, nextDisabled }: { onBack?: () => void;
       )}
       <Button size="lg" onClick={onNext} disabled={nextDisabled} className="gap-1.5">
         {nextLabel ?? t("continue")}
-        <ArrowRight className="size-4" />
+        <ArrowRight data-nudge className="size-4" />
       </Button>
     </div>
   );
@@ -405,7 +405,7 @@ function WhatsAppStep({ onBack, onNext }: { onBack: () => void; onNext: () => vo
           )}
           <Button size="lg" onClick={onNext} disabled={!connected} className="gap-1.5">
             {t("continue")}
-            <ArrowRight className="size-4" />
+            <ArrowRight data-nudge className="size-4" />
           </Button>
         </div>
       </div>
@@ -488,7 +488,7 @@ function DoneStep() {
           <li key={href}>
             <Link href={href} className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:border-primary/50">
               {label}
-              <ArrowRight className="size-4 text-muted-foreground" />
+              <ArrowRight data-nudge className="size-4 text-muted-foreground" />
             </Link>
           </li>
         ))}

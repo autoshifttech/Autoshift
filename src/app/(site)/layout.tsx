@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { PageMotion } from "@/components/motion/page-motion";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
 
 // Public pages rendered by the app (free tools, release notes) in the
@@ -10,8 +12,13 @@ export const metadata: Metadata = { robots: { index: true, follow: true } };
 export default function SiteLayout({ children }: { children: ReactNode }) {
   return (
     <div className="app-canvas min-h-screen bg-background text-foreground">
+      {/* How far down the page you are: a thin green line along the top. */}
+      <div className="scroll-progress" aria-hidden />
       <SiteHeader />
-      <main id="main">{children}</main>
+      <main id="main">
+        <PageMotion>{children}</PageMotion>
+      </main>
+      <ScrollReveal />
       <SiteFooter />
     </div>
   );

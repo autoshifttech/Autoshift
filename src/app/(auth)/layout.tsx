@@ -41,13 +41,14 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
       {/* Plain <a>: "/" is the static public site, not an app route. */}
       <a
         href="/"
-        className="liquid-glass absolute top-5 left-5 z-10 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold hover:brightness-105 sm:top-6 sm:left-8"
+        className="liquid-glass auth-pill absolute top-5 left-5 z-10 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold hover:brightness-105 sm:top-6 sm:left-8"
       >
-        <LogoMark className="size-6" />
+        <LogoMark className="logo-in size-6" />
         AutoShift
       </a>
       {/* With the notice on a phone, the page below no longer needs a full screen of height. */}
-      <div className={configured ? undefined : "max-sm:[&>div]:min-h-0 max-sm:[&>div]:py-6 sm:[&>div]:pt-56"}>{children}</div>
+      {/* auth-motion: the sign-in card rises in and its parts follow (globals.css). */}
+      <div className={configured ? "auth-motion" : "auth-motion max-sm:[&>div]:min-h-0 max-sm:[&>div]:py-6 sm:[&>div]:pt-56"}>{children}</div>
     </div>
   );
 }

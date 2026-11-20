@@ -478,6 +478,64 @@ html[data-mode="dark"] :is(input, textarea, select)[aria-invalid="true"] ~ p {
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.6); }
 }
+/* Sign-in pages: the card rises in, then its header and form follow. */
+.auth-motion [data-slot="card"].lg-frost {
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.auth-motion [data-slot="card"].lg-frost > * {
+  animation: rise-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: 0.12s;
+}
+.auth-motion [data-slot="card"].lg-frost > :nth-child(n + 2) { animation-delay: 0.2s; }
+.auth-motion [data-slot="card"].lg-frost > :nth-child(n + 3) { animation-delay: 0.28s; }
+.auth-pill { animation: rise-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+/* Public pages: a thin green line along the top shows how far you've read.
+   Scroll-driven, so it costs no script; browsers without it don't show it. */
+.scroll-progress { display: none; }
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 60;
+    height: 3px;
+    background: var(--primary);
+    transform-origin: 0 50%;
+    pointer-events: none;
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes scroll-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+/* Hover and press feedback (motion-safe only): clickable cards lift a
+   little, and arrows marked data-nudge move toward where they lead. */
+@media (prefers-reduced-motion: no-preference) {
+  a[data-slot="card"],
+  button[data-slot="card"],
+  a:has(> [data-slot="card"]:only-child) > [data-slot="card"] {
+    transition: translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+  }
+  a[data-slot="card"]:hover,
+  button[data-slot="card"]:hover,
+  a:hover:has(> [data-slot="card"]:only-child) > [data-slot="card"] {
+    translate: 0 -3px;
+    box-shadow: 0 14px 32px -12px color-mix(in oklab, var(--foreground) 22%, transparent), var(--shadow-card);
+  }
+  a[data-slot="card"]:active,
+  button[data-slot="card"]:active,
+  a:active:has(> [data-slot="card"]:only-child) > [data-slot="card"] {
+    translate: 0 -1px;
+    transition-duration: 0.08s;
+  }
+  svg[data-nudge] {
+    transition: translate 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+  :is(a, button):hover svg[data-nudge] { translate: 3px 0; }
+  :is(a, button):hover svg[data-nudge][data-up] { translate: 2px -2px; }
+}
 /* ============================================================
  * Liquid glass (Apple style). One class, used by the notifications and
  * the sidebar "more" panels:
@@ -780,7 +838,10 @@ html,
   .title-weight,
   .logo-in,
   .draw-check path,
-  .pop-in {
+  .pop-in,
+  .auth-motion [data-slot="card"].lg-frost,
+  .auth-motion [data-slot="card"].lg-frost > *,
+  .auth-pill {
     animation: none !important;
   }
   .roll-strip,
