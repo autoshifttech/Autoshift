@@ -3,12 +3,16 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { buildConversationContext } from './context'
 
 /** Minimal fake matching the query chain in buildConversationContext:
- *  from().select().eq().eq().order().limit() → { data, error }. */
-function fakeDb(rows: unknown[]): SupabaseClient {
+ *  from().select().eq().in().order().limit() → { data, error }. */
+function fakeDb(rows: unknown[], seen: { types?: string[] } = {}): SupabaseClient {
   const chain = {
     from: () => chain,
     select: () => chain,
     eq: () => chain,
+    in: (_col: string, values: string[]) => {
+      seen.types = values
+      return chain
+    },
     order: () => chain,
     limit: () => Promise.resolve({ data: rows, error: null }),
   }
@@ -49,5 +53,21 @@ describe('buildConversationContext', () => {
       'conv-1',
     )
     expect(out).toEqual([{ role: 'user', content: 'real' }])
+  })
+
+  it('includes button messages and taps, so the AI sees the question and the answer', async () => {
+    const seen: { types?: string[] } = {}
+    const out = await buildConversationContext(
+      fakeDb([
+        { sender_type: 'customer', content_text: 'Cash on delivery' },
+        { sender_type: 'bot', content_text: 'How would you like to pay?' },
+      ], seen),
+      'conv-1',
+    )
+    expect(seen.types).toEqual(['text', 'interactive'])
+    expect(out).toEqual([
+      { role: 'assistant', content: 'How would you like to pay?' },
+      { role: 'user', content: 'Cash on delivery' },
+    ])
   })
 })

@@ -135,6 +135,7 @@ async def ai_draft(body: InternalAiDraft, _: Internal, sdb: ServiceDb, settings:
     result = asdict(out)
     result.pop("order", None)
     result.pop("booking", None)
+    result.pop("buttons", None)
     return result
 
 

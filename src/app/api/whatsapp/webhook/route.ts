@@ -21,7 +21,7 @@ import {
 import { readCappedBody } from '@/lib/whatsapp/webhook-body'
 import { resumeAwaitingReply, runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
-import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
+import { AI_BUTTON_PREFIX, dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
 import { billableCategory, chargeBilledMessage, internalConfigured } from '@/lib/backend/internal'
 import {
@@ -920,7 +920,10 @@ async function processMessage(
   // the account has enabled it. Awaited inside `after()` (same reason as
   // the webhook dispatch below); `dispatchInboundToAiReply` owns its
   // eligibility gates + try/catch and never throws.
-  if (!contentConsumed && !interactiveReplyId && inboundText.trim()) {
+  // A tap on one of the AI assistant's own buttons (Pay online, Confirm order …) is answered by the AI
+  // too: its title is the customer's reply. Taps on flow or automation buttons stay with those.
+  const aiButtonTap = Boolean(interactiveReplyId?.startsWith(AI_BUTTON_PREFIX))
+  if (!contentConsumed && (!interactiveReplyId || aiButtonTap) && inboundText.trim()) {
     await dispatchInboundToAiReply({
       accountId,
       conversationId: conversation.id,

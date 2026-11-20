@@ -125,3 +125,20 @@ async def test_ai_draft_suggests_without_handoff_or_sending(client, world, inter
     assert again["balance_paise"] == 950
     assert client.post("/v1/internal/ai-draft", json={**body, "account_id": world.acct_b}, headers=internal).status_code == 404
     assert client.post("/v1/internal/ai-draft", json=body, headers=world.headers("owner_a")).status_code == 401
+
+
+async def test_ai_reply_can_offer_tap_buttons(client, world, internal, settings, llm):
+    from app.ai_runner import extract_buttons
+
+    assert extract_buttons("Pay how?\n[BUTTONS: Pay online | Cash on delivery]") == ("Pay how?", ["Pay online", "Cash on delivery"])
+    assert extract_buttons("x [Buttons: one | ONE | two | three | four]")[1] == ["one", "two", "three"]
+    assert extract_buttons("no buttons here") == ("no buttons here", [])
+    p = next(p for p in world.rows("platform_ai_providers") if p["vendor"] == "openai")
+    p.update(enabled=True, key_ciphertext=encrypt("sk-live-1234", settings), key_tail="1234")
+    await wallet.apply(world.service, world.acct_a, 1000, "topup", "t", "fund-btn")
+    aid = client.post("/v1/assistants", json={"name": "Shop", "provider": "openai", "model_id": "gpt-5.5", "enabled": True}, headers=world.headers("admin_a")).json()["id"]
+    llm.answer = "Your total is ₹298. How would you like to pay?\n[BUTTONS: Pay online | Cash on delivery]"
+    out = client.post("/v1/internal/ai-reply", json={"account_id": world.acct_a, "assistant_id": aid, "message": "that's all", "ref": "wamid.btn.1"}, headers=internal).json()
+    assert out["status"] == "reply" and out["buttons"] == ["Pay online", "Cash on delivery"] and "[BUTTONS" not in out["text"]
+    draft = client.post("/v1/internal/ai-draft", json={"account_id": world.acct_a, "assistant_id": aid, "message": "that's all"}, headers=internal).json()
+    assert "buttons" not in draft and "[BUTTONS" not in draft["text"]

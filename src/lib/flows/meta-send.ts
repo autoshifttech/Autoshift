@@ -311,6 +311,8 @@ interface SendInteractiveButtonsEngineArgs {
   buttons: InteractiveButton[]
   headerText?: string
   footerText?: string
+  /** Sent by the AI assistant (counts toward its reply limit, marked as AI in the inbox). */
+  aiGenerated?: boolean
 }
 
 interface SendInteractiveListEngineArgs {
@@ -481,6 +483,7 @@ async function sendInteractiveViaMeta(
     interactive_payload: interactivePayload,
     message_id: waMessageId,
     status: 'sent',
+    ai_generated: input.kind === 'buttons' ? (input.aiGenerated ?? false) : false,
   })
   if (msgErr) {
     throw new Error(t('send.dbInsertFailed', { message: msgErr.message }))

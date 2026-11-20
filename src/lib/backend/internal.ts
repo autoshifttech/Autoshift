@@ -60,6 +60,8 @@ export interface AssistantReply {
   reason: string
   /** Set when the shop assistant placed an order in this reply. */
   order?: { id: string; number: number } | null
+  /** Tap-buttons to send under the reply (WhatsApp reply buttons; 3 at most). */
+  buttons?: string[]
 }
 
 /**

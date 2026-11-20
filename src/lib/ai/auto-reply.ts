@@ -8,6 +8,7 @@ import { buildHandoffSummary } from './handoff'
 import { logAiUsage } from './usage'
 import { latestUserMessage } from './query'
 import {
+  engineSendInteractiveButtons,
   engineSendText,
   loadAccountMetaCredentials,
 } from '@/lib/flows/meta-send'
@@ -354,5 +355,37 @@ async function replyWithAssistant(db: ReturnType<typeof supabaseAdmin>, args: Di
   }
   // A newer message will get its own reply, except when this one placed an order: its summary and payment link must arrive.
   if (!out.order && inboundMessageId && (await hasNewerInbound(db, conversationId, inboundMessageId))) return
+  const buttons = (out.buttons ?? []).filter((b) => b.trim()).slice(0, 3)
+  if (buttons.length > 0 && !out.order) {
+    await sendWithButtons({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, buttons })
+    return
+  }
   await engineSendText({ accountId, userId: configOwnerUserId, conversationId, contactId, text: out.text, aiGenerated: true })
+}
+
+/** Ids of AI tap-buttons start with this, so the webhook sends their taps back to the AI. */
+export const AI_BUTTON_PREFIX = 'ai:'
+const MAX_BODY = 1024
+
+/**
+ * The reply with WhatsApp reply buttons (e.g. Pay online / Cash on delivery). A long reply goes first as
+ * text, then its last paragraph with the buttons. If WhatsApp refuses the buttons, the choices are sent as text.
+ */
+async function sendWithButtons(args: { accountId: string; userId: string; conversationId: string; contactId: string; text: string; buttons: string[] }): Promise<void> {
+  const { text, buttons, ...who } = args
+  const asButtons = buttons.map((title, i) => ({ id: `${AI_BUTTON_PREFIX}${i + 1}`, title: title.slice(0, 20) }))
+  let body = text
+  if (body.length > MAX_BODY) {
+    const cut = body.lastIndexOf('\n\n')
+    const tail = cut > 0 ? body.slice(cut + 2).trim() : ''
+    const head = cut > 0 && tail.length <= MAX_BODY ? body.slice(0, cut).trim() : body
+    body = cut > 0 && tail.length <= MAX_BODY ? tail : '👇'
+    await engineSendText({ ...who, text: head, aiGenerated: true })
+  }
+  try {
+    await engineSendInteractiveButtons({ ...who, bodyText: body, buttons: asButtons, aiGenerated: true })
+  } catch (err) {
+    console.warn('[ai auto-reply] buttons refused, sending the choices as text:', err)
+    await engineSendText({ ...who, text: `${body}\n\n${buttons.map((b) => `• ${b}`).join('\n')}`, aiGenerated: true })
+  }
 }

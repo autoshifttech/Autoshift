@@ -44,6 +44,7 @@ STATUSES = ("new", "packed", "shipped", "delivered", "cancelled")
 # What AutoShift itself writes to the customer, in the shop's language.
 TEXT: dict[str, dict[str, str]] = {
     "en": {
+        "b_online": "Pay online", "b_cod": "Cash on delivery", "b_confirm": "Confirm order", "b_change": "Change order",
         "order": "🧾 Order #{n}", "delivery": "Delivery", "free": "Free", "total": "Total", "deliver_to": "Deliver to",
         "pay_link": "💳 Pay securely here (UPI, cards, net banking): {url}\nThe link works for 24 hours.",
         "cod": "💵 Cash on delivery: please keep ₹{total} ready.",
@@ -62,6 +63,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Here is a new payment link for order #{n} (₹{total}): {url}\nThe link works for 24 hours.",
     },
     "pt": {
+        "b_online": "Pagar online", "b_cod": "Pagar na entrega", "b_confirm": "Confirmar pedido", "b_change": "Alterar pedido",
         "order": "🧾 Pedido nº {n}", "delivery": "Entrega", "free": "Grátis", "total": "Total", "deliver_to": "Entregar para",
         "pay_link": "💳 Pague com segurança aqui (UPI, cartões, internet banking): {url}\nO link vale por 24 horas.",
         "cod": "💵 Pagamento na entrega: tenha ₹{total} em mãos.",
@@ -80,6 +82,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aqui está um novo link de pagamento do pedido nº {n} (₹{total}): {url}\nO link vale por 24 horas.",
     },
     "es": {
+        "b_online": "Pagar en línea", "b_cod": "Contra entrega", "b_confirm": "Confirmar pedido", "b_change": "Cambiar pedido",
         "order": "🧾 Pedido n.º {n}", "delivery": "Envío", "free": "Gratis", "total": "Total", "deliver_to": "Entregar a",
         "pay_link": "💳 Paga de forma segura aquí (UPI, tarjetas, banca en línea): {url}\nEl enlace vale 24 horas.",
         "cod": "💵 Pago contra entrega: ten listos ₹{total}.",
@@ -98,6 +101,7 @@ TEXT: dict[str, dict[str, str]] = {
         "new_link": "💳 Aquí tienes un nuevo enlace de pago del pedido n.º {n} (₹{total}): {url}\nEl enlace vale 24 horas.",
     },
     "ko": {
+        "b_online": "온라인 결제", "b_cod": "착불 결제", "b_confirm": "주문 확인", "b_change": "주문 변경",
         "order": "🧾 주문 #{n}", "delivery": "배송비", "free": "무료", "total": "합계", "deliver_to": "배송지",
         "pay_link": "💳 여기에서 안전하게 결제하세요 (UPI, 카드, 인터넷 뱅킹): {url}\n링크는 24시간 동안 유효합니다.",
         "cod": "💵 착불 결제: ₹{total}을(를) 준비해 주세요.",
@@ -153,10 +157,13 @@ def instructions(shop: dict) -> str:
         delivery = f"delivery costs ₹{rs(fee)}, free for orders of ₹{rs(free_above)} or more"
     else:
         delivery = f"delivery costs ₹{rs(fee)}"
-    options = []
+    w = words(shop)
+    options, choices = [], []
     if shop.get("online", True):
+        choices.append(w["b_online"])
         options.append('online payment through a secure Razorpay link (UPI, cards, net banking) — "pay":"online"')
     if shop.get("cod", True):
+        choices.append(w["b_cod"])
         options.append('cash on delivery' + (f" (only for orders up to ₹{rs(cod_max)})" if cod_max else "") + ' — "pay":"cod"')
     if not options:
         options.append('online payment — "pay":"online"')
@@ -166,8 +173,12 @@ def instructions(shop: dict) -> str:
         f"2. Tell them the price of each item and the total; {delivery}." + (f" The minimum order is ₹{rs(min_order)}." if min_order else ""),
         "   For a product with sizes or colours, ask which size or colour for each item (they can differ per item).",
         "3. Ask for their full name and full delivery address with PIN code.",
-        "4. Ask how they want to pay: " + "; or ".join(options) + ".",
-        "5. Read the whole order back (items, quantities, total, name, address, payment) and ask them to confirm.",
+        "4. Ask how they want to pay: " + "; or ".join(options) + "."
+        + (f" End that question with this line so they can tap an answer: [BUTTONS: {' | '.join(choices)}]" if len(choices) > 1 else ""),
+        "5. Read the whole order back (items, quantities, total, name, address, payment) and ask them to confirm. End that message "
+        f"with this line so they can tap an answer: [BUTTONS: {w['b_confirm']} | {w['b_change']}]",
+        f"   A reply of \"{w['b_confirm']}\" is a clear confirmation; \"{w['b_change']}\" means ask what they want to change. "
+        "Use a [BUTTONS: …] line only for these two questions, never with the [ORDER] line.",
         "If the customer asks for all products, give a short list grouped by type (at most about 25 lines) and ask what they are looking for.",
         "6. Only after they clearly confirm, end your reply with one line in exactly this form, and nothing after it:",
         '[ORDER]{"items":[{"code":"P001","qty":2,"option":"M"},{"code":"P007","qty":1,"option":"Black"}],"name":"Full name","address":"Full address with PIN code","pay":"online","note":""}',

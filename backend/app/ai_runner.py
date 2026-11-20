@@ -9,7 +9,7 @@ import asyncio
 import logging
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 from .db import Db
@@ -46,6 +46,22 @@ class Reply:
     order: dict | None = None
     # A booking assistant's confirmed appointment (its [BOOK] line), for the caller to place.
     booking: dict | None = None
+    # Tap-buttons for the customer (a [BUTTONS: a | b] line): at most 3, 20 characters each.
+    buttons: list[str] = field(default_factory=list)
+
+
+BUTTONS_MARK = re.compile(r"\[BUTTONS?\s*:\s*([^\]\n]+)\]", re.I)
+
+
+def extract_buttons(text: str) -> tuple[str, list[str]]:
+    """Takes the [BUTTONS: a | b | c] line out of a reply: WhatsApp reply buttons (3 at most, 20 characters)."""
+    found: list[str] = []
+    for m in BUTTONS_MARK.finditer(text):
+        for part in m.group(1).split("|"):
+            title = " ".join(part.split())[:20].strip()
+            if title and title.lower() not in {f.lower() for f in found}:
+                found.append(title)
+    return BUTTONS_MARK.sub("", text).strip(), found[:3]
 
 
 def _words(text: str) -> set[str]:
@@ -196,7 +212,7 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
     if result is None:
         return Reply("failed", reason=problem)
 
-    text = result.text.strip()
+    text, buttons = extract_buttons(result.text.strip())
     order = book = None
     if shop_orders.shop_on(assistant) and assistant.get("_products"):
         text, order = shop_orders.extract(text)
@@ -204,6 +220,7 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         text, book = booking.extract(text)
     if draft:
         order = book = None
+        buttons = []
         text = text.replace(UNSURE_MARKER, "").strip()
     if not text and order is None and book is None:
         return Reply("failed", reason="The model sent an empty reply")
@@ -214,4 +231,6 @@ async def reply(sdb: Db, llm: Llm, settings, assistant: dict, history: list[dict
         paid = await wallet.charge(sdb, account_id, "charge_ai", 1, ref=ref, idem_key=f"ai:{ref}")
     except wallet.InsufficientFunds:
         return Reply("no_funds", reason="The wallet ran out", balance_paise=await wallet.balance(sdb, account_id))
-    return Reply("reply", text=text, balance_paise=paid.balance_paise if paid else have, order=order, booking=book)
+    # A confirmed order or booking gets its summary next, not buttons.
+    return Reply("reply", text=text, balance_paise=paid.balance_paise if paid else have, order=order, booking=book,
+                 buttons=[] if order is not None or book is not None else buttons)
