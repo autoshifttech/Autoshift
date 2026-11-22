@@ -85,7 +85,7 @@ export function WebsiteSyncPanel() {
           <p className="text-xs text-muted-foreground">{t("help")}</p>
           <Label htmlFor="feed-url" className="mt-1">{t("urlLabel")}</Label>
           <Input id="feed-url" type="url" inputMode="url" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourshop.com/products.csv" className="min-h-11" />
-          <Button type="submit" className="mt-1 min-h-11 w-full gap-1.5 px-5 sm:w-auto sm:self-start" disabled={!!busy || !url.trim()}>
+          <Button type="submit" className="mt-1 min-h-11 w-full gap-1.5 px-5 sm:w-auto sm:justify-self-start" disabled={!!busy || !url.trim()}>
             {busy === "connect" && <Loader2 className="size-4 animate-spin" aria-hidden />}
             {t("connect")}
           </Button>
