@@ -118,6 +118,8 @@ const T: Record<string, [string, string, string]> = {
   "Audit log": ["Registro de auditoria", "Registro de auditoría", "감사 로그"],
   "Alert settings": ["Configuração de alertas", "Ajustes de alertas", "알림 설정"],
   "Website admin": ["Admin do site", "Admin del sitio web", "웹사이트 관리"],
+  "Keep menu open": ["Manter menu aberto", "Mantener el menú abierto", "메뉴 계속 열어 두기"],
+  "Collapse menu": ["Recolher menu", "Contraer el menú", "메뉴 접기"],
   "Opens full screen": ["Abre em tela cheia", "Se abre a pantalla completa", "전체 화면으로 열림"],
   More: ["Mais", "Más", "더보기"],
   "All pages": ["Todas as páginas", "Todas las páginas", "모든 페이지"],

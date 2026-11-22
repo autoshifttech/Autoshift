@@ -1,5 +1,6 @@
 "use client";
 
+import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useRailOpen } from "@/components/layout/expanding-rail";
 import { adminTranslate, useAdminT } from "@/lib/admin/strings";
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
@@ -105,17 +106,14 @@ function activeItem(pathname: string) {
 /** Shown in the phone bar; the rest sit under "More". */
 const BAR_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/support"];
 
-const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
-const railActive = "rail-active opacity-100";
 
 function itemFor(href: string) {
   return ALL_ITEMS.find((i) => i.href === href)!;
 }
 
-function SupportBadge({ href, count }: { href: string; count: number }) {
+function SupportBadge({ href, count, inline }: { href: string; count: number; inline?: boolean }) {
   if (href !== "/admin/support" || count === 0) return null;
-  return <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">{count}</span>;
+  return <span className={cn("flex h-5 min-w-5 items-center justify-center rounded-full bg-[#c2410c] px-1 text-xs font-bold text-white", inline ? "relative shrink-0" : "absolute -top-1 left-6 border-2 border-white/80")}>{count}</span>;
 }
 
 /** The pages that aren't on the rail, plus the website editor and the business app. */
@@ -162,50 +160,56 @@ function MoreList({ exclude, currentHref, onPick }: { exclude: string[]; current
   );
 }
 
-/** The desktop rail shows these six; the rest open from the dots. */
-const RAIL_HREFS = ["/admin", "/admin/businesses", "/admin/payments", "/admin/plans", "/admin/whatsapp", "/admin/support"];
-
-/** Desktop: a short pill of the main pages, the rest behind the dots. */
-function AdminRail() {
+/**
+ * Desktop: the admin icon rail. Hover (or tab into) it and it opens into a
+ * compact menu of every admin page, grouped, with the website editor and the
+ * mode switch at the bottom; the pin keeps it open. Same component as the
+ * business sidebar (components/layout/expanding-rail.tsx).
+ */
+export function AdminRail() {
   const tr = useAdminT();
   const pathname = usePathname();
   const { tickets } = useAdmin();
   const openTickets = tickets.filter((t) => t.status === "open").length;
   const current = activeItem(pathname);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const inMore = !!current && !RAIL_HREFS.includes(current.href);
+  const { open, pinned, togglePin, handlers } = useRailOpen("autoshift-admin-rail-pinned");
+  const tip = (label: string) => (open ? undefined : label);
   return (
-    <aside aria-label="Admin navigation" className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex">
-      <Link href="/admin" aria-label="AutoShift admin" className="mb-2 shrink-0">
-        <LogoMark className="logo-in size-8" />
-      </Link>
-      <nav className="flex flex-col items-center gap-0.5">
-        {RAIL_HREFS.map((href) => {
-          const item = itemFor(href);
-          const active = current?.href === href;
-          return (
-            <Link key={href} href={href} aria-label={tr(item.label)} data-tip={tr(item.label)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
-              <item.icon className="size-[18px]" />
-              <SupportBadge href={href} count={openTickets} />
-            </Link>
-          );
-        })}
-        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-          <PopoverTrigger aria-label="More pages" data-tip={tr("More")} className={cn(railButton, inMore && railActive)}>
-            <MoreHorizontal className="size-[18px]" />
-          </PopoverTrigger>
-          <PopoverContent side="right" align="center" sideOffset={14} className="liquid-glass lg-floating relative w-64 gap-0 overflow-hidden rounded-3xl border-0 bg-transparent p-1.5 shadow-none ring-0">
-            <div className="max-h-[78vh] overflow-y-auto">
-              <MoreList exclude={RAIL_HREFS} currentHref={current?.href} onPick={() => setMoreOpen(false)} />
-            </div>
-          </PopoverContent>
-        </Popover>
+    <aside aria-label="Admin navigation" data-open={open || undefined} {...handlers} className={railShellClass}>
+      <RailHeader href="/admin" homeLabel="AutoShift admin" title="AutoShift" open={open} pinned={pinned} onPin={togglePin} pinLabel={tr("Keep menu open")} unpinLabel={tr("Collapse menu")} />
+      <nav className="flex flex-col gap-0.5">
+        {ADMIN_NAV.map((group, gi) => (
+          <div key={group.label} className="flex flex-col gap-0.5">
+            {gi > 0 && <RailSection title={tr(group.label)} />}
+            {group.items.map((item, i) => {
+              const active = current?.href === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-label={open ? undefined : tr(item.label)}
+                  data-tip={tip(tr(item.label))}
+                  aria-current={active ? "page" : undefined}
+                  style={{ ["--i" as string]: i }}
+                  className={cn(railRow, !open && "rail-tip", active && railActive)}
+                >
+                  <item.icon className="size-[18px]" />
+                  <span className={railLabel}>{tr(item.label)}</span>
+                  <SupportBadge href={item.href} count={openTickets} inline={open} />
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
-      <span className="my-1.5 h-px w-6 shrink-0 bg-white/15" />
-      <Link href="/admin/website" aria-label="Website admin (opens full screen)" data-tip={tr("Website admin")} className={railButton}>
-        <Globe className="size-[18px]" />
-      </Link>
-      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
+      <div className="mt-auto flex flex-col gap-0.5 pt-2">
+        <span aria-hidden className="mx-[10px] my-1.5 h-px shrink-0 bg-foreground/15" />
+        <Link href="/admin/website" aria-label={open ? undefined : "Website admin (opens full screen)"} data-tip={tip(tr("Website admin"))} className={cn(railRow, !open && "rail-tip")}>
+          <Globe className="size-[18px]" />
+          <span className={railLabel}>{tr("Website admin")}</span>
+        </Link>
+        <ModeToggle tip={!open} withLabel className={cn(railRow, !open && "rail-tip", "h-8 w-full justify-start")} />
+      </div>
     </aside>
   );
 }

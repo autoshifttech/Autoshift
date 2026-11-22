@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { LogoMark } from "@/components/brand/logo-mark";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,8 +17,6 @@ import {
   LogOut,
   MessageSquare,
   MoreHorizontal,
-  PanelLeftClose,
-  PanelLeftOpen,
   Radio,
   Repeat,
   Settings,
@@ -33,6 +30,7 @@ import {
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ModeToggle } from "@/components/layout/mode-toggle";
+import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useRailOpen } from "@/components/layout/expanding-rail";
 import { isOn, pageForPath, usePages } from "@/lib/workspace/pages";
 
 interface NavItem {
@@ -162,52 +160,20 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
   );
 }
 
-const railActive = "rail-active opacity-100";
-
-/** One row of the desktop rail: the icon never moves, the name slides out beside it. */
-const railRow =
-  "relative flex h-8 w-full shrink-0 items-center gap-2.5 rounded-full px-[11px] opacity-85 transition-[opacity,background-color] hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
-
-const PIN_KEY = "autoshift-rail-pinned";
 
 /**
  * Desktop: a glass rail of icons. Hover it (or tab into it) and it smoothly
- * widens into a full menu with names, section titles, counts, the mode switch
- * and your profile; move away and it folds back. The pin keeps it open. The
- * page beside it narrows and re-flows instead of being covered. Phones get a
- * bottom bar instead (see MobileNav).
+ * widens into a compact menu with names, section titles, counts, the mode
+ * switch and your profile; move away and it folds back. The pin keeps it open.
+ * The page beside it narrows and re-flows instead of being covered. Phones get
+ * a bottom bar instead (see MobileNav).
  */
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
   const groups = useVisibleNavGroups();
   const { profile } = useAuth();
-  const [hovered, setHovered] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const timer = useRef(0);
-  const open = pinned || hovered;
-
-  useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (localStorage.getItem(PIN_KEY) === "1") setPinned(true);
-    } catch {}
-    return () => window.clearTimeout(timer.current);
-  }, []);
-
-  // A short delay both ways, so brushing past the rail doesn't flap it open.
-  const later = (next: boolean, ms: number) => {
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setHovered(next), ms);
-  };
-  const togglePin = () => {
-    const next = !pinned;
-    setPinned(next);
-    if (!next) setHovered(false);
-    try {
-      localStorage.setItem(PIN_KEY, next ? "1" : "0");
-    } catch {}
-  };
+  const { open, pinned, togglePin, handlers } = useRailOpen("autoshift-rail-pinned");
   const tip = (label: string) => (open ? undefined : label);
   const name = profile?.full_name || profile?.email || t("defaultUser");
 
@@ -215,44 +181,17 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
     <aside
       aria-label={t("primaryNav")}
       data-open={open || undefined}
-      onPointerEnter={(e) => e.pointerType === "mouse" && later(true, 90)}
-      onPointerLeave={(e) => e.pointerType === "mouse" && later(false, 260)}
-      onFocus={() => later(true, 0)}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) later(false, 0);
-      }}
-      className="rail-shell relative z-30 my-3 ml-3 hidden shrink-0 flex-col self-center overflow-x-hidden overflow-y-auto px-[10px] py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      {...handlers}
+      className={railShellClass}
     >
-      <div className="mb-2 flex h-10 shrink-0 items-center gap-2.5 px-1">
-        <Link href="/dashboard" aria-label={t("title")} className="flex min-w-0 items-center gap-2.5">
-          <LogoMark className="logo-in size-8" />
-          <span className="rail-label text-[15px] font-bold tracking-[-0.02em]">AutoShift</span>
-        </Link>
-        <button
-          type="button"
-          onClick={togglePin}
-          aria-pressed={pinned}
-          aria-label={pinned ? t("unpinMenu") : t("pinMenu")}
-          title={pinned ? t("unpinMenu") : t("pinMenu")}
-          tabIndex={open ? 0 : -1}
-          className="rail-label ml-auto flex size-8 shrink-0 items-center justify-center rounded-full ring-1 ring-foreground/15 hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-          {pinned ? <PanelLeftClose className="size-4" /> : <PanelLeftOpen className="size-4" />}
-        </button>
-      </div>
+      <RailHeader href="/dashboard" homeLabel={t("title")} title="AutoShift" open={open} pinned={pinned} onPin={togglePin} pinLabel={t("pinMenu")} unpinLabel={t("unpinMenu")} />
       <nav className="flex flex-col gap-0.5">
         {groups
           .map((group) => ({ ...group, items: group.items.filter((item) => item.href !== "/settings") }))
           .filter((group) => group.items.length > 0)
           .map((group, gi) => (
           <div key={group.labelKey} className="flex flex-col gap-0.5">
-            {/* Section title when open; a short divider when folded. */}
-            {gi > 0 && (
-              <div aria-hidden className="relative flex h-6 shrink-0 items-center">
-                <span className="rail-divider absolute left-[10px] h-px w-5 bg-foreground/15" />
-                <span className="rail-label pl-2.5 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</span>
-              </div>
-            )}
+            {gi > 0 && <RailSection title={t(group.labelKey)} />}
             {group.items.map((item, i) => {
                 const active = isActiveHref(pathname, item.href);
                 return (
@@ -266,7 +205,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
                     className={cn(railRow, !open && "rail-tip", active && railActive)}
                   >
                     <item.icon className="size-[18px]" />
-                    <span className="rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]">{t(item.labelKey)}</span>
+                    <span className={railLabel}>{t(item.labelKey)}</span>
                     <NavBadges href={item.href} active={active} counts={counts} onRail inline={open} />
                   </Link>
                 );
@@ -285,7 +224,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           className={cn(railRow, !open && "rail-tip", isActiveHref(pathname, "/settings") && railActive)}
         >
           <Settings className="size-[18px]" />
-          <span className="rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]">{t("settings")}</span>
+          <span className={railLabel}>{t("settings")}</span>
         </Link>
         {/* You: shows once the rail is open. */}
         <Link href="/settings" tabIndex={open ? 0 : -1} aria-hidden={!open} className="rail-profile mt-1.5 flex h-12 shrink-0 items-center gap-3 rounded-2xl border-t border-foreground/10 px-0.5 pt-1.5">
