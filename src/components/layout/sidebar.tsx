@@ -166,7 +166,7 @@ const railActive = "rail-active opacity-100";
 
 /** One row of the desktop rail: the icon never moves, the name slides out beside it. */
 const railRow =
-  "relative flex h-9 w-full shrink-0 items-center gap-3 rounded-full px-[11px] opacity-85 transition-[opacity,background-color] hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
+  "relative flex h-8 w-full shrink-0 items-center gap-2.5 rounded-full px-[11px] opacity-85 transition-[opacity,background-color] hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
 
 const PIN_KEY = "autoshift-rail-pinned";
 
@@ -226,7 +226,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
       <div className="mb-2 flex h-10 shrink-0 items-center gap-2.5 px-1">
         <Link href="/dashboard" aria-label={t("title")} className="flex min-w-0 items-center gap-2.5">
           <LogoMark className="logo-in size-8" />
-          <span className="rail-label text-[17px] font-extrabold tracking-tight">AutoShift</span>
+          <span className="rail-label text-[15px] font-bold tracking-[-0.02em]">AutoShift</span>
         </Link>
         <button
           type="button"
@@ -235,7 +235,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           aria-label={pinned ? t("unpinMenu") : t("pinMenu")}
           title={pinned ? t("unpinMenu") : t("pinMenu")}
           tabIndex={open ? 0 : -1}
-          className="rail-label ml-auto flex size-9 shrink-0 items-center justify-center rounded-full ring-1 ring-foreground/15 hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="rail-label ml-auto flex size-8 shrink-0 items-center justify-center rounded-full ring-1 ring-foreground/15 hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           {pinned ? <PanelLeftClose className="size-4" /> : <PanelLeftOpen className="size-4" />}
         </button>
@@ -250,7 +250,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
             {gi > 0 && (
               <div aria-hidden className="relative flex h-6 shrink-0 items-center">
                 <span className="rail-divider absolute left-[10px] h-px w-5 bg-foreground/15" />
-                <span className="rail-label pl-2.5 text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">{t(group.labelKey)}</span>
+                <span className="rail-label pl-2.5 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground/80 uppercase">{t(group.labelKey)}</span>
               </div>
             )}
             {group.items.map((item, i) => {
@@ -266,7 +266,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
                     className={cn(railRow, !open && "rail-tip", active && railActive)}
                   >
                     <item.icon className="size-[18px]" />
-                    <span className="rail-label flex-1 truncate text-[15px] font-medium">{t(item.labelKey)}</span>
+                    <span className="rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]">{t(item.labelKey)}</span>
                     <NavBadges href={item.href} active={active} counts={counts} onRail inline={open} />
                   </Link>
                 );
@@ -276,7 +276,7 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
       </nav>
       <div className="mt-auto flex flex-col gap-0.5 pt-2">
         <span aria-hidden className="mx-[10px] my-1.5 h-px shrink-0 bg-foreground/15" />
-        <ModeToggle tip={!open} withLabel className={cn(railRow, !open && "rail-tip", "h-9 w-full justify-start")} />
+        <ModeToggle tip={!open} withLabel className={cn(railRow, !open && "rail-tip", "h-8 w-full justify-start")} />
         <Link
           href="/settings"
           aria-label={open ? undefined : t("settings")}
@@ -285,16 +285,16 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
           className={cn(railRow, !open && "rail-tip", isActiveHref(pathname, "/settings") && railActive)}
         >
           <Settings className="size-[18px]" />
-          <span className="rail-label flex-1 truncate text-[15px] font-medium">{t("settings")}</span>
+          <span className="rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]">{t("settings")}</span>
         </Link>
         {/* You: shows once the rail is open. */}
-        <Link href="/settings" tabIndex={open ? 0 : -1} aria-hidden={!open} className="rail-profile mt-1.5 flex h-14 shrink-0 items-center gap-3 rounded-2xl border-t border-foreground/10 px-0.5 pt-1.5">
-          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-bold text-primary-foreground">
-            {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="size-9 object-cover" /> : name.charAt(0).toUpperCase()}
+        <Link href="/settings" tabIndex={open ? 0 : -1} aria-hidden={!open} className="rail-profile mt-1.5 flex h-12 shrink-0 items-center gap-3 rounded-2xl border-t border-foreground/10 px-0.5 pt-1.5">
+          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">
+            {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="size-8 object-cover" /> : name.charAt(0).toUpperCase()}
           </span>
           <span className="rail-label min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-foreground">{name}</span>
-            {profile?.email && profile.email !== name && <span className="block truncate text-xs text-muted-foreground">{profile.email}</span>}
+            <span className="block truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">{name}</span>
+            {profile?.email && profile.email !== name && <span className="block truncate text-[11px] text-muted-foreground">{profile.email}</span>}
           </span>
         </Link>
       </div>

@@ -1317,7 +1317,7 @@ html[data-nav-dir="back"]::view-transition-new(.page) { animation: slide-in-left
 
 /* ==========================================================================
    Desktop rail that opens into a full menu on hover (sidebar.tsx).
-   Folded: 60px pill of icons. Open: a 264px panel with names and sections;
+   Folded: 60px pill of icons. Open: a 228px panel with names and sections;
    the page beside it narrows with it, so nothing is covered.
    ========================================================================== */
 .rail-shell {
@@ -1327,8 +1327,7 @@ html[data-nav-dir="back"]::view-transition-new(.page) { animation: slide-in-left
   interpolate-size: allow-keywords;
 }
 .rail-shell[data-open] {
-  width: 264px;
-  height: calc(100dvh - 1.5rem);
+  width: 228px;
   border-radius: 28px;
 }
 .rail-shell .rail-label { opacity: 0; translate: -6px 0; white-space: nowrap; pointer-events: none; }

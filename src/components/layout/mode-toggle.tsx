@@ -58,7 +58,7 @@ export function ModeToggle({ className, tip, withLabel }: { className?: string; 
       ) : (
         <Sun key="sun" className="mode-icon h-5 w-5" />
       )}
-      {withLabel && <span className="rail-label flex-1 truncate text-left text-[15px] font-medium text-foreground">{switchLabel}</span>}
+      {withLabel && <span className="rail-label flex-1 truncate text-left text-[13.5px] font-medium tracking-[-0.01em] text-foreground">{switchLabel}</span>}
     </button>
   );
 }
