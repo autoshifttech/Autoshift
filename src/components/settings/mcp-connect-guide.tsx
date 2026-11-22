@@ -26,7 +26,7 @@ function CodeBlock({ code, label }: { code: string; label: string }) {
   };
   return (
     <div className="relative">
-      <pre aria-label={label} className="max-w-full overflow-x-auto rounded-xl border border-border bg-muted/40 p-3 pr-12 text-xs leading-relaxed text-foreground">
+      <pre aria-label={label} className="max-w-full overflow-x-auto rounded-xl border border-border bg-muted/40 p-3 pr-12 text-[13px] leading-relaxed text-foreground">
         <code>{code}</code>
       </pre>
       <Button type="button" variant="ghost" size="icon" onClick={copy} className="absolute top-1 right-1 size-11" aria-label={copied ? t('copied') : t('copyLabel', { what: label })}>
@@ -80,7 +80,7 @@ export function McpConnectGuide({ platform = false, apiKey }: { platform?: boole
       </ol>
 
       <div>
-        <p className="mb-1 text-xs font-medium text-muted-foreground">{t('serverUrl')}</p>
+        <p className="mb-1.5 text-sm font-medium text-muted-foreground">{t('serverUrl')}</p>
         <CodeBlock code={url} label={t('serverUrl')} />
       </div>
 
@@ -115,10 +115,10 @@ export function McpConnectGuide({ platform = false, apiKey }: { platform?: boole
         <h4 className="text-sm font-semibold text-foreground">{t('groupsTitle')}</h4>
         <p className="text-sm text-muted-foreground">{t('groupsDesc')}</p>
         <CodeBlock code={`${url}?groups=${platform ? 'admin-reports,admin-support' : 'chats,contacts'}`} label={t('groupsTitle')} />
-        <p className="text-xs break-words text-muted-foreground">{platform ? t('groupsListPlatform') : t('groupsList')}</p>
+        <p className="text-sm break-words text-muted-foreground">{platform ? t('groupsListPlatform') : t('groupsList')}</p>
       </div>
 
-      <ul className="space-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
+      <ul className="list-disc space-y-1.5 border-t border-border pt-4 pl-5 text-sm leading-relaxed text-muted-foreground marker:text-primary/60">
         <li>{t('tipLimits')}</li>
         <li>{t('tipPrompts')}</li>
         <li>{t('tipScope')}</li>
