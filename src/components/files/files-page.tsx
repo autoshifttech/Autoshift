@@ -4,7 +4,7 @@ import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { CheckCircle2, Circle, HardDrive, Layers, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Circle, HardDrive, Layers, Play, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,38 @@ function Thumb({ file, className }: { file: LibraryFile; className?: string }) {
   return (
     <div className={cn("flex h-full w-full items-center justify-center", className)} style={{ background: `linear-gradient(135deg, ${file.tint}26, ${file.tint}55)` }}>
       <Icon className="size-10" style={{ color: file.tint }} />
+    </div>
+  );
+}
+
+/** The picture on a file card: the image, a video's first frame with a play
+ *  button, or a big type icon with the file's extension. */
+function TileThumb({ file }: { file: LibraryFile }) {
+  const zoom = "h-full w-full object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.05]";
+  if (file.url && file.kind === "image") {
+    // eslint-disable-next-line @next/next/no-img-element -- the file's own storage URL
+    return <img src={file.url} alt="" loading="lazy" className={zoom} />;
+  }
+  if (file.url && file.kind === "video") {
+    return (
+      <>
+        <video src={`${file.url}#t=0.5`} muted playsInline preload="metadata" aria-hidden className={cn(zoom, "bg-black")} />
+        <span aria-hidden className="absolute inset-0 flex items-center justify-center bg-black/10">
+          <span className="flex size-11 items-center justify-center rounded-full bg-white/90 text-[#1a1d1b] shadow-lg transition-transform duration-300 motion-safe:group-hover:scale-110">
+            <Play className="ml-0.5 size-5 fill-current" />
+          </span>
+        </span>
+      </>
+    );
+  }
+  const Icon = KIND_ICON[file.kind];
+  const ext = (/\.([a-z0-9]{1,5})$/i.exec(file.name)?.[1] ?? file.kind).toUpperCase();
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2" style={{ background: `radial-gradient(120% 90% at 30% 15%, ${file.tint}1f, ${file.tint}45)` }}>
+      <span className="flex size-14 items-center justify-center rounded-2xl bg-card/90 shadow-sm ring-1 ring-black/5 transition-transform duration-300 motion-safe:group-hover:-translate-y-0.5">
+        <Icon className="size-7" style={{ color: file.tint }} />
+      </span>
+      <span className="text-[11px] font-bold tracking-[0.14em]" style={{ color: file.tint }}>.{ext}</span>
     </div>
   );
 }
@@ -311,22 +343,30 @@ export function FilesPage() {
               setOpenId(f.id);
             }}
             className={cn(
-              "file-tile group relative flex aspect-[4/5] flex-col overflow-hidden rounded-2xl border bg-card text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,scale] duration-200 [-webkit-touch-callout:none] select-none hover:border-primary/40",
+              "file-tile group relative flex aspect-[4/5] flex-col overflow-hidden rounded-3xl border bg-card text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,scale,translate] duration-300 [-webkit-touch-callout:none] select-none hover:border-primary/30 hover:shadow-[0_18px_40px_-18px_rgb(30_40_35/0.35)] motion-safe:hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
               isSel ? "scale-[0.96] border-primary ring-2 ring-primary" : "border-border",
             )}
           >
             {selecting && (
-              <span aria-hidden className={cn("absolute top-2 left-2 z-10 flex size-7 items-center justify-center rounded-full shadow-sm", isSel ? "bg-primary text-primary-foreground" : "bg-card/90 text-muted-foreground")}>
+              <span aria-hidden className={cn("absolute top-4 left-4 z-10 flex size-7 items-center justify-center rounded-full shadow-sm", isSel ? "bg-primary text-primary-foreground" : "bg-card/90 text-muted-foreground")}>
                 {isSel ? <CheckCircle2 className="size-5" /> : <Circle className="size-5" />}
               </span>
             )}
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <Thumb file={f} className="transition-transform group-hover:scale-[1.03]" />
+            {/* The file, framed like a photo inside the card. */}
+            <div className="relative m-2 mb-0 min-h-0 flex-1 overflow-hidden rounded-[1.1rem] ring-1 ring-black/5 dark:ring-white/10">
+              <TileThumb file={f} />
+              <span className="pointer-events-none absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-md">
+                {(() => { const KI = KIND_ICON[f.kind]; return <KI className="size-3.5" />; })()}
+                {t(`kind_${f.kind}`)}
+              </span>
             </div>
-            <div className="p-3">
-              <p className="truncate text-sm font-medium text-foreground">{f.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {formatSize(f.size, locale)} · {f.usedIn.length ? t("usedCount", { count: f.usedIn.length }) : t("notUsed")}
+            <div className="px-3.5 pt-2.5 pb-3">
+              <p className="truncate text-sm font-semibold tracking-[-0.01em] text-foreground">{f.name}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="shrink-0 whitespace-nowrap tabular-nums">{formatSize(f.size, locale)}</span>
+                <span aria-hidden>·</span>
+                <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", f.usedIn.length ? "bg-emerald-500" : "bg-muted-foreground/40")} />
+                <span className="truncate">{f.usedIn.length ? t("usedCount", { count: f.usedIn.length }) : t("notUsed")}</span>
               </p>
             </div>
           </button>
