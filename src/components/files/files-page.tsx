@@ -226,16 +226,22 @@ export function FilesPage() {
         </div>
       </div>
 
+      {/* Drop zone: big, clear, and it lights up while a file is dragged over the page. */}
+      <button
+        type="button"
+        onClick={() => input.current?.click()}
+        data-dragging={dragging || undefined}
+        className="drop-zone group flex w-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-primary/30 bg-card/60 px-6 py-10 text-center transition-[border-color,background-color,scale] duration-200 hover:border-primary/60 hover:bg-primary/[0.04] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none data-[dragging]:scale-[1.01] data-[dragging]:border-primary data-[dragging]:bg-primary/[0.07] sm:py-14"
+      >
+        <span className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/5 transition-transform duration-300 group-hover:-translate-y-1 group-data-[dragging]:-translate-y-1.5">
+          <Upload className="size-7" />
+        </span>
+        <span className="text-base font-semibold text-foreground sm:text-lg">{t("dropHere")}</span>
+        <span className="max-w-md text-sm text-muted-foreground">{t("limits")}</span>
+      </button>
+
       {shown.length > 0 && !selecting && <p className="-mb-2 text-xs text-muted-foreground lg:hidden">{t("holdHint")}</p>}
-      <div className={cn("grid grid-cols-2 gap-4 rounded-2xl transition-colors sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5", dragging && "bg-primary/5 ring-2 ring-primary/40 ring-dashed", selecting && "pb-24")}>
-        <button
-          type="button"
-          onClick={() => input.current?.click()}
-          className="flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
-        >
-          <Upload className="size-6" />
-          {t("dropHere")}
-        </button>
+      <div className={cn("grid grid-cols-2 gap-4 rounded-2xl sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5", selecting && "pb-24")}>
         {shown.map((f) => {
           const isSel = selected.has(f.id);
           return (
@@ -280,7 +286,7 @@ export function FilesPage() {
           );
         })}
       </div>
-      {shown.length === 0 && <EmptyPanel icon={FileText} mascot="sleep" title={t("empty")} />}
+      {shown.length === 0 && files.length > 0 && <EmptyPanel icon={FileText} mascot="sleep" title={t("empty")} />}
 
       {/* A file's details: a centred card with a real preview. */}
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
