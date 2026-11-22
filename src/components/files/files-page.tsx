@@ -4,10 +4,11 @@ import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { CheckCircle2, Circle, HardDrive, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Circle, HardDrive, Layers, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
@@ -232,24 +233,44 @@ export function FilesPage() {
         </ul>
       </section>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" value={query} placeholder={t("search")} aria-label={t("search")} onChange={(e) => setQuery(e.target.value)} />
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {(["all", ...FILE_KINDS] as const).map((k) => (
+      {/* Search + type filter: one card; the filter is a segmented control with a sliding pill and counts. */}
+      <div className="flex flex-col gap-2 rounded-3xl border border-border bg-card p-2 shadow-[var(--shadow-card)] md:flex-row md:items-center">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            className="h-11 rounded-2xl border-transparent bg-muted/50 pr-10 pl-11 text-[15px] shadow-none focus-visible:bg-card [&::-webkit-search-cancel-button]:hidden"
+            value={query}
+            placeholder={t("search")}
+            aria-label={t("search")}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
             <button
-              key={k}
               type="button"
-              aria-pressed={kind === k}
-              onClick={() => setKind(k)}
-              className={cn("rounded-full border px-3 py-1 text-xs font-medium", kind === k ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}
+              onClick={() => setQuery("")}
+              aria-label={t("clearSearch")}
+              className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              {t(`kind_${k}`)}
+              <X className="size-4" />
             </button>
-          ))}
+          )}
         </div>
+        <Tabs value={kind} onValueChange={(v) => setKind(v as FileKind | "all")} className="min-w-0">
+          <TabsList aria-label={t("filterLabel")} className="h-11 w-full max-w-full justify-start overflow-x-auto rounded-2xl bg-muted/50 p-1 [scrollbar-width:none] md:w-fit [&::-webkit-scrollbar]:hidden">
+            {(["all", ...FILE_KINDS] as const).map((k) => {
+              const Icon = k === "all" ? Layers : KIND_ICON[k];
+              const count = k === "all" ? files.length : files.filter((f) => f.kind === k).length;
+              return (
+                <TabsTrigger key={k} value={k} className="h-full flex-none gap-1.5 rounded-xl px-3 text-[13px]">
+                  <Icon className="size-3.5" />
+                  {t(`kind_${k}`)}
+                  <span className="rounded-full bg-foreground/[0.07] px-1.5 text-[11px] font-semibold tabular-nums">{count}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Drop zone: big, clear, and it lights up while a file is dragged over the page. */}

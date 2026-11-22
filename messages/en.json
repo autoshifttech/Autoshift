@@ -4392,7 +4392,9 @@
     "holdHint": "Tip: press and hold a file to select several.",
     "ofTotal": "of {total}",
     "percentUsed": "{percent}% used",
-    "free": "Free"
+    "free": "Free",
+    "clearSearch": "Clear search",
+    "filterLabel": "File type"
   },
   "Search": {
     "title": "Search",

@@ -4392,7 +4392,9 @@
     "holdHint": "팁: 파일을 길게 누르면 여러 개를 선택할 수 있어요.",
     "ofTotal": "/ {total}",
     "percentUsed": "{percent}% 사용",
-    "free": "남은 공간"
+    "free": "남은 공간",
+    "clearSearch": "검색 지우기",
+    "filterLabel": "파일 유형"
   },
   "Search": {
     "title": "검색",

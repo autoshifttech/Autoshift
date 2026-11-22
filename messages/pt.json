@@ -4392,7 +4392,9 @@
     "holdHint": "Dica: pressione e segure um arquivo para selecionar vários.",
     "ofTotal": "de {total}",
     "percentUsed": "{percent}% usado",
-    "free": "Livre"
+    "free": "Livre",
+    "clearSearch": "Limpar busca",
+    "filterLabel": "Tipo de arquivo"
   },
   "Search": {
     "title": "Buscar",
