@@ -60,7 +60,9 @@
     "morePages": "모든 페이지",
     "search": "검색",
     "orders": "주문",
-    "appointments": "예약"
+    "appointments": "예약",
+    "pinMenu": "메뉴 계속 열어 두기",
+    "unpinMenu": "메뉴 접기"
   },
   "Header": {
     "dashboard": "대시보드",

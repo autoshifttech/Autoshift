@@ -16,7 +16,7 @@ import { useTranslations } from "next-intl";
  *
  * 40×40 hit target to match the header's other touch controls.
  */
-export function ModeToggle({ className, tip }: { className?: string; /** Show the label as a rail hover name. */ tip?: boolean }) {
+export function ModeToggle({ className, tip, withLabel }: { className?: string; /** Show the label as a rail hover name. */ tip?: boolean; /** Text beside the icon (hidden until the rail opens). */ withLabel?: boolean }) {
   const t = useTranslations("ModeToggle");
   const { mode, toggleMode } = useTheme();
   const goingTo = mode === "dark" ? "light" : "dark";
@@ -45,7 +45,7 @@ export function ModeToggle({ className, tip }: { className?: string; /** Show th
     <button
       type="button"
       onClick={onClick}
-      aria-label={switchLabel}
+      aria-label={withLabel && !tip ? undefined : switchLabel}
       title={tip ? undefined : switchLabel}
       data-tip={tip ? switchLabel : undefined}
       className={cn(
@@ -58,6 +58,7 @@ export function ModeToggle({ className, tip }: { className?: string; /** Show th
       ) : (
         <Sun key="sun" className="mode-icon h-5 w-5" />
       )}
+      {withLabel && <span className="rail-label flex-1 truncate text-left text-[15px] font-medium text-foreground">{switchLabel}</span>}
     </button>
   );
 }

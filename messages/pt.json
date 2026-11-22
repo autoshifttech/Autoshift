@@ -60,7 +60,9 @@
     "morePages": "Todas as páginas",
     "search": "Pesquisar",
     "orders": "Pedidos",
-    "appointments": "Agendamentos"
+    "appointments": "Agendamentos",
+    "pinMenu": "Manter menu aberto",
+    "unpinMenu": "Recolher menu"
   },
   "Header": {
     "dashboard": "Painel",

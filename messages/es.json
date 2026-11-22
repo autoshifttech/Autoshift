@@ -60,7 +60,9 @@
     "morePages": "Todas las páginas",
     "search": "Buscar",
     "orders": "Pedidos",
-    "appointments": "Citas"
+    "appointments": "Citas",
+    "pinMenu": "Mantener el menú abierto",
+    "unpinMenu": "Contraer el menú"
   },
   "Header": {
     "dashboard": "Panel",

@@ -1320,3 +1320,43 @@ html[data-nav-dir="back"]::view-transition-new(.page) { animation: slide-in-left
   from { translate: 0 -24px; }
   to { translate: 0 24px; }
 }
+
+/* ==========================================================================
+   Desktop rail that opens into a full menu on hover (sidebar.tsx).
+   Folded: 60px pill of icons. Open: a 264px panel with names and sections;
+   the page beside it narrows with it, so nothing is covered.
+   ========================================================================== */
+.rail-shell {
+  width: 60px;
+  height: auto;
+  border-radius: 30px;
+  interpolate-size: allow-keywords;
+}
+.rail-shell[data-open] {
+  width: 264px;
+  height: calc(100dvh - 1.5rem);
+  border-radius: 28px;
+}
+.rail-shell .rail-label { opacity: 0; translate: -6px 0; white-space: nowrap; pointer-events: none; }
+.rail-shell[data-open] .rail-label { opacity: 1; translate: 0 0; pointer-events: auto; }
+.rail-shell .rail-divider { opacity: 1; }
+.rail-shell[data-open] .rail-divider { opacity: 0; }
+.rail-shell .rail-profile { max-height: 0; padding-top: 0; margin-top: 0; opacity: 0; overflow: hidden; border-color: transparent; }
+.rail-shell[data-open] .rail-profile { max-height: 64px; padding-top: 6px; margin-top: 6px; opacity: 1; border-color: color-mix(in oklab, var(--foreground) 10%, transparent); }
+/* Rows don't magnify like dock icons while the menu is open. */
+.rail-shell[data-open] .rail-tip:hover { transform: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .rail-shell {
+    transition: width 0.42s cubic-bezier(0.32, 0.72, 0, 1), height 0.42s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  /* Names fade out quickly when folding... */
+  .rail-shell .rail-label { transition: opacity 0.12s ease-in, translate 0.12s ease-in; }
+  .rail-shell .rail-divider { transition: opacity 0.2s 0.1s; }
+  .rail-shell .rail-profile { transition: max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.15s, padding-top 0.35s, margin-top 0.35s; }
+  /* ...and slide in one after another once it has opened. */
+  .rail-shell[data-open] .rail-label { transition: opacity 0.3s ease-out, translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); transition-delay: calc(90ms + var(--i, 0) * 18ms); }
+  .rail-shell[data-open] .rail-divider { transition: opacity 0.1s; }
+  .rail-shell[data-open] .rail-profile { transition: max-height 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s 0.12s, padding-top 0.4s, margin-top 0.4s; }
+}
+/* Names are on the rows once the rail is open, so no hover tooltips then. */
+body:has(.rail-shell[data-open]) .rail-tip-layer { display: none !important; }

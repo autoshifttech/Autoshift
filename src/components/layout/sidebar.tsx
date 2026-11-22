@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/brand/logo-mark";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,6 +18,8 @@ import {
   LogOut,
   MessageSquare,
   MoreHorizontal,
+  PanelLeftClose,
+  PanelLeftOpen,
   Radio,
   Repeat,
   Settings,
@@ -109,12 +111,12 @@ export function useNavCounts(): NavCounts {
   return { totalUnread: useTotalUnread() };
 }
 
-function NavBadges({ href, active, counts }: { href: string; active: boolean; counts: NavCounts; onRail?: boolean }) {
+function NavBadges({ href, active, counts, inline }: { href: string; active: boolean; counts: NavCounts; onRail?: boolean; inline?: boolean }) {
   const t = useTranslations("Sidebar");
   const { totalUnread } = counts;
   if (href === "/inbox" && totalUnread > 0 && !active) {
     return (
-      <span key={totalUnread} aria-label={t("unreadConversations", { count: totalUnread })} className="badge-pop absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white/80 bg-[#c2410c] px-1 text-xs font-bold text-white">
+      <span key={totalUnread} aria-label={t("unreadConversations", { count: totalUnread })} className={cn("badge-pop flex h-5 min-w-5 items-center justify-center rounded-full bg-[#c2410c] px-1 text-xs font-bold text-white", inline ? "relative shrink-0" : "absolute -top-1 left-6 border-2 border-white/80")}>
         {totalUnread > 9 ? "9+" : totalUnread}
       </span>
     );
@@ -149,7 +151,7 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
                 >
                   <item.icon className="size-4" />
                   <span className="flex-1">{t(item.labelKey)}</span>
-                  <NavBadges href={item.href} active={active} counts={counts} />
+                  <NavBadges href={item.href} active={active} counts={counts} inline />
                 </Link>
               );
             })}
@@ -160,51 +162,142 @@ function MorePages({ pathname, exclude, onPick, counts }: { pathname: string; ex
   );
 }
 
-const railButton =
-  "rail-tip relative flex size-9 shrink-0 items-center justify-center rounded-full opacity-85 transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:[stroke-width:1.5]";
 const railActive = "rail-active opacity-100";
 
+/** One row of the desktop rail: the icon never moves, the name slides out beside it. */
+const railRow =
+  "relative flex h-9 w-full shrink-0 items-center gap-3 rounded-full px-[11px] opacity-85 transition-[opacity,background-color] hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
+
+const PIN_KEY = "autoshift-rail-pinned";
+
 /**
- * Desktop: a glass rail with an icon for every page and a tooltip name on
- * hover; opt-ins, files and the wallet live in Settings. Phones get a bottom
- * bar instead (see MobileNav).
+ * Desktop: a glass rail of icons. Hover it (or tab into it) and it smoothly
+ * widens into a full menu with names, section titles, counts, the mode switch
+ * and your profile; move away and it folds back. The pin keeps it open. The
+ * page beside it narrows and re-flows instead of being covered. Phones get a
+ * bottom bar instead (see MobileNav).
  */
 export function Sidebar({ counts }: { counts: NavCounts }) {
   const t = useTranslations("Sidebar");
   const pathname = usePathname();
   const groups = useVisibleNavGroups();
+  const { profile } = useAuth();
+  const [hovered, setHovered] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const timer = useRef(0);
+  const open = pinned || hovered;
+
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (localStorage.getItem(PIN_KEY) === "1") setPinned(true);
+    } catch {}
+    return () => window.clearTimeout(timer.current);
+  }, []);
+
+  // A short delay both ways, so brushing past the rail doesn't flap it open.
+  const later = (next: boolean, ms: number) => {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setHovered(next), ms);
+  };
+  const togglePin = () => {
+    const next = !pinned;
+    setPinned(next);
+    if (!next) setHovered(false);
+    try {
+      localStorage.setItem(PIN_KEY, next ? "1" : "0");
+    } catch {}
+  };
+  const tip = (label: string) => (open ? undefined : label);
+  const name = profile?.full_name || profile?.email || t("defaultUser");
 
   return (
     <aside
       aria-label={t("primaryNav")}
-      className="relative z-30 my-3 ml-3 hidden w-[60px] shrink-0 flex-col items-center gap-0.5 self-center rounded-full py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      data-open={open || undefined}
+      onPointerEnter={(e) => e.pointerType === "mouse" && later(true, 90)}
+      onPointerLeave={(e) => e.pointerType === "mouse" && later(false, 260)}
+      onFocus={() => later(true, 0)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) later(false, 0);
+      }}
+      className="rail-shell relative z-30 my-3 ml-3 hidden shrink-0 flex-col self-center overflow-x-hidden overflow-y-auto px-[10px] py-3 liquid-glass lg:flex max-h-[calc(100dvh-1.5rem)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      <Link href="/dashboard" aria-label={t("title")} className="mb-2 shrink-0">
-        <LogoMark className="logo-in size-8" />
-      </Link>
-      <nav className="flex flex-col items-center gap-0.5">
-        {groups.map((group, gi) => (
-          <div key={group.labelKey} className="flex flex-col items-center gap-0.5">
-            {gi > 0 && <span aria-hidden className="my-1 h-px w-5 shrink-0 bg-foreground/15" />}
-            {group.items
-              .filter((item) => item.href !== "/settings")
-              .map((item) => {
+      <div className="mb-2 flex h-10 shrink-0 items-center gap-2.5 px-1">
+        <Link href="/dashboard" aria-label={t("title")} className="flex min-w-0 items-center gap-2.5">
+          <LogoMark className="logo-in size-8" />
+          <span className="rail-label text-[17px] font-extrabold tracking-tight">AutoShift</span>
+        </Link>
+        <button
+          type="button"
+          onClick={togglePin}
+          aria-pressed={pinned}
+          aria-label={pinned ? t("unpinMenu") : t("pinMenu")}
+          title={pinned ? t("unpinMenu") : t("pinMenu")}
+          tabIndex={open ? 0 : -1}
+          className="rail-label ml-auto flex size-9 shrink-0 items-center justify-center rounded-full ring-1 ring-foreground/15 hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
+          {pinned ? <PanelLeftClose className="size-4" /> : <PanelLeftOpen className="size-4" />}
+        </button>
+      </div>
+      <nav className="flex flex-col gap-0.5">
+        {groups
+          .map((group) => ({ ...group, items: group.items.filter((item) => item.href !== "/settings") }))
+          .filter((group) => group.items.length > 0)
+          .map((group, gi) => (
+          <div key={group.labelKey} className="flex flex-col gap-0.5">
+            {/* Section title when open; a short divider when folded. */}
+            {gi > 0 && (
+              <div aria-hidden className="relative flex h-6 shrink-0 items-center">
+                <span className="rail-divider absolute left-[10px] h-px w-5 bg-foreground/15" />
+                <span className="rail-label pl-2.5 text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">{t(group.labelKey)}</span>
+              </div>
+            )}
+            {group.items.map((item, i) => {
                 const active = isActiveHref(pathname, item.href);
                 return (
-                  <Link key={item.href} href={item.href} aria-label={t(item.labelKey)} data-tip={t(item.labelKey)} aria-current={active ? "page" : undefined} className={cn(railButton, active && railActive)}>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-label={open ? undefined : t(item.labelKey)}
+                    data-tip={tip(t(item.labelKey))}
+                    aria-current={active ? "page" : undefined}
+                    style={{ ["--i" as string]: i }}
+                    className={cn(railRow, !open && "rail-tip", active && railActive)}
+                  >
                     <item.icon className="size-[18px]" />
-                    <NavBadges href={item.href} active={active} counts={counts} onRail />
+                    <span className="rail-label flex-1 truncate text-[15px] font-medium">{t(item.labelKey)}</span>
+                    <NavBadges href={item.href} active={active} counts={counts} onRail inline={open} />
                   </Link>
                 );
               })}
           </div>
         ))}
       </nav>
-      <span className="my-1.5 h-px w-6 shrink-0 bg-foreground/15" />
-      <ModeToggle tip className={cn(railButton, "size-9 rounded-full")} />
-      <Link href="/settings" aria-label={t("settings")} data-tip={t("settings")} aria-current={isActiveHref(pathname, "/settings") ? "page" : undefined} className={cn(railButton, isActiveHref(pathname, "/settings") && railActive)}>
-        <Settings className="size-[18px]" />
-      </Link>
+      <div className="mt-auto flex flex-col gap-0.5 pt-2">
+        <span aria-hidden className="mx-[10px] my-1.5 h-px shrink-0 bg-foreground/15" />
+        <ModeToggle tip={!open} withLabel className={cn(railRow, !open && "rail-tip", "h-9 w-full justify-start")} />
+        <Link
+          href="/settings"
+          aria-label={open ? undefined : t("settings")}
+          data-tip={tip(t("settings"))}
+          aria-current={isActiveHref(pathname, "/settings") ? "page" : undefined}
+          className={cn(railRow, !open && "rail-tip", isActiveHref(pathname, "/settings") && railActive)}
+        >
+          <Settings className="size-[18px]" />
+          <span className="rail-label flex-1 truncate text-[15px] font-medium">{t("settings")}</span>
+        </Link>
+        {/* You: shows once the rail is open. */}
+        <Link href="/settings" tabIndex={open ? 0 : -1} aria-hidden={!open} className="rail-profile mt-1.5 flex h-14 shrink-0 items-center gap-3 rounded-2xl border-t border-foreground/10 px-0.5 pt-1.5">
+          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="size-9 object-cover" /> : name.charAt(0).toUpperCase()}
+          </span>
+          <span className="rail-label min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold text-foreground">{name}</span>
+            {profile?.email && profile.email !== name && <span className="block truncate text-xs text-muted-foreground">{profile.email}</span>}
+          </span>
+        </Link>
+      </div>
     </aside>
   );
 }

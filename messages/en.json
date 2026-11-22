@@ -60,7 +60,9 @@
     "morePages": "All pages",
     "search": "Search",
     "orders": "Orders",
-    "appointments": "Appointments"
+    "appointments": "Appointments",
+    "pinMenu": "Keep menu open",
+    "unpinMenu": "Collapse menu"
   },
   "Header": {
     "dashboard": "Dashboard",
