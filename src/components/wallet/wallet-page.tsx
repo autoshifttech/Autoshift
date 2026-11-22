@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { NativeSelect } from "@/components/ui/native-select";
-import { BarChart } from "@/components/tremor/bar-chart";
+import { BarChart } from "@/components/tremor/lazy-charts";
 import { cn } from "@/lib/utils";
 import {
   CHARGE_KINDS,

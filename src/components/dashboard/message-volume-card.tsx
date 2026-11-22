@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { MessageSquare } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { BarChart } from '@/components/tremor/bar-chart'
+import { BarChart } from '@/components/tremor/lazy-charts'
 import {
   Card,
   CardAction,

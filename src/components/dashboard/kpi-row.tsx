@@ -9,7 +9,7 @@ import {
   type DashboardOverview,
 } from '@/lib/dashboard/overview'
 import { KpiTile, KpiTileSkeleton, TargetBar } from './kpi-tile'
-import { Sparkline } from './sparkline'
+import { Sparkline } from '@/components/tremor/lazy-charts'
 import { useFormatDuration } from './use-format-duration'
 
 export function KpiRow({ data }: { data: DashboardOverview | null }) {

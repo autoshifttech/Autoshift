@@ -6,7 +6,7 @@ import { toast } from "@/lib/toast";
 import { ArrowDownRight, ArrowUpRight, Bot, Download, Printer, MessageSquare, Target, Timer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { BarChart } from "@/components/tremor/bar-chart";
+import { BarChart } from "@/components/tremor/lazy-charts";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/wallet/model";
 import { FunnelChart, RouteCard } from "./journey-charts";

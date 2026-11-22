@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Bot, Coins, HandCoins, Landmark, PiggyBank, Wallet } from "lucide-react";
 
-import { BarChart } from "@/components/tremor/bar-chart";
+import { BarChart } from "@/components/tremor/lazy-charts";
 import { cn } from "@/lib/utils";
 import { UNIT_ECONOMICS, usageRevenue, type Usage } from "@/lib/admin/data";
 import { useAdminStats } from "@/lib/admin/live-stats";

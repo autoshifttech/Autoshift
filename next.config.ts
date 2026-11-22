@@ -169,13 +169,30 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "no-store" }],
       },
       {
+        // Pages: a browser may keep them but must check with us every
+        // time (a 304 when nothing changed), so a new deploy shows at
+        // once without making returning visitors download it all again.
+        // ("no-store" here, from the old Hostinger set-up, made every
+        // visit re-download the whole site.)
         source: "/:path((?!_next/static|_next/image|api).*)",
         headers: [
           {
             key: "Cache-Control",
-            value: "private, no-store",
+            value: "private, no-cache",
           },
         ],
+      },
+      {
+        // Website photos: the file name carries a hash of the content,
+        // so a changed photo gets a new name and these never go stale.
+        source: "/site/img/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        // Small static files from /public (icons, the notification
+        // script): cache for a day, refresh quietly in the background.
+        source: "/:file([^/]+\\.(?:svg|png|webp|jpg|ico|woff2|js))",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
       },
       {
         // Security headers on every response, including /_next/static

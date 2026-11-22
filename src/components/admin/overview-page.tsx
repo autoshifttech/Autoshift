@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { BadgeIndianRupee, Building2, ChevronRight, Hourglass, PiggyBank, Repeat, TrendingDown, UserPlus, Wallet, X } from "lucide-react";
 
-import { BarChart } from "@/components/tremor/bar-chart";
+import { BarChart } from "@/components/tremor/lazy-charts";
 import { ADMIN_NOW, INDUSTRY_LABEL, usageRevenue, type Business } from "@/lib/admin/data";
 import { useAdminStats } from "@/lib/admin/live-stats";
 import { buildAlerts } from "@/lib/admin/alerts";

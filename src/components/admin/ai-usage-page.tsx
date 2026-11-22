@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertOctagon, Bot, Coins, Hand, PiggyBank, Sparkles } from "lucide-react";
 
-import { BarChart } from "@/components/tremor/bar-chart";
+import { BarChart } from "@/components/tremor/lazy-charts";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 import { AI_MODELS } from "@/lib/admin/data";
