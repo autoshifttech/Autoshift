@@ -37,8 +37,8 @@ export function ReplyQuote({
         isChip
           ? "rounded-md bg-muted/80"
           : onPrimary
-            ? "mb-1.5 rounded-md bg-primary-foreground/15"
-            : "mb-1.5 rounded-md bg-background/20",
+            ? "mb-1.5 rounded-lg bg-primary-foreground/15 py-1.5"
+            : "mb-1.5 rounded-lg bg-card/80 py-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.04)]",
       )}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
@@ -57,7 +57,9 @@ export function ReplyQuote({
          *  layout wider, shoving the contact sidebar off-screen.
          *  `break-words` also wraps long URLs that have no whitespace
          *  to break on. Issue #165. */}
-        <div className="whitespace-pre-wrap break-words text-xs text-foreground/80">
+        {/* Two lines at most, like WhatsApp's quote: enough to recognise
+            the message without repeating it in full. */}
+        <div className={cn("line-clamp-2 break-words text-xs", onPrimary ? "text-primary-foreground/80" : "text-foreground/75")} title={preview}>
           {preview}
         </div>
       </div>

@@ -340,14 +340,13 @@ function MessageContent({
       }
       if (message.sender_type === "customer") {
         return (
-          <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <CornerDownLeft className="h-3 w-3" />
-              {t("buttonReply")}
+          // The customer tapped a button: show their choice as the button they pressed.
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-[11px] font-medium text-muted-foreground">{t("buttonReply")}</span>
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-semibold text-primary shadow-[0_1px_2px_rgb(0_0_0/0.06)] ring-1 ring-primary/25">
+              <CornerDownLeft className="size-3.5 shrink-0" />
+              <span className="break-words">{message.content_text || t("interactiveReply")}</span>
             </span>
-            <p className="whitespace-pre-wrap break-words text-sm">
-              {message.content_text || t("interactiveReply")}
-            </p>
           </div>
         );
       }
