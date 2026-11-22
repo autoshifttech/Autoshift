@@ -3983,7 +3983,7 @@
     "save": "Salvar alterações",
     "saved": "Alterações salvas.",
     "testTitle": "Chat de teste",
-    "testDesc": "Respostas simuladas com o conhecimento e as ferramentas deste assistente.",
+    "testDesc": "Respostas reais deste assistente. Cada uma usa uma resposta de IA da sua carteira.",
     "reset": "Recomeçar",
     "testEmpty": "Envie uma mensagem como se fosse um cliente.",
     "testPlaceholder": "Digite uma mensagem de cliente…",
@@ -4015,7 +4015,8 @@
     "wizardDone": "{name} está pronto. Você pode continuar editando quando quiser.",
     "loadingList": "Carregando seus assistentes…",
     "tabShop": "Loja",
-    "tabBookings": "Agendamentos"
+    "tabBookings": "Agendamentos",
+    "testError": "Sem resposta: {reason}"
   },
   "AiTools": {
     "title": "Ferramentas de IA",

@@ -10,7 +10,6 @@ import { MobileNav, Sidebar, useNavCounts, type NavCounts } from "@/components/l
 import { RailTip } from "@/components/layout/rail-tip";
 import { RouteTransition } from "@/components/motion/route-transition";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
-import { CollapsingTitle } from "@/components/motion/collapsing-title";
 import { NavDirection } from "@/components/motion/nav-direction";
 import { PageMotion } from "@/components/motion/page-motion";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
@@ -103,7 +102,6 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* The banners and top bar scroll with the page, so there's no fixed band. */}
         <div id="app-scroll" className="smooth-scroll flex-1 overflow-y-auto">
-          <CollapsingTitle rootId="app-scroll" />
           <NavDirection />
           <AccountNotices />
           <Header />

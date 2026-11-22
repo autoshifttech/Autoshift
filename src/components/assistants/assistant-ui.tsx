@@ -7,7 +7,9 @@ import { Bot, Hand, ListChecks, MessageSquare, Puzzle, Send, Sparkles, Tag, Webh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { simulateReply, type Assistant, type Tool, type ToolCall, type ToolCategory } from "@/lib/assistants/model";
+import { resolveAssistantId, simulateReply, type Assistant, type Tool, type ToolCall, type ToolCategory } from "@/lib/assistants/model";
+import { backend, backendUrl } from "@/lib/backend/client";
+import { ThinkingDots } from "@/components/motion/thinking";
 
 export const CATEGORY_ICON: Record<ToolCategory, LucideIcon> = {
   leads: ListChecks,
@@ -38,9 +40,22 @@ export function AssistantAvatar({ assistant, className }: { assistant: Pick<Assi
   );
 }
 
-type ChatLine = { from: "customer" | "ai"; text: string; toolCalls?: ToolCall[]; handoff?: boolean };
+type ChatLine = { from: "customer" | "ai" | "note"; text: string; toolCalls?: ToolCall[]; handoff?: boolean; buttons?: string[] };
 
-/** Try an assistant: replies come from a rule-based simulation that uses its knowledge and tools. */
+/** What the backend's test reply returns (the real model, the same path as WhatsApp). */
+interface TestReply {
+  status: "reply" | "handoff" | "no_model" | "no_funds" | "failed" | "off" | "plan_limit";
+  text: string;
+  reason?: string;
+  buttons?: string[];
+}
+
+/**
+ * Try an assistant. With the AutoShift backend connected, every message goes
+ * to the real assistant (same model, knowledge, products and buttons as on
+ * WhatsApp; each reply is charged like a real one). Without it (local demo),
+ * a rule-based simulation answers instead.
+ */
 export function TestChat({ assistant, tools, className }: { assistant: Assistant; tools: Tool[]; className?: string }) {
   const t = useTranslations("Assistants");
   const [lines, setLines] = useState<ChatLine[]>(() => (assistant.greeting ? [{ from: "ai", text: assistant.greeting }] : []));
@@ -52,12 +67,38 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
   }, [lines]);
   const suggestions = [t("try1"), t("try2"), t("try3"), t("try4")];
 
-  const send = (text: string) => {
+  const [busy, setBusy] = useState(false);
+  const send = async (text: string) => {
     const msg = text.trim();
-    if (!msg) return;
-    const r = simulateReply(assistant, tools, msg);
-    setLines((prev) => [...prev, { from: "customer", text: msg }, { from: "ai", text: r.text, toolCalls: r.toolCalls, handoff: r.handoff }]);
+    if (!msg || busy) return;
     setDraft("");
+    if (!backendUrl()) {
+      const r = simulateReply(assistant, tools, msg);
+      setLines((prev) => [...prev, { from: "customer", text: msg }, { from: "ai", text: r.text, toolCalls: r.toolCalls, handoff: r.handoff }]);
+      return;
+    }
+    // The chat so far, as the model sees it (notes are ours, not part of the chat).
+    const history = lines
+      .filter((l) => l.from !== "note")
+      .slice(-20)
+      .map((l) => ({ role: l.from === "customer" ? "user" : "assistant", content: l.text.slice(0, 2000) }));
+    setLines((prev) => [...prev, { from: "customer", text: msg }]);
+    setBusy(true);
+    try {
+      const r = await backend<TestReply>(`/v1/assistants/${resolveAssistantId(assistant.id)}/test-reply`, {
+        method: "POST",
+        body: { message: msg, history, idempotency_key: crypto.randomUUID() },
+      });
+      if (r.status === "reply" || r.status === "handoff") {
+        setLines((prev) => [...prev, { from: "ai", text: r.text || "…", handoff: r.status === "handoff", buttons: r.buttons }]);
+      } else {
+        setLines((prev) => [...prev, { from: "note", text: t("testError", { reason: r.reason || r.status }) }]);
+      }
+    } catch (e) {
+      setLines((prev) => [...prev, { from: "note", text: t("testError", { reason: e instanceof Error ? e.message : "" }) }]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -68,13 +109,18 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
           <p className="truncate text-sm font-semibold text-foreground">{t("testTitle")}</p>
           <p className="truncate text-xs text-muted-foreground">{t("testDesc")}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setLines(assistant.greeting ? [{ from: "ai", text: assistant.greeting }] : [])}>
+        <Button variant="ghost" size="sm" disabled={busy} onClick={() => setLines(assistant.greeting ? [{ from: "ai", text: assistant.greeting }] : [])}>
           {t("reset")}
         </Button>
       </div>
       <div ref={scroller} className="min-h-72 flex-1 space-y-3 overflow-y-auto bg-[#efeae2] p-3 dark:bg-[#0b141a]">
         {lines.length === 0 && <p className="py-10 text-center text-xs text-[#667781]">{t("testEmpty")}</p>}
-        {lines.map((l, i) => (
+        {lines.map((l, i) =>
+          l.from === "note" ? (
+            <p key={i} role="status" className="mx-auto max-w-[90%] rounded-lg bg-amber-50 px-3 py-2 text-center text-xs text-amber-900 dark:bg-amber-950/60 dark:text-amber-100">
+              {l.text}
+            </p>
+          ) : (
           <div key={i} className={cn("flex flex-col gap-1", l.from === "customer" ? "items-end" : "items-start")}>
             {l.toolCalls?.map((c, j) => {
               const tool = tools.find((x) => x.id === c.toolId);
@@ -95,13 +141,31 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
             >
               {l.text}
             </span>
+            {/* The tap-buttons the customer would see on WhatsApp; tapping one sends it. */}
+            {l.buttons && l.buttons.length > 0 && (
+              <div className="flex max-w-[85%] flex-wrap gap-1.5">
+                {l.buttons.map((b) => (
+                  <button key={b} type="button" disabled={busy} onClick={() => void send(b)} className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#027eb5] shadow-sm hover:bg-white/80 disabled:opacity-50 dark:bg-[#202c33] dark:text-[#53bdeb]">
+                    {b}
+                  </button>
+                ))}
+              </div>
+            )}
             {l.handoff && <span className="text-xs font-medium text-amber-700 dark:text-amber-300">{t("handedOff")}</span>}
           </div>
-        ))}
+          ),
+        )}
+        {busy && (
+          <div className="flex items-start">
+            <span className="rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm dark:bg-[#202c33]">
+              <ThinkingDots />
+            </span>
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-1.5 border-t border-border px-3 pt-3">
         {suggestions.map((s) => (
-          <button key={s} type="button" onClick={() => send(s)} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+          <button key={s} type="button" disabled={busy} onClick={() => void send(s)} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
             {s}
           </button>
         ))}
@@ -110,11 +174,11 @@ export function TestChat({ assistant, tools, className }: { assistant: Assistant
         className="flex gap-2 p-3"
         onSubmit={(e) => {
           e.preventDefault();
-          send(draft);
+          void send(draft);
         }}
       >
         <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={t("testPlaceholder")} aria-label={t("testPlaceholder")} />
-        <Button type="submit" size="icon" aria-label={t("send")} disabled={!draft.trim()}>
+        <Button type="submit" size="icon" aria-label={t("send")} disabled={!draft.trim() || busy}>
           <Send className="size-4" />
         </Button>
       </form>

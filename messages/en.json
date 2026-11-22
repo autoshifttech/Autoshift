@@ -3983,7 +3983,7 @@
     "save": "Save changes",
     "saved": "Changes saved.",
     "testTitle": "Test chat",
-    "testDesc": "Simulated replies using this assistant’s knowledge and tools.",
+    "testDesc": "Real replies from this assistant. Each one uses one AI reply from your wallet.",
     "reset": "Reset",
     "testEmpty": "Send a message as if you were a customer.",
     "testPlaceholder": "Type a customer message…",
@@ -4015,7 +4015,8 @@
     "wizardDone": "{name} is ready. You can keep editing any time.",
     "loadingList": "Loading your assistants…",
     "tabShop": "Shop",
-    "tabBookings": "Bookings"
+    "tabBookings": "Bookings",
+    "testError": "No reply: {reason}"
   },
   "AiTools": {
     "title": "AI tools",
