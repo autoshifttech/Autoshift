@@ -169,18 +169,26 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "no-store" }],
       },
       {
-        // Pages: a browser may keep them but must check with us every
-        // time (a 304 when nothing changed), so a new deploy shows at
-        // once without making returning visitors download it all again.
-        // ("no-store" here, from the old Hostinger set-up, made every
-        // visit re-download the whole site.)
         source: "/:path((?!_next/static|_next/image|api).*)",
         headers: [
           {
             key: "Cache-Control",
-            value: "private, no-cache",
+            value: "private, no-store",
           },
         ],
+      },
+      {
+        // The public home page (the big self-contained site file): a
+        // browser may keep it but must check with us every time, so a
+        // returning visitor gets a tiny 304 instead of the whole page and
+        // a new deploy still shows at once. Never stored by shared caches.
+        // Signed-in pages above stay no-store.
+        source: "/",
+        headers: [{ key: "Cache-Control", value: "private, no-cache" }],
+      },
+      {
+        source: "/site/index.html",
+        headers: [{ key: "Cache-Control", value: "private, no-cache" }],
       },
       {
         // Website photos: the file name carries a hash of the content,

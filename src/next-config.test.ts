@@ -13,7 +13,7 @@ async function cacheControlFor(pathname: string) {
 }
 
 describe("next.config Cache-Control", () => {
-  it.each(["/", "/login", "/signup", "/dashboard", "/inbox/123", "/settings/team", "/join/abc"])(
+  it.each(["/login", "/signup", "/dashboard", "/inbox/123", "/settings/team", "/join/abc"])(
     "keeps %s out of shared caches",
     async (pathname) => {
       const value = await cacheControlFor(pathname);
@@ -21,6 +21,16 @@ describe("next.config Cache-Control", () => {
       expect(value).not.toMatch(/public|s-maxage|stale-while-revalidate/);
     },
   );
+
+  it.each(["/", "/site/index.html"])("lets browsers keep the public home page %s but revalidate it", async (pathname) => {
+    const value = await cacheControlFor(pathname);
+    expect(value).toBe("private, no-cache");
+    expect(value).not.toMatch(/public|s-maxage|stale-while-revalidate/);
+  });
+
+  it("caches the hashed website photos for a year", async () => {
+    expect(await cacheControlFor("/site/img/about-studio.31cc351490.webp")).toBe("public, max-age=31536000, immutable");
+  });
 
   it("sends no-store on API routes", async () => {
     expect(await cacheControlFor("/api/whatsapp/templates")).toBe("no-store");
