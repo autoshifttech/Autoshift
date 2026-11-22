@@ -1,14 +1,15 @@
 "use client";
 
 import { EmptyPanel } from "@/components/ui/empty-panel";
-import { useRef, useState } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { Copy, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Circle, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { FILE_KINDS, MAX_SIZE, MEDIA_BUCKET, STORAGE_LIMIT, deleteLiveFile, filesStore, formatSize, kindOf, loadLiveFiles, useFiles, type FileKind, type LibraryFile } from "@/lib/files/model";
 import { uploadAccountMedia } from "@/lib/storage/upload-media";
@@ -32,6 +33,22 @@ function Thumb({ file, className }: { file: LibraryFile; className?: string }) {
   );
 }
 
+/** The big preview in the file card: the image itself, a playable video, or the type icon. */
+function Preview({ file }: { file: LibraryFile }) {
+  if (file.url && file.kind === "image") {
+    // eslint-disable-next-line @next/next/no-img-element -- the file's own storage URL
+    return <img src={file.url} alt={file.name} className="max-h-[42vh] w-full bg-[repeating-conic-gradient(#0000_0_25%,#0000000a_0_50%)] bg-[length:16px_16px] object-contain" />;
+  }
+  if (file.url && file.kind === "video") {
+    return <video src={file.url} controls playsInline preload="metadata" className="max-h-[42vh] w-full bg-black" />;
+  }
+  return (
+    <div className="aspect-[16/9] w-full">
+      <Thumb file={file} />
+    </div>
+  );
+}
+
 export function FilesPage() {
   const t = useTranslations("Files");
   const locale = useLocale();
@@ -41,6 +58,54 @@ export function FilesPage() {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  // Select several files: long-press a tile on a phone (or Ctrl/Cmd-click),
+  // then tap more and delete them together.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirm, setConfirm] = useState<string[] | null>(null);
+  const press = useRef<{ timer: number; fired: boolean; x: number; y: number } | null>(null);
+  const selecting = selected.size > 0;
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const removeFiles = (ids: string[]) => {
+    filesStore.set((s) => ({ files: s.files.filter((x) => !ids.includes(x.id)) }));
+    setSelected(new Set());
+    setOpenId(null);
+    if (!isLive()) {
+      toast.success(t("deletedMany", { count: ids.length }));
+      return;
+    }
+    void Promise.allSettled(ids.map((id) => deleteLiveFile(id))).then((results) => {
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      const ok = results.length - results.filter((r) => r.status === "rejected").length;
+      if (ok) toast.success(t("deletedMany", { count: ok }));
+      if (failed) {
+        toast.error(failed.reason instanceof Error ? failed.reason.message : String(failed.reason));
+        void loadLiveFiles(true);
+      }
+    });
+  };
+  const pressStart = (id: string) => (e: ReactPointerEvent) => {
+    if (e.pointerType !== "touch") return;
+    const st = { fired: false, x: e.clientX, y: e.clientY, timer: 0 };
+    st.timer = window.setTimeout(() => {
+      st.fired = true;
+      navigator.vibrate?.(12);
+      setSelected((prev) => new Set(prev).add(id));
+    }, 450);
+    press.current = st;
+  };
+  const pressMove = (e: ReactPointerEvent) => {
+    const st = press.current;
+    if (st && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 10) window.clearTimeout(st.timer);
+  };
+  const pressEnd = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+  };
   // The Upload button's liquid fill: real bytes sent across all picked files.
   const [up, setUp] = useState<{ phase: UploadPhase; loaded: number; total: number; ms: number }>({ phase: "idle", loaded: 0, total: 0, ms: 0 });
   const used = files.reduce((s, f) => s + f.size, 0);
@@ -161,7 +226,8 @@ export function FilesPage() {
         </div>
       </div>
 
-      <div className={cn("grid grid-cols-2 gap-4 rounded-2xl transition-colors sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5", dragging && "bg-primary/5 ring-2 ring-primary/40 ring-dashed")}>
+      {shown.length > 0 && !selecting && <p className="-mb-2 text-xs text-muted-foreground lg:hidden">{t("holdHint")}</p>}
+      <div className={cn("grid grid-cols-2 gap-4 rounded-2xl transition-colors sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5", dragging && "bg-primary/5 ring-2 ring-primary/40 ring-dashed", selecting && "pb-24")}>
         <button
           type="button"
           onClick={() => input.current?.click()}
@@ -170,13 +236,37 @@ export function FilesPage() {
           <Upload className="size-6" />
           {t("dropHere")}
         </button>
-        {shown.map((f) => (
+        {shown.map((f) => {
+          const isSel = selected.has(f.id);
+          return (
           <button
             key={f.id}
             type="button"
-            onClick={() => setOpenId(f.id)}
-            className="group flex aspect-[4/5] flex-col overflow-hidden rounded-2xl border border-border bg-card text-left shadow-[var(--shadow-card)] transition-colors hover:border-primary/40"
+            aria-pressed={selecting ? isSel : undefined}
+            onPointerDown={pressStart(f.id)}
+            onPointerMove={pressMove}
+            onPointerUp={pressEnd}
+            onPointerCancel={pressEnd}
+            onContextMenu={(e) => selecting && e.preventDefault()}
+            onClick={(e) => {
+              // The lift after a long press must not also open the file.
+              if (press.current?.fired) {
+                press.current = null;
+                return;
+              }
+              if (selecting || e.metaKey || e.ctrlKey) return toggle(f.id);
+              setOpenId(f.id);
+            }}
+            className={cn(
+              "file-tile group relative flex aspect-[4/5] flex-col overflow-hidden rounded-2xl border bg-card text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,scale] duration-200 [-webkit-touch-callout:none] select-none hover:border-primary/40",
+              isSel ? "scale-[0.96] border-primary ring-2 ring-primary" : "border-border",
+            )}
           >
+            {selecting && (
+              <span aria-hidden className={cn("absolute top-2 left-2 z-10 flex size-7 items-center justify-center rounded-full shadow-sm", isSel ? "bg-primary text-primary-foreground" : "bg-card/90 text-muted-foreground")}>
+                {isSel ? <CheckCircle2 className="size-5" /> : <Circle className="size-5" />}
+              </span>
+            )}
             <div className="min-h-0 flex-1 overflow-hidden">
               <Thumb file={f} className="transition-transform group-hover:scale-[1.03]" />
             </div>
@@ -187,49 +277,63 @@ export function FilesPage() {
               </p>
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
       {shown.length === 0 && <EmptyPanel icon={FileText} mascot="sleep" title={t("empty")} />}
 
-      <Sheet open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-md">
+      {/* A file's details: a centred card with a real preview. */}
+      <Dialog open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
+        <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto p-0 sm:max-w-lg">
           {open && (
             <>
-              <SheetHeader>
-                <SheetTitle className="pr-6 break-all">{open.name}</SheetTitle>
-                <SheetDescription>
-                  {t(`kind_${open.kind}`)} · {formatSize(open.size, locale)} · {new Date(open.uploadedAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
-                </SheetDescription>
-              </SheetHeader>
-              <div className="space-y-5 px-4 pb-6">
-                <div className="aspect-video overflow-hidden rounded-xl border border-border">
-                  <Thumb file={open} />
-                </div>
+              <div className="relative overflow-hidden rounded-t-3xl border-b border-border">
+                <Preview file={open} />
+                <button
+                  type="button"
+                  onClick={() => setOpenId(null)}
+                  aria-label={t("close")}
+                  className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              <div className="space-y-5 p-5">
+                <DialogHeader className="gap-2">
+                  <DialogTitle className="text-lg leading-snug font-semibold tracking-[-0.01em] break-all">{open.name}</DialogTitle>
+                  <DialogDescription render={<div />} className="flex flex-wrap gap-1.5">
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{t(`kind_${open.kind}`)}</span>
+                    <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground/80 tabular-nums">{formatSize(open.size, locale)}</span>
+                    <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground/80">
+                      {new Date(open.uploadedAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  </DialogDescription>
+                </DialogHeader>
                 <div className="grid gap-1.5">
-                  <label htmlFor="file-name" className="text-xs text-muted-foreground">
+                  <label htmlFor="file-name" className="text-sm font-medium text-foreground">
                     {t("rename")}
                   </label>
                   <Input id="file-name" value={open.name} onChange={(e) => filesStore.set((s) => ({ files: s.files.map((x) => (x.id === open.id ? { ...x, name: e.target.value } : x)) }))} />
                 </div>
                 {open.url && isCatalogFile(open.name) && <ProductListPanel file={{ name: open.name, url: open.url }} />}
-                <section>
-                  <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("usedIn")}</p>
+                <section className="rounded-2xl bg-muted/50 p-3.5">
+                  <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{t("usedIn")}</p>
                   {open.usedIn.length === 0 ? (
                     <p className="mt-1 text-sm text-muted-foreground">{t("notUsedLong")}</p>
                   ) : (
                     <ul className="mt-2 flex flex-wrap gap-1.5">
                       {open.usedIn.map((u) => (
-                        <li key={u} className="rounded-full bg-muted px-2.5 py-1 text-xs text-foreground">
+                        <li key={u} className="rounded-full bg-card px-2.5 py-1 text-xs text-foreground ring-1 ring-border">
                           {u}
                         </li>
                       ))}
                     </ul>
                   )}
                 </section>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_auto]">
                   <Button
                     variant="outline"
-                    className="gap-1.5"
+                    className="min-h-11 gap-1.5"
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(open.url ?? `https://files.autoshift.app/demo/${encodeURIComponent(open.name)}`);
@@ -242,21 +346,15 @@ export function FilesPage() {
                     <Copy className="size-4" />
                     {t("copyLink")}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="gap-1.5 text-destructive hover:text-destructive"
-                    onClick={() => {
-                      const id = open.id;
-                      filesStore.set((s) => ({ files: s.files.filter((x) => x.id !== id) }));
-                      setOpenId(null);
-                      deleteLiveFile(id)
-                        .then(() => toast.success(t("deleted")))
-                        .catch((err) => {
-                          toast.error(err instanceof Error ? err.message : String(err));
-                          void loadLiveFiles(true);
-                        });
-                    }}
-                  >
+                  {open.url ? (
+                    <a href={open.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border px-4 text-sm font-medium text-foreground hover:bg-muted">
+                      <ExternalLink className="size-4" />
+                      {t("openFile")}
+                    </a>
+                  ) : (
+                    <span />
+                  )}
+                  <Button variant="destructive" className="col-span-2 min-h-11 gap-1.5 sm:col-span-1" onClick={() => setConfirm([open.id])}>
                     <Trash2 className="size-4" />
                     {t("delete")}
                   </Button>
@@ -265,8 +363,32 @@ export function FilesPage() {
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
+
+      {/* Selection bar: appears after a long press (or Ctrl/Cmd-click). */}
+      {selecting && (
+        <div role="toolbar" aria-label={t("selectedCount", { count: selected.size })} className="select-bar liquid-glass lg-floating fixed inset-x-3 bottom-24 z-50 mx-auto flex max-w-md items-center gap-2 rounded-full p-2 pl-4 lg:bottom-6">
+          <span className="flex-1 text-sm font-semibold text-foreground tabular-nums">{t("selectedCount", { count: selected.size })}</span>
+          <Button variant="ghost" className="min-h-10 rounded-full" onClick={() => setSelected(new Set())}>
+            {t("cancel")}
+          </Button>
+          <Button variant="destructive" className="min-h-10 gap-1.5 rounded-full" onClick={() => setConfirm(Array.from(selected))}>
+            <Trash2 className="size-4" />
+            {t("delete")}
+          </Button>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        onOpenChange={(o) => !o && setConfirm(null)}
+        title={t("deleteTitle", { count: confirm?.length ?? 1 })}
+        description={t("deleteDesc")}
+        confirmLabel={t("delete")}
+        cancelLabel={t("cancel")}
+        onConfirm={() => confirm && removeFiles(confirm)}
+      />
     </div>
   );
 }

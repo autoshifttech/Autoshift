@@ -4381,7 +4381,15 @@
     "uploadDone": "업로드 완료",
     "connecting": "연결 중…",
     "progressOf": "{total} 중 {loaded}",
-    "doneIn": "{total} · {seconds}초"
+    "doneIn": "{total} · {seconds}초",
+    "close": "닫기",
+    "openFile": "열기",
+    "selectedCount": "{count}개 선택됨",
+    "cancel": "취소",
+    "deleteTitle": "{count, plural, one {이 파일을 삭제할까요?} other {파일 #개를 삭제할까요?}}",
+    "deleteDesc": "라이브러리에서 삭제됩니다. 사용 중인 파일은 사용 중인 곳에서도 삭제됩니다.",
+    "deletedMany": "{count, plural, one {파일을 삭제했습니다.} other {파일 #개를 삭제했습니다.}}",
+    "holdHint": "팁: 파일을 길게 누르면 여러 개를 선택할 수 있어요."
   },
   "Search": {
     "title": "검색",

@@ -4381,7 +4381,15 @@
     "uploadDone": "Subido",
     "connecting": "Conectando…",
     "progressOf": "{loaded} de {total}",
-    "doneIn": "{total} en {seconds} s"
+    "doneIn": "{total} en {seconds} s",
+    "close": "Cerrar",
+    "openFile": "Abrir",
+    "selectedCount": "{count, plural, one {# seleccionado} other {# seleccionados}}",
+    "cancel": "Cancelar",
+    "deleteTitle": "{count, plural, one {¿Eliminar este archivo?} other {¿Eliminar # archivos?}}",
+    "deleteDesc": "Se quitan de tu biblioteca. Un archivo en uso también se quita de esos lugares.",
+    "deletedMany": "{count, plural, one {Archivo eliminado.} other {# archivos eliminados.}}",
+    "holdHint": "Consejo: mantén pulsado un archivo para seleccionar varios."
   },
   "Search": {
     "title": "Buscar",
