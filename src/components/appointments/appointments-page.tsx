@@ -339,11 +339,14 @@ function SettingsDialog({ open, onOpenChange, settings, onSaved }: { open: boole
           {DAYS.map((d) => {
             const win = s.hours[d]?.[0];
             return (
-              <div key={d} className="grid grid-cols-[5.5rem_auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2">
+              <div key={d} className="grid grid-cols-[5.5rem_auto_minmax(0,1fr)] items-center gap-2">
                 <span className="text-sm text-foreground">{t(`day_${d}`)}</span>
                 <Switch checked={!!win} aria-label={t("openOn", { day: t(`day_${d}`) })} onCheckedChange={(on) => put({ hours: { ...s.hours, [d]: on ? [["09:00", "18:00"]] : [] } })} />
+                {/* Phones: the two times go on their own line so "AM/PM" never gets cut. */}
+                <div className="grid grid-cols-2 gap-2 max-sm:col-span-3">
                 <Input type="time" aria-label={t("opens", { day: t(`day_${d}`) })} className="min-h-11" disabled={!win} value={win?.[0] ?? ""} onChange={(e) => put({ hours: { ...s.hours, [d]: [[e.target.value, win?.[1] ?? "18:00"]] } })} />
                 <Input type="time" aria-label={t("closes", { day: t(`day_${d}`) })} className="min-h-11" disabled={!win} value={win?.[1] ?? ""} onChange={(e) => put({ hours: { ...s.hours, [d]: [[win?.[0] ?? "09:00", e.target.value]] } })} />
+                </div>
               </div>
             );
           })}

@@ -1397,3 +1397,7 @@ body:has(.rail-shell[data-open]) .rail-tip-layer { display: none !important; }
 }
 @keyframes upload-wave { to { translate: -50% 0; } }
 @keyframes upload-pulse { 50% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent); } }
+
+/* Time fields: always wide enough for the hour, minutes, AM/PM and the clock icon. */
+input[type="time"] { min-width: 8.5rem; font-variant-numeric: tabular-nums; }
+input[type="datetime-local"] { min-width: 13.5rem; font-variant-numeric: tabular-nums; }

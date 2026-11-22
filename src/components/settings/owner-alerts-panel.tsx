@@ -108,10 +108,10 @@ function Form({ saved }: { saved: NotifyPrefs }) {
             <Switch checked={p.quietHours.enabled} onCheckedChange={(v) => setP({ ...p, quietHours: { ...p.quietHours, enabled: v } })} aria-label={t("quietHours")} />
           </label>
           {p.quietHours.enabled && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <Input type="time" value={p.quietHours.from} onChange={(ev) => setP({ ...p, quietHours: { ...p.quietHours, from: ev.target.value } })} aria-label={t("from")} className="h-9 w-28" />
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Input type="time" value={p.quietHours.from} onChange={(ev) => setP({ ...p, quietHours: { ...p.quietHours, from: ev.target.value } })} aria-label={t("from")} className="h-9 w-36" />
               {t("to")}
-              <Input type="time" value={p.quietHours.to} onChange={(ev) => setP({ ...p, quietHours: { ...p.quietHours, to: ev.target.value } })} aria-label={t("to")} className="h-9 w-28" />
+              <Input type="time" value={p.quietHours.to} onChange={(ev) => setP({ ...p, quietHours: { ...p.quietHours, to: ev.target.value } })} aria-label={t("to")} className="h-9 w-36" />
             </div>
           )}
         </div>
@@ -176,7 +176,7 @@ function Form({ saved }: { saved: NotifyPrefs }) {
         <Label htmlFor="summary-time" className="flex-1 text-sm">
           {t("summaryTime")}
         </Label>
-        <Input id="summary-time" type="time" value={p.summaryTime} onChange={(ev) => setP({ ...p, summaryTime: ev.target.value })} className="h-9 w-28" />
+        <Input id="summary-time" type="time" value={p.summaryTime} onChange={(ev) => setP({ ...p, summaryTime: ev.target.value })} className="h-9 w-36" />
       </div>
       <p className="text-xs text-muted-foreground">{t("footnote")}</p>
     </section>

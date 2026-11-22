@@ -290,9 +290,9 @@ export function DripBuilder({ id }: { id: string }) {
             </label>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span>{t("sendBetween")}</span>
-              <input type="time" value={d.window.start} aria-label={t("windowStart")} onChange={(e) => set({ window: { ...d.window, start: e.target.value } })} className="h-8 w-32 rounded-lg border border-input bg-card px-2 text-sm dark:bg-input/30" />
+              <input type="time" value={d.window.start} aria-label={t("windowStart")} onChange={(e) => set({ window: { ...d.window, start: e.target.value } })} className="h-8 w-36 rounded-lg border border-input bg-card px-2 text-sm tabular-nums dark:bg-input/30" />
               <span>–</span>
-              <input type="time" value={d.window.end} aria-label={t("windowEnd")} onChange={(e) => set({ window: { ...d.window, end: e.target.value } })} className="h-8 w-32 rounded-lg border border-input bg-card px-2 text-sm dark:bg-input/30" />
+              <input type="time" value={d.window.end} aria-label={t("windowEnd")} onChange={(e) => set({ window: { ...d.window, end: e.target.value } })} className="h-8 w-36 rounded-lg border border-input bg-card px-2 text-sm tabular-nums dark:bg-input/30" />
             </div>
             <p className="text-xs text-muted-foreground">{t("optInNote")}</p>
           </section>
