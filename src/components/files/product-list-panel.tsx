@@ -96,13 +96,13 @@ export function ProductListPanel({ file }: { file?: { name: string; url: string 
           </div>
         </div>
       ) : file ? (
-        <Button variant={isCurrent ? "outline" : "default"} className="mt-3 min-h-11 w-full gap-1.5" disabled={busy} onClick={() => void run(true)}>
+        <Button variant={isCurrent ? "outline" : "default"} className="mt-3 min-h-11 w-full gap-1.5 px-5 sm:w-auto sm:self-start" disabled={busy} onClick={() => void run(true)}>
           {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}
           {isCurrent ? t("update") : t("use")}
         </Button>
       ) : (
         <>
-          <Button className="mt-3 min-h-11 w-full gap-1.5" disabled={busy} onClick={() => pick.current?.click()}>
+          <Button className="mt-3 min-h-11 w-full gap-1.5 px-5 sm:w-auto sm:self-start" disabled={busy} onClick={() => pick.current?.click()}>
             {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <FileUp className="size-4" aria-hidden />}
             {catalog ? t("importNew") : t("import")}
           </Button>
