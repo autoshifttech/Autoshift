@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { cn } from "@/lib/utils";
 import { FILE_KINDS, MAX_SIZE, MEDIA_BUCKET, STORAGE_LIMIT, deleteLiveFile, filesStore, formatSize, kindOf, loadLiveFiles, useFiles, type FileKind, type LibraryFile } from "@/lib/files/model";
 import { uploadAccountMedia } from "@/lib/storage/upload-media";
+import { UploadButton, type UploadPhase } from "@/components/motion/upload-button";
 import { isLive } from "@/lib/workspace/live";
 import { isCatalogFile } from "@/lib/catalog";
 import { ProductListPanel } from "./product-list-panel";
@@ -40,6 +41,8 @@ export function FilesPage() {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  // The Upload button's liquid fill: real bytes sent across all picked files.
+  const [up, setUp] = useState<{ phase: UploadPhase; loaded: number; total: number; ms: number }>({ phase: "idle", loaded: 0, total: 0, ms: 0 });
   const used = files.reduce((s, f) => s + f.size, 0);
   const shown = files.filter((f) => (kind === "all" || f.kind === kind) && f.name.toLowerCase().includes(query.trim().toLowerCase()));
   const open = files.find((f) => f.id === openId) ?? null;
@@ -63,9 +66,22 @@ export function FilesPage() {
     }
     // Real accounts: upload to storage, then show what's really there.
     const picked = Array.from(list).filter((f) => f.size <= MAX_SIZE[kindOf(f)]);
-    void Promise.allSettled(picked.map((f) => uploadAccountMedia(MEDIA_BUCKET, f))).then(async (results) => {
+    const total = picked.reduce((n, f) => n + f.size, 0);
+    const sent = picked.map(() => 0);
+    const started = performance.now();
+    setUp({ phase: "connecting", loaded: 0, total, ms: 0 });
+    void Promise.allSettled(
+      picked.map((f, i) =>
+        uploadAccountMedia(MEDIA_BUCKET, f, (loaded) => {
+          sent[i] = loaded;
+          setUp({ phase: "uploading", loaded: sent.reduce((a, b) => a + b, 0), total, ms: 0 });
+        }),
+      ),
+    ).then(async (results) => {
       const ok = results.filter((r) => r.status === "fulfilled").length;
       const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      setUp(ok ? { phase: "done", loaded: total, total, ms: performance.now() - started } : { phase: "idle", loaded: 0, total: 0, ms: 0 });
+      if (ok) window.setTimeout(() => setUp((u) => (u.phase === "done" ? { phase: "idle", loaded: 0, total: 0, ms: 0 } : u)), 3200);
       if (ok) toast.success(t("uploaded", { count: ok }));
       if (failed) toast.error(failed.reason instanceof Error ? failed.reason.message : String(failed.reason));
       await loadLiveFiles(true);
@@ -91,10 +107,22 @@ export function FilesPage() {
           <h2 className="sr-only">{t("title")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <Button onClick={() => input.current?.click()} className="gap-1.5 self-start">
-          <Upload className="size-4" />
-          {t("upload")}
-        </Button>
+        <UploadButton
+          className="self-start"
+          phase={up.phase}
+          progress={up.total ? up.loaded / up.total : 0}
+          labels={{ idle: t("upload"), uploading: t("uploading"), done: t("uploadDone") }}
+          caption={
+            up.phase === "connecting"
+              ? t("connecting")
+              : up.phase === "uploading"
+                ? t("progressOf", { loaded: formatSize(up.loaded, locale), total: formatSize(up.total, locale) })
+                : up.phase === "done"
+                  ? t("doneIn", { total: formatSize(up.total, locale), seconds: (up.ms / 1000).toFixed(1) })
+                  : null
+          }
+          onClick={() => input.current?.click()}
+        />
         <input ref={input} type="file" multiple className="hidden" accept="image/*,application/pdf,video/mp4,.doc,.docx,.xls,.xlsx,.csv,text/csv,text/comma-separated-values,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(e) => add(e.target.files)} />
       </div>
 

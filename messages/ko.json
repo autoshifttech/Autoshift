@@ -3023,7 +3023,8 @@
   "LibErrors": {
     "upload": {
       "notSignedIn": "로그인되어 있지 않습니다.",
-      "accountUnresolved": "계정을 확인할 수 없습니다."
+      "accountUnresolved": "계정을 확인할 수 없습니다.",
+      "networkError": "업로드 중 네트워크 오류가 발생했습니다. 연결을 확인하고 다시 시도하세요."
     },
     "media": {
       "noAttachment": "이 메시지에는 첨부 파일이 없습니다."
@@ -4375,7 +4376,12 @@
     "copyFailed": "링크를 복사하지 못했습니다.",
     "delete": "삭제",
     "deleted": "파일을 삭제했습니다.",
-    "deleteWarning": "사용 중인 파일을 삭제하면 해당 위치에서도 빠집니다."
+    "deleteWarning": "사용 중인 파일을 삭제하면 해당 위치에서도 빠집니다.",
+    "uploading": "업로드 중",
+    "uploadDone": "업로드 완료",
+    "connecting": "연결 중…",
+    "progressOf": "{total} 중 {loaded}",
+    "doneIn": "{total} · {seconds}초"
   },
   "Search": {
     "title": "검색",

@@ -1368,3 +1368,32 @@ html[data-mode="dark"] .rail-shell .rail-active {
 }
 /* Names are on the rows once the rail is open, so no hover tooltips then. */
 body:has(.rail-shell[data-open]) .rail-tip-layer { display: none !important; }
+
+/* "The bin eats the label" (components/motion/bin-button.tsx). */
+.bin-button .bin-lid { transform-origin: 3.5px 6px; transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.bin-button[data-phase="eat"] .bin-lid { transform: rotate(-38deg) translate(-1px, -1px); }
+.bin-button .bin-fill { transform-origin: 12px 22px; transform: scaleY(0); }
+.bin-button[data-phase="eat"] .bin-fill { transform: scaleY(1); transition: transform 0.9s 0.15s ease-in; }
+.bin-button[data-phase="fold"] .bin-fill,
+.bin-button[data-phase="ring"] .bin-fill { transform: scaleY(1); }
+.bin-button[data-phase="fold"],
+.bin-button[data-phase="ring"] { padding-inline: 0; gap: 0; }
+.bin-button[data-phase="fold"] .bin-word,
+.bin-button[data-phase="ring"] .bin-word { width: 0; }
+.bin-ring circle + circle { stroke-dasharray: 1; stroke-dashoffset: 1; animation: bin-ring 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+@keyframes bin-ring { to { stroke-dashoffset: 0; } }
+
+/* Upload button with a rising liquid fill (components/motion/upload-button.tsx). */
+.upload-btn .upload-liquid { color: var(--primary); transform: translateY(calc((1 - var(--level, 0)) * (100% + 8px))); }
+.upload-btn .upload-ink { clip-path: inset(calc((1 - var(--level, 0)) * 100%) 0 0 0); }
+.upload-btn[data-phase="done"] { border-color: var(--primary); }
+@media (prefers-reduced-motion: no-preference) {
+  .upload-btn .upload-liquid { transition: transform 0.45s cubic-bezier(0.3, 0.8, 0.3, 1); }
+  .upload-btn .upload-ink { transition: clip-path 0.45s cubic-bezier(0.3, 0.8, 0.3, 1); }
+  .upload-btn[data-phase="uploading"] .upload-wave,
+  .upload-btn[data-phase="connecting"] .upload-wave { animation: upload-wave 1.2s linear infinite; }
+  .upload-btn[data-phase="connecting"] { animation: upload-pulse 1.2s ease-in-out infinite; }
+  .upload-btn[data-phase="done"] { animation: pop-in 0.45s cubic-bezier(0.3, 1.6, 0.5, 1); }
+}
+@keyframes upload-wave { to { translate: -50% 0; } }
+@keyframes upload-pulse { 50% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent); } }

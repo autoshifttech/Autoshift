@@ -3,6 +3,7 @@
 import { TriangleAlert } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { BinButton } from "@/components/motion/bin-button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
@@ -45,15 +46,25 @@ export function ConfirmDialog({
           <Button variant="outline" autoFocus onClick={() => onOpenChange(false)}>
             {cancelLabel}
           </Button>
-          <Button
-            variant={destructive ? "destructive" : "default"}
-            onClick={() => {
-              onOpenChange(false)
-              onConfirm()
-            }}
-          >
-            {confirmLabel}
-          </Button>
+          {destructive ? (
+            // The bin eats the label, then the delete runs and the box closes.
+            <BinButton
+              label={confirmLabel}
+              onDone={() => {
+                onOpenChange(false)
+                onConfirm()
+              }}
+            />
+          ) : (
+            <Button
+              onClick={() => {
+                onOpenChange(false)
+                onConfirm()
+              }}
+            >
+              {confirmLabel}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

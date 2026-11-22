@@ -3023,7 +3023,8 @@
   "LibErrors": {
     "upload": {
       "notSignedIn": "No has iniciado sesión.",
-      "accountUnresolved": "No se pudo identificar tu cuenta."
+      "accountUnresolved": "No se pudo identificar tu cuenta.",
+      "networkError": "Error de red al subir. Revisa tu conexión e inténtalo de nuevo."
     },
     "media": {
       "noAttachment": "Este mensaje no tiene archivo adjunto."
@@ -4375,7 +4376,12 @@
     "copyFailed": "No se pudo copiar el enlace.",
     "delete": "Eliminar",
     "deleted": "Archivo eliminado.",
-    "deleteWarning": "Si eliminas un archivo en uso, también se quita de esos sitios."
+    "deleteWarning": "Si eliminas un archivo en uso, también se quita de esos sitios.",
+    "uploading": "Subiendo",
+    "uploadDone": "Subido",
+    "connecting": "Conectando…",
+    "progressOf": "{loaded} de {total}",
+    "doneIn": "{total} en {seconds} s"
   },
   "Search": {
     "title": "Buscar",

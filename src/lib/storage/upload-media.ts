@@ -97,6 +97,8 @@ export interface UploadAccountMediaResult {
 export async function uploadAccountMedia(
   bucket: string,
   file: File,
+  /** Optional: bytes sent so far, for a progress display. Uses the same storage endpoint and rules. */
+  onProgress?: (loaded: number, total: number) => void,
 ): Promise<UploadAccountMediaResult> {
   const supabase = createClient();
 
@@ -121,12 +123,21 @@ export async function uploadAccountMedia(
   }
 
   const path = buildMediaPath(profile.account_id as string, file.name);
-  const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-    cacheControl: "3600",
-    upsert: false,
-    contentType: storageContentType(file),
-  });
-  if (upErr) throw new Error(upErr.message);
+  if (onProgress) {
+    // Same request supabase-js makes, sent with XMLHttpRequest because fetch
+    // can't report upload progress.
+    const { data: session } = await supabase.auth.getSession();
+    const token = session.session?.access_token;
+    if (!token) throw new Error(t("upload.notSignedIn"));
+    await uploadWithProgress(bucket, path, file, token, onProgress);
+  } else {
+    const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: storageContentType(file),
+    });
+    if (upErr) throw new Error(upErr.message);
+  }
 
   const {
     data: { publicUrl },
@@ -167,4 +178,36 @@ export function storageContentType(file: { name: string; type: string }): string
   if (name.endsWith(".xlsx")) return XLSX_TYPE;
   if (name.endsWith(".xls")) return "application/vnd.ms-excel";
   return file.type;
+}
+
+/** POST the file to Supabase Storage, reporting bytes sent. */
+function uploadWithProgress(bucket: string, path: string, file: File, token: string, onProgress: (loaded: number, total: number) => void): Promise<void> {
+  const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+  const url = `${base}/storage/v1/object/${encodeURIComponent(bucket)}/${path.split("/").map(encodeURIComponent).join("/")}`;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.setRequestHeader("authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("apikey", key);
+    xhr.setRequestHeader("x-upsert", "false");
+    xhr.setRequestHeader("cache-control", "max-age=3600");
+    xhr.setRequestHeader("content-type", storageContentType(file));
+    xhr.upload.onprogress = (e) => onProgress(e.loaded, e.lengthComputable ? e.total : file.size);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress(file.size, file.size);
+        resolve();
+        return;
+      }
+      let message = xhr.statusText || `Upload failed (${xhr.status})`;
+      try {
+        const body = JSON.parse(xhr.responseText) as { message?: string; error?: string };
+        message = body.message || body.error || message;
+      } catch {}
+      reject(new Error(message));
+    };
+    xhr.onerror = () => reject(new Error(t("upload.networkError")));
+    xhr.send(file);
+  });
 }

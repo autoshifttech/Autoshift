@@ -3023,7 +3023,8 @@
   "LibErrors": {
     "upload": {
       "notSignedIn": "Not signed in.",
-      "accountUnresolved": "Could not resolve your account."
+      "accountUnresolved": "Could not resolve your account.",
+      "networkError": "Network error while uploading. Check your connection and try again."
     },
     "media": {
       "noAttachment": "This message has no attachment."
@@ -4375,7 +4376,12 @@
     "copyFailed": "Couldn’t copy the link.",
     "delete": "Delete",
     "deleted": "File deleted.",
-    "deleteWarning": "Deleting a file that is in use removes it from those places too."
+    "deleteWarning": "Deleting a file that is in use removes it from those places too.",
+    "uploading": "Uploading",
+    "uploadDone": "Uploaded",
+    "connecting": "Connecting…",
+    "progressOf": "{loaded} of {total}",
+    "doneIn": "{total} in {seconds} s"
   },
   "Search": {
     "title": "Search",

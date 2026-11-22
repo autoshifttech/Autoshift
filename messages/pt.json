@@ -3023,7 +3023,8 @@
   "LibErrors": {
     "upload": {
       "notSignedIn": "Você não está conectado.",
-      "accountUnresolved": "Não foi possível identificar sua conta."
+      "accountUnresolved": "Não foi possível identificar sua conta.",
+      "networkError": "Erro de rede no envio. Verifique sua conexão e tente de novo."
     },
     "media": {
       "noAttachment": "Esta mensagem não tem anexo."
@@ -4375,7 +4376,12 @@
     "copyFailed": "Não foi possível copiar o link.",
     "delete": "Excluir",
     "deleted": "Arquivo excluído.",
-    "deleteWarning": "Excluir um arquivo em uso também o remove desses lugares."
+    "deleteWarning": "Excluir um arquivo em uso também o remove desses lugares.",
+    "uploading": "Enviando",
+    "uploadDone": "Enviado",
+    "connecting": "Conectando…",
+    "progressOf": "{loaded} de {total}",
+    "doneIn": "{total} em {seconds} s"
   },
   "Search": {
     "title": "Buscar",
