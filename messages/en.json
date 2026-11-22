@@ -4389,7 +4389,10 @@
     "deleteTitle": "{count, plural, one {Delete this file?} other {Delete # files?}}",
     "deleteDesc": "They’re removed from your library. A file in use is removed from those places too.",
     "deletedMany": "{count, plural, one {File deleted.} other {# files deleted.}}",
-    "holdHint": "Tip: press and hold a file to select several."
+    "holdHint": "Tip: press and hold a file to select several.",
+    "ofTotal": "of {total}",
+    "percentUsed": "{percent}% used",
+    "free": "Free"
   },
   "Search": {
     "title": "Search",

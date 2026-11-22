@@ -4389,7 +4389,10 @@
     "deleteTitle": "{count, plural, one {¿Eliminar este archivo?} other {¿Eliminar # archivos?}}",
     "deleteDesc": "Se quitan de tu biblioteca. Un archivo en uso también se quita de esos lugares.",
     "deletedMany": "{count, plural, one {Archivo eliminado.} other {# archivos eliminados.}}",
-    "holdHint": "Consejo: mantén pulsado un archivo para seleccionar varios."
+    "holdHint": "Consejo: mantén pulsado un archivo para seleccionar varios.",
+    "ofTotal": "de {total}",
+    "percentUsed": "{percent}% usado",
+    "free": "Libre"
   },
   "Search": {
     "title": "Buscar",

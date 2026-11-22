@@ -4,7 +4,7 @@ import { EmptyPanel } from "@/components/ui/empty-panel";
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { CheckCircle2, Circle, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Circle, HardDrive, Copy, ExternalLink, FileText, Film, Image as ImageIcon, Paperclip, Search, Trash2, Upload, X, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,6 +109,9 @@ export function FilesPage() {
   // The Upload button's liquid fill: real bytes sent across all picked files.
   const [up, setUp] = useState<{ phase: UploadPhase; loaded: number; total: number; ms: number }>({ phase: "idle", loaded: 0, total: 0, ms: 0 });
   const used = files.reduce((s, f) => s + f.size, 0);
+  const usedPct = (used / STORAGE_LIMIT) * 100;
+  const KIND_COLOR: Record<FileKind, string> = { image: "var(--primary)", video: "#5fbf9f", pdf: "#c2410c", other: "#b49a6a" };
+  const byKind = FILE_KINDS.map((k) => ({ kind: k, color: KIND_COLOR[k], size: files.filter((f) => f.kind === k).reduce((n, f) => n + f.size, 0) }));
   const shown = files.filter((f) => (kind === "all" || f.kind === kind) && f.name.toLowerCase().includes(query.trim().toLowerCase()));
   const open = files.find((f) => f.id === openId) ?? null;
 
@@ -193,18 +196,41 @@ export function FilesPage() {
 
       {isLive() && <ProductListPanel />}
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
-        <div className="min-w-0 flex-1">
-          <div className="flex justify-between text-sm">
-            <span className="text-foreground">{t("storage")}</span>
-            <span className="text-muted-foreground">{t("storageUsed", { used: formatSize(used, locale), total: formatSize(STORAGE_LIMIT, locale) })}</span>
+      {/* Storage: how much is used, split by file type. */}
+      <section className="rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <HardDrive className="size-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-muted-foreground">{t("storage")}</p>
+            <p className="mt-0.5 text-2xl font-bold tracking-[-0.02em] text-foreground tabular-nums">
+              {formatSize(used, locale)}
+              <span className="ml-1.5 text-sm font-medium text-muted-foreground">{t("ofTotal", { total: formatSize(STORAGE_LIMIT, locale) })}</span>
+            </p>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(1, (used / STORAGE_LIMIT) * 100)}%` }} />
-          </div>
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary tabular-nums">{t("percentUsed", { percent: usedPct < 1 && used > 0 ? "<1" : Math.round(usedPct) })}</span>
         </div>
-        <p className="text-xs text-muted-foreground sm:max-w-xs">{t("limits")}</p>
-      </div>
+        <div className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={t("storageUsed", { used: formatSize(used, locale), total: formatSize(STORAGE_LIMIT, locale) })}>
+          {byKind.map((k) =>
+            k.size > 0 ? <span key={k.kind} className="grow-x-bar h-full first:rounded-l-full last:rounded-r-full" style={{ width: `${Math.max(1.2, (k.size / STORAGE_LIMIT) * 100)}%`, background: k.color }} /> : null,
+          )}
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-5">
+          {byKind.map((k) => (
+            <li key={k.kind} className="flex items-center gap-2 text-sm">
+              <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: k.color }} />
+              <span className="min-w-0 flex-1 truncate text-muted-foreground">{t(`kind_${k.kind}`)}</span>
+              <span className="font-medium text-foreground tabular-nums">{formatSize(k.size, locale)}</span>
+            </li>
+          ))}
+          <li className="col-span-2 flex items-center gap-2 text-sm sm:col-span-1">
+            <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-muted ring-1 ring-border" />
+            <span className="min-w-0 flex-1 truncate text-muted-foreground">{t("free")}</span>
+            <span className="font-medium text-foreground tabular-nums">{formatSize(Math.max(0, STORAGE_LIMIT - used), locale)}</span>
+          </li>
+        </ul>
+      </section>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
