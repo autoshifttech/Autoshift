@@ -11,7 +11,8 @@ import {
   Clock,
   Check,
   CheckCheck,
-  XCircle,
+  X,
+  AlertTriangle,
   MapPin,
   LayoutTemplate,
   CornerDownLeft,
@@ -136,24 +137,28 @@ function failureReason(message: Message): string | null {
 function StatusIcon({
   status,
   title,
+  labels,
 }: {
   status: Message["status"];
   /** Tooltip for the failed state — Meta's reason, when we have one. */
   title?: string | null;
+  labels?: Partial<Record<"sending" | "sent" | "delivered" | "read" | "failed", string>>;
 }) {
   switch (status) {
+    // Ticks sit on the green "sent" bubble, so they use light colours that
+    // read on it (and dark ones on the light green bubble of dark mode).
     case "sending":
-      return <Clock className="h-3 w-3 text-muted-foreground" />;
+      return <Clock className="size-3.5 text-primary-foreground/70" aria-label={labels?.sending} />;
     case "sent":
-      return <Check className="h-3 w-3 text-muted-foreground" />;
+      return <Check className="size-3.5 text-primary-foreground/80" strokeWidth={2.5} aria-label={labels?.sent} />;
     case "delivered":
-      return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
+      return <CheckCheck className="size-3.5 text-primary-foreground/80" strokeWidth={2.5} aria-label={labels?.delivered} />;
     case "read":
-      return <CheckCheck className="h-3 w-3 text-blue-700 dark:text-blue-400" />;
+      return <CheckCheck className="size-3.5 text-[#53bdeb] drop-shadow-[0_0_1px_rgb(0_0_0/0.25)] dark:text-[#075e9c] dark:drop-shadow-none" strokeWidth={2.5} aria-label={labels?.read} />;
     case "failed":
       return (
-        <span className="inline-flex" title={title ?? undefined}>
-          <XCircle className="h-3 w-3 text-red-700 dark:text-red-400" />
+        <span className="inline-flex size-4 items-center justify-center rounded-full bg-red-600 text-white ring-2 ring-primary-foreground/30" title={title ?? undefined} aria-label={labels?.failed}>
+          <X className="size-2.5" strokeWidth={3.5} />
         </span>
       );
     default:
@@ -442,12 +447,19 @@ export function MessageBubble({
         </div>
       </div>
       {failure && (
-        <p
-          className="mt-0.5 px-1 text-xs leading-tight text-muted-foreground"
-          title={failure}
+        // A clear red card under the bubble: what failed, then why.
+        <div
+          role="alert"
+          className="mt-1.5 flex max-w-sm items-start gap-2 rounded-xl bg-red-50 px-3 py-2 text-left text-xs leading-snug text-red-900 ring-1 ring-red-200 dark:bg-red-950/60 dark:text-red-100 dark:ring-red-900"
         >
-          {t("notDelivered")}: {failure}
-        </p>
+          <AlertTriangle className="mt-px size-3.5 shrink-0 text-red-600 dark:text-red-300" aria-hidden />
+          <span>
+            <span className="font-semibold">
+              {t("notDelivered")}: {message.error_title}
+            </span>
+            {message.error_details && <span className="mt-0.5 block text-red-800/90 dark:text-red-100/85">{message.error_details}</span>}
+          </span>
+        </div>
       )}
       {reactions && reactions.length > 0 && onToggleReaction && (
         <MessageReactions
