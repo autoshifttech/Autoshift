@@ -1111,7 +1111,13 @@ html[data-mode="dark"] .sh-host svg { filter: drop-shadow(0 0 1.2px rgb(201 242 
     animation: lq-item 0.5s cubic-bezier(0.25, 0.9, 0.3, 1) backwards;
     animation-delay: 70ms;
   }
-  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-closed] > *,
+  /* Pop-up panels hold whole blocks (a list, a form), not single rows: drip them a short fixed
+     distance, so a tall block never flies up over the panel's title or its button. */
+  [data-slot="popover-content"][data-open] > * {
+    animation-name: lq-block;
+  }
+  [data-slot="popover-content"][data-closed] > * { animation: lq-fade-out 0.16s ease-in forwards; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"])[data-closed] > *,
   [data-slot="select-content"][data-closed] [data-slot="select-item"] {
     animation: lq-item-out 0.16s ease-in forwards;
   }
@@ -1155,8 +1161,16 @@ html[data-mode="dark"] .sh-host svg { filter: drop-shadow(0 0 1.2px rgb(201 242 
   75% { transform: translateY(calc(var(--lq-dir, 1) * 1px)) scale(1.02, 0.96); filter: none; }
   100% { transform: none; }
 }
+@keyframes lq-block {
+  0% { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -10px)) scale(0.96, 0.9); filter: blur(2px); }
+  50% { opacity: 1; transform: translateY(calc(var(--lq-dir, 1) * -2px)) scale(0.99, 1.02); filter: none; }
+  100% { transform: none; }
+}
 @keyframes lq-item-out {
   to { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -40%)) scale(0.85, 0.5); }
+}
+@keyframes lq-fade-out {
+  to { opacity: 0; }
 }
 @keyframes lq-release {
   0% { scale: 1; }
