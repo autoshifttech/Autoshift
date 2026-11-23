@@ -170,16 +170,24 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   };
   if (!reduce) window.addEventListener("pointermove", onLight, { passive: true });
   // Condense in: the controls form out of the glass one after another, as on the file's first load.
+  let condenseTimer = 0;
   if (condense && !condensed.has(condense) && !reduce) {
     condensed.add(condense);
+    let lastEnd = 0;
     box.querySelectorAll<HTMLElement>(item).forEach((el, i) => {
       if (el.offsetParent === null) return;
+      lastEnd = Math.max(lastEnd, 120 + Math.min(i, 14) * 45 + 620);
       el.animate(
         [{ transform: "scale(0.12)", opacity: 0, filter: "blur(3px)" }, { transform: "scale(1.06, 0.96)", opacity: 1, filter: "none", offset: 0.6 }, { transform: "none", opacity: 1 }],
         { duration: 620, delay: 120 + Math.min(i, 14) * 45, easing: "cubic-bezier(0.25, 0.9, 0.3, 1)", fill: "backwards" },
       );
     });
+    condenseTimer = window.setTimeout(() => place(), lastEnd + 30);
   }
+  // Items still forming (this or an earlier mount's condense-in) were measured shrunk: measure
+  // them again once every animation on them has finished.
+  const forming = [...box.querySelectorAll<HTMLElement>(item)].flatMap((el) => el.getAnimations());
+  if (forming.length) void Promise.allSettled(forming.map((a) => a.finished)).then(() => { if (box.isConnected) place(); });
   const onUp = () => { if (press.t !== 1) { press.t = 1; press.vel += 1.2; kick(); } };
   box.addEventListener("pointerover", onOver);
   box.addEventListener("pointerleave", onLeave);
@@ -200,6 +208,7 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   return () => {
     cancelAnimationFrame(raf);
     mo.disconnect();
+    clearTimeout(condenseTimer);
     window.removeEventListener("pointermove", onLight);
     cancelAnimationFrame(lightRaf);
     ro.disconnect();
