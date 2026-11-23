@@ -1,6 +1,6 @@
 "use client";
 
-import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useRailOpen } from "@/components/layout/expanding-rail";
+import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useBarBulge, useRailBulge, useRailOpen } from "@/components/layout/expanding-rail";
 import { adminTranslate, useAdminT } from "@/lib/admin/strings";
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
@@ -173,9 +173,10 @@ export function AdminRail() {
   const openTickets = tickets.filter((t) => t.status === "open").length;
   const current = activeItem(pathname);
   const { open, pinned, togglePin, handlers } = useRailOpen("autoshift-admin-rail-pinned");
+  const railRef = useRailBulge();
   const tip = (label: string) => (open ? undefined : label);
   return (
-    <aside aria-label="Admin navigation" data-open={open || undefined} {...handlers} className={railShellClass}>
+    <aside aria-label="Admin navigation" ref={railRef} data-open={open || undefined} {...handlers} className={railShellClass}>
       <RailHeader href="/admin" homeLabel="AutoShift admin" title="AutoShift" open={open} pinned={pinned} onPin={togglePin} pinLabel={tr("Keep menu open")} unpinLabel={tr("Collapse menu")} />
       <nav className="flex flex-col gap-0.5">
         {ADMIN_NAV.map((group, gi) => (
@@ -223,8 +224,9 @@ function AdminMobileNav() {
   const current = activeItem(pathname);
   const [open, setOpen] = useState(false);
   const inMore = !current || !BAR_HREFS.includes(current.href);
+  const barRef = useBarBulge();
   return (
-    <nav data-mobile-nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
+    <nav ref={barRef} data-mobile-nav aria-label="Admin navigation" className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
       {BAR_HREFS.map((href) => {
         const item = itemFor(href);
         const active = current?.href === href;

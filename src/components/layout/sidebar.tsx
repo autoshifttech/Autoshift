@@ -30,7 +30,7 @@ import {
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ModeToggle } from "@/components/layout/mode-toggle";
-import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useRailOpen } from "@/components/layout/expanding-rail";
+import { RailHeader, RailSection, railActive, railLabel, railRow, railShellClass, useBarBulge, useRailBulge, useRailOpen } from "@/components/layout/expanding-rail";
 import { isOn, pageForPath, usePages } from "@/lib/workspace/pages";
 
 interface NavItem {
@@ -174,12 +174,13 @@ export function Sidebar({ counts }: { counts: NavCounts }) {
   const groups = useVisibleNavGroups();
   const { profile } = useAuth();
   const { open, pinned, togglePin, handlers } = useRailOpen("autoshift-rail-pinned");
+  const railRef = useRailBulge();
   const tip = (label: string) => (open ? undefined : label);
   const name = profile?.full_name || profile?.email || t("defaultUser");
 
   return (
     <aside
-      aria-label={t("primaryNav")}
+      aria-label={t("primaryNav")} ref={railRef}
       data-open={open || undefined}
       {...handlers}
       className={railShellClass}
@@ -256,8 +257,9 @@ export function MobileNav({ counts }: { counts: NavCounts }) {
     setOpen(false);
   }, [pathname]);
 
+  const barRef = useBarBulge();
   return (
-    <nav data-mobile-nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
+    <nav ref={barRef} data-mobile-nav aria-label={t("primaryNav")} className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-full px-3 liquid-glass lg-floating lg:hidden">
       {bar.map((href) => {
         const item = itemFor(href);
         const active = isActiveHref(pathname, href);

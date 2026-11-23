@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
+import { useLiquidBulge } from '@/components/motion/liquid-bulge';
 import { SETTINGS_SECTIONS, type SettingsSection } from './settings-sections';
 
 /**
@@ -23,6 +24,9 @@ export function SettingsRail({
 }) {
   const t = useTranslations('Settings');
   const activeRef = useRef<HTMLButtonElement>(null);
+  // The dark pill is one liquid drop that slides (and stretches) to the section you pick.
+  const barRef = useRef<HTMLElement>(null);
+  useLiquidBulge(barRef, { item: 'button', current: '[aria-current="page"]', follow: 'current' });
 
   useEffect(() => {
     activeRef.current?.scrollIntoView({
@@ -34,6 +38,7 @@ export function SettingsRail({
 
   return (
     <nav
+      ref={barRef}
       aria-label={t('sectionsNav')}
       className="settings-tabs mx-auto flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-border bg-card/85 p-1 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_6px_20px_-12px_rgb(0_0_0/0.25)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >

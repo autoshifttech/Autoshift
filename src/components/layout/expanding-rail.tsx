@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FocusEvent, type PointerEvent } from 
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/logo-mark";
+import { useLiquidBulge } from "@/components/motion/liquid-bulge";
 
 /**
  * Shared by the business sidebar and the admin sidebar: a 60px icon rail that
@@ -14,9 +15,23 @@ import { LogoMark } from "@/components/brand/logo-mark";
 
 /** One row: the icon never moves, the name slides out beside it. */
 export const railRow =
-  "relative flex h-8 w-full shrink-0 items-center gap-2.5 rounded-full px-[11px] opacity-85 transition-[opacity,background-color,color,box-shadow] duration-200 hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
+  "rail-row relative flex h-8 w-full shrink-0 items-center gap-2.5 rounded-full px-[11px] opacity-85 transition-[opacity,background-color,color,box-shadow] duration-200 hover:bg-foreground/[0.06] hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:[stroke-width:1.5]";
 export const railActive = "rail-active opacity-100";
 export const railLabel = "rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]";
+
+/** The liquid pill in a sidebar: it follows the pointer down the rows and rests on the current page. */
+export function useRailBulge() {
+  const ref = useRef<HTMLElement>(null);
+  useLiquidBulge(ref, { axis: "y", item: ".rail-row", current: ".rail-active" });
+  return ref;
+}
+
+/** The liquid pill in a phone bottom bar: it slides to the page you tap. */
+export function useBarBulge() {
+  const ref = useRef<HTMLElement>(null);
+  useLiquidBulge(ref, { item: "a, button", current: ".rail-active", follow: "current" });
+  return ref;
+}
 
 export function useRailOpen(pinKey: string) {
   const [hovered, setHovered] = useState(false);
