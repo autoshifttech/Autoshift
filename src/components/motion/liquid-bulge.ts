@@ -31,11 +31,15 @@ export interface LiquidBulgeOptions {
   ripple?: boolean;
   /** On first show, the items condense in one after another (once per page load per key). */
   condense?: string;
+  /** The pill sits above the items and carries its own copy of their labels, clipped to its shape
+      (styled by CSS as .lq-ink): text inside the pill reads in one colour and outside in another
+      at every moment of a slide, so no label ever vanishes against it. */
+  ink?: boolean;
 }
 
 const condensed = new Set<string>();
 
-export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current, follow = "hover", grow = 0, ripple = false, condense }: LiquidBulgeOptions): () => void {
+export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current, follow = "hover", grow = 0, ripple = false, condense, ink = false }: LiquidBulgeOptions): () => void {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const bulge = document.createElement("span");
   bulge.className = "lq-bulge";
@@ -45,6 +49,28 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   drop.setAttribute("aria-hidden", "true");
   box.prepend(drop);
   box.prepend(bulge);
+  const inkLayer = ink ? document.createElement("span") : null;
+  if (inkLayer) {
+    inkLayer.className = "lq-ink";
+    bulge.appendChild(inkLayer);
+    bulge.classList.add("lq-bulge-ink");
+  }
+  /** Copy each label into the pill at its place in the box (layout offsets, so transforms and
+      scrolling don't matter). */
+  const paintInk = () => {
+    if (!inkLayer) return;
+    const items = [...box.querySelectorAll<HTMLElement>(item)].filter((el) => !inkLayer.contains(el));
+    inkLayer.replaceChildren(
+      ...items.map((el) => {
+        const c = el.cloneNode(true) as HTMLElement;
+        c.removeAttribute("id");
+        c.setAttribute("aria-hidden", "true");
+        c.tabIndex = -1;
+        Object.assign(c.style, { left: `${el.offsetLeft}px`, top: `${el.offsetTop}px`, width: `${el.offsetWidth}px`, height: `${el.offsetHeight}px` });
+        return c;
+      }),
+    );
+  };
   box.classList.add("lq-bulge-on");
   // The bulge is placed inside the box: give it a position only if it has none (a dropdown panel
   // is already absolute and must stay where it is).
@@ -79,11 +105,12 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
       ? { transform: `translate(${along.toFixed(2)}px, ${crossStart.toFixed(2)}px)`, width: `${alongSize.toFixed(2)}px`, height: `${crossSize.toFixed(2)}px` }
       : { transform: `translate(${crossStart.toFixed(2)}px, ${along.toFixed(2)}px)`, height: `${alongSize.toFixed(2)}px`, width: `${crossSize.toFixed(2)}px` });
     bulge.style.opacity = shown ? "1" : "0";
+    if (inkLayer) inkLayer.style.transform = X ? `translate(${(-along).toFixed(2)}px, ${(-crossStart).toFixed(2)}px)` : `translate(${(-crossStart).toFixed(2)}px, ${(-along).toFixed(2)}px)`;
     const t = Math.min(1, Math.max(0, dropT.v));
     if (t < 0.98) {
       const f = Math.sin(Math.PI * t), r = 4 + 5 * f;
       const a = dropFrom + (dropTo - dropFrom) * t - r;
-      const c = X ? cross.start + cross.size + 4 * f - r + r * 0.4 : cross.start + 14 - r;
+      const c = X ? cross.start + cross.size / 2 - r : cross.start + 14 - r;
       drop.style.width = drop.style.height = `${(2 * r).toFixed(2)}px`;
       drop.style.transform = X ? `translate(${a.toFixed(2)}px, ${c.toFixed(2)}px)` : `translate(${c.toFixed(2)}px, ${a.toFixed(2)}px)`;
       drop.style.opacity = "1";
@@ -100,7 +127,8 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); } };
 
   function place() {
-    const el = hover ?? (current ? box.querySelector<HTMLElement>(current) : null);
+    paintInk();
+    const el = hover ?? (current ? [...box.querySelectorAll<HTMLElement>(current)].find((c) => !bulge.contains(c)) ?? null : null);
     if (!el || el.offsetParent === null) {
       if (shown) { const m = (lo.t + hi.t) / 2; lo.t = hi.t = m; shown = false; }
       kick();
@@ -229,9 +257,9 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
 
 /** React: attach the bulge to the element this ref points at, for as long as it is mounted. */
 export function useLiquidBulge<T extends HTMLElement>(ref: { current: T | null }, options: LiquidBulgeOptions, enabled = true) {
-  const { axis, item, current, follow, grow, ripple, condense } = options;
+  const { axis, item, current, follow, grow, ripple, condense, ink } = options;
   useEffect(
-    () => (enabled && ref.current ? attachLiquidBulge(ref.current, { axis, item, current, follow, grow, ripple, condense }) : undefined),
-    [ref, axis, item, current, follow, grow, ripple, condense, enabled],
+    () => (enabled && ref.current ? attachLiquidBulge(ref.current, { axis, item, current, follow, grow, ripple, condense, ink }) : undefined),
+    [ref, axis, item, current, follow, grow, ripple, condense, ink, enabled],
   );
 }

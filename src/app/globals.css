@@ -1575,11 +1575,21 @@ html[data-solid] .rail-shell .lq-bulge {
     0 6px 14px -6px rgb(0 0 0 / 0.45),
     0 1px 3px rgb(0 0 0 / 0.2);
 }
-.liquid-glass.liquid-glass.settings-tabs button { transition: color 0.25s ease, transform 0.2s; }
-.liquid-glass.liquid-glass.settings-tabs button.settings-tab-on {
-  color: var(--background);
-  text-shadow: none;
-  transition: color 0.3s ease 0.16s, transform 0.2s;
+/* The pill rides above the labels with its own light copy of them, clipped to its shape. */
+.settings-tabs .lq-bulge { z-index: 2; overflow: hidden; }
+.lq-ink { position: absolute; top: 0; left: 0; }
+.lq-ink > * {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  color: var(--background) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
 }
 /* Taps ripple through the glass. */
 .lq-ripple {
