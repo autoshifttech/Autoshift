@@ -22,35 +22,39 @@ export function DashboardCustomize() {
         <SlidersHorizontal className="size-3.5" />
         {t("button")}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 gap-1 p-3">
-        <p className="px-1 pb-1 text-sm font-semibold text-foreground">{t("title")}</p>
-        <ul className="space-y-1">
+      {/* Same structure as the "New" menu: a compact list of rows. Denser glass, so the dark chart
+          card under it never shows through the text. */}
+      <PopoverContent align="end" className="lg-dense w-72 max-w-[calc(100vw-2rem)] gap-0 p-1">
+        <p className="px-2 pt-1.5 pb-1 text-xs font-medium text-muted-foreground">{t("title")}</p>
+        <ul>
           {order.map((s, i) => {
             const off = hidden.includes(s)
+            const name = t(`sections.${s}`)
             return (
-              <li key={s} className="flex items-center gap-1 rounded-xl px-1 py-0.5">
+              <li key={s} className="group/row flex items-center gap-0.5 rounded-md pr-0.5 transition-colors hover:bg-foreground/8">
                 <button
                   type="button"
                   onClick={() => toggle(s)}
                   aria-pressed={!off}
-                  aria-label={t(off ? "show" : "hide", { name: t(`sections.${s}`) })}
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label={t(off ? "show" : "hide", { name })}
+                  className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {off ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {off ? <EyeOff className="size-4 shrink-0 text-muted-foreground" aria-hidden /> : <Eye className="size-4 shrink-0" aria-hidden />}
+                  <span className={cn("min-w-0 flex-1 truncate", off ? "text-muted-foreground line-through" : "text-foreground")}>{name}</span>
                 </button>
-                <span className={cn("min-w-0 flex-1 truncate text-sm font-medium", off ? "text-muted-foreground line-through" : "text-foreground")}>{t(`sections.${s}`)}</span>
-                <button type="button" disabled={i === 0} onClick={() => move(s, -1)} aria-label={t("moveUp", { name: t(`sections.${s}`) })} className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30">
-                  <ArrowUp className="size-4" />
+                <button type="button" disabled={i === 0} onClick={() => move(s, -1)} aria-label={t("moveUp", { name })} className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-foreground/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30">
+                  <ArrowUp className="size-3.5" aria-hidden />
                 </button>
-                <button type="button" disabled={i === order.length - 1} onClick={() => move(s, 1)} aria-label={t("moveDown", { name: t(`sections.${s}`) })} className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30">
-                  <ArrowDown className="size-4" />
+                <button type="button" disabled={i === order.length - 1} onClick={() => move(s, 1)} aria-label={t("moveDown", { name })} className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-foreground/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30">
+                  <ArrowDown className="size-3.5" aria-hidden />
                 </button>
               </li>
             )
           })}
         </ul>
-        <button type="button" onClick={reset} className="mt-1 inline-flex items-center gap-1.5 self-start rounded-full px-3 py-2 text-sm font-semibold text-primary hover:bg-muted">
-          <RotateCcw className="size-3.5" />
+        <div className="-mx-1 my-1 h-px bg-border" />
+        <button type="button" onClick={reset} className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm font-medium text-primary outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring">
+          <RotateCcw className="size-4" aria-hidden />
           {t("reset")}
         </button>
       </PopoverContent>

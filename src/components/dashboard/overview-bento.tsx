@@ -190,15 +190,19 @@ export function OverviewBento({ data, now }: { data: DashboardOverview | null; n
         <div className="relative mt-auto grid h-[230px] items-end gap-2" style={{ gridTemplateColumns: `repeat(${bars.length}, minmax(0, 1fr))` }}>
           {bars.map((b, i) => (
             <div key={b.t} className="relative flex h-full flex-col items-center justify-end gap-2" title={`${barLabel(b.t)}: ${format.number(b.total)}`}>
-              {i === peakIndex && b.total > 0 && (
-                <b className="absolute left-1/2 -translate-x-1/2 rounded-full bg-white px-1.5 py-0.5 text-xs font-bold text-[#1a1d1b] shadow-md" style={{ bottom: `calc(${(b.total / peak) * 82}% + 30px)` }}>
-                  {format.number(b.total, { notation: 'compact' })}
-                </b>
-              )}
-              <i
-                className={cn('animate-grow-y block w-full max-w-9 rounded-full', i === bars.length - 1 && bars.length > 1 ? 'hatch-light' : 'bg-[#fffdf9]')}
-                style={{ height: `${Math.max(4, (b.total / peak) * 82)}%`, animationDelay: `${i * 50}ms` }}
-              />
+              {/* The bar and its number share one column, so the number always sits on top of the bar
+                  whatever height the date under it takes (dates can wrap to two lines). */}
+              <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end gap-1.5">
+                {i === peakIndex && b.total > 0 && (
+                  <b className="relative z-10 shrink-0 rounded-full bg-white px-1.5 py-0.5 text-xs leading-4 font-bold text-[#1a1d1b] shadow-md">
+                    {format.number(b.total, { notation: 'compact' })}
+                  </b>
+                )}
+                <i
+                  className={cn('animate-grow-y block w-full max-w-9 shrink-0 rounded-full', i === bars.length - 1 && bars.length > 1 ? 'hatch-light' : 'bg-[#fffdf9]')}
+                  style={{ height: `${Math.max(4, (b.total / peak) * 82)}%`, animationDelay: `${i * 50}ms` }}
+                />
+              </div>
               <span className="text-xs text-white/75">{barLabel(b.t)}</span>
             </div>
           ))}

@@ -660,6 +660,20 @@ html[data-mode="dark"][data-lens] .liquid-glass.lg-frost {
   --lg-con: 0.64;
   --lg-br: 1.5;
 }
+/* Denser glass for a panel that can open over the dark chart card (dashboard Customise):
+   still light frosted glass, but the dark card never shows through the text. */
+.liquid-glass.lg-floating.lg-dense {
+  --lg-a: rgb(255 255 255 / 0.9);
+  --lg-b: rgb(255 255 255 / 0.84);
+  --lg-con: 0.9;
+  --lg-br: 1.1;
+}
+html[data-mode="dark"] .liquid-glass.lg-floating.lg-dense {
+  --lg-a: rgb(30 36 33 / 0.86);
+  --lg-b: rgb(24 29 26 / 0.8);
+  color: var(--foreground);
+  text-shadow: none;
+}
 .liquid-glass::placeholder {
   color: color-mix(in oklab, var(--lg-ink) 70%, transparent);
 }
@@ -803,6 +817,9 @@ html[data-mode="dark"] .liquid-glass button:hover,
 html[data-mode="dark"] .liquid-glass a[aria-current="page"] {
   background-color: rgb(255 255 255 / 0.12);
 }
+/* Customise rows carry their own soft hover, so the glass-wide hover fill stays off there. */
+.liquid-glass.lg-floating.lg-dense.lg-dense li button:hover { background-color: transparent; }
+.liquid-glass.lg-floating.lg-dense.lg-dense li button:not(:first-child):hover { background-color: color-mix(in oklab, var(--foreground) 10%, transparent); }
 .liquid-glass:not(.lg-frost:not(.lg-floating)) p {
   color: color-mix(in oklab, var(--lg-ink) 72%, transparent);
 }
