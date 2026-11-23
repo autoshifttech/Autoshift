@@ -538,7 +538,9 @@
       "downloadFailed": "첨부파일을 다운로드할 수 없습니다",
       "viewImage": "이미지 보기",
       "expandVideo": "동영상 확대",
-      "imageAlt": "공유된 이미지"
+      "imageAlt": "공유된 이미지",
+      "hiddenTitle": "비즈니스에 표시되지 않는 메시지",
+      "hiddenDesc": "WhatsApp은 한 번 보기 사진, 투표, 동영상 메모 같은 메시지를 비즈니스 앱에 공유하지 않습니다. 고객에게 일반 메시지로 다시 보내 달라고 요청하세요."
     },
     "mediaViewer": {
       "counter": "{total}개 중 {index}번째",

@@ -97,6 +97,10 @@ interface WhatsAppMessage {
    * payload and mirrors the label into it).
    */
   button?: { text?: string; payload?: string }
+  /** A shared contact card (or several). */
+  contacts?: { name?: { formatted_name?: string; first_name?: string }; phones?: { phone?: string; wa_id?: string }[] }[]
+  /** A cart sent from the business's WhatsApp catalogue. */
+  order?: { catalog_id?: string; text?: string; product_items?: { product_retailer_id?: string; quantity?: number | string; item_price?: number | string; currency?: string }[] }
   /** Present when the customer swipe-replies to one of our messages. */
   context?: { id: string }
 }
@@ -1149,7 +1153,30 @@ async function parseMessageContent(
       }
     }
 
+    case 'contacts': {
+      // A shared contact card: show who it is and their number, so the
+      // inbox (and the AI) can read it instead of "unsupported".
+      const cards = (message.contacts ?? []).map((c) => {
+        const name = c.name?.formatted_name || c.name?.first_name || ''
+        const phone = c.phones?.[0]?.phone || c.phones?.[0]?.wa_id || ''
+        return [name, phone].filter(Boolean).join(' · ')
+      }).filter(Boolean)
+      return { ...empty, contentText: cards.length ? `👤 ${cards.join('\n👤 ')}` : '👤 Contact card' }
+    }
+
+    case 'order': {
+      // A cart from the WhatsApp catalogue: how many items, and the note.
+      const items = message.order?.product_items ?? []
+      const count = items.reduce((n, i) => n + (Number(i.quantity) || 1), 0)
+      const lines = [`🛒 Cart: ${count} item${count === 1 ? '' : 's'}`]
+      if (message.order?.text) lines.push(message.order.text)
+      return { ...empty, contentText: lines.join('\n') }
+    }
+
     default:
+      // Meta sends type "unsupported" (no content) for things it doesn't
+      // pass to business apps: view-once photos/videos, polls, video
+      // notes, events… The inbox shows this marker as a friendly card.
       return {
         ...empty,
         contentText: `[Unsupported message type: ${message.type}]`,

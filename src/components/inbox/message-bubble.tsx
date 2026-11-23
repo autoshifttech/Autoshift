@@ -13,6 +13,7 @@ import {
   CheckCheck,
   X,
   AlertTriangle,
+  EyeOff,
   MapPin,
   LayoutTemplate,
   CornerDownLeft,
@@ -186,6 +187,21 @@ function MessageContent({
 
   switch (message.content_type) {
     case "text":
+      // Something WhatsApp doesn't hand to business apps (view-once media,
+      // a poll, a video note…): explain it instead of showing the raw code.
+      if (/^\[Unsupported message type(?::[^\]]*)?\]$/.test(message.content_text ?? "")) {
+        return (
+          <div className="flex max-w-xs items-start gap-2.5 py-0.5">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground/[0.07] text-muted-foreground">
+              <EyeOff className="size-4" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold">{t("hiddenTitle")}</span>
+              <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{t("hiddenDesc")}</span>
+            </span>
+          </div>
+        );
+      }
       return (
         <p className="whitespace-pre-wrap break-words text-sm">
           {message.content_text}

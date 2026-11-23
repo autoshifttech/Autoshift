@@ -538,7 +538,9 @@
       "downloadFailed": "No se pudo descargar el adjunto",
       "viewImage": "Ver imagen",
       "expandVideo": "Ampliar video",
-      "imageAlt": "Imagen compartida"
+      "imageAlt": "Imagen compartida",
+      "hiddenTitle": "Mensaje no visible para empresas",
+      "hiddenDesc": "WhatsApp no comparte este tipo de mensaje con apps de empresas, como una foto de una sola visualización, una encuesta o una nota de video. Pide al cliente que lo envíe de nuevo como mensaje normal."
     },
     "mediaViewer": {
       "counter": "{index} de {total}",

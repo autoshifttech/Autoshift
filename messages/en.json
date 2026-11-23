@@ -538,7 +538,9 @@
       "downloadFailed": "Couldn't download the attachment",
       "viewImage": "View image",
       "expandVideo": "Expand video",
-      "imageAlt": "Shared image"
+      "imageAlt": "Shared image",
+      "hiddenTitle": "Message not shown to businesses",
+      "hiddenDesc": "WhatsApp doesn’t share this kind of message with business apps, like a view-once photo, a poll or a video note. Ask the customer to send it again as a normal message."
     },
     "mediaViewer": {
       "counter": "{index} of {total}",
