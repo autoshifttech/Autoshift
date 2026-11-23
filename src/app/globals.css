@@ -1088,33 +1088,81 @@ html[data-mode="dark"] .sh-host svg { filter: drop-shadow(0 0 1.2px rgb(201 242 
 
 @media (prefers-reduced-motion: no-preference) {
   .burger i { transition: top 0.3s cubic-bezier(0.3, 1.4, 0.5, 1), rotate 0.45s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.2s, scale 0.25s; }
-  /* Menus drop open from their button; items follow one by one (menu_3). */
-  .menu-drop { animation: menu-drop 0.32s cubic-bezier(0.3, 1.3, 0.5, 1); transform-origin: top right; }
-  .menu-drop > * { animation: rise-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(40ms + var(--i, 0) * 35ms); }
-  [data-slot="dropdown-menu-content"][data-open] > *,
-  [data-slot="select-content"][data-open] [data-slot="select-item"] {
-    animation: menu-item-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  /* Liquid dropdowns: every select, menu and popover oozes out of its button like a drop of
+     liquid glass (squeezed thin, stretched as it falls, a small squash as it lands), each option
+     drips out of the one above it, and closing drains it all back up into the button. The
+     button gives a little squish as the liquid leaves it. Opening upward mirrors all of it. */
+  .menu-drop { animation: lq-drip 0.56s cubic-bezier(0.25, 0.9, 0.3, 1) backwards; transform-origin: top right; }
+  .menu-drop > * { animation: lq-item 0.5s cubic-bezier(0.25, 0.9, 0.3, 1) backwards; animation-delay: calc(70ms + var(--i, 0) * 55ms); }
+  :is([data-slot="select-content"]:not([data-align-trigger="true"]), [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"]) {
+    --lq-dir: 1;
   }
-  [data-slot="dropdown-menu-content"][data-open] > :nth-child(2),
-  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(2) { animation-delay: 30ms; }
-  [data-slot="dropdown-menu-content"][data-open] > :nth-child(3),
-  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(3) { animation-delay: 60ms; }
-  [data-slot="dropdown-menu-content"][data-open] > :nth-child(4),
-  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(4) { animation-delay: 90ms; }
-  [data-slot="dropdown-menu-content"][data-open] > :nth-child(5),
-  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(5) { animation-delay: 120ms; }
-  [data-slot="dropdown-menu-content"][data-open] > :nth-child(n + 6),
-  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(n + 6) { animation-delay: 150ms; }
+  :is([data-slot="select-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-side="top"] {
+    --lq-dir: -1;
+  }
+  :is([data-slot="select-content"]:not([data-align-trigger="true"]), [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] {
+    animation: lq-drip 0.56s cubic-bezier(0.25, 0.9, 0.3, 1) backwards;
+  }
+  :is([data-slot="select-content"]:not([data-align-trigger="true"]), [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-closed] {
+    animation: lq-drain 0.26s cubic-bezier(0.5, 0, 0.75, 0.4) forwards;
+  }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > *,
+  [data-slot="select-content"][data-open] [data-slot="select-item"] {
+    animation: lq-item 0.5s cubic-bezier(0.25, 0.9, 0.3, 1) backwards;
+    animation-delay: 70ms;
+  }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-closed] > *,
+  [data-slot="select-content"][data-closed] [data-slot="select-item"] {
+    animation: lq-item-out 0.16s ease-in forwards;
+  }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(2),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(2) { animation-delay: 125ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(3),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(3) { animation-delay: 180ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(4),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(4) { animation-delay: 235ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(5),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(5) { animation-delay: 290ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(6),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(6) { animation-delay: 345ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(7),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(7) { animation-delay: 400ms; }
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"])[data-open] > :nth-child(n + 8),
+  [data-slot="select-content"][data-open] [data-slot="select-item"]:nth-child(n + 8) { animation-delay: 455ms; }
+  /* The button squishes as the liquid leaves it. */
+  :is([data-slot="select-trigger"], [data-slot="dropdown-menu-trigger"], [data-slot="popover-trigger"])[data-popup-open] {
+    animation: lq-release 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
   /* The tick on the chosen option pops in (menu_3). */
   [data-slot="select-item"][data-selected] svg,
   [data-slot="dropdown-menu-checkbox-item-indicator"] svg,
   [data-slot="dropdown-menu-radio-item-indicator"] svg { animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
 }
-@keyframes menu-drop {
-  from { opacity: 0; scale: 0.92; translate: 0 -6px; }
+@keyframes lq-drip {
+  0% { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -10px)) scale(0.5, 0.2); }
+  40% { opacity: 1; transform: translateY(calc(var(--lq-dir, 1) * -3px)) scale(0.86, 1.1); }
+  72% { transform: translateY(calc(var(--lq-dir, 1) * 1px)) scale(1.03, 0.97); }
+  100% { transform: none; }
 }
-@keyframes menu-item-in {
-  from { opacity: 0; translate: 0 -4px; }
+@keyframes lq-drain {
+  0% { opacity: 1; transform: none; }
+  45% { opacity: 0.9; transform: translateY(calc(var(--lq-dir, 1) * -4px)) scale(0.82, 1.08); }
+  100% { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -12px)) scale(0.5, 0.2); }
+}
+@keyframes lq-item {
+  0% { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -70%)) scale(0.7, 0.4); filter: blur(2px); }
+  45% { opacity: 1; transform: translateY(calc(var(--lq-dir, 1) * -12%)) scale(0.92, 1.12); filter: blur(0.5px); }
+  75% { transform: translateY(calc(var(--lq-dir, 1) * 1px)) scale(1.02, 0.96); filter: none; }
+  100% { transform: none; }
+}
+@keyframes lq-item-out {
+  to { opacity: 0; transform: translateY(calc(var(--lq-dir, 1) * -40%)) scale(0.85, 0.5); }
+}
+@keyframes lq-release {
+  0% { scale: 1; }
+  30% { scale: 1.04 0.93; }
+  60% { scale: 0.98 1.03; }
+  100% { scale: 1; }
 }
 
 /* Dialogs spring open (dialog_1); the warning icon gives a small wobble. */

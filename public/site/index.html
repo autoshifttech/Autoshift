@@ -145,6 +145,10 @@ button.chip:hover{border-color:var(--c-black)}
 .mega-card b{display:block;font:700 var(--text-base)/1.3 var(--f-body)}
 .mega-card small{display:block;margin-top:var(--space-1);color:var(--c-ink-2);font-size:var(--text-sm);line-height:1.45;max-width:32ch}
 .mega.open .mega-col,.mega.open .mega-card,.mega.open .mega-foot{animation:megaIn .5s var(--ease-o2) backwards;animation-delay:calc(50ms + var(--i,0) * 45ms)}
+/* Liquid dropdown: the panel oozes out of the header like a drop (squeezed, stretched, a small squash as it lands) and its columns drip in one by one */
+@media (prefers-reduced-motion:no-preference){.mega.open{animation:lqMega .6s cubic-bezier(.25,.9,.3,1)}.mega.open .mega-col,.mega.open .mega-card,.mega.open .mega-foot{animation-name:lqMegaItem;animation-duration:.55s;animation-timing-function:cubic-bezier(.25,.9,.3,1);animation-delay:calc(90ms + var(--i,0) * 60ms)}}
+@keyframes lqMega{0%{scale:.55 .2}40%{scale:.9 1.06}72%{scale:1.015 .985}100%{scale:1}}
+@keyframes lqMegaItem{0%{opacity:0;transform:translateY(-40px) scale(.75,.45);filter:blur(2px)}45%{opacity:1;transform:translateY(-8px) scale(.94,1.08);filter:blur(.5px)}75%{transform:translateY(1px) scale(1.02,.97);filter:none}100%{transform:none}}
 @keyframes megaIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .mnav{position:fixed;inset:0;z-index:35;background:var(--c-bg);color:var(--c-black);padding:calc(var(--hdr-h,88px) + var(--space-6)) var(--gutter) calc(var(--space-9) + env(safe-area-inset-bottom,0px));overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-3);animation:fadeUp .35s var(--ease-o2)}
 .mnav details{background:var(--c-white);border-radius:22px;padding:0 var(--space-5);box-shadow:var(--sh-1);animation:fadeUp .5s var(--ease-o2) backwards;animation-delay:calc(var(--i) * 50ms)}
