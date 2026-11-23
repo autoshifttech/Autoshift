@@ -19,10 +19,11 @@ export const railRow =
 export const railActive = "rail-active opacity-100";
 export const railLabel = "rail-label flex-1 truncate text-[13.5px] font-medium tracking-[-0.01em]";
 
-/** The liquid pill in a sidebar: it follows the pointer down the rows and rests on the current page. */
+/** The liquid glass lens in a sidebar: it follows the pointer down the rows, rests on the current page,
+ *  bulges a little past its row, catches a light that follows the pointer, and taps ripple the glass. */
 export function useRailBulge() {
   const ref = useRef<HTMLElement>(null);
-  useLiquidBulge(ref, { axis: "y", item: ".rail-row", current: ".rail-active" });
+  useLiquidBulge(ref, { axis: "y", item: ".rail-row", current: ".rail-active", grow: 3, ripple: true, condense: "rail" });
   return ref;
 }
 

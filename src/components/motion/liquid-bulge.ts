@@ -25,9 +25,17 @@ export interface LiquidBulgeOptions {
       "current": it only moves when the current item changes (tab bars, where the current
       item's text changes colour with it). */
   follow?: "hover" | "current";
+  /** How far (px) the glass bulges past its item on every side, like the file's lens over its bar. */
+  grow?: number;
+  /** Taps send a ripple through the glass. */
+  ripple?: boolean;
+  /** On first show, the items condense in one after another (once per page load per key). */
+  condense?: string;
 }
 
-export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current, follow = "hover" }: LiquidBulgeOptions): () => void {
+const condensed = new Set<string>();
+
+export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current, follow = "hover", grow = 0, ripple = false, condense }: LiquidBulgeOptions): () => void {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const bulge = document.createElement("span");
   bulge.className = "lq-bulge";
@@ -101,8 +109,8 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
     // In the box's content coordinates, so it stays on its item while the box scrolls.
     const b = box.getBoundingClientRect(), r = el.getBoundingClientRect();
     const ox = box.scrollLeft - b.left - box.clientLeft, oy = box.scrollTop - b.top - box.clientTop;
-    const L = X ? r.left + ox : r.top + oy, R = X ? r.right + ox : r.bottom + oy;
-    cross = X ? { start: r.top + oy, size: r.height } : { start: r.left + ox, size: r.width };
+    const L = (X ? r.left + ox : r.top + oy) - grow, R = (X ? r.right + ox : r.bottom + oy) + grow;
+    cross = X ? { start: r.top + oy - grow, size: r.height + 2 * grow } : { start: r.left + ox - grow, size: r.width + 2 * grow };
     if (!shown || hi.v - lo.v < 1) { // appear where the item is, from its middle
       const m = (L + R) / 2;
       lo.v = hi.v = m; lo.vel = hi.vel = 0;
@@ -125,11 +133,53 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   const onFocus = (e: FocusEvent) => { if (!hovers) return; const el = itemOf(e); if (el) { hover = el; place(); } };
   const onBlur = (e: FocusEvent) => { if (!box.contains(e.relatedTarget as Node | null)) { hover = null; place(); } };
   const onDown = (e: PointerEvent) => {
+    rippleAt(e);
     const el = itemOf(e);
     if (!el) return;
     if (hovers) { hover = el; place(); }
     press.t = 0.9; kick();
   };
+  // Taps ripple through the glass from where the finger lands.
+  const rippleAt = (e: PointerEvent) => {
+    if (!ripple || reduce) return;
+    const b = box.getBoundingClientRect();
+    const dot = document.createElement("span");
+    dot.className = "lq-ripple";
+    dot.setAttribute("aria-hidden", "true");
+    dot.style.left = `${e.clientX - b.left + box.scrollLeft - box.clientLeft}px`;
+    dot.style.top = `${e.clientY - b.top + box.scrollTop - box.clientTop}px`;
+    dot.style.setProperty("--lq-r", `${Math.max(b.width, b.height) * 1.6}px`);
+    box.prepend(dot);
+    dot.addEventListener("animationend", () => dot.remove(), { once: true });
+  };
+  // A light follows the pointer: the lens's highlight sits on the side facing it.
+  let lightRaf = 0, lx = 0, ly = 0;
+  const onLight = (e: PointerEvent) => {
+    lx = e.clientX; ly = e.clientY;
+    if (lightRaf) return;
+    lightRaf = requestAnimationFrame(() => {
+      lightRaf = 0;
+      const r = bulge.getBoundingClientRect();
+      if (!r.width) return;
+      const nx = Math.max(-0.3, Math.min(1.3, (lx - r.left) / r.width)), ny = Math.max(-0.3, Math.min(1.3, (ly - r.top) / r.height));
+      bulge.style.setProperty("--lx", `${(nx * 100).toFixed(1)}%`);
+      bulge.style.setProperty("--ly", `${(ny * 100).toFixed(1)}%`);
+      box.style.setProperty("--lx", `${(((lx - box.getBoundingClientRect().left) / Math.max(1, box.offsetWidth)) * 100).toFixed(1)}%`);
+      box.style.setProperty("--ly", `${(((ly - box.getBoundingClientRect().top) / Math.max(1, box.offsetHeight)) * 100).toFixed(1)}%`);
+    });
+  };
+  if (!reduce) window.addEventListener("pointermove", onLight, { passive: true });
+  // Condense in: the controls form out of the glass one after another, as on the file's first load.
+  if (condense && !condensed.has(condense) && !reduce) {
+    condensed.add(condense);
+    box.querySelectorAll<HTMLElement>(item).forEach((el, i) => {
+      if (el.offsetParent === null) return;
+      el.animate(
+        [{ transform: "scale(0.12)", opacity: 0, filter: "blur(3px)" }, { transform: "scale(1.06, 0.96)", opacity: 1, filter: "none", offset: 0.6 }, { transform: "none", opacity: 1 }],
+        { duration: 620, delay: 120 + Math.min(i, 14) * 45, easing: "cubic-bezier(0.25, 0.9, 0.3, 1)", fill: "backwards" },
+      );
+    });
+  }
   const onUp = () => { if (press.t !== 1) { press.t = 1; press.vel += 1.2; kick(); } };
   box.addEventListener("pointerover", onOver);
   box.addEventListener("pointerleave", onLeave);
@@ -150,6 +200,8 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
   return () => {
     cancelAnimationFrame(raf);
     mo.disconnect();
+    window.removeEventListener("pointermove", onLight);
+    cancelAnimationFrame(lightRaf);
     ro.disconnect();
     box.removeEventListener("pointerover", onOver);
     box.removeEventListener("pointerleave", onLeave);
@@ -168,6 +220,9 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
 
 /** React: attach the bulge to the element this ref points at, for as long as it is mounted. */
 export function useLiquidBulge<T extends HTMLElement>(ref: { current: T | null }, options: LiquidBulgeOptions, enabled = true) {
-  const { axis, item, current, follow } = options;
-  useEffect(() => (enabled && ref.current ? attachLiquidBulge(ref.current, { axis, item, current, follow }) : undefined), [ref, axis, item, current, follow, enabled]);
+  const { axis, item, current, follow, grow, ripple, condense } = options;
+  useEffect(
+    () => (enabled && ref.current ? attachLiquidBulge(ref.current, { axis, item, current, follow, grow, ripple, condense }) : undefined),
+    [ref, axis, item, current, follow, grow, ripple, condense, enabled],
+  );
 }

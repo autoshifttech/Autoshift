@@ -8,10 +8,10 @@ import { useLiquidBulge } from '@/components/motion/liquid-bulge';
 import { SETTINGS_SECTIONS, type SettingsSection } from './settings-sections';
 
 /**
- * The settings sections as one row of rounded pills across the top of the
- * page, on every screen size. The active section is the dark pill and
- * scrolls into view, so a deep-linked section is never off-screen; on a
- * phone the row swipes sideways with a soft fade at both ends.
+ * The settings sections as one glass bar across the top of the page, on
+ * every screen size. A liquid glass lens marks the active section (and
+ * follows the pointer); the active section scrolls into view, so a
+ * deep-linked section is never off-screen; on a phone the bar swipes sideways.
  */
 export function SettingsRail({
   active,
@@ -24,9 +24,10 @@ export function SettingsRail({
 }) {
   const t = useTranslations('Settings');
   const activeRef = useRef<HTMLButtonElement>(null);
-  // The dark pill is one liquid drop that slides (and stretches) to the section you pick.
+  // A glass bar with one liquid glass lens (from the Liquid Glass top menu): the lens follows the
+  // pointer, rests on the current section, stretches as it travels and taps ripple the glass.
   const barRef = useRef<HTMLElement>(null);
-  useLiquidBulge(barRef, { item: 'button', current: '[aria-current="page"]', follow: 'current' });
+  useLiquidBulge(barRef, { item: 'button', current: '[aria-current="page"]', grow: 3, ripple: true, condense: 'settings' });
 
   useEffect(() => {
     activeRef.current?.scrollIntoView({
@@ -40,7 +41,7 @@ export function SettingsRail({
     <nav
       ref={barRef}
       aria-label={t('sectionsNav')}
-      className="settings-tabs mx-auto flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-border bg-card/85 p-1 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_6px_20px_-12px_rgb(0_0_0/0.25)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="settings-tabs liquid-glass lg-floating mx-auto flex w-fit max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {SETTINGS_SECTIONS.map((s) => {
         const isActive = s === active;
@@ -52,10 +53,8 @@ export function SettingsRail({
             onClick={() => onSelect(s)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold sm:px-3.5 sm:text-sm whitespace-nowrap transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95',
-              isActive
-                ? 'bg-foreground text-background'
-                : 'text-foreground/80 hover:bg-foreground/[0.07] hover:text-foreground',
+              'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold sm:px-3.5 sm:text-sm whitespace-nowrap transition-[color,transform] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95',
+              isActive ? 'font-bold text-foreground' : 'text-foreground/75 hover:text-foreground',
             )}
           >
             {t(`sections.${s}`)}
