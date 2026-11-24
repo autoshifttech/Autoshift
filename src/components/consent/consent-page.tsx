@@ -27,6 +27,7 @@ import {
   type ConsentSource,
   type ConsentStatus,
 } from "@/lib/consent/model";
+import { TickBox } from "@/components/ui/tick-box";
 
 type Tab = "people" | "blocklist" | "rules" | "collect";
 const COLLECT: Exclude<ConsentSource, "manual">[] = ["website", "keyword", "ad", "import"];
@@ -195,7 +196,7 @@ function CollectTab({ saved }: { saved: ConsentSettings }) {
           <div className="mt-2 rounded-xl border border-border bg-background p-4">
             <div className="h-9 rounded-lg border border-border bg-muted/50 px-3 text-sm leading-9 text-muted-foreground">+91 98765 43210</div>
             <label className="mt-3 flex items-start gap-2 text-sm text-foreground">
-              <input type="checkbox" defaultChecked={false} className="mt-0.5 accent-[var(--primary)]" />
+              <TickBox defaultChecked={false} className="mt-0.5" />
               {s.checkboxText || t("checkboxText")}
             </label>
           </div>

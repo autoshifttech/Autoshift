@@ -17,6 +17,7 @@ import { kindFits, useConnections } from "@/lib/flows/connections";
 import { ConnectionLogo } from "../connection-logos";
 import type { BuilderNode } from "../shared";
 import { NextNodeRow } from "./fields";
+import { TickBox } from "@/components/ui/tick-box";
 
 export interface ActionCfg {
   service?: string;
@@ -141,9 +142,8 @@ export function ActionForm({
         <>
           <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">{t.raw("razorpayHelp") as string}</p>
           <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
-            <input
-              type="checkbox"
-              className="mt-0.5 size-4 accent-[var(--primary)]"
+            <TickBox
+              className="mt-0.5"
               checked={["yes", "true", "1"].includes(String(params.send_qr ?? "").toLowerCase())}
               onChange={(e) => setParam("send_qr", e.target.checked ? "yes" : "")}
             />

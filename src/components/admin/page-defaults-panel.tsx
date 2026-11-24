@@ -9,6 +9,7 @@ import { toast } from "@/lib/toast";
 import { backend, backendUrl, BackendError } from "@/lib/backend/client";
 import { BUSINESS_TYPES, OPTIONAL_PAGES, type BusinessType, type OptionalPage } from "@/lib/workspace/pages";
 import { PAGE_LABEL_KEY } from "./business-pages";
+import { TickBox } from "@/components/ui/tick-box";
 
 type Defaults = Record<BusinessType, OptionalPage[]>;
 
@@ -74,9 +75,7 @@ export function PageDefaultsPanel() {
                 {OPTIONAL_PAGES.map((p) => (
                   <td key={p} className="px-2 py-1 text-center">
                     <label className="inline-flex size-11 cursor-pointer items-center justify-center">
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-[var(--primary)]"
+                      <TickBox
                         checked={d[k].includes(p)}
                         onChange={() => flip(k, p)}
                         aria-label={t("cellLabel", { type: to(`industry_${k}`), page: ts(PAGE_LABEL_KEY[p]) })}

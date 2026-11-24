@@ -13,6 +13,7 @@ import { DEFAULT_SHOP, type Assistant, type ShopSettings } from "@/lib/assistant
 import { useCatalog } from "@/lib/catalog";
 import { isPaymentKind, useConnections } from "@/lib/flows/connections";
 import { TemplatePicker } from "@/components/templates/template-picker";
+import { TickBox } from "@/components/ui/tick-box";
 
 const LANGS = ["en", "pt", "es", "ko"] as const;
 
@@ -69,14 +70,14 @@ export function ShopTab({ a, set }: { a: Assistant; set: (p: Partial<Assistant>)
           <fieldset className="space-y-2">
             <legend className="mb-1 text-sm font-medium text-foreground">{t("payments")}</legend>
             <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 focus-within:ring-2 focus-within:ring-ring">
-              <input type="checkbox" className="mt-0.5 size-4 accent-[var(--primary)]" checked={shop.online} onChange={(e) => put({ online: e.target.checked || !shop.cod })} />
+              <TickBox className="mt-0.5" checked={shop.online} onChange={(e) => put({ online: e.target.checked || !shop.cod })} />
               <span>
                 <span className="block text-sm font-medium text-foreground">{t("online")}</span>
                 <span className="block text-xs text-muted-foreground">{t("onlineHelp")}</span>
               </span>
             </label>
             <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 focus-within:ring-2 focus-within:ring-ring">
-              <input type="checkbox" className="mt-0.5 size-4 accent-[var(--primary)]" checked={shop.cod} onChange={(e) => put({ cod: e.target.checked || !shop.online })} />
+              <TickBox className="mt-0.5" checked={shop.cod} onChange={(e) => put({ cod: e.target.checked || !shop.online })} />
               <span>
                 <span className="block text-sm font-medium text-foreground">{t("cod")}</span>
                 <span className="block text-xs text-muted-foreground">{t("codHelp")}</span>

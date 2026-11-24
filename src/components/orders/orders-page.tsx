@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { BackendError } from "@/lib/backend/client";
 import { ORDER_VIEWS, inView, itemLabel, matches, nextActions, rupees, updateOrder, useOrders, type OrderAction, type OrderView, type PaymentStatus, type OrderStatus, type ShopOrder } from "@/lib/orders";
+import { TickBox } from "@/components/ui/tick-box";
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
   new: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
@@ -264,7 +265,7 @@ function OrderDialog({ order, onClose, onChanged, date }: { order: ShopOrder | n
                   </div>
                 )}
                 <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-foreground">
-                  <input type="checkbox" className="size-4 accent-[var(--primary)]" checked={notify} onChange={(e) => setNotify(e.target.checked)} />
+                  <TickBox checked={notify} onChange={(e) => setNotify(e.target.checked)} />
                   {t("notify")}
                 </label>
                 <div className="flex flex-wrap gap-2">

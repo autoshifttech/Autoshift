@@ -27,6 +27,7 @@ import { AssistantModelPicker } from "./assistant-model-picker";
 import { ShopTab } from "./shop-tab";
 import { BookingTab } from "./booking-tab";
 import { isOn, usePages } from "@/lib/workspace/pages";
+import { TickBox } from "@/components/ui/tick-box";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
 const AUDIENCES: Audience[] = ["all", "new_contacts", "tagged", "after_hours"];
@@ -289,7 +290,7 @@ function ProductListSwitch({ on, onChange }: { on: boolean; onChange: (v: boolea
   return (
     <div className="mb-4 rounded-xl border border-border p-3">
       <label className="flex min-h-11 cursor-pointer items-start gap-3">
-        <input type="checkbox" className="mt-1 size-4 accent-[var(--primary)]" checked={on} onChange={(e) => onChange(e.target.checked)} />
+        <TickBox className="mt-1" checked={on} onChange={(e) => onChange(e.target.checked)} />
         <span className="min-w-0">
           <span className="block text-sm font-medium text-foreground">{t("assistantSwitch")}</span>
           <span className="block text-xs text-muted-foreground">

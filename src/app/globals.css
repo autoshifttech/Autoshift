@@ -1633,102 +1633,131 @@ html[data-mode="dark"] [data-mobile-nav] .lq-bulge-drop {
 }
 
 /* ==========================================================================
-   Premium tick boxes: every plain checkbox in the app and admin panel (and the
-   shared Checkbox component) gets a soft rounded box. Ticking it springs the
-   green fill in, draws the tick, and sends a soft halo out; pressing squishes
-   it; hover glows; keyboard focus shows a ring. Behaviour is the browser's own.
+   Tick box (TickBox and Checkbox draw it with TickArt): an outlined rounded box.
+   Ticking it swells the border, runs one dark stroke all the way around the box
+   and on into the tick (from its long end down and up the short leg), and the
+   tick settles. Unticking draws it back. Reduced motion: it simply switches.
    ========================================================================== */
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]) {
+.tick-box,
+[data-slot="checkbox"] {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  border-radius: 7px;
+}
+.tick-box-input {
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.tick-box-input:disabled { cursor: not-allowed; }
+.tick-box-art {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.tb-base {
+  stroke: color-mix(in oklab, var(--primary) 50%, transparent);
+  stroke-width: 2;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.tb-ring,
+.tb-tick,
+.tb-dash {
+  stroke: var(--primary);
+  stroke-width: 2.4;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  /* hidden until drawn (a round line end would otherwise leave a dot); after drawing back it hides */
+  opacity: 0;
+  transition: stroke-dashoffset 0.22s ease-in, opacity 0s linear 0.34s;
+}
+.tb-tick { stroke-width: 2.6; transform-origin: 50% 50%; transform-box: fill-box; }
+/* ticked */
+.tick-box-input:checked + .tick-box-art .tb-ring,
+.tick-box-input:checked + .tick-box-art .tb-tick,
+[data-slot="checkbox"][data-checked] .tb-ring,
+[data-slot="checkbox"][data-checked] .tb-tick,
+.tick-box-input:indeterminate + .tick-box-art .tb-ring,
+.tick-box-input:indeterminate + .tick-box-art .tb-dash,
+[data-slot="checkbox"][data-indeterminate] .tb-ring,
+[data-slot="checkbox"][data-indeterminate] .tb-dash { stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset 0.22s ease-in, opacity 0s; }
+.tick-box-input:checked + .tick-box-art .tb-base,
+[data-slot="checkbox"][data-checked] .tb-base { stroke-width: 2.4; }
+/* hover, press, focus, disabled */
+.tick-box-input:hover:not(:disabled) + .tick-box-art .tb-base,
+[data-slot="checkbox"]:hover:not([data-disabled]) .tb-base { stroke: color-mix(in oklab, var(--primary) 75%, transparent); }
+.tick-box-input:active:not(:disabled) + .tick-box-art,
+[data-slot="checkbox"]:active:not([data-disabled]) .tick-box-art { transform: scale(0.86); }
+.tick-box:has(.tick-box-input:focus-visible),
+[data-slot="checkbox"]:focus-visible { outline: 2px solid var(--ring, var(--primary)); outline-offset: 2px; }
+.tick-box:has(.tick-box-input:disabled),
+[data-slot="checkbox"][data-disabled] { opacity: 0.5; }
+@media (prefers-reduced-motion: no-preference) {
+  /* the border swells as it fills, the stroke runs round, then flows into the tick */
+  .tick-box-input:checked + .tick-box-art .tb-base,
+  [data-slot="checkbox"][data-checked] .tb-base { animation: tb-swell 0.3s ease-out; }
+  .tick-box-input:checked + .tick-box-art .tb-ring,
+  [data-slot="checkbox"][data-checked] .tb-ring { animation: tb-draw 0.42s 0.08s cubic-bezier(0.55, 0.1, 0.6, 1) backwards; }
+  .tick-box-input:checked + .tick-box-art .tb-tick,
+  [data-slot="checkbox"][data-checked] .tb-tick {
+    animation: tb-draw 0.3s 0.46s cubic-bezier(0.3, 0.7, 0.4, 1) backwards, tb-settle 0.45s 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) backwards;
+  }
+  .tick-box-input:indeterminate + .tick-box-art .tb-dash,
+  [data-slot="checkbox"][data-indeterminate] .tb-dash { animation: tb-draw 0.25s ease-out backwards; }
+  /* unticking: the tick draws back first, then the ring */
+  .tick-box-input:not(:checked) + .tick-box-art .tb-ring,
+  [data-slot="checkbox"]:not([data-checked]) .tb-ring { transition-delay: 0.12s; }
+}
+@keyframes tb-draw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes tb-swell {
+  0% { stroke-width: 2; }
+  60% { stroke-width: 3.4; }
+  100% { stroke-width: 2.4; }
+}
+@keyframes tb-settle {
+  0% { transform: translate(0.6px, -0.6px) scale(1.12); }
+  100% { transform: none; }
+}
+/* Any plain checkbox not yet using TickBox still gets a matching outlined look. */
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tick-box-input) {
   appearance: none;
   -webkit-appearance: none;
-  position: relative;
   display: inline-grid;
   place-content: center;
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   margin: 0;
-  border-radius: 6px;
-  border: 1.5px solid color-mix(in oklab, var(--foreground) 28%, transparent);
-  background: var(--card);
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+  border-radius: 7px;
+  border: 2px solid color-mix(in oklab, var(--primary) 50%, transparent);
+  background: transparent;
   cursor: pointer;
   vertical-align: middle;
-  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
 }
-/* the tick: a check mark revealed from left to right */
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"])::before {
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tick-box-input):checked { border-color: var(--primary); }
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tick-box-input)::before {
   content: "";
   width: 11px;
   height: 11px;
-  background: var(--primary-foreground);
+  background: var(--primary);
   clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%);
   transform: scale(0);
   transition: transform 0.2s ease;
 }
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):hover:not(:disabled) {
-  border-color: var(--primary);
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06), 0 0 0 4px color-mix(in oklab, var(--primary) 12%, transparent);
-}
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked,
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):indeterminate {
-  border-color: var(--primary);
-  background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 82%, white), var(--primary));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 2px 6px -2px color-mix(in oklab, var(--primary) 60%, transparent);
-}
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked::before { transform: scale(1); }
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):indeterminate::before {
-  clip-path: inset(40% 10% 40% 10% round 2px);
-  transform: scale(1);
-}
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):active:not(:disabled) { transform: scale(0.86); }
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):focus-visible {
-  outline: 2px solid var(--ring, var(--primary));
-  outline-offset: 2px;
-}
-input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):disabled { opacity: 0.5; cursor: not-allowed; }
-@media (prefers-reduced-motion: no-preference) {
-  input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked {
-    animation: tick-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1), tick-halo 0.6s ease-out;
-  }
-  input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked::before {
-    animation: tick-draw 0.32s 0.06s cubic-bezier(0.65, 0, 0.35, 1) backwards;
-  }
-  /* the shared Checkbox component: same spring, halo and drawn tick */
-  [data-slot="checkbox"][data-checked] { animation: tick-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1), tick-halo 0.6s ease-out; }
-  [data-slot="checkbox-indicator"] svg path { stroke-dasharray: 24; animation: tick-stroke 0.32s 0.06s cubic-bezier(0.65, 0, 0.35, 1) backwards; }
-}
-@keyframes tick-pop {
-  0% { transform: scale(0.8); }
-  55% { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-@keyframes tick-halo {
-  from { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent); }
-  to { box-shadow: 0 0 0 10px color-mix(in oklab, var(--primary) 0%, transparent); }
-}
-@keyframes tick-draw {
-  from { clip-path: polygon(14% 52%, 0 66%, 0 66%, 0 52%, 0 52%, 14% 52%); transform: scale(1); }
-  45% { clip-path: polygon(14% 52%, 0 66%, 38% 100%, 50% 86%, 38% 72%, 38% 72%); }
-  to { clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); transform: scale(1); }
-}
-@keyframes tick-stroke {
-  from { stroke-dashoffset: 24; }
-  to { stroke-dashoffset: 0; }
-}
-/* Shared Checkbox component: the same box look */
-[data-slot="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  border-width: 1.5px;
-  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
-}
-[data-slot="checkbox"]:hover:not([data-disabled]) { border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 12%, transparent); }
-[data-slot="checkbox"]:active:not([data-disabled]) { transform: scale(0.86); }
-[data-slot="checkbox"][data-checked],
-[data-slot="checkbox"][data-indeterminate] {
-  background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 82%, white), var(--primary));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 2px 6px -2px color-mix(in oklab, var(--primary) 60%, transparent);
-}
-[data-slot="checkbox-indicator"] svg { stroke-width: 3; }
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tick-box-input):checked::before { transform: scale(1); }

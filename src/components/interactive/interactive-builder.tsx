@@ -18,6 +18,7 @@ import {
   type InteractiveMessagePayload,
 } from "@/lib/whatsapp/interactive";
 import { InteractivePreview } from "./interactive-preview";
+import { TickBox } from "@/components/ui/tick-box";
 
 // ------------------------------------------------------------
 // Blank payload factories — used to seed a fresh builder and to
@@ -157,11 +158,9 @@ export function InteractiveBuilder({
           )}
 
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
+            <TickBox
               checked={advanced}
               onChange={(e) => setAdvanced(e.target.checked)}
-              className="h-3.5 w-3.5 accent-primary"
             />
             {t("showIds")}
           </label>

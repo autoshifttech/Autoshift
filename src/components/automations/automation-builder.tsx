@@ -86,6 +86,7 @@ import {
   listTimeZones,
 } from "@/lib/automations/time-of-day"
 import { NativeSelect } from "@/components/ui/native-select"
+import { TickBox } from "@/components/ui/tick-box"
 
 // ------------------------------------------------------------
 // Types (builder-local — mirror the flattened rows we POST)
@@ -1435,11 +1436,10 @@ function StepEditor({
             }
           />
           <label className="flex items-start gap-2 text-xs text-foreground">
-            <input
-              type="checkbox"
+            <TickBox
               checked={cfg.wait_for_reply === true}
               onChange={(e) => set({ wait_for_reply: e.target.checked })}
-              className="mt-0.5 h-3.5 w-3.5 accent-primary"
+              className="mt-0.5"
             />
             <span>
               {t("config.waitForReply")}

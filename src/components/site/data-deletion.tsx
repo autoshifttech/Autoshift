@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { LEGAL } from "@/lib/legal";
+import { TickBox } from "@/components/ui/tick-box";
 
 type Who = "business" | "customer" | "facebook";
 interface DeletionRequest {
@@ -119,7 +120,7 @@ export function DataDeletion() {
               <Textarea id="dd-details" rows={3} value={details} onChange={(e) => setDetails(e.target.value)} placeholder={who === "customer" ? "e.g. Please delete my chat history and number." : "e.g. Delete the whole workspace and our WhatsApp connection."} />
             </div>
             <label className="flex items-start gap-2 text-sm">
-              <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} className="mt-0.5 accent-[var(--primary)]" />
+              <TickBox checked={confirm} onChange={(e) => setConfirm(e.target.checked)} className="mt-0.5" />
               I understand deleted data can&apos;t be recovered.
             </label>
             {error && (
