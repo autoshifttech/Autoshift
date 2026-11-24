@@ -4019,7 +4019,8 @@
     "loadingList": "Cargando tus asistentes…",
     "tabShop": "Tienda",
     "tabBookings": "Citas",
-    "testError": "Sin respuesta: {reason}"
+    "testError": "Sin respuesta: {reason}",
+    "notFoundDesc": "Puede que se haya eliminado, o este enlace es de antes de que cambiara de nombre. Tus otros asistentes y sus chats están a salvo."
   },
   "AiTools": {
     "title": "Herramientas de IA",

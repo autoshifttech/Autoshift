@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, Hand, Plus, Settings2, ShoppingBag, Trash2, Users, Wrench, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Bot, CalendarDays, Check, Hand, Plus, SearchX, Settings2, ShoppingBag, Trash2, Users, Wrench, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -16,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { formatMoney, RATES } from "@/lib/wallet/model";
-import { assistantsStore, resolveAssistantId, updateAssistant, useAssistants, type Assistant, type Audience, type Tone } from "@/lib/assistants/model";
+import { assistantsStore, newAssistant, resolveAssistantId, updateAssistant, useAssistants, type Assistant, type Audience, type Tone } from "@/lib/assistants/model";
 import { startAssistantsSync, useAssistantsSyncStatus } from "@/lib/assistants/backend-sync";
 import { AiKnowledgeCard } from "@/components/settings/ai-knowledge";
 import { useAuth } from "@/hooks/use-auth";
@@ -49,16 +50,66 @@ export function AssistantEditor({ id }: { id: string }) {
     if (realId !== id) router.replace(`/agents/${realId}${wizard ? "?new=1" : ""}`);
   }, [realId, id, router, wizard]);
 
-  if (!a && syncStatus === "loading") return <p role="status" className="text-sm text-muted-foreground">{t("loadingList")}</p>;
+  if (!a && syncStatus === "loading") {
+    return (
+      <div role="status" aria-busy="true" className="space-y-4">
+        <span className="sr-only">{t("loadingList")}</span>
+        <Skeleton className="h-5 w-40" />
+        <div className="flex items-center gap-4 rounded-[24px] border border-border bg-card p-5">
+          <Skeleton className="size-14 rounded-2xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-72 max-w-full" />
+          </div>
+        </div>
+        <Skeleton className="h-64 rounded-[24px]" />
+      </div>
+    );
+  }
 
   if (!a) {
+    // A link to an assistant that is gone: say what happened and offer the two ways forward.
+    const create = () => {
+      const fresh = newAssistant("custom");
+      assistantsStore.set((s) => ({ ...s, assistants: [...s.assistants, fresh] }));
+      router.push(`/agents/${fresh.id}?new=1`);
+    };
     return (
-      <div className="rounded-2xl border border-dashed border-border p-10 text-center">
-        <p className="text-sm text-muted-foreground">{t("notFound")}</p>
-        <Link href="/agents" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
-          {t("backToList")}
-        </Link>
-      </div>
+      <section
+        aria-labelledby="assistant-missing-title"
+        className="relative mx-auto mt-4 max-w-xl overflow-hidden rounded-[28px] border border-border bg-card px-6 pt-12 pb-10 text-center shadow-[var(--shadow-card)] animate-in fade-in-0 slide-in-from-bottom-3 duration-500 sm:px-12"
+      >
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 -top-32 h-80 bg-[radial-gradient(45%_45%_at_50%_50%,color-mix(in_oklab,var(--primary)_16%,transparent),transparent_100%)]" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-24 left-1/2 h-48 w-72 -translate-x-1/2 bg-[radial-gradient(50%_50%_at_50%_50%,rgb(201_242_122/0.18),transparent_70%)]" />
+
+        <span aria-hidden className="relative mx-auto flex size-28 items-center justify-center">
+          <span className="missing-orbit absolute inset-0 rounded-full border border-dashed border-primary/25" />
+          <span className="absolute inset-3 rounded-full bg-primary/[0.06]" />
+          <span className="absolute inset-6 rounded-full bg-primary/10" />
+          <span className="missing-float relative flex size-14 items-center justify-center rounded-2xl bg-card text-primary shadow-[0_10px_24px_-10px_color-mix(in_oklab,var(--primary)_55%,transparent)] ring-1 ring-border">
+            <Bot className="size-7" />
+            <span className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-[#c2410c] text-white shadow-md ring-2 ring-card">
+              <SearchX className="size-3.5" />
+            </span>
+          </span>
+        </span>
+
+        <h2 id="assistant-missing-title" className="relative mt-6 text-xl font-bold tracking-[-0.02em] text-foreground">
+          {t("notFound")}
+        </h2>
+        <p className="relative mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{t("notFoundDesc")}</p>
+
+        <div className="relative mt-7 flex flex-col-reverse items-stretch justify-center gap-2.5 sm:flex-row sm:items-center">
+          <Button variant="outline" onClick={create} className="h-11 gap-1.5 px-5">
+            <Plus className="size-4" />
+            {t("newAssistant")}
+          </Button>
+          <Link href="/agents" className={cn(buttonVariants(), "h-11 gap-1.5 px-5")}>
+            <ArrowLeft className="size-4" />
+            {t("backToList")}
+          </Link>
+        </div>
+      </section>
     );
   }
 

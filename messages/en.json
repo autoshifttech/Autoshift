@@ -4019,7 +4019,8 @@
     "loadingList": "Loading your assistants…",
     "tabShop": "Shop",
     "tabBookings": "Bookings",
-    "testError": "No reply: {reason}"
+    "testError": "No reply: {reason}",
+    "notFoundDesc": "It may have been deleted, or this link is from before it was renamed. Your other assistants and their chats are safe."
   },
   "AiTools": {
     "title": "AI tools",

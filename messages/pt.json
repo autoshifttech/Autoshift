@@ -4019,7 +4019,8 @@
     "loadingList": "Carregando seus assistentes…",
     "tabShop": "Loja",
     "tabBookings": "Agendamentos",
-    "testError": "Sem resposta: {reason}"
+    "testError": "Sem resposta: {reason}",
+    "notFoundDesc": "Ele pode ter sido excluído, ou este link é de antes de ser renomeado. Seus outros assistentes e as conversas deles estão seguros."
   },
   "AiTools": {
     "title": "Ferramentas de IA",

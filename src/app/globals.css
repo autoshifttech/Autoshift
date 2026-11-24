@@ -1762,3 +1762,15 @@ input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tic
   transition: transform 0.2s ease;
 }
 input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tick-box-input):checked::before { transform: scale(1); }
+
+/* A missing page's illustration: the icon floats, the dashed ring turns slowly. */
+@media (prefers-reduced-motion: no-preference) {
+  .missing-float { animation: missing-float 3.6s ease-in-out infinite; }
+  .missing-orbit { animation: missing-orbit 24s linear infinite; }
+}
+@keyframes missing-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+@keyframes missing-orbit { to { rotate: 360deg; } }
+
