@@ -1631,3 +1631,104 @@ html[data-mode="dark"] [data-mobile-nav] .lq-bulge-drop {
   color: #fff;
   text-shadow: none;
 }
+
+/* ==========================================================================
+   Premium tick boxes: every plain checkbox in the app and admin panel (and the
+   shared Checkbox component) gets a soft rounded box. Ticking it springs the
+   green fill in, draws the tick, and sends a soft halo out; pressing squishes
+   it; hover glows; keyboard focus shows a ring. Behaviour is the browser's own.
+   ========================================================================== */
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]) {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border-radius: 6px;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 28%, transparent);
+  background: var(--card);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+/* the tick: a check mark revealed from left to right */
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"])::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  background: var(--primary-foreground);
+  clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%);
+  transform: scale(0);
+  transition: transform 0.2s ease;
+}
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06), 0 0 0 4px color-mix(in oklab, var(--primary) 12%, transparent);
+}
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked,
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):indeterminate {
+  border-color: var(--primary);
+  background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 82%, white), var(--primary));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 2px 6px -2px color-mix(in oklab, var(--primary) 60%, transparent);
+}
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked::before { transform: scale(1); }
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):indeterminate::before {
+  clip-path: inset(40% 10% 40% 10% round 2px);
+  transform: scale(1);
+}
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):active:not(:disabled) { transform: scale(0.86); }
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):focus-visible {
+  outline: 2px solid var(--ring, var(--primary));
+  outline-offset: 2px;
+}
+input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):disabled { opacity: 0.5; cursor: not-allowed; }
+@media (prefers-reduced-motion: no-preference) {
+  input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked {
+    animation: tick-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1), tick-halo 0.6s ease-out;
+  }
+  input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"]):checked::before {
+    animation: tick-draw 0.32s 0.06s cubic-bezier(0.65, 0, 0.35, 1) backwards;
+  }
+  /* the shared Checkbox component: same spring, halo and drawn tick */
+  [data-slot="checkbox"][data-checked] { animation: tick-pop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1), tick-halo 0.6s ease-out; }
+  [data-slot="checkbox-indicator"] svg path { stroke-dasharray: 24; animation: tick-stroke 0.32s 0.06s cubic-bezier(0.65, 0, 0.35, 1) backwards; }
+}
+@keyframes tick-pop {
+  0% { transform: scale(0.8); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes tick-halo {
+  from { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent); }
+  to { box-shadow: 0 0 0 10px color-mix(in oklab, var(--primary) 0%, transparent); }
+}
+@keyframes tick-draw {
+  from { clip-path: polygon(14% 52%, 0 66%, 0 66%, 0 52%, 0 52%, 14% 52%); transform: scale(1); }
+  45% { clip-path: polygon(14% 52%, 0 66%, 38% 100%, 50% 86%, 38% 72%, 38% 72%); }
+  to { clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); transform: scale(1); }
+}
+@keyframes tick-stroke {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+/* Shared Checkbox component: the same box look */
+[data-slot="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border-width: 1.5px;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+[data-slot="checkbox"]:hover:not([data-disabled]) { border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 12%, transparent); }
+[data-slot="checkbox"]:active:not([data-disabled]) { transform: scale(0.86); }
+[data-slot="checkbox"][data-checked],
+[data-slot="checkbox"][data-indeterminate] {
+  background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 82%, white), var(--primary));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 2px 6px -2px color-mix(in oklab, var(--primary) 60%, transparent);
+}
+[data-slot="checkbox-indicator"] svg { stroke-width: 3; }
