@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 interface CustomFieldsManagerProps {
   open: boolean;
@@ -201,10 +202,7 @@ export function CustomFieldsPanel() {
       {/* List */}
       <div className="max-h-72 overflow-y-auto rounded-md border border-border">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" />
-            {t('loading')}
-          </div>
+          <ListSkeleton rows={3} compact label={t('loading')} />
         ) : fields.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             {t('empty')}

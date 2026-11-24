@@ -58,6 +58,7 @@ import { useCan } from '@/hooks/use-can';
 import { GatedButton } from '@/components/ui/gated-button';
 import { useTranslations } from 'next-intl';
 import { LeadScoreCell } from '@/components/leads/lead-ui';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 25;
 
@@ -561,11 +562,8 @@ export default function ContactsPage() {
           <TableBody>
             {loading ? (
               <TableRow className="border-border">
-                <TableCell colSpan={9} className="text-center py-12">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="size-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">{t('loading')}</p>
-                  </div>
+                <TableCell colSpan={9} className="p-0">
+                  <ListSkeleton rows={5} label={t('loading')} />
                 </TableCell>
               </TableRow>
             ) : contacts.length === 0 ? (

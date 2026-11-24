@@ -25,7 +25,6 @@ import {
   UserPlus,
   Check,
   Clock,
-  ArrowLeft,
   RefreshCw,
   PanelRightOpen,
   PanelRightClose,
@@ -74,6 +73,7 @@ import {
   isTempMessage,
   newTempMessageId,
 } from "@/lib/inbox/optimistic-messages";
+import { BackLink } from "@/components/ui/back-link";
 
 const MESSAGE_PAGE_SIZE = 200;
 
@@ -995,14 +995,7 @@ export function MessageThread({
           {/* Back-to-list button — mobile only. Hidden on lg+ where the
               conversation list is always visible next to the thread. */}
           {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label={t("backToConversations")}
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
+            <BackLink iconOnly label={t("backToConversations")} onClick={onBack} className="lg:hidden" />
           )}
           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
             {displayName.charAt(0).toUpperCase()}

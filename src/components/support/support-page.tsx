@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, Clock, LifeBuoy, MessageCircle, Plus, Send } from "lucide-react";
+import { Clock, LifeBuoy, MessageCircle, Plus, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ import { DEMO_BUSINESS_ID, type Ticket } from "@/lib/admin/data";
 // the backend exists both sides share this browser's store.
 import { CURRENT_ADMIN, addTicketMessage, createTicket, useAdmin } from "@/lib/admin/store";
 import { businessReply, connected, loadMyTickets, openTicket } from "@/lib/admin/admin-data-sync";
+import { BackLink } from "@/components/ui/back-link";
 
 const CATEGORIES: Ticket["category"][] = ["WhatsApp connection", "Billing", "Templates", "AI assistant", "Bug", "Other"];
 const CATEGORY_KEY: Record<Ticket["category"], string> = { "WhatsApp connection": "whatsapp", Billing: "billing", Templates: "templates", "AI assistant": "ai", Bug: "bug", Other: "other" };
@@ -46,9 +47,7 @@ function Thread({ ticket, onBack }: { ticket: Ticket; onBack: () => void }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-start gap-2 border-b border-border p-4">
-        <button type="button" onClick={onBack} aria-label={t("back")} className="-ml-1 rounded-md p-1 text-muted-foreground hover:bg-muted lg:hidden">
-          <ArrowLeft className="size-5" />
-        </button>
+        <BackLink iconOnly label={t("back")} onClick={onBack} className="-ml-1 lg:hidden" />
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground">
             {ticket.id} · {t(`category_${CATEGORY_KEY[ticket.category]}`)} · {when(ticket.createdAt)}

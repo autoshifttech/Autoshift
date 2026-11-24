@@ -16,6 +16,7 @@ import { toast } from "@/lib/toast";
 import { BackendError } from "@/lib/backend/client";
 import { ORDER_VIEWS, inView, itemLabel, matches, nextActions, rupees, updateOrder, useOrders, type OrderAction, type OrderView, type PaymentStatus, type OrderStatus, type ShopOrder } from "@/lib/orders";
 import { TickBox } from "@/components/ui/tick-box";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
   new: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
@@ -86,9 +87,7 @@ export function OrdersPage() {
 
       <section className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]" aria-live="polite">
         {!loaded ? (
-          <p role="status" className="p-6 text-sm text-muted-foreground">
-            {t("loading")}
-          </p>
+          <ListSkeleton rows={4} label={t("loading")} className="p-4" />
         ) : error ? (
           <p role="alert" className="p-6 text-sm text-destructive">
             {t("loadError")}

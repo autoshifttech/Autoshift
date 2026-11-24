@@ -29,6 +29,7 @@ import { ShopTab } from "./shop-tab";
 import { BookingTab } from "./booking-tab";
 import { isOn, usePages } from "@/lib/workspace/pages";
 import { TickBox } from "@/components/ui/tick-box";
+import { BackLink } from "@/components/ui/back-link";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
 const AUDIENCES: Audience[] = ["all", "new_contacts", "tagged", "after_hours"];
@@ -120,10 +121,7 @@ export function AssistantEditor({ id }: { id: string }) {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Link href="/agents" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-4" />
-          {t("backToList")}
-        </Link>
+        <BackLink href="/agents" className="self-start">{t("backToList")}</BackLink>
       </div>
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-3">

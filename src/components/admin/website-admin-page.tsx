@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { toast } from "@/lib/toast";
-import Link from "next/link";
-import { ArrowLeft, ExternalLink, Globe, Info, RotateCcw } from "lucide-react";
+import { ExternalLink, Globe, Info, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { act } from "@/lib/admin/store";
+import { BackLink } from "@/components/ui/back-link";
 
 /** Where the public website's own editor lives (served from public/site). */
 const EDITOR_URL = "/site/index.html#admin";
@@ -36,11 +36,10 @@ export function WebsiteAdminPage() {
     <div className="app-canvas flex h-dvh flex-col bg-background">
       {/* Full screen: the platform admin's sidebar and header are left behind. */}
       <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 sm:px-4">
-        <Link href="/admin" className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground shadow-[var(--shadow-card)] hover:bg-card-2">
-          <ArrowLeft className="size-4" />
+        <BackLink href="/admin" label="Back to admin panel">
           <span className="hidden sm:inline">Back to admin panel</span>
           <span className="sm:hidden">Admin</span>
-        </Link>
+        </BackLink>
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <Globe className="size-4 shrink-0 text-primary" />
           <span className="truncate text-sm font-semibold text-foreground">Website admin</span>

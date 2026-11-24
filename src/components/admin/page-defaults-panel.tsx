@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import {  } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
@@ -10,6 +10,7 @@ import { backend, backendUrl, BackendError } from "@/lib/backend/client";
 import { BUSINESS_TYPES, OPTIONAL_PAGES, type BusinessType, type OptionalPage } from "@/lib/workspace/pages";
 import { PAGE_LABEL_KEY } from "./business-pages";
 import { TickBox } from "@/components/ui/tick-box";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 type Defaults = Record<BusinessType, OptionalPage[]>;
 
@@ -34,7 +35,7 @@ export function PageDefaultsPanel() {
   }, []);
 
   if (hidden) return null;
-  if (!d) return <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>;
+  if (!d) return <ListSkeleton rows={3} compact label={t("loading")} className="px-0" />;
 
   const flip = (kind: BusinessType, p: OptionalPage) =>
     setD({ ...d, [kind]: OPTIONAL_PAGES.filter((x) => (x === p ? !d[kind].includes(p) : d[kind].includes(x))) });

@@ -26,7 +26,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
-  ArrowLeft,
   CircleDot,
   History,
   Loader2,
@@ -48,6 +47,7 @@ import {
   useFlowEditor,
   type BuilderState,
 } from "./flow-editor-state";
+import { BackLink } from "@/components/ui/back-link";
 
 export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
   const router = useRouter();
@@ -79,15 +79,13 @@ export function EditorHeader({ viewToggle }: { viewToggle?: React.ReactNode }) {
     <div className="flex flex-col gap-1 bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1 sm:px-5 sm:pb-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 sm:gap-y-3">
         {/* ---- left: back · icon · name · status · edited ---- */}
-        <button
-          type="button"
-          onClick={() => (dirty ? setLeaveOpen(true) : router.push("/flows"))}
+        <BackLink
+          iconOnly
+          label={t("backToFlows")}
           title={t("backToFlows")}
-          aria-label={t("backToFlows")}
-          className="order-1 sm:order-none inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
+          onClick={() => (dirty ? setLeaveOpen(true) : router.push("/flows"))}
+          className="order-1 sm:order-none"
+        />
         <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary sm:flex">
           <Workflow className="h-[18px] w-[18px]" />
         </span>

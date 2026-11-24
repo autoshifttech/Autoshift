@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, Clock, Flag, Pause, Play, Plus, Rocket, Trash2, Zap } from "lucide-react";
+import { Clock, Flag, Pause, Play, Plus, Rocket, Trash2, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import {
   type TriggerKind,
 } from "@/lib/drips/model";
 import { DripStatusChip } from "./drip-ui";
+import { BackLink } from "@/components/ui/back-link";
 
 
 export function DripBuilder({ id }: { id: string }) {
@@ -80,10 +81,7 @@ export function DripBuilder({ id }: { id: string }) {
 
   return (
     <div className="space-y-5">
-      <Link href="/drips" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" />
-        {t("backToList")}
-      </Link>
+      <BackLink href="/drips">{t("backToList")}</BackLink>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:flex-row md:items-center">
         <div className="min-w-0 flex-1">

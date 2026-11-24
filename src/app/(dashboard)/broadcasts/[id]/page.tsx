@@ -20,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  ArrowLeft,
   Loader2,
   Users,
   Send,
@@ -41,6 +40,7 @@ import {
   getRecipientStatus,
 } from '@/lib/broadcast-status';
 import { useTranslations } from 'next-intl';
+import { BackLink } from '@/components/ui/back-link';
 
 interface StatCardProps {
   label: string;
@@ -339,14 +339,7 @@ export default function BroadcastDetailPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => router.push('/broadcasts')}
-            className="border-border"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          <BackLink iconOnly label={t('backToBroadcasts')} onClick={() => router.push('/broadcasts')} />
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold text-foreground">{broadcast.name}</h2>

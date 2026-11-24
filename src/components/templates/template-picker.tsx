@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { isLive } from "@/lib/workspace/live";
 import { TEMPLATE_FIELDS } from "@/lib/assistants/model";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 interface Row {
   name: string;
@@ -147,7 +148,7 @@ export function TemplatePicker<V extends TemplateChoice>({ kind, value, language
       <p className="mt-1 text-xs text-muted-foreground">{t(`help_${kind}`)}</p>
 
       {rows === null ? (
-        <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>
+        <ListSkeleton rows={3} compact label={t("loading")} className="mt-3 px-0" />
       ) : failed ? (
         <p role="alert" className="mt-3 text-sm text-rose-800 dark:text-rose-300">{t("loadFailed")}</p>
       ) : (

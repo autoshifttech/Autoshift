@@ -14,6 +14,7 @@ import { assistantsStore, newAssistant, updateAssistant, useAssistants } from "@
 import { startAssistantsSync, useAssistantsSyncStatus } from "@/lib/assistants/backend-sync";
 import { toast } from "@/lib/toast";
 import { AssistantAvatar } from "./assistant-ui";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 const AI_PRICE = RATES.find((r) => r.kind === "ai")?.price ?? 0;
 
@@ -52,7 +53,7 @@ export function AssistantsList() {
         </div>
       </div>
 
-      {syncStatus === "loading" && <p role="status" className="text-sm text-muted-foreground">{t("loadingList")}</p>}
+      {syncStatus === "loading" && <ListSkeleton rows={3} label={t("loadingList")} className="rounded-2xl border border-border bg-card" />}
       <div className={cn("grid gap-4 md:grid-cols-2 xl:grid-cols-3", syncStatus === "loading" && "hidden")}>
         {assistants.map((a) => {
           const activeTools = a.toolIds.filter((id) => tools.some((x) => x.id === id && x.enabled)).length;

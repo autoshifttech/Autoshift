@@ -14,6 +14,7 @@ import { backend, backendUrl } from '@/lib/backend/client';
 import { ApiKeysSettings } from './api-keys-settings';
 import { SettingsPanelHead } from './settings-panel-head';
 import { McpConnectGuide } from './mcp-connect-guide';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 interface ApiKey {
   id: string;
@@ -151,7 +152,7 @@ export function ApiKeysPanel({ platform = false }: { platform?: boolean } = {}) 
       </div>
 
       <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-        {keys === null && <li className="p-4 text-sm text-muted-foreground">{t('loading')}</li>}
+        {keys === null && <li><ListSkeleton rows={2} compact label={t('loading')} /></li>}
         {keys?.length === 0 && <li className="p-4 text-sm text-muted-foreground">{t('empty')}</li>}
         {keys?.map((k) => (
           <li key={k.id} className="flex flex-wrap items-center gap-3 p-4">

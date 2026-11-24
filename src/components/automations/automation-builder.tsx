@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "@/lib/toast";
 import {
-  ArrowLeft,
   ChevronDown,
   Plus,
   Trash2,
@@ -87,6 +86,7 @@ import {
 } from "@/lib/automations/time-of-day"
 import { NativeSelect } from "@/components/ui/native-select"
 import { TickBox } from "@/components/ui/tick-box"
+import { BackLink } from "@/components/ui/back-link";
 
 // ------------------------------------------------------------
 // Types (builder-local — mirror the flattened rows we POST)
@@ -746,14 +746,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
           switch moves to the right of the save button, so the name input
           gets maximum width. */}
       <header className="flex flex-shrink-0 items-center gap-2 border-b border-border bg-card/80 px-3 py-3 sm:gap-3 sm:px-4">
-        <button
-          type="button"
-          onClick={() => router.push("/automations")}
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label={t("backToAutomations")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
+        <BackLink iconOnly label={t("backToAutomations")} onClick={() => router.push("/automations")} />
         <input
           value={state.name}
           onChange={(e) => patchTop("name", e.target.value)}

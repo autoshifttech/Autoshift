@@ -36,6 +36,7 @@ import {
   type AppointmentView,
   type BookingSettings,
 } from "@/lib/appointments";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 const STATUS_STYLE: Record<AppointmentStatus, string> = {
   booked: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
@@ -122,7 +123,7 @@ export function AppointmentsPage() {
 
       <section className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]" aria-live="polite">
         {!loaded ? (
-          <p role="status" className="p-6 text-sm text-muted-foreground">{t("loading")}</p>
+          <ListSkeleton rows={4} label={t("loading")} className="p-4" />
         ) : error ? (
           <p role="alert" className="p-6 text-sm text-destructive">{t("loadError")} <button type="button" className="underline" onClick={() => void reload()}>{t("retry")}</button></p>
         ) : groups.length === 0 ? (

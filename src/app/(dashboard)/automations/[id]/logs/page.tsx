@@ -3,7 +3,6 @@
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
-  ArrowLeft,
   Check,
   Loader2,
   X,
@@ -21,6 +20,7 @@ import type {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { formatRelative } from "@/lib/automations/trigger-meta"
+import { BackLink } from "@/components/ui/back-link"
 
 export default function AutomationLogsPage({
   params,
@@ -87,14 +87,7 @@ export default function AutomationLogsPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => router.push("/automations")}
-          className="flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label={t("backAria")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
+        <BackLink iconOnly label={t("backAria")} onClick={() => router.push("/automations")} />
         <div>
           <h2 className="text-2xl font-bold text-foreground">{automation.name}</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("title")}</p>

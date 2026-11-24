@@ -15,6 +15,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 interface DocSummary {
   id: string;
@@ -190,9 +191,7 @@ export function AiKnowledgeCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
-          <div className="flex items-center py-4 text-sm text-muted-foreground">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('loading')}
-          </div>
+          <ListSkeleton rows={2} compact label={t('loading')} className="px-0" />
         ) : (
           <>
             {docs.length === 0 && editing === null && (

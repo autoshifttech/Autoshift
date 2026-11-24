@@ -14,6 +14,7 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { SettingsPanelHead } from '@/components/settings/settings-panel-head';
 import { toast } from '@/lib/toast';
 import { backend, backendUrl } from '@/lib/backend/client';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 type ParamType = 'string' | 'number' | 'integer' | 'boolean';
 interface Param {
@@ -308,7 +309,7 @@ export function CustomToolsPanel() {
       </form>
 
       <ul className="divide-y divide-border rounded-2xl border border-border bg-card" aria-label={t('listLabel')}>
-        {tools === null && <li className="p-4 text-sm text-muted-foreground">{t('loading')}</li>}
+        {tools === null && <li><ListSkeleton rows={2} compact label={t('loading')} /></li>}
         {tools?.length === 0 && <li className="p-4 text-sm text-muted-foreground">{t('empty')}</li>}
         {tools?.map((tool) => (
           <li key={tool.id} className="space-y-3 p-4">

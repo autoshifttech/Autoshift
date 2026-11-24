@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";
 import {
-  ArrowLeft,
   Ban,
   Bot,
   CalendarPlus,
@@ -46,6 +45,7 @@ import { useTranslations } from "next-intl";
 import { BusinessTeam } from "./business-team";
 import { BusinessPages } from "./business-pages";
 import { DataTable, EmptyState, Initials, Kpi, NUMBER_META, Panel, Pill, QualityPill, Segmented, StatusPill, td } from "./admin-ui";
+import { BackLink } from "@/components/ui/back-link";
 
 type Tab = "overview" | "pages" | "team" | "usage" | "payments" | "notes" | "activity";
 type DialogKind = "trial" | "plan" | "credits" | "block" | null;
@@ -110,10 +110,7 @@ export function BusinessDetail({ id }: { id: string }) {
 
   return (
     <>
-      <Link href="/admin/businesses" data-nav-back className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" />
-        Businesses
-      </Link>
+      <BackLink href="/admin/businesses" data-nav-back>Businesses</BackLink>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 items-center gap-4">

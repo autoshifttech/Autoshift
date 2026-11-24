@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, Inbox, Lock, MessageSquareReply, Search, Send } from "lucide-react";
+import { Inbox, Lock, MessageSquareReply, Search, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { businessById, type Ticket, type TicketPriority, type TicketStatus } fro
 import { dateTime, relTime } from "@/lib/admin/format";
 import { CURRENT_ADMIN, addTicketMessage, act, updateTicket, useAdmin } from "@/lib/admin/store";
 import { EmptyState, Initials, PRIORITY_META, PageHeader, Pill, Segmented, TICKET_STATUS_META } from "./admin-ui";
+import { BackLink } from "@/components/ui/back-link";
 
 const CANNED: { label: string; text: string }[] = [
   { label: "Connect WhatsApp", text: "Open Settings → WhatsApp → Connect, sign in with the Facebook account that manages your business, then pick or add your number. If the popup closes early, allow popups for this site and try again. Happy to do it with you on a quick call." },
@@ -80,9 +81,7 @@ function Conversation({ t, team, onBack }: { t: Ticket; team: string[]; onBack: 
     <div className="flex h-full min-h-0 flex-col">
       <div className="border-b border-border p-4">
         <div className="flex items-start gap-2">
-          <button type="button" onClick={onBack} aria-label="Back to tickets" className="-ml-1 rounded-md p-1 text-muted-foreground hover:bg-muted lg:hidden">
-            <ArrowLeft className="size-5" />
-          </button>
+          <BackLink iconOnly label="Back to tickets" onClick={onBack} className="-ml-1 lg:hidden" />
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground">
               {t.id} · {t.category} · opened {dateTime(t.createdAt)}

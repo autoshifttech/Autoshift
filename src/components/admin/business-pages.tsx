@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Lock, RotateCcw } from "lucide-react";
+import { Lock, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { toast } from "@/lib/toast";
 import { backend, backendUrl, BackendError } from "@/lib/backend/client";
 import { BUSINESS_TYPES, OPTIONAL_PAGES, SHOP_SOURCES, isShopType, type BusinessType, type OptionalPage, type ShopSource } from "@/lib/workspace/pages";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 interface PagesInfo {
   business_type: BusinessType | null;
@@ -57,7 +58,7 @@ export function BusinessPages({ businessId }: { businessId: string }) {
 
   if (!backendUrl()) return <p className="text-sm text-muted-foreground">{t("noBackend")}</p>;
   if (error) return <p role="alert" className="text-sm text-destructive">{error}</p>;
-  if (!info) return <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>;
+  if (!info) return <ListSkeleton rows={3} compact label={t("loading")} className="px-0" />;
 
   const changed = info.all || on.join() !== info.optional_on.join() || (kind || null) !== info.business_type || (isShopType(kind) && source !== (info.shop_source ?? "whatsapp"));
   const toggle = (p: OptionalPage, value: boolean) => setOn((list) => OPTIONAL_PAGES.filter((x) => (x === p ? value : list.includes(x))));

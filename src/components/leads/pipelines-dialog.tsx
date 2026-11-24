@@ -21,6 +21,7 @@ import {
   type Pipeline,
   type StageDraft,
 } from "@/lib/leads/pipelines";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 type Editing = { pipeline: Pipeline | null } | null;
 
@@ -57,9 +58,7 @@ export function PipelinesDialog({ open, onOpenChange }: { open: boolean; onOpenC
                 <DialogDescription>{t("desc")}</DialogDescription>
               </DialogHeader>
               {!loaded ? (
-                <p className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}
-                </p>
+                <ListSkeleton rows={3} compact label={t("loading")} className="px-0" />
               ) : pipelines.length === 0 ? (
                 <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">{t("empty")}</p>
               ) : (

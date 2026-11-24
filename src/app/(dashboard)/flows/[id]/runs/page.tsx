@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Loader2,
   CircleCheck,
   CircleAlert,
@@ -22,6 +21,7 @@ import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { BackLink } from "@/components/ui/back-link";
 
 /**
  * Run history viewer.
@@ -176,14 +176,9 @@ export default function FlowRunsPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <button
-        type="button"
-        onClick={() => router.push(`/flows/${flow.id}`)}
-        className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-3 w-3" />
+      <BackLink onClick={() => router.push(`/flows/${flow.id}`)} className="mb-3">
         {flow.name}
-      </button>
+      </BackLink>
       <h2 className="text-xl font-semibold text-foreground">{t("title")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         {t("description")}

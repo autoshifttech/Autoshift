@@ -23,16 +23,21 @@ function PageSkeleton() {
   )
 }
 
-/** Rows for a list column such as the conversation list. */
-function ListSkeleton({ rows = 6 }: { rows?: number }) {
+/** Rows for a list column such as the conversation list, or any panel still loading its list.
+ *  `label` is what screen readers hear (pass the page's own translated "Loading…"). */
+function ListSkeleton({ rows = 6, label = "Loading", className, compact }: { rows?: number; label?: string; className?: string; compact?: boolean }) {
   return (
-    <div role="status" aria-busy="true" aria-label="Loading" className="space-y-1 p-3">
+    <div role="status" aria-busy="true" aria-label={label} className={cn("space-y-1 p-3", className)}>
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl p-2">
-          <Skeleton className="size-10 shrink-0 rounded-full" />
+        <div
+          key={i}
+          className="flex items-center gap-3 rounded-xl p-2 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:fill-mode-backwards motion-safe:duration-500"
+          style={{ animationDelay: `${i * 70}ms` }}
+        >
+          <Skeleton className={cn("shrink-0 rounded-full", compact ? "size-8" : "size-10")} />
           <div className="flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-2/5" />
-            <Skeleton className="h-3 w-4/5" />
+            <Skeleton className="h-3.5" style={{ width: `${[42, 55, 35, 48, 60, 38][i % 6]}%` }} />
+            <Skeleton className="h-3" style={{ width: `${[78, 64, 82, 70, 58, 74][i % 6]}%` }} />
           </div>
         </div>
       ))}

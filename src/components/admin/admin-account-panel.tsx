@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/toast";
 import { USERNAME_RE, passwordProblem } from "@/lib/admin/admin-password";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 /**
  * Admin → Settings → "Your sign-in": the username and password this admin can use on the admin login
@@ -88,7 +89,7 @@ export function AdminAccountPanel() {
       </div>
 
       {!loaded ? (
-        <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>
+        <ListSkeleton rows={2} compact label={t("loading")} className="px-0" />
       ) : (
         <form onSubmit={save} className="grid gap-3 sm:grid-cols-2" noValidate>
           <div className="grid gap-1.5 sm:col-span-2">

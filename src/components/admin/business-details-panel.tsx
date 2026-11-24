@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/lib/toast";
 import type { BusinessDetails } from "@/lib/legal-details";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 const FIELDS: { key: keyof BusinessDetails; multi?: boolean; type?: string }[] = [
   { key: "company" }, { key: "address", multi: true }, { key: "email", type: "email" }, { key: "whatsapp", type: "tel" },
@@ -32,7 +33,7 @@ export function BusinessDetailsPanel() {
   }, []);
 
   if (hidden) return null;
-  if (!d) return <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" aria-hidden /> {t("loading")}</p>;
+  if (!d) return <ListSkeleton rows={3} compact label={t("loading")} className="px-0" />;
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
