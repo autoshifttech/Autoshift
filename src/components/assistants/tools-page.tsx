@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { CheckCircle2, FlaskConical, Loader2, Pencil, Plus, Trash2, X, XCircle } from "lucide-react";
+import { CheckCircle2, FlaskConical, Loader2, Pencil, Plus, X, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ import { TOOL_CATEGORIES, assistantsStore, updateTool, useAssistants, type Tool,
 import { AssistantAvatar, toolIcon } from "./assistant-ui";
 import { startAssistantsSync } from "@/lib/assistants/backend-sync";
 import { backend, backendUrl } from "@/lib/backend/client";
+import { BinButton } from "@/components/motion/bin-button";
 
 /** The backend's rule for a field name (backend/app/schemas.py ToolParam). */
 const PARAM_RE = /^[A-Za-z_][A-Za-z0-9_]{0,40}$/;
@@ -318,18 +319,15 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
         </div>
         <DialogFooter className="sm:justify-between">
           {tool && !tool.builtin ? (
-            <Button
-              variant="ghost"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              onClick={() => {
+            <BinButton
+              variant="soft"
+              label={t("delete")}
+              onDone={() => {
                 assistantsStore.set((s) => ({ tools: s.tools.filter((x) => x.id !== tool.id), assistants: s.assistants.map((a) => ({ ...a, toolIds: a.toolIds.filter((x) => x !== tool.id) })) }));
                 toast.success(t("deleted"));
                 onClose();
               }}
-            >
-              <Trash2 className="size-4" />
-              {t("delete")}
-            </Button>
+            />
           ) : (
             <span />
           )}

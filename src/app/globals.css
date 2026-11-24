@@ -1231,6 +1231,11 @@ html[data-vt-reveal]::view-transition-new(root) { animation: theme-reveal 0.6s c
   .step-ring { animation: step-ring 2s ease-out 3; }
   .step-dot { transition: width 0.4s cubic-bezier(0.3, 1.3, 0.5, 1), background-color 0.3s; }
 }
+/* A finished step's tick draws itself. */
+.step-tick { stroke-dasharray: 100; }
+@media (prefers-reduced-motion: no-preference) {
+  .step-tick { animation: tb-draw 0.4s 0.1s cubic-bezier(0.3, 0.7, 0.4, 1) backwards; }
+}
 @keyframes step-ring {
   0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent); }
   70%, 100% { box-shadow: 0 0 0 7px transparent; }
@@ -1773,4 +1778,25 @@ input[type="checkbox"]:not([role="switch"], .sr-only, [aria-hidden="true"], .tic
   50% { translate: 0 -5px; }
 }
 @keyframes missing-orbit { to { rotate: 360deg; } }
+
+/* Automation builder: the lines between steps carry a slow flow downward, like messages passing
+   through; cards lift a touch on hover; the first + softly invites a click. */
+.auto-flow {
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+.auto-card { transition: transform 0.25s cubic-bezier(0.3, 1.3, 0.5, 1), box-shadow 0.25s ease; }
+@media (prefers-reduced-motion: no-preference) {
+  .auto-flow {
+    background:
+      linear-gradient(to bottom, transparent 0 40%, color-mix(in oklab, var(--primary) 70%, transparent) 50%, transparent 60% 100%) 0 0 / 100% 200% repeat-y,
+      color-mix(in oklab, var(--foreground) 14%, transparent);
+    animation: auto-flow 2.4s linear infinite;
+  }
+  .auto-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 18px 34px -18px rgb(0 0 0 / 0.4); }
+  .auto-add-invite { animation: step-ring 2s ease-out infinite; }
+}
+@keyframes auto-flow {
+  from { background-position: 0 -100%, 0 0; }
+  to { background-position: 0 100%, 0 0; }
+}
 

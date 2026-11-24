@@ -1326,7 +1326,11 @@
         },
         "when": "{subject} 조건",
         "noUrl": "URL 없음"
-      }
+      },
+      "stateLive": "실행 중",
+      "stateDraft": "초안",
+      "firstStepHint": "첫 단계를 추가하세요: 다음에 무엇을 할까요?",
+      "renameHint": "이름 바꾸기"
     }
   },
   "Flows": {

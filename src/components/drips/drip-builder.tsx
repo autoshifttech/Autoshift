@@ -35,6 +35,7 @@ import {
 } from "@/lib/drips/model";
 import { DripStatusChip } from "./drip-ui";
 import { BackLink } from "@/components/ui/back-link";
+import { BinButton } from "@/components/motion/bin-button";
 
 
 export function DripBuilder({ id }: { id: string }) {
@@ -101,18 +102,15 @@ export function DripBuilder({ id }: { id: string }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            className="gap-1.5 text-destructive hover:text-destructive"
-            onClick={() => {
+          <BinButton
+            variant="soft"
+            label={t("delete")}
+            onDone={() => {
               dripsStore.set((s) => ({ drips: s.drips.filter((x) => x.id !== d.id) }));
               toast.success(t("deleted"));
               router.push("/drips");
             }}
-          >
-            <Trash2 className="size-4" />
-            {t("delete")}
-          </Button>
+          />
           {d.status === "active" ? (
             <Button variant="outline" className="gap-1.5" onClick={() => set({ status: "paused" })}>
               <Pause className="size-4" />

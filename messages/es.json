@@ -1326,7 +1326,11 @@
         },
         "when": "cuando {subject}",
         "noUrl": "sin URL"
-      }
+      },
+      "stateLive": "Activa",
+      "stateDraft": "Borrador",
+      "firstStepHint": "Añade el primer paso: ¿qué debe pasar después?",
+      "renameHint": "Cambiar nombre"
     }
   },
   "Flows": {

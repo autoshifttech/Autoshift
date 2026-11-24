@@ -13,7 +13,6 @@ import { toast } from "@/lib/toast";
 import {
   ChevronDown,
   Plus,
-  Trash2,
   GripVertical,
   MessageSquare,
   FileText,
@@ -87,6 +86,7 @@ import {
 import { NativeSelect } from "@/components/ui/native-select"
 import { TickBox } from "@/components/ui/tick-box"
 import { BackLink } from "@/components/ui/back-link";
+import { BinButton } from "@/components/motion/bin-button";
 
 // ------------------------------------------------------------
 // Types (builder-local — mirror the flattened rows we POST)
@@ -745,16 +745,28 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
       {/* Top bar. At sub-sm widths the "Active" label is hidden and the
           switch moves to the right of the save button, so the name input
           gets maximum width. */}
-      <header className="flex flex-shrink-0 items-center gap-2 border-b border-border bg-card/80 px-3 py-3 sm:gap-3 sm:px-4">
+      <header className="relative z-10 flex flex-shrink-0 items-center gap-2 border-b border-border/70 bg-card/75 px-3 py-2.5 shadow-[0_8px_24px_-18px_rgb(0_0_0/0.35)] backdrop-blur-xl sm:gap-3 sm:px-4">
         <BackLink iconOnly label={t("backToAutomations")} onClick={() => router.push("/automations")} />
-        <input
-          value={state.name}
-          onChange={(e) => patchTop("name", e.target.value)}
-          placeholder={t("untitled")}
-          className="min-w-0 flex-1 rounded-md bg-transparent px-2 py-1 text-sm font-semibold text-foreground placeholder:text-muted-foreground focus:bg-muted focus:outline-none sm:text-base"
-        />
+        <label className="group/name flex min-w-0 flex-1 items-center gap-1.5 rounded-xl px-2 py-1 transition-colors focus-within:bg-muted/70 focus-within:ring-2 focus-within:ring-ring hover:bg-muted/50">
+          <input
+            value={state.name}
+            onChange={(e) => patchTop("name", e.target.value)}
+            placeholder={t("untitled")}
+            aria-label={t("renameHint")}
+            className="min-w-0 flex-1 bg-transparent text-sm font-semibold tracking-[-0.01em] text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-base"
+          />
+          <PencilLine aria-hidden className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/name:opacity-100 group-focus-within/name:opacity-0" />
+        </label>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="hidden sm:inline">{t("active")}</span>
+          <span
+            className={cn(
+              "hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors sm:inline-flex",
+              state.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+            )}
+          >
+            <span className={cn("size-1.5 rounded-full", state.is_active ? "animate-pulse bg-primary" : "bg-muted-foreground/50")} />
+            {state.is_active ? t("stateLive") : t("stateDraft")}
+          </span>
           <Switch
             checked={state.is_active}
             onCheckedChange={(v) => patchTop("is_active", !!v)}
@@ -764,7 +776,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
         <Button
           onClick={save}
           disabled={saving}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className="h-10 rounded-full px-5 shadow-[0_6px_16px_-8px_var(--primary)]"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {isEditing ? t("save") : t("saveDraft")}
@@ -773,7 +785,8 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
 
       {/* Canvas */}
       <div className="relative flex-1 overflow-y-auto">
-        <div className="absolute inset-0 bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(50%_60%_at_50%_0%,color-mix(in_oklab,var(--primary)_10%,transparent),transparent_70%)]" />
         {/* Phones: extra room at the end so the last + clears the floating bottom bar and help button. */}
         <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-0 px-4 pt-10 pb-44 lg:pb-10">
           <ResourcesProvider>
@@ -823,18 +836,19 @@ function TriggerCard({
   return (
     // Card width: full on mobile, fixed 320px on sm+. The canvas wrapper
     // (max-w-2xl + px-4) keeps this tidy on tablet/desktop.
-    <div className="z-10 w-full max-w-[320px] sm:w-80">
-      <div className="rounded-lg border border-border border-l-4 border-l-blue-500 bg-card shadow-lg">
+    <div className="z-10 w-full max-w-[340px] motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-2 motion-safe:duration-500 sm:w-[340px]">
+      <div className="auto-card overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04),0_14px_30px_-18px_rgb(0_0_0/0.35)] ring-1 ring-primary/10">
+        <span aria-hidden className="block h-1 bg-[linear-gradient(90deg,var(--primary),color-mix(in_oklab,var(--primary)_40%,#c9f27a))]" />
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           className="flex w-full items-center gap-3 px-4 py-3 text-left"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-400">
-            <Zap className="h-4 w-4" />
+          <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(160deg,color-mix(in_oklab,var(--primary)_80%,white),var(--primary))] text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.3),0_6px_14px_-6px_var(--primary)]">
+            <Zap className="h-[18px] w-[18px]" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300">{t("trigger")}</div>
+            <div className="text-[11px] font-semibold tracking-wider text-primary uppercase">{t("trigger")}</div>
             <div className="truncate text-sm font-medium text-foreground">
               {t(`triggers.${type}.label`)}
             </div>
@@ -844,7 +858,7 @@ function TriggerCard({
           />
         </button>
         {open && (
-          <div className="space-y-3 border-t border-border px-4 py-3">
+          <div className="space-y-3 border-t border-border px-4 py-3 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 motion-safe:duration-300">
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 {t("triggerType")}
@@ -1074,7 +1088,7 @@ function StepList(props: StepListProps) {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <AddButton onPick={(t) => props.addStepAt(scope, 0, t)} />
+      <AddButton first={scope.kind === "root" && steps.length === 0} onPick={(t) => props.addStepAt(scope, 0, t)} />
       {steps.map((step, idx) => (
         <StepRenderer
           key={step.cid}
@@ -1134,7 +1148,7 @@ function StepRenderer({
       <div className={cn("z-10 flex min-w-0 flex-col", width)}>
         <div
           className={cn(
-            "rounded-lg border border-border border-l-4 bg-card shadow-lg",
+            "auto-card overflow-hidden rounded-[20px] border border-border border-l-4 bg-card shadow-[0_1px_2px_rgb(0_0_0/0.04),0_12px_26px_-18px_rgb(0_0_0/0.35)] motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-500",
             meta.border,
           )}
         >
@@ -1144,7 +1158,7 @@ function StepRenderer({
             className="flex w-full items-center gap-3 px-4 py-3 text-left"
           >
             <GripVertical className="h-4 w-4 flex-shrink-0 text-muted-foreground" aria-hidden />
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground/70 ring-1 ring-border">
               <Icon className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
@@ -1159,7 +1173,7 @@ function StepRenderer({
             />
           </button>
           {expanded && (
-            <div className="border-t border-border px-4 py-3">
+            <div className="border-t border-border px-4 py-3 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 motion-safe:duration-300">
               <StepEditor
                 step={step}
                 onChange={(next) => props.updateStep(path, () => next)}
@@ -1185,14 +1199,7 @@ function StepRenderer({
                     <ArrowDown className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => props.deleteStepAt(path)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  {t("delete")}
-                </Button>
+                <BinButton variant="soft" size="sm" label={t("delete")} onDone={() => props.deleteStepAt(path)} />
               </div>
             </div>
           )}
@@ -1270,17 +1277,20 @@ function BranchColumn({
   )
 }
 
-function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
+function AddButton({ onPick, first }: { onPick: (t: AutomationStepType) => void; first?: boolean }) {
   const t = useTranslations("Automations.builder")
   return (
     <div className="relative flex flex-col items-center">
-      <div className="h-4 w-[2px] bg-border" aria-hidden />
+      <div className="auto-flow h-6 w-[2px] rounded-full" aria-hidden />
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-border bg-background text-muted-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary data-[popup-open]:border-primary data-[popup-open]:bg-primary/20 data-[popup-open]:text-primary"
+          className={cn(
+            "group/add relative flex size-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-[0_1px_2px_rgb(0_0_0/0.05),0_8px_18px_-10px_rgb(0_0_0/0.35)] transition-[background-color,color,border-color,box-shadow,transform] duration-200 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_10px_22px_-10px_var(--primary)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none motion-safe:hover:scale-105 data-[popup-open]:border-primary data-[popup-open]:bg-primary data-[popup-open]:text-primary-foreground sm:size-10",
+            first && "auto-add-invite",
+          )}
           aria-label={t("addStep")}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-[18px] w-[18px] transition-transform duration-300 motion-safe:group-hover/add:rotate-90 motion-safe:group-data-[popup-open]/add:rotate-45" />
         </DropdownMenuTrigger>
         {/* Centred under the + so the menu opens straight below it. */}
         <DropdownMenuContent
@@ -1298,7 +1308,11 @@ function AddButton({ onPick }: { onPick: (t: AutomationStepType) => void }) {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="h-4 w-[2px] bg-border" aria-hidden />
+      {first ? (
+        <p className="mt-3 max-w-[16rem] text-center text-sm text-muted-foreground motion-safe:animate-in motion-safe:fade-in-0 motion-safe:delay-300 motion-safe:fill-mode-backwards motion-safe:duration-500">{t("firstStepHint")}</p>
+      ) : (
+        <div className="auto-flow h-6 w-[2px] rounded-full" aria-hidden />
+      )}
     </div>
   )
 }

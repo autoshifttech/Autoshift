@@ -1326,7 +1326,11 @@
         },
         "when": "when {subject}",
         "noUrl": "no url"
-      }
+      },
+      "stateLive": "Live",
+      "stateDraft": "Draft",
+      "firstStepHint": "Add the first step: what should happen next?",
+      "renameHint": "Rename"
     }
   },
   "Flows": {

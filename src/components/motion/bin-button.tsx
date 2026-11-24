@@ -10,7 +10,22 @@ import { cn } from "@/lib/utils";
  * folds into a round bin and a ring draws around it; then `onDone` runs (the
  * real delete). With reduced motion it simply runs `onDone`.
  */
-export function BinButton({ label, onDone, className, autoFocus }: { label: string; onDone: () => void; className?: string; autoFocus?: boolean }) {
+export function BinButton({
+  label,
+  onDone,
+  className,
+  autoFocus,
+  variant = "solid",
+  size = "default",
+}: {
+  label: string;
+  onDone: () => void;
+  className?: string;
+  autoFocus?: boolean;
+  /** "solid": the red confirm button. "soft": a light red pill for a Delete beside other actions. */
+  variant?: "solid" | "soft";
+  size?: "default" | "sm";
+}) {
   const [phase, setPhase] = useState<"idle" | "eat" | "fold" | "ring">("idle");
   const btn = useRef<HTMLButtonElement>(null);
   const bin = useRef<SVGSVGElement>(null);
@@ -62,7 +77,11 @@ export function BinButton({ label, onDone, className, autoFocus }: { label: stri
         data-phase={phase}
         aria-busy={phase !== "idle" || undefined}
         className={cn(
-          "bin-button relative inline-flex h-9 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-destructive px-4 text-sm font-semibold text-white shadow-[0_6px_16px_-8px_var(--destructive)] outline-none select-none focus-visible:ring-3 focus-visible:ring-destructive/40 disabled:opacity-50",
+          "bin-button relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-full font-semibold outline-none select-none focus-visible:ring-3 focus-visible:ring-destructive/40 disabled:opacity-50",
+          size === "sm" ? "h-9 min-h-10 px-3.5 text-[13px] sm:min-h-0" : "h-10 px-4 text-sm",
+          variant === "soft"
+            ? "bg-destructive/10 text-destructive transition-colors hover:bg-destructive/15 data-[phase=fold]:bg-destructive data-[phase=fold]:text-white data-[phase=ring]:bg-destructive data-[phase=ring]:text-white"
+            : "bg-destructive text-white shadow-[0_6px_16px_-8px_var(--destructive)]",
           className,
         )}
       >

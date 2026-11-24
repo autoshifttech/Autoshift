@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { ArrowLeft, ArrowRight, BookOpen, Bot, CalendarDays, Check, Hand, Plus, SearchX, Settings2, ShoppingBag, Trash2, Users, Wrench, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Bot, CalendarDays, Check, Hand, Plus, SearchX, Settings2, ShoppingBag, Users, Wrench, X } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +30,7 @@ import { BookingTab } from "./booking-tab";
 import { isOn, usePages } from "@/lib/workspace/pages";
 import { TickBox } from "@/components/ui/tick-box";
 import { BackLink } from "@/components/ui/back-link";
+import { BinButton } from "@/components/motion/bin-button";
 
 const COLORS = ["#1E4C41", "#2563EB", "#7C5CBF", "#C2410C", "#B45309", "#BE185D", "#0F766E"];
 const AUDIENCES: Audience[] = ["all", "new_contacts", "tagged", "after_hours"];
@@ -138,19 +139,16 @@ export function AssistantEditor({ id }: { id: string }) {
             <Switch checked={a.enabled} onCheckedChange={(enabled) => set({ enabled })} />
             {a.enabled ? t("on") : t("off")}
           </label>
-          <Button
-            variant="ghost"
+          <BinButton
+            variant="soft"
             size="sm"
-            className="gap-1.5 text-destructive hover:text-destructive"
-            onClick={() => {
+            label={t("delete")}
+            onDone={() => {
               assistantsStore.set((s) => ({ ...s, assistants: s.assistants.filter((x) => x.id !== a.id) }));
               toast.success(t("deleted", { name: a.name }));
               router.push("/agents");
             }}
-          >
-            <Trash2 className="size-4" />
-            {t("delete")}
-          </Button>
+          />
         </div>
       </div>
 
@@ -556,49 +554,78 @@ function WizardSteps({
   const t = useTranslations("Assistants");
   const last = step === WIZARD_STEPS.length - 1;
   // A new step starts at the top of the page, not wherever the last one ended.
+  const [back, setBack] = useState(false);
   const go = (n: number) => {
+    setBack(n < step);
     setStep(n);
     document.getElementById("app-scroll")?.scrollTo({ top: 0 });
   };
   const current = WIZARD_STEPS[step];
   return (
     <div className="min-w-0 space-y-4 pb-2">
-      <nav aria-label={t("wizardSteps")}>
-        <ol className="flex items-center gap-2">
+      <nav aria-label={t("wizardSteps")} className="rounded-[24px] border border-border bg-card p-3 shadow-[var(--shadow-card)] sm:px-5 sm:py-4">
+        <ol className="flex items-center gap-1.5 sm:gap-2">
           {WIZARD_STEPS.map((st, i) => {
             const done = i < step;
             const active = i === step;
+            const Icon = st.icon;
             return (
-              <li key={st.id} className={cn("flex min-w-0 items-center gap-2 last:flex-none", active ? "flex-[2]" : "flex-1")}>
+              <li key={st.id} className={cn("flex min-w-0 items-center gap-1.5 last:flex-none sm:gap-2", active ? "flex-[2] lg:flex-1" : "flex-1")}>
                 <button
                   type="button"
                   onClick={() => go(i)}
                   aria-current={active ? "step" : undefined}
-                  className="flex min-h-11 min-w-0 items-center gap-2 rounded-full pr-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  className="group/step flex min-h-11 min-w-0 items-center gap-2.5 rounded-full py-1 pr-3 pl-1 transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                   <span
                     className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold",
-                      active ? "border-primary bg-primary text-primary-foreground" : done ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground",
+                      "relative flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-[background-color,color,box-shadow,transform] duration-300 motion-safe:group-hover/step:scale-105",
+                      active
+                        ? "step-ring bg-[linear-gradient(160deg,color-mix(in_oklab,var(--primary)_82%,white),var(--primary))] text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.3),0_6px_14px_-6px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                        : done
+                          ? "bg-primary/12 text-primary ring-1 ring-primary/30"
+                          : "bg-card text-muted-foreground ring-1 ring-border",
                     )}
                   >
-                    {done ? <Check className="size-4" aria-hidden /> : i + 1}
+                    {done ? (
+                      <svg viewBox="0 0 24 24" aria-hidden className="size-4 fill-none stroke-current stroke-[3] [stroke-linecap:round] [stroke-linejoin:round]">
+                        <path className="step-tick" pathLength={100} d="M5 12.5 10 17.5 19 7.5" />
+                      </svg>
+                    ) : active ? (
+                      <Icon className="size-4" aria-hidden />
+                    ) : (
+                      i + 1
+                    )}
                   </span>
-                  <span className={cn("text-sm font-medium whitespace-nowrap", active ? "text-foreground" : "hidden text-muted-foreground sm:inline")}>{t(st.label)}</span>
+                  <span className="min-w-0 text-left">
+                    <span className={cn("text-[11px] font-semibold tracking-wider whitespace-nowrap text-primary uppercase", active ? "block" : "hidden")}>
+                      {t("wizardStep", { n: i + 1, total: WIZARD_STEPS.length })}
+                    </span>
+                    <span className={cn("block text-sm font-semibold whitespace-nowrap", active ? "text-foreground" : "hidden text-muted-foreground lg:block")}>{t(st.label)}</span>
+                  </span>
                 </button>
-                {i < WIZARD_STEPS.length - 1 && <span aria-hidden className={cn("h-px min-w-2 flex-1", done ? "bg-primary" : "bg-border")} />}
+                {i < WIZARD_STEPS.length - 1 && (
+                  <span aria-hidden className="relative h-[3px] min-w-2 flex-1 overflow-hidden rounded-full bg-border">
+                    <span data-on={done || undefined} className="step-fill absolute inset-0 origin-left rounded-full bg-primary" />
+                  </span>
+                )}
               </li>
             );
           })}
         </ol>
+        {/* Overall progress under the steps: fills a quarter per step. */}
+        <div aria-hidden className="mt-3 h-1 overflow-hidden rounded-full bg-muted sm:hidden">
+          <span className="block h-full rounded-full bg-primary transition-[width] duration-500 ease-out" style={{ width: `${((step + 1) / WIZARD_STEPS.length) * 100}%` }} />
+        </div>
       </nav>
 
-      <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t("wizardStep", { n: step + 1, total: WIZARD_STEPS.length })}</p>
-
+      {/* The step's content slides in from the side you moved toward. */}
+      <div key={current.id} className={cn("motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-300", back ? "motion-safe:slide-in-from-left-4" : "motion-safe:slide-in-from-right-4")}>
       {current.id === "profile" && <ProfileTab a={a} set={set} />}
       {current.id === "knowledge" && <KnowledgeTab a={a} set={set} />}
       {current.id === "tools" && <ToolsTab a={a} set={set} />}
       {current.id === "audience" && <AudienceTab a={a} set={set} />}
+      </div>
 
       <div className="sticky bottom-3 z-10 mx-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-border bg-card/95 p-1.5 shadow-[0_8px_24px_-12px_rgb(0_0_0/0.3)] backdrop-blur">
         <Button variant="ghost" className="h-10 rounded-full px-4 text-sm" onClick={() => go(step - 1)} disabled={step === 0}>

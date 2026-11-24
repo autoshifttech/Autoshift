@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { Copy, Megaphone, Pencil, Plus, Repeat, Trash2, Users, X } from "lucide-react";
+import { Copy, Megaphone, Pencil, Plus, Repeat, Users, X } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyPanel } from "@/components/ui/empty-panel";
@@ -28,6 +28,7 @@ import {
   type SegmentOp,
   type SegmentRule,
 } from "@/lib/segments/model";
+import { BinButton } from "@/components/motion/bin-button";
 
 const MARKETING = RATES.find((r) => r.kind === "marketing")?.price ?? 0;
 
@@ -290,18 +291,15 @@ function SegmentDialog({ segment, onClose }: { segment: Segment | null; onClose:
         </div>
         <DialogFooter className="sm:justify-between">
           {segment ? (
-            <Button
-              variant="ghost"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              onClick={() => {
+            <BinButton
+              variant="soft"
+              label={t("delete")}
+              onDone={() => {
                 segmentsStore.set((s) => ({ segments: s.segments.filter((x) => x.id !== segment.id) }));
                 toast.success(t("deleted"));
                 onClose();
               }}
-            >
-              <Trash2 className="size-4" />
-              {t("delete")}
-            </Button>
+            />
           ) : (
             <span />
           )}
