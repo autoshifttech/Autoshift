@@ -61,3 +61,51 @@ def test_roles_and_isolation(client, world):
     assert client.post("/v1/tools", json={"name": "No", "description": "d", "webhook": hook()}, headers=H(world, "agent_a")).status_code == 403
     assert client.patch(f"/v1/tools/{key}", json={"enabled": False}, headers=H(world, "admin_b")).status_code == 404
     assert key not in [t["key"] for t in client.get("/v1/tools", headers=H(world, "admin_b")).json()]
+
+
+# ------------------------------------------------------------------ "Send a test request"
+from app.routers.tools import get_sender  # noqa: E402
+
+
+@pytest.fixture
+def sent(client):
+    calls = []
+
+    async def fake(method, url, args):
+        calls.append((method, url, args))
+        if "down" in url:
+            import httpx
+            raise httpx.ConnectError("refused")
+        if "broken" in url:
+            return 500, "oops"
+        return 200, '{"status": "shipped"}'
+
+    client.app.dependency_overrides[get_sender] = lambda: fake
+    yield calls
+    client.app.dependency_overrides.pop(get_sender, None)
+
+
+def test_test_request_really_calls_the_webhook_and_reports_its_answer(client, world, sent):
+    res = client.post("/v1/tools/test", json={"webhook": hook(), "arguments": {"order_id": "A12", "not_a_field": "x"}}, headers=H(world))
+    assert res.status_code == 200, res.text
+    out = res.json()
+    assert out["ok"] is True and out["status"] == 200 and out["body"] == '{"status": "shipped"}' and out["error"] is None
+    assert sent == [("POST", "https://n8n.example.com/webhook/order", {"order_id": "A12"})]  # only the tool's own fields go out
+
+
+def test_test_request_reports_failures_instead_of_pretending(client, world, sent):
+    broken = client.post("/v1/tools/test", json={"webhook": hook("https://n8n.example.com/broken")}, headers=H(world)).json()
+    assert broken["ok"] is False and broken["status"] == 500 and broken["body"] == "oops"
+    down = client.post("/v1/tools/test", json={"webhook": hook("https://n8n.example.com/down")}, headers=H(world)).json()
+    assert down["ok"] is False and down["status"] == 0 and "Could not reach" in down["error"]
+
+
+@pytest.mark.parametrize("url", ["http://n8n.example.com/x", "https://db.internal/x", "https://10.0.0.1/x"])
+def test_test_request_only_goes_to_public_https(client, world, sent, url):
+    assert client.post("/v1/tools/test", json={"webhook": hook(url)}, headers=H(world)).status_code == 422
+    assert sent == []
+
+
+def test_test_request_needs_an_admin(client, world, sent):
+    assert client.post("/v1/tools/test", json={"webhook": hook()}, headers=H(world, "viewer_a")).status_code == 403
+    assert sent == []

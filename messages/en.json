@@ -4038,7 +4038,7 @@
     "footnote": "Use counts are for {date}. Turning a tool off stops every assistant from using it.",
     "editTitle": "Edit tool",
     "newTitle": "New custom tool",
-    "builtinDesc": "Adjust when assistants should use this tool.",
+    "builtinDesc": "Built-in tools work as they are. Switch them on or off on the page, and pick which assistants can use them here.",
     "newDesc": "The assistant calls your webhook with the details it collects in the chat, and uses the reply in its answer.",
     "name": "Name",
     "namePh": "e.g. Check order status",
@@ -4063,7 +4063,18 @@
     "delete": "Delete tool",
     "saved": "Tool saved.",
     "added": "Tool added.",
-    "deleted": "Tool deleted."
+    "deleted": "Tool deleted.",
+    "paramError": "Field names use letters, numbers and _ only, and start with a letter (for example order_id).",
+    "paramDup": "Each field needs a different name.",
+    "maxParams": "Up to 10 fields.",
+    "testing": "Sending…",
+    "testNeedsUrl": "Add a full https:// webhook address first.",
+    "testOk": "Answered {status} in {ms} ms",
+    "testBad": "Answered {status} in {ms} ms. Assistants only use a reply between 200 and 299.",
+    "testUnreachable": "No answer",
+    "testNoServer": "Testing needs the AutoShift server, which isn’t connected here.",
+    "testSample": "Sent sample details: {fields}",
+    "testNoFields": "Sent with no details."
   },
   "LeadsPage": {
     "title": "Leads",

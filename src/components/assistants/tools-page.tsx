@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { FlaskConical, Pencil, Plus, Trash2, X } from "lucide-react";
+import { CheckCircle2, FlaskConical, Loader2, Pencil, Plus, Trash2, X, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +16,32 @@ import { cn } from "@/lib/utils";
 import { TOOL_CATEGORIES, assistantsStore, updateTool, useAssistants, type Tool, type ToolParam } from "@/lib/assistants/model";
 import { AssistantAvatar, toolIcon } from "./assistant-ui";
 import { startAssistantsSync } from "@/lib/assistants/backend-sync";
+import { backend, backendUrl } from "@/lib/backend/client";
+
+/** The backend's rule for a field name (backend/app/schemas.py ToolParam). */
+const PARAM_RE = /^[A-Za-z_][A-Za-z0-9_]{0,40}$/;
+const MAX_PARAMS = 10;
+
+/** What the backend answers for "Send a test request" (POST /v1/tools/test). */
+interface TestResult {
+  ok: boolean;
+  status: number;
+  ms: number;
+  body: string;
+  error: string | null;
+}
+
+/** The webhook's answer, indented when it is JSON. */
+const prettyBody = (text: string) => {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
+};
+
+/** A sample value per field, typed the way the tool expects. */
+const sampleFor = (p: ToolParam) => (p.type === "number" ? 1 : p.type === "boolean" ? true : "test");
 
 /** AI → Tools: what assistants can do in a chat, plus custom webhook tools (e.g. n8n). */
 export function ToolsPage() {
@@ -115,19 +141,58 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
       },
   );
   const [usedBy, setUsedBy] = useState<string[]>(() => assistants.filter((a) => tool && a.toolIds.includes(tool.id)).map((a) => a.id));
-  const [tested, setTested] = useState<string | null>(null);
+  const [tested, setTested] = useState<{ result: TestResult; sent: Record<string, unknown> } | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
   const [tried, setTried] = useState(false);
   const wh = draft.webhook;
   const setParam = (i: number, patch: Partial<ToolParam>) =>
     wh && setDraft({ ...draft, webhook: { ...wh, params: wh.params.map((p, j) => (j === i ? { ...p, ...patch } : p)) } });
   const urlOk = !wh || /^https:\/\/[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(wh.url.trim());
-  const valid = draft.name.trim() && draft.description.trim() && urlOk;
+  // Rows left completely empty are dropped on save; every other row needs a name the server accepts,
+  // and no two rows may share one (otherwise the server refuses the tool and it disappears).
+  const filled = (p: ToolParam) => p.name.trim() !== "" || p.description.trim() !== "";
+  const paramBad = (p: ToolParam) => filled(p) && !PARAM_RE.test(p.name);
+  const names = (wh?.params ?? []).filter(filled).map((p) => p.name);
+  const paramDup = (p: ToolParam) => filled(p) && PARAM_RE.test(p.name) && names.filter((n) => n === p.name).length > 1;
+  const paramsOk = !wh || wh.params.every((p) => !paramBad(p) && !paramDup(p));
+  const valid = draft.name.trim() && draft.description.trim() && urlOk && paramsOk;
+
+  const runTest = async () => {
+    if (!wh) return;
+    setTested(null);
+    setTestError(null);
+    if (!urlOk) {
+      setTried(true);
+      setTestError(t("testNeedsUrl"));
+      return;
+    }
+    if (!backendUrl()) {
+      setTestError(t("testNoServer"));
+      return;
+    }
+    const params = wh.params.filter((p) => PARAM_RE.test(p.name));
+    const sent = Object.fromEntries(params.map((p) => [p.name, sampleFor(p)]));
+    setTesting(true);
+    try {
+      const result = await backend<TestResult>("/v1/tools/test", {
+        method: "POST",
+        body: { webhook: { url: wh.url.trim(), method: wh.method, params: params.map((p) => ({ ...p, description: p.description.slice(0, 200) })) }, arguments: sent },
+      });
+      setTested({ result, sent });
+    } catch (e) {
+      setTestError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const save = () => {
     setTried(true);
     if (!valid) return;
+    const clean: Tool = wh ? { ...draft, name: draft.name.trim(), description: draft.description.trim(), webhook: { ...wh, url: wh.url.trim(), params: wh.params.filter(filled) } } : draft;
     assistantsStore.set((s) => ({
-      tools: tool ? s.tools.map((x) => (x.id === tool.id ? draft : x)) : [...s.tools, draft],
+      tools: tool ? s.tools.map((x) => (x.id === tool.id ? clean : x)) : [...s.tools, clean],
       assistants: s.assistants.map((a) => ({
         ...a,
         toolIds: usedBy.includes(a.id) ? [...new Set([...a.toolIds, draft.id])] : a.toolIds.filter((x) => x !== draft.id),
@@ -147,12 +212,12 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="tl-name">{t("name")}</Label>
-            <Input id="tl-name" value={draft.name} disabled={draft.builtin} aria-invalid={tried && !draft.name.trim()} placeholder={t("namePh")} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <Input id="tl-name" value={draft.name} maxLength={80} disabled={draft.builtin} aria-invalid={tried && !draft.name.trim()} placeholder={t("namePh")} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="tl-desc">{t("whenToUse")}</Label>
-            <Textarea id="tl-desc" rows={3} value={draft.description} aria-invalid={tried && !draft.description.trim()} placeholder={t("whenToUsePh")} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-            <p className="text-xs text-muted-foreground">{t("whenToUseHint")}</p>
+            <Textarea id="tl-desc" rows={3} value={draft.description} maxLength={500} disabled={draft.builtin} aria-invalid={tried && !draft.description.trim()} placeholder={t("whenToUsePh")} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+            {!draft.builtin && <p className="text-xs text-muted-foreground">{t("whenToUseHint")}</p>}
           </div>
 
           {wh && (
@@ -167,14 +232,14 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="tl-url">{t("url")}</Label>
-                  <Input id="tl-url" value={wh.url} aria-invalid={tried && !urlOk} placeholder="https://n8n.example.com/webhook/…" onChange={(e) => setDraft({ ...draft, webhook: { ...wh, url: e.target.value } })} />
+                  <Input id="tl-url" value={wh.url} maxLength={500} aria-invalid={tried && !urlOk} placeholder="https://n8n.example.com/webhook/…" onChange={(e) => setDraft({ ...draft, webhook: { ...wh, url: e.target.value } })} />
                 </div>
               </div>
               {tried && !urlOk && <p className="-mt-2 text-xs text-destructive">{t("urlError")}</p>}
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-sm font-medium text-foreground">{t("params")}</p>
-                  <Button size="sm" variant="ghost" className="gap-1" onClick={() => setDraft({ ...draft, webhook: { ...wh, params: [...wh.params, { name: "", type: "string", required: false, description: "" }] } })}>
+                  <Button size="sm" variant="ghost" className="gap-1" disabled={wh.params.length >= MAX_PARAMS} title={wh.params.length >= MAX_PARAMS ? t("maxParams") : undefined} onClick={() => setDraft({ ...draft, webhook: { ...wh, params: [...wh.params, { name: "", type: "string", required: false, description: "" }] } })}>
                     <Plus className="size-3.5" />
                     {t("addParam")}
                   </Button>
@@ -182,7 +247,7 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
                 <div className="space-y-2">
                   {wh.params.map((p, i) => (
                     <div key={i} className="grid gap-2 rounded-xl bg-muted/50 p-2.5 sm:grid-cols-[minmax(0,1fr)_110px_auto]">
-                      <Input value={p.name} placeholder={t("paramName")} aria-label={t("paramName")} onChange={(e) => setParam(i, { name: e.target.value.replace(/\s+/g, "_") })} />
+                      <Input value={p.name} maxLength={41} placeholder={t("paramName")} aria-label={t("paramName")} aria-invalid={tried && (paramBad(p) || paramDup(p))} onChange={(e) => setParam(i, { name: e.target.value.replace(/\s+/g, "_") })} />
                       <NativeSelect value={p.type} onChange={(e) => setParam(i, { type: e.target.value as ToolParam["type"] })}>
                         <option value="string">{t("type_string")}</option>
                         <option value="number">{t("type_number")}</option>
@@ -191,25 +256,40 @@ function ToolDialog({ tool, onClose }: { tool: Tool | null; onClose: () => void 
                       <Button variant="ghost" size="icon" aria-label={t("removeParam")} onClick={() => setDraft({ ...draft, webhook: { ...wh, params: wh.params.filter((_, j) => j !== i) } })}>
                         <X className="size-4" />
                       </Button>
-                      <Input className="sm:col-span-3" value={p.description} placeholder={t("paramDesc")} aria-label={t("paramDesc")} onChange={(e) => setParam(i, { description: e.target.value })} />
+                      <Input className="sm:col-span-3" value={p.description} maxLength={200} placeholder={t("paramDesc")} aria-label={t("paramDesc")} onChange={(e) => setParam(i, { description: e.target.value })} />
+                      {tried && (paramBad(p) || paramDup(p)) && <p className="text-xs font-medium text-destructive sm:col-span-3">{paramBad(p) ? t("paramError") : t("paramDup")}</p>}
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => setTested(JSON.stringify({ ok: true, status: 200, data: { status: "shipped", eta: "Thursday" } }, null, 2))}
-                >
-                  <FlaskConical className="size-3.5" />
-                  {t("test")}
+                <Button variant="outline" size="sm" className="gap-1.5" disabled={testing} onClick={runTest}>
+                  {testing ? <Loader2 className="size-3.5 animate-spin" /> : <FlaskConical className="size-3.5" />}
+                  {testing ? t("testing") : t("test")}
                 </Button>
+                {testError && (
+                  <p role="alert" className="mt-2 flex items-start gap-1.5 text-xs font-medium text-destructive">
+                    <XCircle className="mt-px size-3.5 shrink-0" />
+                    {testError}
+                  </p>
+                )}
                 {tested && (
-                  <pre className="mt-2 overflow-x-auto rounded-xl bg-[#0b141a] p-3 font-mono text-xs text-emerald-200">
-                    {tested}
-                  </pre>
+                  <div role="status" className="mt-2 overflow-hidden rounded-xl border border-border">
+                    <p className={cn("flex items-center gap-1.5 px-3 py-2 text-xs font-semibold", tested.result.ok ? "bg-[var(--tone-mint)] text-primary" : "bg-destructive/10 text-destructive")}>
+                      {tested.result.ok ? <CheckCircle2 className="size-3.5 shrink-0" /> : <XCircle className="size-3.5 shrink-0" />}
+                      {tested.result.status === 0
+                        ? `${t("testUnreachable")} · ${tested.result.error ?? ""}`
+                        : t(tested.result.ok ? "testOk" : "testBad", { status: tested.result.status, ms: tested.result.ms })}
+                    </p>
+                    <p className="border-t border-border px-3 py-1.5 font-mono text-[11px] text-muted-foreground">
+                      {Object.keys(tested.sent).length ? t("testSample", { fields: JSON.stringify(tested.sent) }) : t("testNoFields")}
+                    </p>
+                    {tested.result.body && (
+                      <pre className="max-h-48 overflow-auto bg-[#0b141a] p-3 font-mono text-xs whitespace-pre-wrap text-emerald-200">
+                        {prettyBody(tested.result.body)}
+                      </pre>
+                    )}
+                  </div>
                 )}
               </div>
             </>

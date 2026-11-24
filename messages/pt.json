@@ -4038,7 +4038,7 @@
     "footnote": "Usos referentes a {date}. Desativar uma ferramenta impede todos os assistentes de usá-la.",
     "editTitle": "Editar ferramenta",
     "newTitle": "Nova ferramenta personalizada",
-    "builtinDesc": "Ajuste quando os assistentes devem usar esta ferramenta.",
+    "builtinDesc": "As ferramentas integradas funcionam como estão. Ligue ou desligue na página e escolha aqui quais assistentes podem usá-las.",
     "newDesc": "O assistente chama seu webhook com os dados coletados na conversa e usa a resposta.",
     "name": "Nome",
     "namePh": "ex.: Ver status do pedido",
@@ -4063,7 +4063,18 @@
     "delete": "Excluir ferramenta",
     "saved": "Ferramenta salva.",
     "added": "Ferramenta adicionada.",
-    "deleted": "Ferramenta excluída."
+    "deleted": "Ferramenta excluída.",
+    "paramError": "Os nomes dos campos usam só letras, números e _, e começam com uma letra (por exemplo order_id).",
+    "paramDup": "Cada campo precisa de um nome diferente.",
+    "maxParams": "Até 10 campos.",
+    "testing": "Enviando…",
+    "testNeedsUrl": "Primeiro adicione um endereço de webhook completo com https://.",
+    "testOk": "Respondeu {status} em {ms} ms",
+    "testBad": "Respondeu {status} em {ms} ms. Os assistentes só usam respostas entre 200 e 299.",
+    "testUnreachable": "Sem resposta",
+    "testNoServer": "O teste precisa do servidor AutoShift, que não está conectado aqui.",
+    "testSample": "Dados de exemplo enviados: {fields}",
+    "testNoFields": "Enviado sem dados."
   },
   "LeadsPage": {
     "title": "Leads",

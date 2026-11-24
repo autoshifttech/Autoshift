@@ -1,12 +1,17 @@
 """Tools an assistant can use: built-in ones a business switches on or off, and its own webhook tools."""
 
 import secrets
+import time
+from collections.abc import Awaitable, Callable
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from .. import audit, events
 from ..deps import AdminMember, Member, ServiceDb
-from ..schemas import ToolCreate, ToolPatch
+from ..schemas import ToolCreate, ToolPatch, ToolWebhook
 
 router = APIRouter(prefix="/v1/tools", tags=["tools"])
 
@@ -90,3 +95,51 @@ async def delete_tool(key: str, ctx: AdminMember, sdb: ServiceDb):
         if key in (a.get("tool_ids") or []):
             await sdb.update("assistants", {"id": a["id"], "account_id": ctx.account_id}, {"tool_ids": [k for k in a["tool_ids"] if k != key]})
     await audit.record(sdb, scope="account", action="tool.delete", actor_id=ctx.user.id, account_id=ctx.account_id, target=key)
+
+
+# ------------------------------------------------------------------ test a webhook tool
+# The Tools page's "Send a test request": one real call to the webhook (saved or still a draft),
+# so a business sees what its endpoint really answers before an assistant relies on it.
+Sender = Callable[[str, str, dict[str, Any]], Awaitable[tuple[int, str]]]
+TEST_TIMEOUT = 10
+MAX_ANSWER = 2000
+
+
+async def http_send(method: str, url: str, args: dict[str, Any]) -> tuple[int, str]:
+    headers = {"User-Agent": "AutoShift-Tools/1.0", "X-AutoShift-Test": "1"}
+    async with httpx.AsyncClient(timeout=TEST_TIMEOUT, follow_redirects=False) as client:
+        if method == "GET":
+            res = await client.get(url, params={k: str(v) for k, v in args.items()}, headers=headers)
+        else:
+            res = await client.post(url, json=args, headers=headers)
+        return res.status_code, res.text[:MAX_ANSWER]
+
+
+def get_sender() -> Sender:
+    return http_send
+
+
+class ToolTestIn(BaseModel):
+    webhook: ToolWebhook
+    arguments: dict[str, Any] = Field(default_factory=dict)
+
+
+@router.post("/test")
+async def test_tool(body: ToolTestIn, ctx: AdminMember, sdb: ServiceDb, send: Annotated[Sender, Depends(get_sender)]):
+    """Call the webhook once with sample details and report what it answered. A failing webhook is a
+    result (ok false), not an error, so the page can show it."""
+    await _safe(body.webhook.url)
+    names = {p.name for p in body.webhook.params}
+    args = {k: v for k, v in body.arguments.items() if k in names}
+    started = time.monotonic()
+    try:
+        status, text = await send(body.webhook.method, body.webhook.url, args)
+        error = None
+    except httpx.TimeoutException:
+        status, text, error = 0, "", f"The webhook didn't answer within {TEST_TIMEOUT} seconds"
+    except httpx.HTTPError as exc:
+        status, text, error = 0, "", f"Could not reach the webhook ({exc.__class__.__name__})"
+    ms = round((time.monotonic() - started) * 1000)
+    await audit.record(sdb, scope="account", action="tool.test", actor_id=ctx.user.id, account_id=ctx.account_id, target=body.webhook.url[:200], details={"status": status, "method": body.webhook.method})
+    return {"ok": 200 <= status < 300, "status": status, "ms": ms, "body": text, "error": error}
+

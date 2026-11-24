@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Bot, Hand, ListChecks, MessageSquare, Puzzle, Send, Sparkles, Tag, Webhook, type LucideIcon } from "lucide-react";
+import { Bot, FileText, Hand, ListChecks, MessageSquare, Paperclip, Puzzle, Send, Sparkles, Tag, Webhook, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ export const TOOL_ICON: Record<string, LucideIcon> = {
   add_tag: Tag,
   capture_lead: Sparkles,
   handoff: Hand,
+  send_template: FileText,
+  send_file: Paperclip,
 };
 
 export function toolIcon(tool: Pick<Tool, "id" | "category">): LucideIcon {
