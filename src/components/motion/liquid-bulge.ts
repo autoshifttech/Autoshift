@@ -55,18 +55,23 @@ export function attachLiquidBulge(box: HTMLElement, { axis = "x", item, current,
     bulge.appendChild(inkLayer);
     bulge.classList.add("lq-bulge-ink");
   }
-  /** Copy each label into the pill at its place in the box (layout offsets, so transforms and
-      scrolling don't matter). */
+  /** Copy each label into the pill at its place in the box, measured exactly like the pill itself
+      (box content coordinates), so the copies line up on every screen size and while scrolled.
+      Element offsets were used before, but they can be measured from a different parent than the
+      pill (it happened on phones), which left the copies below the pill and out of sight. */
   const paintInk = () => {
     if (!inkLayer) return;
+    const b = box.getBoundingClientRect();
+    const ox = box.scrollLeft - b.left - box.clientLeft, oy = box.scrollTop - b.top - box.clientTop;
     const items = [...box.querySelectorAll<HTMLElement>(item)].filter((el) => !inkLayer.contains(el));
     inkLayer.replaceChildren(
       ...items.map((el) => {
+        const r = el.getBoundingClientRect();
         const c = el.cloneNode(true) as HTMLElement;
         c.removeAttribute("id");
         c.setAttribute("aria-hidden", "true");
         c.tabIndex = -1;
-        Object.assign(c.style, { left: `${el.offsetLeft}px`, top: `${el.offsetTop}px`, width: `${el.offsetWidth}px`, height: `${el.offsetHeight}px` });
+        Object.assign(c.style, { left: `${r.left + ox}px`, top: `${r.top + oy}px`, width: `${el.offsetWidth}px`, height: `${el.offsetHeight}px` });
         return c;
       }),
     );

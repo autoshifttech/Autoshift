@@ -1579,7 +1579,8 @@ html[data-solid] .rail-shell .lq-bulge {
 .settings-tabs .lq-bulge { z-index: 2; overflow: hidden; }
 .lq-ink { position: absolute; top: 0; left: 0; }
 .lq-ink > * {
-  position: absolute;
+  /* important: the phones' 44px tap-area rule makes buttons position: relative */
+  position: absolute !important;
   margin: 0;
   pointer-events: none;
   color: var(--background) !important;

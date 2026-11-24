@@ -55,7 +55,7 @@ export function SettingsRail({
             onClick={() => onSelect(s)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold sm:px-3.5 sm:text-sm whitespace-nowrap transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95',
+              'inline-flex h-10 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold sm:px-3.5 sm:text-sm whitespace-nowrap transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
               isActive ? 'text-foreground' : 'text-foreground/70 hover:text-foreground',
             )}
           >
